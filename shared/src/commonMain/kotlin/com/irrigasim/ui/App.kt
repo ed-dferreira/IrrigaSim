@@ -24,19 +24,23 @@ fun IrrigaSIMApp(
     // Estado de preferências do usuário
     var isDarkTheme by remember { mutableStateOf(false) }
 
+    // Estado centralizado de cenários salvos pelo usuário
+    var cenariosSalvos by remember { mutableStateOf(listOf<CenarioSalvo>()) }
+
     IrrigaSIMTheme(darkTheme = isDarkTheme) {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            var screen by remember { mutableStateOf(if (currentUser != null) "metodo" else "login") }
+            var screen by remember { mutableStateOf(if (currentUser != null) "wizard" else "login") }
             var selectedTab by remember { mutableStateOf(0) }
             var metodo by remember { mutableStateOf(MetodoIrrigacao.SULCO) }
-            var resultado by remember { mutableStateOf<Resultado?>(null) }
+            var parametrosAtuais by remember { mutableStateOf(Parametros()) }
+            var resultadoAtual by remember { mutableStateOf<Resultado?>(null) }
 
             LaunchedEffect(currentUser) {
                 if (currentUser != null) {
-                    screen = "metodo"
+                    screen = "wizard"
                     selectedTab = 0
                 } else {
                     screen = "login"
@@ -72,7 +76,7 @@ fun IrrigaSIMApp(
                         ) {
                             NavigationBarItem(
                                 selected = selectedTab == 0,
-                                onClick = { selectedTab = 0; screen = "metodo" },
+                                onClick = { selectedTab = 0; screen = "wizard" },
                                 icon = { Text("💧", fontSize = 20.sp) },
                                 label = { Text("Simulação", style = MaterialTheme.typography.labelLarge) }
                             )
@@ -93,26 +97,55 @@ fun IrrigaSIMApp(
                 ) { paddingValues ->
                     Box(modifier = Modifier.padding(paddingValues)) {
                         when (screen) {
-                            "metodo" -> MetodoScreen(
+                            "wizard" -> WizardSimulacaoScreen(
                                 userName = currentUser?.nome ?: "Usuário",
-                                onSelecionar = { metodo = it; screen = "parametros" }
-                            )
-                            "parametros" -> ParametrosScreen(
-                                metodo = metodo,
-                                onSimular = { p -> resultado = Simulacao.executar(metodo, p); screen = "resultados" },
-                                onVoltar = { screen = "metodo"; selectedTab = 0 }
+                                metodoInicial = metodo,
+                                onSimular = { m, p ->
+                                    metodo = m
+                                    parametrosAtuais = p
+                                    resultadoAtual = Simulacao.executar(m, p)
+                                    screen = "resultados"
+                                }
                             )
                             "resultados" -> ResultadoScreen(
-                                resultado = resultado ?: Resultado(
+                                resultado = resultadoAtual ?: Resultado(
                                     eficiencia = 0.0,
                                     laminaMedia = 0.0,
                                     tempoAvanco = 0.0,
                                     perdaPercolacao = 0.0,
                                     perdaEscoamento = 0.0
                                 ),
-                                onVoltar = { screen = "parametros" }
+                                metodo = metodo,
+                                parametros = parametrosAtuais,
+                                onVoltar = { screen = "wizard"; selectedTab = 0 },
+                                onSalvarCenario = { titulo ->
+                                    val novoCenario = CenarioSalvo(
+                                        id = "cenario_${cenariosSalvos.size + 1}_${parametrosAtuais.comprimento.toInt()}",
+                                        titulo = titulo,
+                                        dataHora = "Hoje",
+                                        metodo = metodo,
+                                        parametros = parametrosAtuais,
+                                        resultado = resultadoAtual ?: Resultado(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+                                    )
+                                    cenariosSalvos = cenariosSalvos + novoCenario
+                                }
                             )
-                            "historico" -> HistoricoScreen()
+                            "historico" -> HistoricoScreen(
+                                cenarios = cenariosSalvos,
+                                onVisualizarCenario = { cenario ->
+                                    metodo = cenario.metodo
+                                    parametrosAtuais = cenario.parametros
+                                    resultadoAtual = cenario.resultado
+                                    screen = "resultados"
+                                },
+                                onExcluirCenario = { id ->
+                                    cenariosSalvos = cenariosSalvos.filterNot { it.id == id }
+                                },
+                                onNovoCenario = {
+                                    selectedTab = 0
+                                    screen = "wizard"
+                                }
+                            )
                             "perfil" -> PerfilScreen(
                                 usuario = currentUser,
                                 isDarkTheme = isDarkTheme,

@@ -1,6 +1,8 @@
 package com.irrigasim.ui
 
+import androidx.compose.animation.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -12,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.irrigasim.domain.*
@@ -19,71 +22,35 @@ import com.irrigasim.ui.components.GraficoAvanco
 import com.irrigasim.ui.components.GraficoBalancoHidrico
 import com.irrigasim.ui.components.GraficoLaminaLongitudinal
 
+/**
+ * Wizard completo em 4 Etapas Didáticas conforme Aula 5 de Irrigação por Superfície.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MetodoScreen(userName: String = "Usuário", onSelecionar: (MetodoIrrigacao) -> Unit) {
-    val metodos = listOf(
-        MetodoIrrigacao.SULCO to "Sulcos - Canais paralelos com sulcos de infiltração",
-        MetodoIrrigacao.FAIXA to "Faixa (Border) - Lâmina contínua em declive",
-        MetodoIrrigacao.INUNDACAO to "Inundação / Bacia - Talhões nivelados de grande volume"
-    )
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp)) {
-        Text(
-            "Olá, ${userName.split(" ").firstOrNull() ?: userName} 👋",
-            style = MaterialTheme.typography.headlineLarge,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Text(
-            "Escolha o método de irrigação por superfície",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(Modifier.height(24.dp))
-        metodos.forEach { (metodo, desc) ->
-            Card(
-                Modifier.fillMaxWidth().padding(vertical = 8.dp).clickable { onSelecionar(metodo) },
-                shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(2.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-            ) {
-                Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        Modifier.size(56.dp).clip(RoundedCornerShape(16.dp))
-                            .background(MaterialTheme.colorScheme.primaryContainer),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            when (metodo) {
-                                MetodoIrrigacao.SULCO -> "🌾"
-                                MetodoIrrigacao.FAIXA -> "📐"
-                                MetodoIrrigacao.INUNDACAO -> "💧"
-                            },
-                            fontSize = 28.sp
-                        )
-                    }
-                    Spacer(Modifier.width(20.dp))
-                    Column {
-                        Text(metodo.nome, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSurface)
-                        Text(desc, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                }
-            }
-        }
-    }
-}
+fun WizardSimulacaoScreen(
+    userName: String = "Usuário",
+    metodoInicial: MetodoIrrigacao = MetodoIrrigacao.SULCO,
+    onSimular: (MetodoIrrigacao, Parametros) -> Unit
+) {
+    var etapa by remember { mutableStateOf(1) }
+    var metodo by remember { mutableStateOf(metodoInicial) }
 
-@Composable
-fun ParametrosScreen(metodo: MetodoIrrigacao, onSimular: (Parametros) -> Unit, onVoltar: () -> Unit) {
-    var comprimento by remember { mutableStateOf("100") }
-    // Declividade calculada a partir de duas medidas: desnível (m) e distância horizontal (m)
-    var desnivelM by remember { mutableStateOf("0.50") }
-    var distanciaHorizontalM by remember { mutableStateOf("100") }
-    var larguraOuEspacamento by remember { mutableStateOf(if (metodo == MetodoIrrigacao.SULCO) "0.75" else "0.8") }
-    var k by remember { mutableStateOf("45") }
+    // Etapa 2: Solo & Cultura
+    var tipoSoloPreset by remember { mutableStateOf("franco") } // arenoso, franco, argiloso, custom
+    var k by remember { mutableStateOf("45.0") }
     var a by remember { mutableStateOf("0.55") }
     var vib by remember { mutableStateOf("2.0") }
-    var vazao by remember { mutableStateOf(if (metodo == MetodoIrrigacao.INUNDACAO) "15.0" else "0.6") }
+    var lamina by remember { mutableStateOf("50.0") }
+
+    // Etapa 3: Terreno & Topografia (Declividade por 2 medidas)
+    var comprimento by remember { mutableStateOf("100") }
+    var desnivelM by remember { mutableStateOf("0.50") }
+    var distanciaHorizontalM by remember { mutableStateOf("100") }
+    var larguraOuEspacamento by remember { mutableStateOf("0.8") }
+
+    // Etapa 4: Manejo Hidráulico
+    var vazao by remember { mutableStateOf("0.6") }
     var tempo by remember { mutableStateOf("90") }
-    var lamina by remember { mutableStateOf("50") }
     var manningN by remember { mutableStateOf("0.04") }
 
     // Cálculo automático da declividade
@@ -92,113 +59,261 @@ fun ParametrosScreen(metodo: MetodoIrrigacao, onSimular: (Parametros) -> Unit, o
     val declividadeCalculada = if (distanciaVal > 0) (desnivelVal / distanciaVal) * 100.0 else 0.0
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-        Surface(color = MaterialTheme.colorScheme.primary, shadowElevation = 4.dp) {
-            Row(
-                Modifier.fillMaxWidth().padding(16.dp).height(48.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+        // Barra de progresso das etapas
+        Surface(color = MaterialTheme.colorScheme.primaryContainer, shadowElevation = 2.dp) {
+            Column(Modifier.padding(16.dp)) {
                 Text(
-                    "←",
-                    style = MaterialTheme.typography.headlineLarge,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.clickable { onVoltar() }.padding(end = 16.dp)
+                    "Simulador Didático IrrigaSIM",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
-                Text(metodo.nome, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onPrimary)
+                Text(
+                    "Etapa $etapa de 4: ${
+                        when (etapa) {
+                            1 -> "Método de Irrigação (Aula 5)"
+                            2 -> "Caracterização de Solo & Cultura"
+                            3 -> "Topografia & Geometria do Terreno"
+                            else -> "Manejo Hidráulico & Operação"
+                        }
+                    }",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Spacer(Modifier.height(8.dp))
+                LinearProgressIndicator(
+                    progress = etapa / 4f,
+                    modifier = Modifier.fillMaxWidth().height(6.dp).clip(CircleShape),
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
         }
-        Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            Text("Geometria do Terreno", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
-            Campo("Comprimento do terreno (m)", comprimento) { comprimento = it }
 
-            // Declividade por duas medidas
-            Text(
-                "Declividade — duas medidas",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 4.dp)
-            )
-            Text(
-                "Meça o desnível (diferença de altura) e a distância horizontal entre os dois pontos. A declividade será calculada automaticamente.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.outline
-            )
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Column(Modifier.weight(1f)) {
-                    Campo("Desnível ΔH (m)", desnivelM) { desnivelM = it }
-                }
-                Column(Modifier.weight(1f)) {
-                    Campo("Distância horiz. L (m)", distanciaHorizontalM) { distanciaHorizontalM = it }
-                }
-            }
-            // Resultado visual da declividade
-            Card(
-                Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-            ) {
-                Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text("📐", fontSize = 20.sp)
-                    Spacer(Modifier.width(8.dp))
-                    Column {
-                        Text(
-                            "Declividade calculada: ${"%.3f".format(declividadeCalculada)}%",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                        Text(
-                            "S₀ = ΔH / L = ${"%.2f".format(desnivelVal)} / ${"%.0f".format(distanciaVal)} = ${"%.5f".format(declividadeCalculada / 100.0)} m/m",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                        )
+        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            when (etapa) {
+                // ETAPA 1: Seleção do Método
+                1 -> {
+                    Text("Conceitos da Aula 5 — Irrigação por Superfície", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    Text(
+                        "Na irrigação por superfície, a água é aplicada diretamente sobre a superfície do solo, escoando por gravidade.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    val metodosList = listOf(
+                        Triple(MetodoIrrigacao.SULCO, "🌾 Sulcos (Furrow)", "Água escoa em canais paralelos entre as fileiras da cultura (milho, feijão, cana-de-açúcar)."),
+                        Triple(MetodoIrrigacao.FAIXA, "📐 Faixa (Border)", "Água escoa em lâmina contínua em faixas delimitadas por pequenas taipas."),
+                        Triple(MetodoIrrigacao.INUNDACAO, "💧 Inundação / Bacia", "Talhões nivelados mantidos inundados com lâmina contínua (ex.: arroz irrigado).")
+                    )
+
+                    metodosList.forEach { (m, titulo, desc) ->
+                        val selected = metodo == m
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    metodo = m
+                                    if (m == MetodoIrrigacao.SULCO && larguraOuEspacamento == "0.8") larguraOuEspacamento = "0.75"
+                                },
+                            shape = RoundedCornerShape(16.dp),
+                            border = if (selected) androidx.compose.foundation.BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) else MaterialTheme.colorScheme.surface
+                            )
+                        ) {
+                            Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                                RadioButton(selected = selected, onClick = { metodo = m })
+                                Spacer(Modifier.width(12.dp))
+                                Column {
+                                    Text(titulo, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+                                    Text(desc, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(Modifier.height(8.dp))
+                    Button(
+                        onClick = { etapa = 2 },
+                        modifier = Modifier.fillMaxWidth().height(52.dp),
+                        shape = RoundedCornerShape(14.dp)
+                    ) {
+                        Text("Avançar: Solo & Cultura →", style = MaterialTheme.typography.titleMedium)
                     }
                 }
-            }
 
-            Campo(
-                if (metodo == MetodoIrrigacao.SULCO) "Espaçamento entre sulcos (m)" else "Largura (m)",
-                larguraOuEspacamento
-            ) { larguraOuEspacamento = it }
-
-            Text("Solo — Modelo Kostiakov-Lewis", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(top = 8.dp))
-            Campo("Coeficiente k (mm/hᵃ)", k) { k = it }
-            Campo("Expoente a (0 < a < 1)", a) { a = it }
-            Campo("Taxa básica de infiltração VIB (mm/h)", vib) { vib = it }
-
-            Text("Manejo & Hidráulica", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(top = 8.dp))
-            Campo(
-                when (metodo) {
-                    MetodoIrrigacao.SULCO -> "Vazão por sulco (L/s)"
-                    MetodoIrrigacao.FAIXA -> "Vazão unitária (L/s/m)"
-                    MetodoIrrigacao.INUNDACAO -> "Vazão total da bacia (L/s)"
-                },
-                vazao
-            ) { vazao = it }
-            Campo("Tempo de aplicação (min)", tempo) { tempo = it }
-            Campo("Lâmina líquida requerida LN (mm)", lamina) { lamina = it }
-            Campo("Rugosidade de Manning n", manningN) { manningN = it }
-
-            Spacer(Modifier.height(8.dp))
-            Button(
-                onClick = {
-                    onSimular(
-                        Parametros(
-                            comprimento = comprimento.toDoubleOrNull() ?: 100.0,
-                            declividade = declividadeCalculada,
-                            larguraOuEspacamento = larguraOuEspacamento.toDoubleOrNull() ?: 0.8,
-                            k = k.toDoubleOrNull() ?: 45.0,
-                            a = a.toDoubleOrNull() ?: 0.55,
-                            vib = vib.toDoubleOrNull() ?: 2.0,
-                            vazao = vazao.toDoubleOrNull() ?: 0.6,
-                            tempoAplicacao = tempo.toDoubleOrNull() ?: 90.0,
-                            laminaRequerida = lamina.toDoubleOrNull() ?: 50.0,
-                            manningN = manningN.toDoubleOrNull() ?: 0.04
-                        )
+                // ETAPA 2: Caracterização de Solo & Cultura
+                2 -> {
+                    Text("Etapa 2 — Solo & Requerimento da Cultura", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    Text(
+                        "Selecione um perfil pré-definido de solo ou digite os parâmetros da equação de Kostiakov-Lewis (I = k * t^a + f0 * t).",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Text("Executar Simulação →", style = MaterialTheme.typography.titleMedium)
+
+
+                    Text("Presets de Solo Agrícola", style = MaterialTheme.typography.labelLarge)
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        FilterChip(
+                            selected = tipoSoloPreset == "arenoso",
+                            onClick = {
+                                tipoSoloPreset = "arenoso"
+                                k = "65.0"; a = "0.65"; vib = "5.0"
+                            },
+                            label = { Text("⏳ Arenoso") }
+                        )
+                        FilterChip(
+                            selected = tipoSoloPreset == "franco",
+                            onClick = {
+                                tipoSoloPreset = "franco"
+                                k = "45.0"; a = "0.55"; vib = "2.0"
+                            },
+                            label = { Text("🧱 Franco/Limoso") }
+                        )
+                        FilterChip(
+                            selected = tipoSoloPreset == "argiloso",
+                            onClick = {
+                                tipoSoloPreset = "argiloso"
+                                k = "30.0"; a = "0.45"; vib = "0.8"
+                            },
+                            label = { Text("🪨 Argiloso") }
+                        )
+                    }
+
+                    Campo("Coeficiente k (mm/hᵃ)", k) { k = it; tipoSoloPreset = "custom" }
+                    Campo("Expoente a (0 < a < 1)", a) { a = it; tipoSoloPreset = "custom" }
+                    Campo("Taxa de Infiltração Básica VIB (mm/h)", vib) { vib = it; tipoSoloPreset = "custom" }
+
+                    Divider(Modifier.padding(vertical = 4.dp))
+                    Text("Requerimento da Cultura", style = MaterialTheme.typography.labelLarge)
+                    Campo("Lâmina Líquida Requerida LN (mm)", lamina) { lamina = it }
+
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        OutlinedButton(onClick = { etapa = 1 }, Modifier.weight(1f).height(52.dp), shape = RoundedCornerShape(14.dp)) {
+                            Text("← Voltar")
+                        }
+                        Button(onClick = { etapa = 3 }, Modifier.weight(1f).height(52.dp), shape = RoundedCornerShape(14.dp)) {
+                            Text("Avançar →")
+                        }
+                    }
+                }
+
+                // ETAPA 3: Topografia & Geometria
+                3 -> {
+                    Text("Etapa 3 — Geometria & Declividade do Terreno", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    Text(
+                        "Meça o desnível vertical e a distância horizontal para calcular a declividade com precisão agrícola.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Campo("Comprimento do terreno L (m)", comprimento) { comprimento = it }
+
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Column(Modifier.weight(1f)) {
+                            Campo("Desnível ΔH (m)", desnivelM) { desnivelM = it }
+                        }
+                        Column(Modifier.weight(1f)) {
+                            Campo("Distância horiz. L (m)", distanciaHorizontalM) { distanciaHorizontalM = it }
+                        }
+                    }
+
+                    Card(
+                        Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                    ) {
+                        Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Text("📐", fontSize = 24.sp)
+                            Spacer(Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    "Declividade S₀ = ${"%.3f".format(declividadeCalculada)}%",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                                Text(
+                                    "Fórmula: (ΔH / L) × 100 = (${"%.2f".format(desnivelVal)} / ${"%.0f".format(distanciaVal)}) × 100",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                                )
+                            }
+                        }
+                    }
+
+                    Campo(
+                        if (metodo == MetodoIrrigacao.SULCO) "Espaçamento entre sulcos (m)" else "Largura (m)",
+                        larguraOuEspacamento
+                    ) { larguraOuEspacamento = it }
+
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        OutlinedButton(onClick = { etapa = 2 }, Modifier.weight(1f).height(52.dp), shape = RoundedCornerShape(14.dp)) {
+                            Text("← Voltar")
+                        }
+                        Button(onClick = { etapa = 4 }, Modifier.weight(1f).height(52.dp), shape = RoundedCornerShape(14.dp)) {
+                            Text("Avançar →")
+                        }
+                    }
+                }
+
+                // ETAPA 4: Manejo Hidráulico & Confirmação
+                4 -> {
+                    Text("Etapa 4 — Manejo Hidráulico & Operação", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+
+                    Campo(
+                        when (metodo) {
+                            MetodoIrrigacao.SULCO -> "Vazão por sulco Q (L/s)"
+                            MetodoIrrigacao.FAIXA -> "Vazão unitária qu (L/s/m)"
+                            MetodoIrrigacao.INUNDACAO -> "Vazão total da bacia Q (L/s)"
+                        },
+                        vazao
+                    ) { vazao = it }
+
+                    Campo("Tempo de aplicação Tap (min)", tempo) { tempo = it }
+                    Campo("Coeficiente de Manning n", manningN) { manningN = it }
+
+                    Card(
+                        Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    ) {
+                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text("📋 Resumo da Configuração", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+                            Text("• Método: ${metodo.nome}", style = MaterialTheme.typography.bodyMedium)
+                            Text("• Terreno: ${comprimento}m de extensão, S₀ = ${"%.2f".format(declividadeCalculada)}%", style = MaterialTheme.typography.bodyMedium)
+                            Text("• Solo: k=${k}, a=${a}, VIB=${vib} mm/h", style = MaterialTheme.typography.bodyMedium)
+                            Text("• Operação: Q = ${vazao} L/s por ${tempo} min | LN = ${lamina} mm", style = MaterialTheme.typography.bodyMedium)
+                        }
+                    }
+
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        OutlinedButton(onClick = { etapa = 3 }, Modifier.weight(1f).height(54.dp), shape = RoundedCornerShape(14.dp)) {
+                            Text("← Voltar")
+                        }
+                        Button(
+                            onClick = {
+                                onSimular(
+                                    metodo,
+                                    Parametros(
+                                        comprimento = comprimento.toDoubleOrNull() ?: 100.0,
+                                        declividade = declividadeCalculada,
+                                        larguraOuEspacamento = larguraOuEspacamento.toDoubleOrNull() ?: 0.8,
+                                        k = k.toDoubleOrNull() ?: 45.0,
+                                        a = a.toDoubleOrNull() ?: 0.55,
+                                        vib = vib.toDoubleOrNull() ?: 2.0,
+                                        vazao = vazao.toDoubleOrNull() ?: 0.6,
+                                        tempoAplicacao = tempo.toDoubleOrNull() ?: 90.0,
+                                        laminaRequerida = lamina.toDoubleOrNull() ?: 50.0,
+                                        manningN = manningN.toDoubleOrNull() ?: 0.04
+                                    )
+                                )
+                            },
+                            Modifier.weight(1.5f).height(54.dp),
+                            shape = RoundedCornerShape(14.dp)
+                        ) {
+                            Text("🚀 Executar Simulação", style = MaterialTheme.typography.titleMedium)
+                        }
+                    }
+                }
             }
         }
     }
@@ -219,12 +334,14 @@ fun Campo(label: String, value: String, onChange: (String) -> Unit) {
 @Composable
 fun ResultadoScreen(
     resultado: Resultado,
-    laminaRequerida: Double = 50.0,
+    metodo: MetodoIrrigacao,
+    parametros: Parametros,
     onVoltar: () -> Unit,
-    onSalvar: (() -> Unit)? = null
+    onSalvarCenario: (String) -> Unit
 ) {
     var abaSelecionada by remember { mutableStateOf(0) }
     var cenarioSalvo by remember { mutableStateOf(false) }
+    var nomeCenario by remember { mutableStateOf("${metodo.nome} — ${parametros.comprimento.toInt()}m (${parametros.vazao} L/s)") }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         Surface(color = MaterialTheme.colorScheme.primary, shadowElevation = 4.dp) {
@@ -263,21 +380,9 @@ fun ResultadoScreen(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
                 contentColor = MaterialTheme.colorScheme.primary
             ) {
-                Tab(
-                    selected = abaSelecionada == 0,
-                    onClick = { abaSelecionada = 0 },
-                    text = { Text("Balanço Hídrico", style = MaterialTheme.typography.labelLarge) }
-                )
-                Tab(
-                    selected = abaSelecionada == 1,
-                    onClick = { abaSelecionada = 1 },
-                    text = { Text("Curva Avanço", style = MaterialTheme.typography.labelLarge) }
-                )
-                Tab(
-                    selected = abaSelecionada == 2,
-                    onClick = { abaSelecionada = 2 },
-                    text = { Text("Perfil Lâmina", style = MaterialTheme.typography.labelLarge) }
-                )
+                Tab(selected = abaSelecionada == 0, onClick = { abaSelecionada = 0 }, text = { Text("Balanço Hídrico", style = MaterialTheme.typography.labelLarge) })
+                Tab(selected = abaSelecionada == 1, onClick = { abaSelecionada = 1 }, text = { Text("Curva Avanço", style = MaterialTheme.typography.labelLarge) })
+                Tab(selected = abaSelecionada == 2, onClick = { abaSelecionada = 2 }, text = { Text("Perfil Lâmina", style = MaterialTheme.typography.labelLarge) })
             }
 
             when (abaSelecionada) {
@@ -293,27 +398,21 @@ fun ResultadoScreen(
                 )
                 2 -> GraficoLaminaLongitudinal(
                     perfil = resultado.perfilLongitudinal,
-                    laminaRequerida = laminaRequerida,
+                    laminaRequerida = parametros.laminaRequerida,
                     cuc = resultado.cuc,
                     du = resultado.du
                 )
             }
 
-            // Card de Recomendação Didática
+            // Recomendação Didática
             val bom = resultado.eficiencia >= 75 && resultado.cuc >= 80
             Card(
                 Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = if (bom) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.errorContainer
-                )
+                colors = CardDefaults.cardColors(containerColor = if (bom) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.errorContainer)
             ) {
                 Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        if (bom) "🏆" else "⚠️",
-                        fontSize = 32.sp,
-                        color = if (bom) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.error
-                    )
+                    Text(if (bom) "🏆" else "⚠️", fontSize = 32.sp)
                     Spacer(Modifier.width(16.dp))
                     Column {
                         Text(
@@ -334,36 +433,51 @@ fun ResultadoScreen(
                 }
             }
 
-            // Botão Salvar Cenário
-            if (cenarioSalvo) {
-                Card(
-                    Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
-                ) {
-                    Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Text("✓", fontSize = 24.sp, color = MaterialTheme.colorScheme.secondary)
-                        Spacer(Modifier.width(12.dp))
-                        Text(
-                            "Cenário salvo com sucesso!",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer
+            // Bloco de Salvamento de Cenário
+            Card(
+                Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.cardElevation(2.dp)
+            ) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text("💾 Salvar este Cenário", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    if (cenarioSalvo) {
+                        Surface(
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Row(Modifier.fillMaxWidth().padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Text("✅", fontSize = 24.sp)
+                                Spacer(Modifier.width(12.dp))
+                                Column {
+                                    Text("Cenário salvo com sucesso!", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                                    Text("Disponível na aba 'Cenários' para consulta futura.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f))
+                                }
+                            }
+                        }
+                    } else {
+                        OutlinedTextField(
+                            value = nomeCenario,
+                            onValueChange = { nomeCenario = it },
+                            label = { Text("Nome do Cenário") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            shape = RoundedCornerShape(12.dp)
                         )
+                        Button(
+                            onClick = {
+                                if (nomeCenario.isNotBlank()) {
+                                    onSalvarCenario(nomeCenario)
+                                    cenarioSalvo = true
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth().height(48.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                        ) {
+                            Text("Salvar na Minha Conta 💾", style = MaterialTheme.typography.titleMedium)
+                        }
                     }
-                }
-            } else {
-                Button(
-                    onClick = {
-                        onSalvar?.invoke()
-                        cenarioSalvo = true
-                    },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondary
-                    )
-                ) {
-                    Text("💾  Salvar Cenário", style = MaterialTheme.typography.titleMedium)
                 }
             }
         }
@@ -371,7 +485,7 @@ fun ResultadoScreen(
 }
 
 @Composable
-fun KpiCard(label: String, value: String, color: androidx.compose.ui.graphics.Color, modifier: Modifier = Modifier) {
+fun KpiCard(label: String, value: String, color: Color, modifier: Modifier = Modifier) {
     Card(
         modifier,
         shape = RoundedCornerShape(16.dp),
@@ -386,17 +500,108 @@ fun KpiCard(label: String, value: String, color: androidx.compose.ui.graphics.Co
     }
 }
 
+/**
+ * Aba de Histórico com listagem funcional dos cenários salvos pelo usuário.
+ */
 @Composable
-fun HistoricoScreen() {
-    Column(Modifier.fillMaxSize().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("Cenários Salvos", style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.onBackground)
-        Spacer(Modifier.height(8.dp))
-        Text("Histórico de simulações realizadas", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(Modifier.height(48.dp))
-        Box(Modifier.size(80.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) { Text("📋", fontSize = 36.sp) }
+fun HistoricoScreen(
+    cenarios: List<CenarioSalvo>,
+    onVisualizarCenario: (CenarioSalvo) -> Unit,
+    onExcluirCenario: (String) -> Unit,
+    onNovoCenario: () -> Unit
+) {
+    Column(Modifier.fillMaxSize().padding(20.dp)) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Column {
+                Text("Cenários Salvos", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground)
+                Text("${cenarios.size} simulação(ões) registrada(s)", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            if (cenarios.isNotEmpty()) {
+                IconButton(onClick = onNovoCenario) {
+                    Text("➕", fontSize = 24.sp)
+                }
+            }
+        }
+
         Spacer(Modifier.height(16.dp))
-        Text("Nenhum cenário salvo", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text("Execute uma simulação para\nver os resultados aqui", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.outline, modifier = Modifier.padding(top = 8.dp))
+
+        if (cenarios.isEmpty()) {
+            Column(
+                Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Box(Modifier.size(80.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) { Text("📋", fontSize = 36.sp) }
+                Spacer(Modifier.height(16.dp))
+                Text("Nenhum cenário salvo ainda", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("Execute uma simulação e clique em 'Salvar'\npara registrar seus testes aqui.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.outline, modifier = Modifier.padding(top = 8.dp))
+                Spacer(Modifier.height(24.dp))
+                Button(onClick = onNovoCenario, shape = RoundedCornerShape(14.dp)) {
+                    Text("Criar Nova Simulação 🚀")
+                }
+            }
+        } else {
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                cenarios.forEach { cenario ->
+                    Card(
+                        Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        elevation = CardDefaults.cardElevation(2.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                    ) {
+                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                Text(cenario.titulo, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+                                Surface(
+                                    color = MaterialTheme.colorScheme.primaryContainer,
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Text(cenario.metodo.nome, Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                                }
+                            }
+
+                            Text(
+                                "📅 Salvo em: ${cenario.dataHora}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.outline
+                            )
+
+                            Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Column {
+                                    Text("Eficiência (Ea)", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                                    Text("${cenario.resultado.eficiencia.toInt()}%", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.secondary)
+                                }
+                                Column {
+                                    Text("Uniformidade (CUC)", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                                    Text("${cenario.resultado.cuc.toInt()}%", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.tertiary)
+                                }
+                                Column {
+                                    Text("Lâmina Média", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                                    Text("${"%.1f".format(cenario.resultado.laminaMedia)} mm", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
+                                }
+                            }
+
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                OutlinedButton(
+                                    onClick = { onVisualizarCenario(cenario) },
+                                    modifier = Modifier.weight(1f).height(44.dp),
+                                    shape = RoundedCornerShape(10.dp)
+                                ) {
+                                    Text("👁️ Visualizar")
+                                }
+                                IconButton(
+                                    onClick = { onExcluirCenario(cenario.id) }
+                                ) {
+                                    Text("🗑️", fontSize = 18.sp)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

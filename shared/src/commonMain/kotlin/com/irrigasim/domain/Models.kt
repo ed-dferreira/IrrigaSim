@@ -214,3 +214,14 @@ interface RepositorioSimulacoes {
     suspend fun buscarPorId(id: Long): SimulacaoSalva?
     suspend fun excluir(id: Long)
 }
+
+/** Modelo de cenário salvo na UI */
+data class CenarioSalvo(
+    val id: String,
+    val titulo: String,
+    val dataHora: String,
+    val metodo: MetodoIrrigacao,
+    val parametros: Parametros,
+    val resultado: Resultado
+)
+
