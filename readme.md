@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/logo.png" width="160" alt="IrrigaSIM Logo" />
+</p>
+
 # IrrigaSIM 💧
 ### Ferramenta Multiplataforma para Simulação e Ensino de Irrigação por Superfície
 
