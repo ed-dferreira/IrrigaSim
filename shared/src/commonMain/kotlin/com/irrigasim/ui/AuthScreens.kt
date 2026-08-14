@@ -50,9 +50,9 @@ fun LoginScreen(
                 if (isLoading) CircularProgressIndicator(Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp) else Text("Entrar", style = MaterialTheme.typography.titleMedium)
             }
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Divider(Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant)
+                Box(Modifier.weight(1f).height(1.dp).background(MaterialTheme.colorScheme.outlineVariant))
                 Text("  ou  ", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelLarge)
-                Divider(Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant)
+                Box(Modifier.weight(1f).height(1.dp).background(MaterialTheme.colorScheme.outlineVariant))
             }
             OutlinedButton(onGoogleSignIn, Modifier.fillMaxWidth().height(54.dp), enabled = !isLoading, shape = RoundedCornerShape(12.dp), border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline)) {
                 Text("G", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)

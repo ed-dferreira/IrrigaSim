@@ -22,6 +22,48 @@ import com.irrigasim.ui.components.GraficoBalancoHidrico
 import com.irrigasim.ui.components.GraficoLaminaLongitudinal
 
 /**
+ * Componente de Chip Customizado à prova de falhas de versão Compose.
+ */
+@Composable
+fun CustomChip(selected: Boolean, label: String, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(20.dp),
+        color = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+        border = if (selected) androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null
+    ) {
+        Text(
+            text = label,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+            style = MaterialTheme.typography.labelMedium,
+            color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+/**
+ * Barra de progresso visual customizada à prova de falhas Compose.
+ */
+@Composable
+fun CustomProgressBar(progress: Float) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(8.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(fraction = progress.coerceIn(0.01f, 1f))
+                .fillMaxHeight()
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary)
+        )
+    }
+}
+
+/**
  * Tela Inicial Rápida de Seleção de Método (Para uso frequente).
  */
 @Composable
@@ -199,16 +241,16 @@ fun ParametrosScreen(
                 onClick = {
                     onSimular(
                         Parametros(
-                            comprimento = comprimento.toDoubleOrNull() ?: 100.0,
-                            declividade = declividadeCalculada,
-                            larguraOuEspacamento = larguraOuEspacamento.toDoubleOrNull() ?: 0.8,
-                            k = k.toDoubleOrNull() ?: 45.0,
-                            a = a.toDoubleOrNull() ?: 0.55,
-                            vib = vib.toDoubleOrNull() ?: 2.0,
-                            vazao = vazao.toDoubleOrNull() ?: 0.6,
-                            tempoAplicacao = tempo.toDoubleOrNull() ?: 90.0,
-                            laminaRequerida = lamina.toDoubleOrNull() ?: 50.0,
-                            manningN = manningN.toDoubleOrNull() ?: 0.04
+                            comprimento = (comprimento.toDoubleOrNull() ?: 100.0).coerceAtLeast(10.0),
+                            declividade = declividadeCalculada.coerceAtLeast(0.001),
+                            larguraOuEspacamento = (larguraOuEspacamento.toDoubleOrNull() ?: 0.8).coerceAtLeast(0.1),
+                            k = (k.toDoubleOrNull() ?: 45.0).coerceAtLeast(1.0),
+                            a = (a.toDoubleOrNull() ?: 0.55).coerceIn(0.01, 0.99),
+                            vib = (vib.toDoubleOrNull() ?: 2.0).coerceAtLeast(0.1),
+                            vazao = (vazao.toDoubleOrNull() ?: 0.6).coerceAtLeast(0.01),
+                            tempoAplicacao = (tempo.toDoubleOrNull() ?: 90.0).coerceAtLeast(1.0),
+                            laminaRequerida = (lamina.toDoubleOrNull() ?: 50.0).coerceAtLeast(1.0),
+                            manningN = (manningN.toDoubleOrNull() ?: 0.04).coerceAtLeast(0.01)
                         )
                     )
                 },
@@ -224,7 +266,6 @@ fun ParametrosScreen(
 /**
  * Wizard Didático em 4 Etapas (Primeiro Acesso / Tutorial).
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WizardSimulacaoScreen(
     userName: String = "Usuário",
@@ -281,11 +322,7 @@ fun WizardSimulacaoScreen(
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 Spacer(Modifier.height(8.dp))
-                LinearProgressIndicator(
-                    progress = (etapa / 4f).coerceIn(0f, 1f),
-                    modifier = Modifier.fillMaxWidth().height(6.dp).clip(CircleShape),
-                    color = MaterialTheme.colorScheme.primary
-                )
+                CustomProgressBar(progress = etapa / 4f)
             }
         }
 
@@ -351,20 +388,20 @@ fun WizardSimulacaoScreen(
 
                     Text("Presets de Solo Agrícola", style = MaterialTheme.typography.labelLarge)
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        FilterChip(
+                        CustomChip(
                             selected = tipoSoloPreset == "arenoso",
                             onClick = { tipoSoloPreset = "arenoso"; k = "65.0"; a = "0.65"; vib = "5.0" },
-                            label = { Text("⏳ Arenoso") }
+                            label = "⏳ Arenoso"
                         )
-                        FilterChip(
+                        CustomChip(
                             selected = tipoSoloPreset == "franco",
                             onClick = { tipoSoloPreset = "franco"; k = "45.0"; a = "0.55"; vib = "2.0" },
-                            label = { Text("🧱 Franco") }
+                            label = "🧱 Franco"
                         )
-                        FilterChip(
+                        CustomChip(
                             selected = tipoSoloPreset == "argiloso",
                             onClick = { tipoSoloPreset = "argiloso"; k = "30.0"; a = "0.45"; vib = "0.8" },
-                            label = { Text("🪨 Argiloso") }
+                            label = "🪨 Argiloso"
                         )
                     }
 
@@ -372,7 +409,8 @@ fun WizardSimulacaoScreen(
                     Campo("Expoente a (0 < a < 1)", a) { a = it; tipoSoloPreset = "custom" }
                     Campo("Taxa de Infiltração Básica VIB (mm/h)", vib) { vib = it; tipoSoloPreset = "custom" }
 
-                    Divider(Modifier.padding(vertical = 4.dp))
+                    Box(Modifier.fillMaxWidth().padding(vertical = 4.dp).height(1.dp).background(MaterialTheme.colorScheme.outlineVariant))
+
                     Campo("Lâmina Líquida Requerida LN (mm)", lamina) { lamina = it }
 
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -455,16 +493,16 @@ fun WizardSimulacaoScreen(
                                 onSimular(
                                     metodo,
                                     Parametros(
-                                        comprimento = comprimento.toDoubleOrNull() ?: 100.0,
-                                        declividade = declividadeCalculada,
-                                        larguraOuEspacamento = larguraOuEspacamento.toDoubleOrNull() ?: 0.8,
-                                        k = k.toDoubleOrNull() ?: 45.0,
-                                        a = a.toDoubleOrNull() ?: 0.55,
-                                        vib = vib.toDoubleOrNull() ?: 2.0,
-                                        vazao = vazao.toDoubleOrNull() ?: 0.6,
-                                        tempoAplicacao = tempo.toDoubleOrNull() ?: 90.0,
-                                        laminaRequerida = lamina.toDoubleOrNull() ?: 50.0,
-                                        manningN = manningN.toDoubleOrNull() ?: 0.04
+                                        comprimento = (comprimento.toDoubleOrNull() ?: 100.0).coerceAtLeast(10.0),
+                                        declividade = declividadeCalculada.coerceAtLeast(0.001),
+                                        larguraOuEspacamento = (larguraOuEspacamento.toDoubleOrNull() ?: 0.8).coerceAtLeast(0.1),
+                                        k = (k.toDoubleOrNull() ?: 45.0).coerceAtLeast(1.0),
+                                        a = (a.toDoubleOrNull() ?: 0.55).coerceIn(0.01, 0.99),
+                                        vib = (vib.toDoubleOrNull() ?: 2.0).coerceAtLeast(0.1),
+                                        vazao = (vazao.toDoubleOrNull() ?: 0.6).coerceAtLeast(0.01),
+                                        tempoAplicacao = (tempo.toDoubleOrNull() ?: 90.0).coerceAtLeast(1.0),
+                                        laminaRequerida = (lamina.toDoubleOrNull() ?: 50.0).coerceAtLeast(1.0),
+                                        manningN = (manningN.toDoubleOrNull() ?: 0.04).coerceAtLeast(0.01)
                                     )
                                 )
                             },
@@ -724,7 +762,7 @@ fun HistoricoScreen(
                                 color = MaterialTheme.colorScheme.outline
                             )
 
-                            Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                            Box(Modifier.fillMaxWidth().height(1.dp).background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)))
 
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 Column {
