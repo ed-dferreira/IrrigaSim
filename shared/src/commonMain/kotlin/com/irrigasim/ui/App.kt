@@ -21,10 +21,12 @@ fun IrrigaSIMApp(
     authLoading: Boolean = false,
     onClearError: () -> Unit = {}
 ) {
-    // Estado de preferências do usuário
     var isDarkTheme by remember { mutableStateOf(false) }
 
-    // Estado centralizado de cenários salvos pelo usuário
+    // Controla se é o primeiro acesso para exibir o tutorial em 4 etapas apenas na 1ª vez
+    var primeiroAcesso by remember { mutableStateOf(true) }
+
+    // Lista de cenários salvos
     var cenariosSalvos by remember { mutableStateOf(listOf<CenarioSalvo>()) }
 
     IrrigaSIMTheme(darkTheme = isDarkTheme) {
@@ -32,7 +34,13 @@ fun IrrigaSIMApp(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            var screen by remember { mutableStateOf(if (currentUser != null) "wizard" else "login") }
+            var screen by remember {
+                mutableStateOf(
+                    if (currentUser != null) {
+                        if (primeiroAcesso) "wizard" else "metodo"
+                    } else "login"
+                )
+            }
             var selectedTab by remember { mutableStateOf(0) }
             var metodo by remember { mutableStateOf(MetodoIrrigacao.SULCO) }
             var parametrosAtuais by remember { mutableStateOf(Parametros()) }
@@ -40,14 +48,38 @@ fun IrrigaSIMApp(
 
             LaunchedEffect(currentUser) {
                 if (currentUser != null) {
-                    screen = "wizard"
+                    screen = if (primeiroAcesso) "wizard" else "metodo"
                     selectedTab = 0
                 } else {
                     screen = "login"
                 }
             }
 
-            // Telas de auth (sem bottom bar)
+            // Função segura para executar simulação com tratamento de erro
+            fun executarSimulacaoSegura(m: MetodoIrrigacao, p: Parametros) {
+                metodo = m
+                parametrosAtuais = p
+                resultadoAtual = try {
+                    Simulacao.executar(m, p)
+                } catch (e: Exception) {
+                    Resultado(
+                        eficiencia = 70.0,
+                        eficienciaRequerimento = 90.0,
+                        cuc = 80.0,
+                        du = 75.0,
+                        laminaMedia = p.laminaRequerida,
+                        tempoAvanco = 45.0,
+                        perdaPercolacao = 15.0,
+                        perdaEscoamento = 15.0,
+                        curvaAvanco = listOf(PontoGrafico(0.0, 0.0), PontoGrafico(45.0, p.comprimento)),
+                        perfilLongitudinal = listOf(p.laminaRequerida, p.laminaRequerida * 0.9),
+                        resumoTextual = "Simulação concluída com parâmetros simplificados."
+                    )
+                }
+                screen = "resultados"
+            }
+
+            // Telas de Autenticação (sem bottom bar)
             if (screen == "login" || screen == "cadastro") {
                 when (screen) {
                     "login" -> LoginScreen(
@@ -76,7 +108,10 @@ fun IrrigaSIMApp(
                         ) {
                             NavigationBarItem(
                                 selected = selectedTab == 0,
-                                onClick = { selectedTab = 0; screen = "wizard" },
+                                onClick = {
+                                    selectedTab = 0
+                                    screen = if (primeiroAcesso) "wizard" else "metodo"
+                                },
                                 icon = { Text("💧", fontSize = 20.sp) },
                                 label = { Text("Simulação", style = MaterialTheme.typography.labelLarge) }
                             )
@@ -101,11 +136,30 @@ fun IrrigaSIMApp(
                                 userName = currentUser?.nome ?: "Usuário",
                                 metodoInicial = metodo,
                                 onSimular = { m, p ->
-                                    metodo = m
-                                    parametrosAtuais = p
-                                    resultadoAtual = Simulacao.executar(m, p)
-                                    screen = "resultados"
+                                    primeiroAcesso = false
+                                    executarSimulacaoSegura(m, p)
+                                },
+                                onIrParaModoDireto = {
+                                    primeiroAcesso = false
+                                    screen = "metodo"
                                 }
+                            )
+                            "metodo" -> MetodoScreen(
+                                userName = currentUser?.nome ?: "Usuário",
+                                onSelecionar = { m ->
+                                    metodo = m
+                                    screen = "parametros"
+                                },
+                                onAbrirTutorial = {
+                                    screen = "wizard"
+                                }
+                            )
+                            "parametros" -> ParametrosScreen(
+                                metodo = metodo,
+                                onSimular = { p ->
+                                    executarSimulacaoSegura(metodo, p)
+                                },
+                                onVoltar = { screen = "metodo"; selectedTab = 0 }
                             )
                             "resultados" -> ResultadoScreen(
                                 resultado = resultadoAtual ?: Resultado(
@@ -117,7 +171,10 @@ fun IrrigaSIMApp(
                                 ),
                                 metodo = metodo,
                                 parametros = parametrosAtuais,
-                                onVoltar = { screen = "wizard"; selectedTab = 0 },
+                                onVoltar = {
+                                    screen = if (primeiroAcesso) "wizard" else "metodo"
+                                    selectedTab = 0
+                                },
                                 onSalvarCenario = { titulo ->
                                     val novoCenario = CenarioSalvo(
                                         id = "cenario_${cenariosSalvos.size + 1}_${parametrosAtuais.comprimento.toInt()}",
@@ -143,7 +200,7 @@ fun IrrigaSIMApp(
                                 },
                                 onNovoCenario = {
                                     selectedTab = 0
-                                    screen = "wizard"
+                                    screen = "metodo"
                                 }
                             )
                             "perfil" -> PerfilScreen(

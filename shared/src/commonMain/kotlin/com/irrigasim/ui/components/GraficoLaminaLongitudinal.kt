@@ -86,7 +86,7 @@ fun GraficoLaminaLongitudinal(
                 val chartWidth = width - paddingLeft - paddingRight
                 val chartHeight = height - paddingTop - paddingBottom
 
-                val maxZ = maxOf(perfil.maxOrNull() ?: 10.0, laminaRequerida * 1.3)
+                val maxZ = maxOf(perfil.maxOrNull() ?: 10.0, laminaRequerida * 1.3).coerceAtLeast(1.0)
 
                 // Eixos
                 drawLine(labelColor, Offset(paddingLeft, paddingTop), Offset(paddingLeft, paddingTop + chartHeight), 1.5.dp.toPx())
@@ -128,8 +128,10 @@ fun GraficoLaminaLongitudinal(
                 // Perfil e gradiente
                 val curvePath = Path()
                 val bgPath = Path()
+                val divisor = if (perfil.size > 1) (perfil.size - 1).toFloat() else 1f
+
                 perfil.forEachIndexed { i, z ->
-                    val xFrac = i.toFloat() / (perfil.size - 1)
+                    val xFrac = i.toFloat() / divisor
                     val xPos = paddingLeft + xFrac * chartWidth
                     val yPos = paddingTop + chartHeight - (z / maxZ).toFloat() * chartHeight
                     if (i == 0) {
@@ -146,7 +148,7 @@ fun GraficoLaminaLongitudinal(
                 // Rótulos de valor nos pontos
                 val step = maxOf(1, perfil.size / 5)
                 perfil.forEachIndexed { i, z ->
-                    val xFrac = i.toFloat() / (perfil.size - 1)
+                    val xFrac = i.toFloat() / divisor
                     val xPos = paddingLeft + xFrac * chartWidth
                     val yPos = paddingTop + chartHeight - (z / maxZ).toFloat() * chartHeight
                     drawCircle(primaryColor, 2.5.dp.toPx(), Offset(xPos, yPos))
