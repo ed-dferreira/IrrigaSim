@@ -1,0 +1,54 @@
+# ─── Gradle ───────────────────────────────────────────────────────────────────
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# ─── Android ──────────────────────────────────────────────────────────────────
+*.apk
+*.aab
+*.ap_
+*.dex
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+*.keystore
+!debug.keystore
+
+# ─── Kotlin / KMP ─────────────────────────────────────────────────────────────
+kotlin-js-store/
+.kotlin/
+xcuserdata/
+*.xcworkspace/xcuserdata/
+DerivedData/
+*.ipa
+Pods/
+
+# ─── IDEs ─────────────────────────────────────────────────────────────────────
+.idea/
+*.iml
+*.iws
+.DS_Store
+*.swp
+*.swo
+*.suo
+*.user
+.vscode/
+*.code-workspace
+
+# ─── iOS / Xcode ──────────────────────────────────────────────────────────────
+iosApp/iosApp.xcworkspace/xcuserdata/
+iosApp/Pods/
+iosApp/DerivedData/
+
+# ─── Logs e temporários ───────────────────────────────────────────────────────
+*.log
+*.tmp
+*.bak
+.cache/
+
+# ─── Segredos (NÃO versionar — mas google-services.json já é necessário) ──────
+# google-services.json é intencionalmente versionado (projeto de pesquisa)
+# Para produção: remover esta exceção e usar CI secrets

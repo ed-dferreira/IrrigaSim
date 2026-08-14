@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">IrrigaSIM</string>
+    <string name="login_title">Login</string>
+    <string name="cadastro_title">Criar Conta</string>
+    <string name="metodo_title">Escolher Método</string>
+    <string name="parametros_title">Parâmetros</string>
+    <string name="resultados_title">Resultados</string>
+    <string name="cenarios_title">Cenários Salvos</string>
+    <string name="aulas_title">Modo Aula</string>
+    <string name="perfil_title">Perfil</string>
+    <!-- Google Sign-In -->
+    <string name="default_web_client_id" translatable="false">1019259738242-a322irkvho4c48d8pvlhli90pev2e1le.apps.googleusercontent.com</string>
+</resources>

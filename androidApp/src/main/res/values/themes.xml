@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.IrrigaSIM" parent="android:Theme.Material.Light.NoActionBar">
+        <!-- Cores principais -->
+        <item name="android:colorPrimary">#1565C0</item>
+        <item name="android:colorPrimaryDark">#0D47A1</item>
+        <item name="android:colorAccent">#2E7D32</item>
+
+        <!-- Status bar -->
+        <item name="android:statusBarColor">#0D47A1</item>
+        <item name="android:navigationBarColor">#FFFFFF</item>
+
+        <!-- Fundo -->
+        <item name="android:windowBackground">#F0F6FF</item>
+
+        <!-- Edges -->
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    </style>
+</resources>
