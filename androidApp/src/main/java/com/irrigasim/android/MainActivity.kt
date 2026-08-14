@@ -4,7 +4,9 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.*
+import androidx.core.view.WindowCompat
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.userProfileChangeRequest
@@ -25,6 +27,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         auth = FirebaseAuth.getInstance()
+
+        // Edge-to-edge: faz a barra de navegação do sistema acompanhar o tema
+        enableEdgeToEdge()
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
             var currentUser by remember { mutableStateOf(auth.currentUser?.toUsuario()) }

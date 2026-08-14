@@ -74,7 +74,9 @@ fun MetodoScreen(userName: String = "Usuário", onSelecionar: (MetodoIrrigacao) 
 @Composable
 fun ParametrosScreen(metodo: MetodoIrrigacao, onSimular: (Parametros) -> Unit, onVoltar: () -> Unit) {
     var comprimento by remember { mutableStateOf("100") }
-    var declividade by remember { mutableStateOf("0.5") }
+    // Declividade calculada a partir de duas medidas: desnível (m) e distância horizontal (m)
+    var desnivelM by remember { mutableStateOf("0.50") }
+    var distanciaHorizontalM by remember { mutableStateOf("100") }
     var larguraOuEspacamento by remember { mutableStateOf(if (metodo == MetodoIrrigacao.SULCO) "0.75" else "0.8") }
     var k by remember { mutableStateOf("45") }
     var a by remember { mutableStateOf("0.55") }
@@ -83,6 +85,11 @@ fun ParametrosScreen(metodo: MetodoIrrigacao, onSimular: (Parametros) -> Unit, o
     var tempo by remember { mutableStateOf("90") }
     var lamina by remember { mutableStateOf("50") }
     var manningN by remember { mutableStateOf("0.04") }
+
+    // Cálculo automático da declividade
+    val desnivelVal = desnivelM.toDoubleOrNull() ?: 0.0
+    val distanciaVal = distanciaHorizontalM.toDoubleOrNull() ?: 1.0
+    val declividadeCalculada = if (distanciaVal > 0) (desnivelVal / distanciaVal) * 100.0 else 0.0
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         Surface(color = MaterialTheme.colorScheme.primary, shadowElevation = 4.dp) {
@@ -102,7 +109,51 @@ fun ParametrosScreen(metodo: MetodoIrrigacao, onSimular: (Parametros) -> Unit, o
         Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             Text("Geometria do Terreno", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
             Campo("Comprimento do terreno (m)", comprimento) { comprimento = it }
-            Campo("Declividade (%)", declividade) { declividade = it }
+
+            // Declividade por duas medidas
+            Text(
+                "Declividade — duas medidas",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+            Text(
+                "Meça o desnível (diferença de altura) e a distância horizontal entre os dois pontos. A declividade será calculada automaticamente.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.outline
+            )
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(Modifier.weight(1f)) {
+                    Campo("Desnível ΔH (m)", desnivelM) { desnivelM = it }
+                }
+                Column(Modifier.weight(1f)) {
+                    Campo("Distância horiz. L (m)", distanciaHorizontalM) { distanciaHorizontalM = it }
+                }
+            }
+            // Resultado visual da declividade
+            Card(
+                Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+            ) {
+                Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text("📐", fontSize = 20.sp)
+                    Spacer(Modifier.width(8.dp))
+                    Column {
+                        Text(
+                            "Declividade calculada: ${"%.3f".format(declividadeCalculada)}%",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Text(
+                            "S₀ = ΔH / L = ${"%.2f".format(desnivelVal)} / ${"%.0f".format(distanciaVal)} = ${"%.5f".format(declividadeCalculada / 100.0)} m/m",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+            }
+
             Campo(
                 if (metodo == MetodoIrrigacao.SULCO) "Espaçamento entre sulcos (m)" else "Largura (m)",
                 larguraOuEspacamento
@@ -132,7 +183,7 @@ fun ParametrosScreen(metodo: MetodoIrrigacao, onSimular: (Parametros) -> Unit, o
                     onSimular(
                         Parametros(
                             comprimento = comprimento.toDoubleOrNull() ?: 100.0,
-                            declividade = declividade.toDoubleOrNull() ?: 0.5,
+                            declividade = declividadeCalculada,
                             larguraOuEspacamento = larguraOuEspacamento.toDoubleOrNull() ?: 0.8,
                             k = k.toDoubleOrNull() ?: 45.0,
                             a = a.toDoubleOrNull() ?: 0.55,
@@ -166,8 +217,14 @@ fun Campo(label: String, value: String, onChange: (String) -> Unit) {
 }
 
 @Composable
-fun ResultadoScreen(resultado: Resultado, onVoltar: () -> Unit) {
+fun ResultadoScreen(
+    resultado: Resultado,
+    laminaRequerida: Double = 50.0,
+    onVoltar: () -> Unit,
+    onSalvar: (() -> Unit)? = null
+) {
     var abaSelecionada by remember { mutableStateOf(0) }
+    var cenarioSalvo by remember { mutableStateOf(false) }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         Surface(color = MaterialTheme.colorScheme.primary, shadowElevation = 4.dp) {
@@ -236,7 +293,7 @@ fun ResultadoScreen(resultado: Resultado, onVoltar: () -> Unit) {
                 )
                 2 -> GraficoLaminaLongitudinal(
                     perfil = resultado.perfilLongitudinal,
-                    laminaRequerida = 50.0,
+                    laminaRequerida = laminaRequerida,
                     cuc = resultado.cuc,
                     du = resultado.du
                 )
@@ -274,6 +331,39 @@ fun ResultadoScreen(resultado: Resultado, onVoltar: () -> Unit) {
                             color = if (bom) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onErrorContainer
                         )
                     }
+                }
+            }
+
+            // Botão Salvar Cenário
+            if (cenarioSalvo) {
+                Card(
+                    Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+                ) {
+                    Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text("✓", fontSize = 24.sp, color = MaterialTheme.colorScheme.secondary)
+                        Spacer(Modifier.width(12.dp))
+                        Text(
+                            "Cenário salvo com sucesso!",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+                }
+            } else {
+                Button(
+                    onClick = {
+                        onSalvar?.invoke()
+                        cenarioSalvo = true
+                    },
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary
+                    )
+                ) {
+                    Text("💾  Salvar Cenário", style = MaterialTheme.typography.titleMedium)
                 }
             }
         }

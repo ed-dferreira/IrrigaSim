@@ -7,13 +7,30 @@
         <item name="android:colorAccent">#2E7D32</item>
 
         <!-- Status bar -->
-        <item name="android:statusBarColor">#0D47A1</item>
-        <item name="android:navigationBarColor">#FFFFFF</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+        <item name="android:enforceStatusBarContrast">false</item>
 
         <!-- Fundo -->
         <item name="android:windowBackground">#F0F6FF</item>
 
         <!-- Edges -->
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    </style>
+
+    <!-- Tema escuro para a barra de navegação do sistema -->
+    <style name="Theme.IrrigaSIM.Dark" parent="android:Theme.Material.NoActionBar">
+        <item name="android:colorPrimary">#9ECAFF</item>
+        <item name="android:colorPrimaryDark">#003258</item>
+        <item name="android:colorAccent">#78DC98</item>
+
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+        <item name="android:enforceStatusBarContrast">false</item>
+
+        <item name="android:windowBackground">#1A1C1E</item>
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
     </style>
 </resources>
