@@ -21,6 +21,10 @@ import com.irrigasim.ui.screens.auth.CadastroScreen
 import com.irrigasim.ui.screens.auth.LoginScreen
 import com.irrigasim.ui.theme.AppIcons
 import com.irrigasim.ui.theme.IrrigaSIMTheme
+import com.irrigasim.ui.viewmodel.HistoricoViewModel
+import com.irrigasim.ui.viewmodel.PerfilViewModel
+import com.irrigasim.ui.viewmodel.SimulacaoViewModel
+import com.irrigasim.ui.viewmodel.rememberViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -35,22 +39,23 @@ fun IrrigaSIMApp(
     authLoading: Boolean = false,
     onClearError: () -> Unit = {}
 ) {
-    var isDarkTheme by remember { mutableStateOf(false) }
+    // ViewModels do escopo do app (provedor manual, sem DI)
+    val simulacaoVm = rememberViewModel { SimulacaoViewModel() }
+    val historicoVm = rememberViewModel { HistoricoViewModel() }
+    val perfilVm = rememberViewModel { PerfilViewModel(usuario = currentUser) }
 
-    // Controla se é o primeiro acesso para exibir o tutorial em 4 etapas apenas na 1ª vez
-    var primeiroAcesso by remember { mutableStateOf(true) }
+    val simulacao by simulacaoVm.state.collectAsState()
+    val historico by historicoVm.state.collectAsState()
+    val perfil by perfilVm.state.collectAsState()
 
-    // Lista de cenários salvos
-    var cenariosSalvos by remember { mutableStateOf(listOf<CenarioSalvo>()) }
-
-    IrrigaSIMTheme(darkTheme = isDarkTheme) {
+    IrrigaSIMTheme(darkTheme = perfil.temaEscuro) {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
             val navState = rememberAppNavigationState(
                 initialRoute = if (currentUser != null) {
-                    if (primeiroAcesso) ScreenRoute.Wizard else ScreenRoute.Simulacao
+                    if (simulacao.primeiroAcesso) ScreenRoute.Wizard else ScreenRoute.Simulacao
                 } else {
                     ScreenRoute.Login
                 }
@@ -61,13 +66,9 @@ fun IrrigaSIMApp(
                 pageCount = { ScreenRoute.TAB_ROOTS.size }
             )
 
-            var metodo by remember { mutableStateOf(MetodoIrrigacao.SULCO) }
-            var parametrosAtuais by remember { mutableStateOf(Parametros()) }
-            var resultadoAtual by remember { mutableStateOf<Resultado?>(null) }
-
             LaunchedEffect(currentUser) {
                 if (currentUser != null) {
-                    navState.resetTo(if (primeiroAcesso) ScreenRoute.Wizard else ScreenRoute.Simulacao)
+                    navState.resetTo(if (simulacao.primeiroAcesso) ScreenRoute.Wizard else ScreenRoute.Simulacao)
                 } else {
                     navState.resetTo(ScreenRoute.Login)
                 }
@@ -80,35 +81,15 @@ fun IrrigaSIMApp(
                 }
             }
 
-            // Função segura para executar simulação com tratamento de erro
+            // Executa a simulação e navega para a tela de resultados
             fun executarSimulacaoSegura(m: MetodoIrrigacao, p: Parametros) {
-                metodo = m
-                parametrosAtuais = p
-                resultadoAtual = try {
-                    Simulacao.executar(m, p)
-                } catch (e: Exception) {
-                    Resultado(
-                        eficiencia = 70.0,
-                        eficienciaRequerimento = 90.0,
-                        cuc = 80.0,
-                        du = 75.0,
-                        laminaMedia = p.laminaRequerida,
-                        tempoAvanco = 45.0,
-                        perdaPercolacao = 15.0,
-                        perdaEscoamento = 15.0,
-                        curvaAvanco = listOf(PontoGrafico(0.0, 0.0), PontoGrafico(45.0, p.comprimento)),
-                        perfilLongitudinal = listOf(p.laminaRequerida, p.laminaRequerida * 0.9),
-                        resumoTextual = "Simulação concluída com parâmetros simplificados."
-                    )
-                }
+                simulacaoVm.executarSimulacao(m, p)
                 navState.resetTo(ScreenRoute.Simulacao)
                 navState.navigate(ScreenRoute.Resultados)
             }
 
             fun abrirCenarioSalvo(cenario: CenarioSalvo) {
-                metodo = cenario.metodo
-                parametrosAtuais = cenario.parametros
-                resultadoAtual = cenario.resultado
+                simulacaoVm.abrirCenario(cenario)
                 navState.navigate(ScreenRoute.Resultados)
             }
 
@@ -159,26 +140,23 @@ fun IrrigaSIMApp(
                                 ScreenRoute.Simulacao -> MetodoScreen(
                                     userName = currentUser?.nome ?: "Usuário",
                                     onSelecionar = { m ->
-                                        metodo = m
+                                        simulacaoVm.selecionarMetodo(m)
                                         navState.navigate(ScreenRoute.Parametros)
                                     },
                                     onAbrirTutorial = { navState.navigate(ScreenRoute.Wizard) }
                                 )
                                 ScreenRoute.Cenarios -> HistoricoScreen(
-                                    cenarios = cenariosSalvos,
+                                    cenarios = historico.cenarios,
                                     onVisualizarCenario = { abrirCenarioSalvo(it) },
-                                    onExcluirCenario = { id ->
-                                        cenariosSalvos = cenariosSalvos.filterNot { it.id == id }
-                                    },
+                                    onExcluirCenario = { id -> historicoVm.excluirCenario(id) },
                                     onNovoCenario = {
                                         navState.selectTab(0)
                                         scope.launch { pagerState.animateScrollToPage(0) }
                                     }
                                 )
                                 ScreenRoute.Perfil -> PerfilScreen(
+                                    viewModel = perfilVm,
                                     usuario = currentUser,
-                                    isDarkTheme = isDarkTheme,
-                                    onToggleDarkTheme = { isDarkTheme = it },
                                     onLogout = onSignOut
                                 )
                                 else -> Unit
@@ -194,44 +172,42 @@ fun IrrigaSIMApp(
                                 when (navState.currentRoute) {
                                     ScreenRoute.Wizard -> WizardSimulacaoScreen(
                                         userName = currentUser?.nome ?: "Usuário",
-                                        metodoInicial = metodo,
+                                        metodoInicial = simulacao.metodo,
                                         onSimular = { m, p ->
-                                            primeiroAcesso = false
+                                            simulacaoVm.concluirPrimeiroAcesso()
                                             executarSimulacaoSegura(m, p)
                                         },
                                         onIrParaModoDireto = {
-                                            primeiroAcesso = false
+                                            simulacaoVm.concluirPrimeiroAcesso()
                                             navState.resetTo(ScreenRoute.Simulacao)
                                         }
                                     )
                                     ScreenRoute.Parametros -> ParametrosScreen(
-                                        metodo = metodo,
+                                        metodo = simulacao.metodo,
                                         onSimular = { p ->
-                                            executarSimulacaoSegura(metodo, p)
+                                            executarSimulacaoSegura(simulacao.metodo, p)
                                         },
                                         onVoltar = { navState.goBack() }
                                     )
                                     ScreenRoute.Resultados -> ResultadoScreen(
-                                        resultado = resultadoAtual ?: Resultado(
+                                        resultado = simulacao.resultado ?: Resultado(
                                             eficiencia = 0.0,
                                             laminaMedia = 0.0,
                                             tempoAvanco = 0.0,
                                             perdaPercolacao = 0.0,
                                             perdaEscoamento = 0.0
                                         ),
-                                        metodo = metodo,
-                                        parametros = parametrosAtuais,
+                                        metodo = simulacao.metodo,
+                                        parametros = simulacao.parametros,
                                         onVoltar = { navState.goBack() },
                                         onSalvarCenario = { titulo ->
-                                            val novoCenario = CenarioSalvo(
-                                                id = "cenario_${cenariosSalvos.size + 1}_${parametrosAtuais.comprimento.toInt()}",
+                                            historicoVm.salvarCenario(
                                                 titulo = titulo,
-                                                dataHora = "Hoje",
-                                                metodo = metodo,
-                                                parametros = parametrosAtuais,
-                                                resultado = resultadoAtual ?: Resultado(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+                                                metodo = simulacao.metodo,
+                                                parametros = simulacao.parametros,
+                                                resultado = simulacao.resultado
+                                                    ?: Resultado(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
                                             )
-                                            cenariosSalvos = cenariosSalvos + novoCenario
                                         }
                                     )
                                     else -> Unit

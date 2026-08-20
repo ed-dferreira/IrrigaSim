@@ -24,10 +24,8 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -39,6 +37,8 @@ import com.irrigasim.ui.components.GraficoAvanco
 import com.irrigasim.ui.components.GraficoBalancoHidrico
 import com.irrigasim.ui.components.GraficoLaminaLongitudinal
 import com.irrigasim.ui.components.KpiCard
+import com.irrigasim.ui.viewmodel.ResultadoViewModel
+import com.irrigasim.ui.viewmodel.rememberViewModel
 
 @Composable
 fun ResultadoScreen(
@@ -48,9 +48,8 @@ fun ResultadoScreen(
     onVoltar: () -> Unit,
     onSalvarCenario: (String) -> Unit
 ) {
-    var abaSelecionada by remember { mutableStateOf(0) }
-    var cenarioSalvo by remember { mutableStateOf(false) }
-    var nomeCenario by remember { mutableStateOf("${metodo.nome} — ${parametros.comprimento.toInt()}m (${parametros.vazao} L/s)") }
+    val viewModel = rememberViewModel { ResultadoViewModel(metodo, parametros) }
+    val state by viewModel.state.collectAsState()
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         Surface(color = MaterialTheme.colorScheme.primary, shadowElevation = 4.dp) {
@@ -85,16 +84,16 @@ fun ResultadoScreen(
 
             // Abas de Gráficos Descritivos
             TabRow(
-                selectedTabIndex = abaSelecionada,
+                selectedTabIndex = state.abaSelecionada,
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
                 contentColor = MaterialTheme.colorScheme.primary
             ) {
-                Tab(selected = abaSelecionada == 0, onClick = { abaSelecionada = 0 }, text = { Text("Balanço Hídrico", style = MaterialTheme.typography.labelLarge) })
-                Tab(selected = abaSelecionada == 1, onClick = { abaSelecionada = 1 }, text = { Text("Curva Avanço", style = MaterialTheme.typography.labelLarge) })
-                Tab(selected = abaSelecionada == 2, onClick = { abaSelecionada = 2 }, text = { Text("Perfil Lâmina", style = MaterialTheme.typography.labelLarge) })
+                Tab(selected = state.abaSelecionada == 0, onClick = { viewModel.selecionarAba(0) }, text = { Text("Balanço Hídrico", style = MaterialTheme.typography.labelLarge) })
+                Tab(selected = state.abaSelecionada == 1, onClick = { viewModel.selecionarAba(1) }, text = { Text("Curva Avanço", style = MaterialTheme.typography.labelLarge) })
+                Tab(selected = state.abaSelecionada == 2, onClick = { viewModel.selecionarAba(2) }, text = { Text("Perfil Lâmina", style = MaterialTheme.typography.labelLarge) })
             }
 
-            when (abaSelecionada) {
+            when (state.abaSelecionada) {
                 0 -> GraficoBalancoHidrico(
                     eficienciaAproveitada = resultado.eficiencia,
                     perdaPercolacao = resultado.perdaPercolacao,
@@ -150,7 +149,7 @@ fun ResultadoScreen(
             ) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text("💾 Salvar este Cenário", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-                    if (cenarioSalvo) {
+                    if (state.cenarioSalvo) {
                         Surface(
                             color = MaterialTheme.colorScheme.secondaryContainer,
                             shape = RoundedCornerShape(12.dp)
@@ -166,20 +165,15 @@ fun ResultadoScreen(
                         }
                     } else {
                         OutlinedTextField(
-                            value = nomeCenario,
-                            onValueChange = { nomeCenario = it },
+                            value = state.nomeCenario,
+                            onValueChange = { viewModel.atualizarNomeCenario(it) },
                             label = { Text("Nome do Cenário") },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             shape = RoundedCornerShape(12.dp)
                         )
                         Button(
-                            onClick = {
-                                if (nomeCenario.isNotBlank()) {
-                                    onSalvarCenario(nomeCenario)
-                                    cenarioSalvo = true
-                                }
-                            },
+                            onClick = { viewModel.salvarCenario(onSalvarCenario) },
                             modifier = Modifier.fillMaxWidth().height(48.dp),
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)

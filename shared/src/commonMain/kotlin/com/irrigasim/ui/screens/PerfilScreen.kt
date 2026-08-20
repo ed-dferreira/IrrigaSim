@@ -26,22 +26,28 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.irrigasim.domain.Usuario
+import com.irrigasim.ui.viewmodel.PerfilViewModel
 
 @Composable
-fun PerfilScreen(usuario: Usuario?, isDarkTheme: Boolean, onToggleDarkTheme: (Boolean) -> Unit, onLogout: () -> Unit) {
-    var editando by remember { mutableStateOf(false) }
-    var nome by remember { mutableStateOf(usuario?.nome ?: "") }
-    var instituicao by remember { mutableStateOf(usuario?.instituicao ?: "") }
-    var curso by remember { mutableStateOf(usuario?.curso ?: "") }
+fun PerfilScreen(
+    viewModel: PerfilViewModel,
+    usuario: Usuario?,
+    onLogout: () -> Unit
+) {
+    val state by viewModel.state.collectAsState()
+
+    // Mantém os campos sincronizados com a conta autenticada fora do modo edição
+    LaunchedEffect(usuario) {
+        viewModel.sincronizarCom(usuario)
+    }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Text("Meu Perfil", style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.onBackground)
@@ -52,20 +58,20 @@ fun PerfilScreen(usuario: Usuario?, isDarkTheme: Boolean, onToggleDarkTheme: (Bo
                     Text(usuario?.nome?.firstOrNull()?.uppercase() ?: "?", style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.primary)
                 }
                 Spacer(Modifier.height(12.dp))
-                if (editando) {
-                    OutlinedTextField(nome, { nome = it }, label = { Text("Nome") }, modifier = Modifier.fillMaxWidth(), singleLine = true, shape = RoundedCornerShape(12.dp))
-                    OutlinedTextField(instituicao, { instituicao = it }, label = { Text("Instituição") }, modifier = Modifier.fillMaxWidth(), singleLine = true, shape = RoundedCornerShape(12.dp))
-                    OutlinedTextField(curso, { curso = it }, label = { Text("Curso") }, modifier = Modifier.fillMaxWidth(), singleLine = true, shape = RoundedCornerShape(12.dp))
+                if (state.editando) {
+                    OutlinedTextField(state.nome, { viewModel.atualizarNome(it) }, label = { Text("Nome") }, modifier = Modifier.fillMaxWidth(), singleLine = true, shape = RoundedCornerShape(12.dp))
+                    OutlinedTextField(state.instituicao, { viewModel.atualizarInstituicao(it) }, label = { Text("Instituição") }, modifier = Modifier.fillMaxWidth(), singleLine = true, shape = RoundedCornerShape(12.dp))
+                    OutlinedTextField(state.curso, { viewModel.atualizarCurso(it) }, label = { Text("Curso") }, modifier = Modifier.fillMaxWidth(), singleLine = true, shape = RoundedCornerShape(12.dp))
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        OutlinedButton({ editando = false }, Modifier.weight(1f), shape = RoundedCornerShape(12.dp)) { Text("Cancelar") }
-                        Button({ editando = false }, Modifier.weight(1f), shape = RoundedCornerShape(12.dp)) { Text("Salvar") }
+                        OutlinedButton({ viewModel.cancelarEdicao() }, Modifier.weight(1f), shape = RoundedCornerShape(12.dp)) { Text("Cancelar") }
+                        Button({ viewModel.salvarEdicao() }, Modifier.weight(1f), shape = RoundedCornerShape(12.dp)) { Text("Salvar") }
                     }
                 } else {
                     Text(usuario?.nome ?: "Usuário", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSurface)
                     Text(usuario?.email ?: "", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     if (!usuario?.instituicao.isNullOrBlank()) Text("${usuario?.instituicao} • ${usuario?.curso}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(Modifier.height(8.dp))
-                    TextButton({ editando = true }) { Text("✏️ Editar perfil", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleMedium) }
+                    TextButton({ viewModel.iniciarEdicao() }) { Text("✏️ Editar perfil", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleMedium) }
                 }
             }
         }
@@ -75,7 +81,7 @@ fun PerfilScreen(usuario: Usuario?, isDarkTheme: Boolean, onToggleDarkTheme: (Bo
             Column {
                 Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Column { Text("Tema escuro", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface); Text("Reduz o brilho da tela", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
-                    Switch(isDarkTheme, onToggleDarkTheme)
+                    Switch(state.temaEscuro, { viewModel.alternarTemaEscuro(it) })
                 }
             }
         }
