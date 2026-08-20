@@ -17,28 +17,28 @@ class ParametrosFaixaTest {
     )
 
     @Test
-    fun cria parametros validos() {
+    fun `cria parametros validos`() {
         val p = paramsValidos()
         assertEquals(400.0, p.comprimento)
         assertEquals(14.548, p.vazaoEntrada)
     }
 
     @Test
-    fun falha com comprimento zero() {
+    fun `falha com comprimento zero`() {
         assertFailsWith<IllegalArgumentException> {
             paramsValidos().copy(comprimento = 0.0)
         }
     }
 
     @Test
-    fun falha com a fora do intervalo() {
+    fun `falha com a fora do intervalo`() {
         assertFailsWith<IllegalArgumentException> {
             paramsValidos().copy(a = 1.5)
         }
     }
 
     @Test
-    fun exemploReferencia tem vazoes candidatas() {
+    fun `exemploReferencia tem vazoes candidatas`() {
         val p = ParametrosFaixa.exemploReferencia()
         assertTrue(p.vazoesCandidatas.isNotEmpty())
         assertEquals(14.548, p.vazaoEntrada, 0.001)

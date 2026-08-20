@@ -10,7 +10,7 @@ import kotlin.test.assertTrue
 class RepositorioSimulacoesTest {
 
     @Test
-    fun salvar e listar simulacao() = runTest {
+    fun `salvar e listar simulacao`() = runTest {
         val repo = RepositorioSimulacoesMemoria()
         val id = repo.salvar(MetodoIrrigacao.FAIXA, "Teste", "{}", "{}")
         assertTrue(id > 0)
@@ -20,7 +20,7 @@ class RepositorioSimulacoesTest {
     }
 
     @Test
-    fun excluir remove simulacao() = runTest {
+    fun `excluir remove simulacao`() = runTest {
         val repo = RepositorioSimulacoesMemoria()
         val id = repo.salvar(MetodoIrrigacao.FAIXA, "A", "{}", "{}")
         repo.excluir(id)
@@ -28,7 +28,7 @@ class RepositorioSimulacoesTest {
     }
 
     @Test
-    fun buscarPorId retorna simulacao() = runTest {
+    fun `buscarPorId retorna simulacao`() = runTest {
         val repo = RepositorioSimulacoesMemoria()
         val id = repo.salvar(MetodoIrrigacao.FAIXA, "B", "{\"k\":45}", "{}")
         val s = repo.buscarPorId(id)

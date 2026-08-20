@@ -1,15 +1,21 @@
 package com.irrigasim.ui
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.irrigasim.domain.*
+import com.irrigasim.ui.navigation.ScreenRoute
+import com.irrigasim.ui.navigation.rememberAppNavigationState
+import com.irrigasim.ui.theme.AppIcons
 import com.irrigasim.ui.theme.IrrigaSIMTheme
+import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun IrrigaSIMApp(
     onGoogleSignIn: () -> Unit = {},
@@ -34,24 +40,35 @@ fun IrrigaSIMApp(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            var screen by remember {
-                mutableStateOf(
-                    if (currentUser != null) {
-                        if (primeiroAcesso) "wizard" else "metodo"
-                    } else "login"
-                )
-            }
-            var selectedTab by remember { mutableStateOf(0) }
+            val navState = rememberAppNavigationState(
+                initialRoute = if (currentUser != null) {
+                    if (primeiroAcesso) ScreenRoute.Wizard else ScreenRoute.Simulacao
+                } else {
+                    ScreenRoute.Login
+                }
+            )
+            val scope = rememberCoroutineScope()
+            val pagerState = rememberPagerState(
+                initialPage = navState.selectedTab,
+                pageCount = { ScreenRoute.TAB_ROOTS.size }
+            )
+
             var metodo by remember { mutableStateOf(MetodoIrrigacao.SULCO) }
             var parametrosAtuais by remember { mutableStateOf(Parametros()) }
             var resultadoAtual by remember { mutableStateOf<Resultado?>(null) }
 
             LaunchedEffect(currentUser) {
                 if (currentUser != null) {
-                    screen = if (primeiroAcesso) "wizard" else "metodo"
-                    selectedTab = 0
+                    navState.resetTo(if (primeiroAcesso) ScreenRoute.Wizard else ScreenRoute.Simulacao)
                 } else {
-                    screen = "login"
+                    navState.resetTo(ScreenRoute.Login)
+                }
+            }
+
+            // Sincroniza o pager com a bottom bar: swipe concluído atualiza a aba selecionada
+            LaunchedEffect(pagerState) {
+                snapshotFlow { pagerState.settledPage }.collect { page ->
+                    navState.onPagerSettled(page)
                 }
             }
 
@@ -76,143 +93,153 @@ fun IrrigaSIMApp(
                         resumoTextual = "Simulação concluída com parâmetros simplificados."
                     )
                 }
-                screen = "resultados"
+                navState.resetTo(ScreenRoute.Simulacao)
+                navState.navigate(ScreenRoute.Resultados)
             }
 
-            // Telas de Autenticação (sem bottom bar)
-            if (screen == "login" || screen == "cadastro") {
-                when (screen) {
-                    "login" -> LoginScreen(
-                        onLogin = onEmailSignIn,
-                        onGoogleSignIn = onGoogleSignIn,
-                        onCadastro = { screen = "cadastro" },
-                        errorMessage = authError,
-                        isLoading = authLoading,
-                        onClearError = onClearError
-                    )
-                    "cadastro" -> CadastroScreen(
-                        onCadastrar = onEmailSignUp,
-                        onVoltar = { screen = "login" },
-                        errorMessage = authError,
-                        isLoading = authLoading,
-                        onClearError = onClearError
-                    )
-                }
-            } else {
-                // Telas autenticadas (com bottom bar)
-                Scaffold(
+            fun abrirCenarioSalvo(cenario: CenarioSalvo) {
+                metodo = cenario.metodo
+                parametrosAtuais = cenario.parametros
+                resultadoAtual = cenario.resultado
+                navState.navigate(ScreenRoute.Resultados)
+            }
+
+            when (navState.currentRoute) {
+                ScreenRoute.Login -> LoginScreen(
+                    onLogin = onEmailSignIn,
+                    onGoogleSignIn = onGoogleSignIn,
+                    onCadastro = { navState.navigate(ScreenRoute.Cadastro) },
+                    errorMessage = authError,
+                    isLoading = authLoading,
+                    onClearError = onClearError
+                )
+                ScreenRoute.Cadastro -> CadastroScreen(
+                    onCadastrar = onEmailSignUp,
+                    onVoltar = { navState.goBack() },
+                    errorMessage = authError,
+                    isLoading = authLoading,
+                    onClearError = onClearError
+                )
+                else -> Scaffold(
                     bottomBar = {
                         NavigationBar(
                             containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
                             tonalElevation = 0.dp
                         ) {
-                            NavigationBarItem(
-                                selected = selectedTab == 0,
-                                onClick = {
-                                    selectedTab = 0
-                                    screen = if (primeiroAcesso) "wizard" else "metodo"
-                                },
-                                icon = { Text("💧", fontSize = 20.sp) },
-                                label = { Text("Simulação", style = MaterialTheme.typography.labelLarge) }
-                            )
-                            NavigationBarItem(
-                                selected = selectedTab == 1,
-                                onClick = { selectedTab = 1; screen = "historico" },
-                                icon = { Text("📋", fontSize = 20.sp) },
-                                label = { Text("Cenários", style = MaterialTheme.typography.labelLarge) }
-                            )
-                            NavigationBarItem(
-                                selected = selectedTab == 2,
-                                onClick = { selectedTab = 2; screen = "perfil" },
-                                icon = { Text("👤", fontSize = 20.sp) },
-                                label = { Text("Perfil", style = MaterialTheme.typography.labelLarge) }
-                            )
+                            ScreenRoute.TAB_ROOTS.forEachIndexed { index, rota ->
+                                NavigationBarItem(
+                                    selected = navState.selectedTab == index,
+                                    onClick = {
+                                        navState.selectTab(index)
+                                        scope.launch { pagerState.animateScrollToPage(index) }
+                                    },
+                                    icon = { Icon(tabIcon(rota), contentDescription = null) },
+                                    label = { Text(rota.label, style = MaterialTheme.typography.labelLarge) }
+                                )
+                            }
                         }
                     }
                 ) { paddingValues ->
                     Box(modifier = Modifier.padding(paddingValues)) {
-                        when (screen) {
-                            "wizard" -> WizardSimulacaoScreen(
-                                userName = currentUser?.nome ?: "Usuário",
-                                metodoInicial = metodo,
-                                onSimular = { m, p ->
-                                    primeiroAcesso = false
-                                    executarSimulacaoSegura(m, p)
-                                },
-                                onIrParaModoDireto = {
-                                    primeiroAcesso = false
-                                    screen = "metodo"
-                                }
-                            )
-                            "metodo" -> MetodoScreen(
-                                userName = currentUser?.nome ?: "Usuário",
-                                onSelecionar = { m ->
-                                    metodo = m
-                                    screen = "parametros"
-                                },
-                                onAbrirTutorial = {
-                                    screen = "wizard"
-                                }
-                            )
-                            "parametros" -> ParametrosScreen(
-                                metodo = metodo,
-                                onSimular = { p ->
-                                    executarSimulacaoSegura(metodo, p)
-                                },
-                                onVoltar = { screen = "metodo"; selectedTab = 0 }
-                            )
-                            "resultados" -> ResultadoScreen(
-                                resultado = resultadoAtual ?: Resultado(
-                                    eficiencia = 0.0,
-                                    laminaMedia = 0.0,
-                                    tempoAvanco = 0.0,
-                                    perdaPercolacao = 0.0,
-                                    perdaEscoamento = 0.0
-                                ),
-                                metodo = metodo,
-                                parametros = parametrosAtuais,
-                                onVoltar = {
-                                    screen = if (primeiroAcesso) "wizard" else "metodo"
-                                    selectedTab = 0
-                                },
-                                onSalvarCenario = { titulo ->
-                                    val novoCenario = CenarioSalvo(
-                                        id = "cenario_${cenariosSalvos.size + 1}_${parametrosAtuais.comprimento.toInt()}",
-                                        titulo = titulo,
-                                        dataHora = "Hoje",
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier.fillMaxSize(),
+                            userScrollEnabled = navState.currentRoute.isTabRoot,
+                            beyondBoundsPageCount = ScreenRoute.TAB_ROOTS.lastIndex
+                        ) { page ->
+                            when (ScreenRoute.TAB_ROOTS[page]) {
+                                ScreenRoute.Simulacao -> MetodoScreen(
+                                    userName = currentUser?.nome ?: "Usuário",
+                                    onSelecionar = { m ->
+                                        metodo = m
+                                        navState.navigate(ScreenRoute.Parametros)
+                                    },
+                                    onAbrirTutorial = { navState.navigate(ScreenRoute.Wizard) }
+                                )
+                                ScreenRoute.Cenarios -> HistoricoScreen(
+                                    cenarios = cenariosSalvos,
+                                    onVisualizarCenario = { abrirCenarioSalvo(it) },
+                                    onExcluirCenario = { id ->
+                                        cenariosSalvos = cenariosSalvos.filterNot { it.id == id }
+                                    },
+                                    onNovoCenario = {
+                                        navState.selectTab(0)
+                                        scope.launch { pagerState.animateScrollToPage(0) }
+                                    }
+                                )
+                                ScreenRoute.Perfil -> PerfilScreen(
+                                    usuario = currentUser,
+                                    isDarkTheme = isDarkTheme,
+                                    onToggleDarkTheme = { isDarkTheme = it },
+                                    onLogout = onSignOut
+                                )
+                                else -> Unit
+                            }
+                        }
+
+                        // Sub-telas sobrepostas ao pager (wizard, parâmetros e resultados)
+                        if (navState.currentRoute in ScreenRoute.SUB_SCREENS) {
+                            Surface(
+                                modifier = Modifier.fillMaxSize(),
+                                color = MaterialTheme.colorScheme.background
+                            ) {
+                                when (navState.currentRoute) {
+                                    ScreenRoute.Wizard -> WizardSimulacaoScreen(
+                                        userName = currentUser?.nome ?: "Usuário",
+                                        metodoInicial = metodo,
+                                        onSimular = { m, p ->
+                                            primeiroAcesso = false
+                                            executarSimulacaoSegura(m, p)
+                                        },
+                                        onIrParaModoDireto = {
+                                            primeiroAcesso = false
+                                            navState.resetTo(ScreenRoute.Simulacao)
+                                        }
+                                    )
+                                    ScreenRoute.Parametros -> ParametrosScreen(
+                                        metodo = metodo,
+                                        onSimular = { p ->
+                                            executarSimulacaoSegura(metodo, p)
+                                        },
+                                        onVoltar = { navState.goBack() }
+                                    )
+                                    ScreenRoute.Resultados -> ResultadoScreen(
+                                        resultado = resultadoAtual ?: Resultado(
+                                            eficiencia = 0.0,
+                                            laminaMedia = 0.0,
+                                            tempoAvanco = 0.0,
+                                            perdaPercolacao = 0.0,
+                                            perdaEscoamento = 0.0
+                                        ),
                                         metodo = metodo,
                                         parametros = parametrosAtuais,
-                                        resultado = resultadoAtual ?: Resultado(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+                                        onVoltar = { navState.goBack() },
+                                        onSalvarCenario = { titulo ->
+                                            val novoCenario = CenarioSalvo(
+                                                id = "cenario_${cenariosSalvos.size + 1}_${parametrosAtuais.comprimento.toInt()}",
+                                                titulo = titulo,
+                                                dataHora = "Hoje",
+                                                metodo = metodo,
+                                                parametros = parametrosAtuais,
+                                                resultado = resultadoAtual ?: Resultado(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+                                            )
+                                            cenariosSalvos = cenariosSalvos + novoCenario
+                                        }
                                     )
-                                    cenariosSalvos = cenariosSalvos + novoCenario
+                                    else -> Unit
                                 }
-                            )
-                            "historico" -> HistoricoScreen(
-                                cenarios = cenariosSalvos,
-                                onVisualizarCenario = { cenario ->
-                                    metodo = cenario.metodo
-                                    parametrosAtuais = cenario.parametros
-                                    resultadoAtual = cenario.resultado
-                                    screen = "resultados"
-                                },
-                                onExcluirCenario = { id ->
-                                    cenariosSalvos = cenariosSalvos.filterNot { it.id == id }
-                                },
-                                onNovoCenario = {
-                                    selectedTab = 0
-                                    screen = "metodo"
-                                }
-                            )
-                            "perfil" -> PerfilScreen(
-                                usuario = currentUser,
-                                isDarkTheme = isDarkTheme,
-                                onToggleDarkTheme = { isDarkTheme = it },
-                                onLogout = onSignOut
-                            )
+                            }
                         }
                     }
                 }
             }
         }
     }
+}
+
+private fun tabIcon(route: ScreenRoute): androidx.compose.ui.graphics.vector.ImageVector = when (route) {
+    ScreenRoute.Simulacao -> AppIcons.NavSimulacao
+    ScreenRoute.Cenarios -> AppIcons.NavCenarios
+    ScreenRoute.Perfil -> AppIcons.NavPerfil
+    else -> AppIcons.NavSimulacao
 }

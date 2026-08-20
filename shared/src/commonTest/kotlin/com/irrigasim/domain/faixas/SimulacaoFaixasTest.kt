@@ -7,7 +7,7 @@ import kotlin.test.assertTrue
 class SimulacaoFaixasTest {
 
     @Test
-    fun executar retorna resultado com curva de avanco() {
+    fun `executar retorna resultado com curva de avanco`() {
         val params = ParametrosFaixa.exemploReferencia()
         val resultado = SimulacaoFaixas.executar(params)
         assertNotNull(resultado)
@@ -16,7 +16,7 @@ class SimulacaoFaixasTest {
     }
 
     @Test
-    fun executar retorna indicadores de desempenho() {
+    fun `executar retorna indicadores de desempenho`() {
         val params = ParametrosFaixa.exemploReferencia()
         val resultado = SimulacaoFaixas.executar(params)
         assertTrue(resultado.eficienciaAplicacao in 0.0..100.0)
@@ -27,7 +27,7 @@ class SimulacaoFaixasTest {
     }
 
     @Test
-    fun executar testa vazoes candidatas quando informadas() {
+    fun `executar testa vazoes candidatas quando informadas`() {
         val params = ParametrosFaixa.exemploReferencia()
         val resultado = SimulacaoFaixas.executar(params)
         assertTrue(resultado.vazoesTestadas.size == params.vazoesCandidatas.size)
@@ -35,7 +35,7 @@ class SimulacaoFaixasTest {
     }
 
     @Test
-    fun qMaxHart converte consistentemente com referencia() {
+    fun `qMaxHart converte consistentemente com referencia`() {
         // Qmáx ≈ 0,872889 m³/min/m ↔ 14,548 L/s/m
         val qMax = VazaoLimites.qMaxHart(0.001, 0.04)
         val qMaxLs = VazaoLimites.m3MinParaLs(qMax)
