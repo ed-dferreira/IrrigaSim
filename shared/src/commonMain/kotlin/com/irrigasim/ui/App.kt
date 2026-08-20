@@ -11,6 +11,14 @@ import androidx.compose.ui.unit.dp
 import com.irrigasim.domain.*
 import com.irrigasim.ui.navigation.ScreenRoute
 import com.irrigasim.ui.navigation.rememberAppNavigationState
+import com.irrigasim.ui.screens.HistoricoScreen
+import com.irrigasim.ui.screens.MetodoScreen
+import com.irrigasim.ui.screens.ParametrosScreen
+import com.irrigasim.ui.screens.PerfilScreen
+import com.irrigasim.ui.screens.ResultadoScreen
+import com.irrigasim.ui.screens.WizardSimulacaoScreen
+import com.irrigasim.ui.screens.auth.CadastroScreen
+import com.irrigasim.ui.screens.auth.LoginScreen
 import com.irrigasim.ui.theme.AppIcons
 import com.irrigasim.ui.theme.IrrigaSIMTheme
 import kotlinx.coroutines.launch
