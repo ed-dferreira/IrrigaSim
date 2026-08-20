@@ -35,6 +35,36 @@ class SimulacaoViewModelTest {
     }
 
     @Test
+    fun selecionarMetodoPreservaParametrosEResultadoAnteriores() = runTest {
+        // Given: uma simulação já executada
+        val vm = SimulacaoViewModel(scope = backgroundScope)
+        val resultado = vm.executarSimulacao(MetodoIrrigacao.SULCO, Parametros(comprimento = 80.0))
+
+        // When: o usuário troca o método na tela inicial
+        vm.selecionarMetodo(MetodoIrrigacao.INUNDACAO)
+
+        // Then: só o método muda; o último resultado continua disponível para a tela de resultados
+        assertEquals(MetodoIrrigacao.INUNDACAO, vm.state.value.metodo)
+        assertEquals(resultado, vm.state.value.resultado)
+    }
+
+    @Test
+    fun executarSimulacaoProduzResultadoValidoParaCadaMetodoDisponivel() = runTest {
+        val vm = SimulacaoViewModel(scope = backgroundScope)
+
+        MetodoIrrigacao.entries.forEach { metodo ->
+            val resultado = vm.executarSimulacao(metodo, Parametros())
+
+            assertEquals(metodo, vm.state.value.metodo)
+            assertEquals(resultado, vm.state.value.resultado)
+            assertTrue(resultado.laminaMedia > 0.0, "lâmina média deve ser positiva para $metodo")
+            assertTrue(resultado.tempoAvanco >= 0.0, "tempo de avanço não pode ser negativo para $metodo")
+            assertTrue(resultado.curvaAvanco.isNotEmpty(), "curva de avanço não pode ser vazia para $metodo")
+            assertTrue(resultado.resumoTextual.isNotBlank(), "resumo textual é obrigatório para $metodo")
+        }
+    }
+
+    @Test
     fun executarSimulacaoPublicaResultadoEAtualizaMetodoEParametros() = runTest {
         val vm = SimulacaoViewModel(scope = backgroundScope)
         val parametros = Parametros(comprimento = 120.0, vazao = 0.8)
@@ -80,6 +110,29 @@ class SimulacaoViewModelTest {
         assertEquals(MetodoIrrigacao.INUNDACAO, vm.state.value.metodo)
         assertEquals(60.0, vm.state.value.parametros.comprimento)
         assertEquals(82.0, vm.state.value.resultado?.eficiencia)
+    }
+
+    @Test
+    fun abrirCenarioNaoInterfereNoTutorialDePrimeiroAcesso() = runTest {
+        val vm = SimulacaoViewModel(scope = backgroundScope)
+        val cenario = CenarioSalvo(
+            id = "cenario_1_100",
+            titulo = "Teste",
+            dataHora = "Hoje",
+            metodo = MetodoIrrigacao.FAIXA,
+            parametros = Parametros(comprimento = 90.0),
+            resultado = Resultado(
+                eficiencia = 75.0,
+                laminaMedia = 48.0,
+                tempoAvanco = 30.0,
+                perdaPercolacao = 10.0,
+                perdaEscoamento = 8.0
+            )
+        )
+
+        vm.abrirCenario(cenario)
+
+        assertTrue(vm.state.value.primeiroAcesso)
     }
 
     @Test

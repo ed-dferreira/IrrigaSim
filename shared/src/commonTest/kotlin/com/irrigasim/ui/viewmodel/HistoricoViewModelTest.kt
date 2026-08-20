@@ -76,4 +76,20 @@ class HistoricoViewModelTest {
 
         assertEquals(1, vm.state.value.cenarios.size)
     }
+
+    @Test
+    fun salvarAposExclusoesMantemOrdemEIdsUnicos() = runTest {
+        // Given: dois cenários salvos e o primeiro excluído
+        val vm = HistoricoViewModel(scope = backgroundScope)
+        val a = vm.salvarCenario("A", MetodoIrrigacao.SULCO, Parametros(comprimento = 100.0), Resultado(eficiencia = 80.0, laminaMedia = 50.0, tempoAvanco = 40.0, perdaPercolacao = 6.0, perdaEscoamento = 4.0))
+        val b = vm.salvarCenario("B", MetodoIrrigacao.FAIXA, Parametros(comprimento = 150.0), Resultado(eficiencia = 70.0, laminaMedia = 45.0, tempoAvanco = 35.0, perdaPercolacao = 8.0, perdaEscoamento = 5.0))
+        vm.excluirCenario(a.id)
+
+        // When: um novo cenário é salvo depois da exclusão
+        val c = vm.salvarCenario("C", MetodoIrrigacao.INUNDACAO, Parametros(comprimento = 120.0), Resultado(eficiencia = 65.0, laminaMedia = 55.0, tempoAvanco = 25.0, perdaPercolacao = 9.0, perdaEscoamento = 3.0))
+
+        // Then: a lista reflete exatamente B e C, na ordem de criação, com ids distintos
+        assertEquals(listOf(b, c), vm.state.value.cenarios)
+        assertEquals(vm.state.value.cenarios.size, vm.state.value.cenarios.map { it.id }.toSet().size)
+    }
 }
