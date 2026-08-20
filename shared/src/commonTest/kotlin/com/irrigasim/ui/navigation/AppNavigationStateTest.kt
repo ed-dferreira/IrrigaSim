@@ -132,4 +132,49 @@ class AppNavigationStateTest {
         assertEquals(ScreenRoute.Simulacao, nav.currentRoute)
         assertFalse(nav.canGoBack)
     }
+
+    @Test
+    fun voltarDoCadastroRetornaParaLogin() {
+        val nav = AppNavigationState(ScreenRoute.Login)
+
+        nav.navigate(ScreenRoute.Cadastro)
+        assertEquals(ScreenRoute.Cadastro, nav.currentRoute)
+        assertTrue(nav.canGoBack)
+
+        assertTrue(nav.goBack())
+        assertEquals(ScreenRoute.Login, nav.currentRoute)
+        assertEquals(0, nav.selectedTab)
+        assertFalse(nav.canGoBack)
+    }
+
+    @Test
+    fun voltarDeSubTelaAbertaPorOutraSubTelaVoltaParaPrimeira() {
+        val nav = novoEstado()
+
+        nav.navigate(ScreenRoute.Wizard)
+        nav.navigate(ScreenRoute.Parametros)
+
+        assertTrue(nav.goBack())
+        assertEquals(ScreenRoute.Wizard, nav.currentRoute)
+        assertTrue(nav.canGoBack)
+
+        assertTrue(nav.goBack())
+        assertEquals(ScreenRoute.Simulacao, nav.currentRoute)
+        assertFalse(nav.canGoBack)
+    }
+
+    @Test
+    fun selecaoDeAbaComSubTelaAbertaLimpaPilhaEVoltaParaRaizCorreta() {
+        val nav = novoEstado()
+
+        nav.selectTab(1)
+        nav.navigate(ScreenRoute.Resultados)
+        assertTrue(nav.canGoBack)
+
+        // Usuário toca em outra aba da bottom bar com sub-tela aberta
+        nav.selectTab(2)
+        assertEquals(ScreenRoute.Perfil, nav.currentRoute)
+        assertEquals(2, nav.selectedTab)
+        assertFalse(nav.canGoBack)
+    }
 }

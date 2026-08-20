@@ -19,10 +19,23 @@ sealed class ScreenRoute(val id: String, val label: String) {
     val isTabRoot: Boolean
         get() = tabIndex != null
 
-    companion object {
-        val TAB_ROOTS: List<ScreenRoute> = listOf(Simulacao, Cenarios, Perfil)
+    /**
+     * Profundidade hierárquica da rota, usada para definir a direção das
+     * transições de navegação (avançar desliza para um lado, voltar para o outro).
+     */
+    val navDepth: Int
+        get() = when (this) {
+            Cadastro, Wizard, Parametros, Resultados -> 1
+            else -> 0
+        }
 
-        val SUB_SCREENS: List<ScreenRoute> = listOf(Wizard, Parametros, Resultados)
+    companion object {
+        // `by lazy` evita ciclo de inicialização na JVM: se o <clinit> da classe
+        // rodar durante o <clinit> de um subobjeto (rota), os campos INSTANCE
+        // ainda seriam nulos e as listas ficariam envenenadas com elementos null.
+        val TAB_ROOTS: List<ScreenRoute> by lazy { listOf(Simulacao, Cenarios, Perfil) }
+
+        val SUB_SCREENS: List<ScreenRoute> by lazy { listOf(Wizard, Parametros, Resultados) }
 
         private val ALL: List<ScreenRoute> by lazy {
             listOf(Login, Cadastro, Simulacao, Cenarios, Perfil, Wizard, Parametros, Resultados)

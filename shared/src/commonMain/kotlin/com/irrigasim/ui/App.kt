@@ -1,5 +1,16 @@
 package com.irrigasim.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
@@ -9,7 +20,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.irrigasim.domain.*
+import com.irrigasim.ui.navigation.DeepLink
+import com.irrigasim.ui.navigation.DeepLinkAction
+import com.irrigasim.ui.navigation.DeepLinkDestination
 import com.irrigasim.ui.navigation.ScreenRoute
+import com.irrigasim.ui.navigation.BackPressHandler
+import com.irrigasim.ui.navigation.resolveDeepLinkAction
 import com.irrigasim.ui.navigation.rememberAppNavigationState
 import com.irrigasim.ui.screens.HistoricoScreen
 import com.irrigasim.ui.screens.MetodoScreen
@@ -26,7 +42,6 @@ import com.irrigasim.ui.viewmodel.HistoricoViewModel
 import com.irrigasim.ui.viewmodel.PerfilViewModel
 import com.irrigasim.ui.viewmodel.SimulacaoViewModel
 import com.irrigasim.ui.viewmodel.rememberViewModel
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -38,7 +53,9 @@ fun IrrigaSIMApp(
     currentUser: Usuario? = null,
     authError: String? = null,
     authLoading: Boolean = false,
-    onClearError: () -> Unit = {}
+    onClearError: () -> Unit = {},
+    pendingDeepLink: String? = null,
+    onDeepLinkConsumed: () -> Unit = {}
 ) {
     // ViewModels do escopo do app (provedor manual, sem DI)
     val simulacaoVm = rememberViewModel { SimulacaoViewModel() }
@@ -68,11 +85,14 @@ fun IrrigaSIMApp(
                     ScreenRoute.Login
                 }
             )
-            val scope = rememberCoroutineScope()
             val pagerState = rememberPagerState(
                 initialPage = navState.selectedTab,
                 pageCount = { ScreenRoute.TAB_ROOTS.size }
             )
+
+            // Botão voltar do sistema: percorre a pilha de navegação (sub-telas e cadastro).
+            // Sem sub-tela aberta o comportamento padrão (sair do app) é preservado.
+            BackPressHandler(enabled = navState.canGoBack) { navState.goBack() }
 
             LaunchedEffect(currentUser) {
                 if (currentUser != null) {
@@ -96,13 +116,14 @@ fun IrrigaSIMApp(
 
             val acessibilidadeConfig = acessibilidade()
 
-            fun navegarParaAba(index: Int) {
-                navState.selectTab(index)
-                scope.launch {
+            // Sincronização inversa: mudanças programáticas da aba selecionada (voltar de uma
+            // sub-tela, deep link, logout/login) reposicionam o pager na aba correta.
+            LaunchedEffect(navState.selectedTab) {
+                if (pagerState.currentPage != navState.selectedTab) {
                     if (acessibilidadeConfig.animacoesReduzidas) {
-                        pagerState.scrollToPage(index)
+                        pagerState.scrollToPage(navState.selectedTab)
                     } else {
-                        pagerState.animateScrollToPage(index)
+                        pagerState.animateScrollToPage(navState.selectedTab)
                     }
                 }
             }
@@ -119,22 +140,59 @@ fun IrrigaSIMApp(
                 navState.navigate(ScreenRoute.Resultados)
             }
 
+            // Deep linking: processa a URI pendente (notificações/links externos) uma única vez
+            LaunchedEffect(pendingDeepLink, currentUser) {
+                val uri = pendingDeepLink ?: return@LaunchedEffect
+                val destino = DeepLink.parse(uri)
+                if (destino != null) {
+                    when (
+                        val acao = destino.resolveDeepLinkAction(isAuthenticated = currentUser != null)
+                    ) {
+                        is DeepLinkAction.SelectTab -> navState.selectTab(acao.index)
+                        is DeepLinkAction.NavigateTo -> navState.navigate(acao.route)
+                        is DeepLinkAction.OpenParametros -> {
+                            simulacaoVm.selecionarMetodo(acao.metodo)
+                            navState.navigate(ScreenRoute.Parametros)
+                        }
+                        is DeepLinkAction.OpenCenario -> {
+                            val cenario = historico.cenarios.firstOrNull { it.id == acao.cenarioId }
+                            if (cenario != null) {
+                                abrirCenarioSalvo(cenario)
+                            } else {
+                                // Cenário inexistente/removido: cai na aba de cenários
+                                navState.selectTab(ScreenRoute.Cenarios.tabIndex ?: 0)
+                            }
+                        }
+                        null -> Unit
+                    }
+                }
+                onDeepLinkConsumed()
+            }
+
             when (navState.currentRoute) {
-                ScreenRoute.Login -> LoginScreen(
-                    onLogin = onEmailSignIn,
-                    onGoogleSignIn = onGoogleSignIn,
-                    onCadastro = { navState.navigate(ScreenRoute.Cadastro) },
-                    errorMessage = authError,
-                    isLoading = authLoading,
-                    onClearError = onClearError
-                )
-                ScreenRoute.Cadastro -> CadastroScreen(
-                    onCadastrar = onEmailSignUp,
-                    onVoltar = { navState.goBack() },
-                    errorMessage = authError,
-                    isLoading = authLoading,
-                    onClearError = onClearError
-                )
+                ScreenRoute.Login, ScreenRoute.Cadastro -> AnimatedContent(
+                    targetState = navState.currentRoute,
+                    transitionSpec = { navTransitionSpec() },
+                    label = "autenticacao"
+                ) { rota ->
+                    when (rota) {
+                        ScreenRoute.Cadastro -> CadastroScreen(
+                            onCadastrar = onEmailSignUp,
+                            onVoltar = { navState.goBack() },
+                            errorMessage = authError,
+                            isLoading = authLoading,
+                            onClearError = onClearError
+                        )
+                        else -> LoginScreen(
+                            onLogin = onEmailSignIn,
+                            onGoogleSignIn = onGoogleSignIn,
+                            onCadastro = { navState.navigate(ScreenRoute.Cadastro) },
+                            errorMessage = authError,
+                            isLoading = authLoading,
+                            onClearError = onClearError
+                        )
+                    }
+                }
                 else -> Scaffold(
                     bottomBar = {
                         NavigationBar(
@@ -144,7 +202,7 @@ fun IrrigaSIMApp(
                             ScreenRoute.TAB_ROOTS.forEachIndexed { index, rota ->
                                 NavigationBarItem(
                                     selected = navState.selectedTab == index,
-                                    onClick = { navegarParaAba(index) },
+                                    onClick = { navState.selectTab(index) },
                                     icon = { Icon(tabIcon(rota), contentDescription = null) },
                                     label = { Text(rota.label, style = MaterialTheme.typography.labelLarge) }
                                 )
@@ -172,7 +230,7 @@ fun IrrigaSIMApp(
                                     cenarios = historico.cenarios,
                                     onVisualizarCenario = { abrirCenarioSalvo(it) },
                                     onExcluirCenario = { id -> historicoVm.excluirCenario(id) },
-                                    onNovoCenario = { navegarParaAba(0) }
+                                    onNovoCenario = { navState.selectTab(0) }
                                 )
                                 ScreenRoute.Perfil -> PerfilScreen(
                                     viewModel = perfilVm,
@@ -184,13 +242,16 @@ fun IrrigaSIMApp(
                         }
 
                         // Sub-telas sobrepostas ao pager (wizard, parâmetros e resultados)
-                        if (navState.currentRoute in ScreenRoute.SUB_SCREENS) {
-                            Surface(
-                                modifier = Modifier.fillMaxSize(),
-                                color = MaterialTheme.colorScheme.background
-                            ) {
-                                when (navState.currentRoute) {
-                                    ScreenRoute.Wizard -> WizardSimulacaoScreen(
+                        // com transição de entrada/saída (slide + fade).
+                        AnimatedContent(
+                            targetState = navState.currentRoute,
+                            transitionSpec = { navTransitionSpec() },
+                            modifier = Modifier.fillMaxSize(),
+                            label = "subtelas"
+                        ) { rota ->
+                            when (rota) {
+                                ScreenRoute.Wizard -> SubTelaContainer {
+                                    WizardSimulacaoScreen(
                                         userName = currentUser?.nome ?: "Usuário",
                                         metodoInicial = simulacao.metodo,
                                         onSimular = { m, p ->
@@ -202,14 +263,18 @@ fun IrrigaSIMApp(
                                             navState.resetTo(ScreenRoute.Simulacao)
                                         }
                                     )
-                                    ScreenRoute.Parametros -> ParametrosScreen(
+                                }
+                                ScreenRoute.Parametros -> SubTelaContainer {
+                                    ParametrosScreen(
                                         metodo = simulacao.metodo,
                                         onSimular = { p ->
                                             executarSimulacaoSegura(simulacao.metodo, p)
                                         },
                                         onVoltar = { navState.goBack() }
                                     )
-                                    ScreenRoute.Resultados -> ResultadoScreen(
+                                }
+                                ScreenRoute.Resultados -> SubTelaContainer {
+                                    ResultadoScreen(
                                         resultado = simulacao.resultado ?: Resultado(
                                             eficiencia = 0.0,
                                             laminaMedia = 0.0,
@@ -230,8 +295,9 @@ fun IrrigaSIMApp(
                                             )
                                         }
                                     )
-                                    else -> Unit
                                 }
+                                // Abas raiz: conteúdo vazio para o pager permanecer visível/interativo
+                                else -> Box(modifier = Modifier.fillMaxSize())
                             }
                         }
                     }
@@ -246,4 +312,44 @@ private fun tabIcon(route: ScreenRoute): androidx.compose.ui.graphics.vector.Ima
     ScreenRoute.Cenarios -> AppIcons.NavCenarios
     ScreenRoute.Perfil -> AppIcons.NavPerfil
     else -> AppIcons.NavSimulacao
+}
+
+/**
+ * Transição de navegação baseada na profundidade das rotas:
+ * - avançando (sub-tela/auth acima): entra deslizando da direita, sai para a esquerda;
+ * - voltando: entra da esquerda, sai deslizando para a direita;
+ * - mesma profundidade (troca entre sub-telas): crossfade.
+ */
+private fun AnimatedContentTransitionScope<ScreenRoute>.navTransitionSpec(): ContentTransform {
+    val duracao = 260
+    val enter: EnterTransition
+    val exit: ExitTransition
+    when {
+        targetState.navDepth > initialState.navDepth -> {
+            enter = slideInHorizontally(tween(duracao)) { it } + fadeIn(tween(duracao))
+            exit = slideOutHorizontally(tween(duracao)) { -it / 4 } + fadeOut(tween(duracao / 2))
+        }
+        targetState.navDepth < initialState.navDepth -> {
+            enter = slideInHorizontally(tween(duracao)) { -it / 4 } + fadeIn(tween(duracao))
+            exit = slideOutHorizontally(tween(duracao)) { it } + fadeOut(tween(duracao / 2))
+        }
+        else -> {
+            enter = fadeIn(tween(duracao))
+            exit = fadeOut(tween(duracao))
+        }
+    }
+    return (enter togetherWith exit).apply {
+        targetContentZIndex = targetState.navDepth.toFloat()
+    }
+}
+
+/** Contêiner opaco das sub-telas sobrepostas ao pager. */
+@Composable
+private fun SubTelaContainer(content: @Composable () -> Unit) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        content()
+    }
 }

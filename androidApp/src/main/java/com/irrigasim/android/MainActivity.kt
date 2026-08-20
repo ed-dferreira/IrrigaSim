@@ -1,5 +1,6 @@
 package com.irrigasim.android
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -17,12 +18,16 @@ import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialException
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 class MainActivity : ComponentActivity() {
 
     private lateinit var auth: FirebaseAuth
+
+    /** URI de deep link pendente de processamento pela UI (padrões `irrigasim://`). */
+    private val pendingDeepLink = MutableStateFlow<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,10 +37,14 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
+        // Deep link de abertura fria (ex.: toque em notificação com o app fechado)
+        handleDeepLinkIntent(intent)
+
         setContent {
             var currentUser by remember { mutableStateOf(auth.currentUser?.toUsuario()) }
             var authError by remember { mutableStateOf<String?>(null) }
             var authLoading by remember { mutableStateOf(false) }
+            val deepLink by pendingDeepLink.collectAsState()
             val scope = rememberCoroutineScope()
 
             IrrigaSIMApp(
@@ -43,6 +52,8 @@ class MainActivity : ComponentActivity() {
                 authError = authError,
                 authLoading = authLoading,
                 onClearError = { authError = null },
+                pendingDeepLink = deepLink,
+                onDeepLinkConsumed = { pendingDeepLink.value = null },
 
                 onEmailSignIn = { email, senha ->
                     authLoading = true
@@ -89,6 +100,22 @@ class MainActivity : ComponentActivity() {
                     currentUser = null
                 }
             )
+        }
+    }
+
+    /**
+     * Deep link com o app já em execução (`launchMode="singleTask"`): a Activity
+     * existente recebe a nova intent em vez de ser recriada.
+     */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleDeepLinkIntent(intent)
+    }
+
+    private fun handleDeepLinkIntent(intent: Intent?) {
+        val uri = intent?.data?.toString() ?: return
+        if (uri.startsWith("irrigasim://", ignoreCase = true)) {
+            pendingDeepLink.value = uri
         }
     }
 
