@@ -9,16 +9,24 @@ import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.CalendarToday
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Contrast
+import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.EmojiEvents
+import androidx.compose.material.icons.rounded.FormatBold
+import androidx.compose.material.icons.rounded.FormatSize
 import androidx.compose.material.icons.rounded.Grain
+import androidx.compose.material.icons.rounded.Insights
 import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.MenuBook
+import androidx.compose.material.icons.rounded.OpenInNew
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.RecordVoiceOver
 import androidx.compose.material.icons.rounded.RocketLaunch
 import androidx.compose.material.icons.rounded.Save
+import androidx.compose.material.icons.rounded.SlowMotionVideo
 import androidx.compose.material.icons.rounded.Straighten
 import androidx.compose.material.icons.rounded.Summarize
 import androidx.compose.material.icons.rounded.Terrain
@@ -80,4 +88,14 @@ object AppIcons {
     // Perfil e autenticação
     val EditarPerfil: ImageVector = Icons.Rounded.Edit
     val FecharErro: ImageVector = Icons.Rounded.Close
+
+    // Acessibilidade e estatísticas do perfil
+    val TemaEscuro: ImageVector = Icons.Rounded.DarkMode
+    val AltoContraste: ImageVector = Icons.Rounded.Contrast
+    val TextoNegrito: ImageVector = Icons.Rounded.FormatBold
+    val AnimacoesReduzidas: ImageVector = Icons.Rounded.SlowMotionVideo
+    val LeitorDeTela: ImageVector = Icons.Rounded.RecordVoiceOver
+    val TamanhoFonte: ImageVector = Icons.Rounded.FormatSize
+    val Estatisticas: ImageVector = Icons.Rounded.Insights
+    val AbrirChangelog: ImageVector = Icons.Rounded.OpenInNew
 }

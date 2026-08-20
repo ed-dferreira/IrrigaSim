@@ -10,6 +10,35 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
+// ─── Alto contraste ───
+// Superfícies e textos em contraste máximo (preto sobre branco / branco sobre preto)
+
+private val HighContrastLightColors = lightColorScheme(
+    background = Color.White,
+    onBackground = Color.Black,
+    surface = Color.White,
+    onSurface = Color.Black,
+    surfaceVariant = Color(0xFFE6E6E6),
+    onSurfaceVariant = Color.Black,
+    outline = Color.Black,
+    outlineVariant = Color(0xFF666666),
+    inverseSurface = Color.Black,
+    inverseOnSurface = Color.White
+)
+
+private val HighContrastDarkColors = darkColorScheme(
+    background = Color.Black,
+    onBackground = Color.White,
+    surface = Color.Black,
+    onSurface = Color.White,
+    surfaceVariant = Color(0xFF1F1F1F),
+    onSurfaceVariant = Color.White,
+    outline = Color.White,
+    outlineVariant = Color(0xFF999999),
+    inverseSurface = Color.White,
+    inverseOnSurface = Color.Black
+)
+
 // ─── Light Palette ───
 // Todas as combinações texto/fundo cumprem WCAG AA (contraste mínimo 4.5:1)
 
@@ -216,17 +245,76 @@ val AppTypography = Typography(
     labelLarge = TextStyle(fontWeight = FontWeight.Medium, fontSize = 14.sp, lineHeight = 20.sp)
 )
 
+private fun TextStyle.comEscala(escala: Float, negrito: Boolean): TextStyle = copy(
+    fontSize = fontSize * escala,
+    lineHeight = lineHeight * escala,
+    fontWeight = if (negrito) FontWeight.Bold else fontWeight
+)
+
+/**
+ * Tipografia ajustada pelas preferências de acessibilidade: escala de tamanho
+ * de fonte e força de negrito em todos os estilos.
+ */
+fun tipografiaAcessivel(escala: Float, negrito: Boolean): Typography {
+    val base = AppTypography
+    return Typography(
+        headlineLarge = base.headlineLarge.comEscala(escala, negrito),
+        titleLarge = base.titleLarge.comEscala(escala, negrito),
+        titleMedium = base.titleMedium.comEscala(escala, negrito),
+        bodyLarge = base.bodyLarge.comEscala(escala, negrito),
+        bodyMedium = base.bodyMedium.comEscala(escala, negrito),
+        labelLarge = base.labelLarge.comEscala(escala, negrito)
+    )
+}
+
+/** Esquema de cores com contraste máximo para texto e superfícies. */
+fun esquemaAltoContraste(base: ColorScheme, escuro: Boolean): ColorScheme {
+    val hc = if (escuro) HighContrastDarkColors else HighContrastLightColors
+    return base.copy(
+        background = hc.background,
+        onBackground = hc.onBackground,
+        surface = hc.surface,
+        onSurface = hc.onSurface,
+        surfaceVariant = hc.surfaceVariant,
+        onSurfaceVariant = hc.onSurfaceVariant,
+        outline = hc.outline,
+        outlineVariant = hc.outlineVariant,
+        inverseSurface = hc.inverseSurface,
+        inverseOnSurface = hc.inverseOnSurface
+    )
+}
+
+data class AcessibilidadeConfig(
+    val animacoesReduzidas: Boolean = false,
+    val modoLeitorTela: Boolean = false
+)
+
+val LocalAcessibilidade = staticCompositionLocalOf { AcessibilidadeConfig() }
+
+@Composable
+fun acessibilidade(): AcessibilidadeConfig = LocalAcessibilidade.current
+
 @Composable
 fun IrrigaSIMTheme(
     darkTheme: Boolean = false,
+    fontScale: Float = 1f,
+    highContrast: Boolean = false,
+    boldText: Boolean = false,
+    reducedAnimations: Boolean = false,
+    screenReaderMode: Boolean = false,
     content: @Composable () -> Unit
 ) {
+    val esquemaBase = if (darkTheme) DarkColorScheme else LightColorScheme
     CompositionLocalProvider(
-        LocalStatusColors provides if (darkTheme) DarkStatusColors else LightStatusColors
+        LocalStatusColors provides if (darkTheme) DarkStatusColors else LightStatusColors,
+        LocalAcessibilidade provides AcessibilidadeConfig(
+            animacoesReduzidas = reducedAnimations,
+            modoLeitorTela = screenReaderMode
+        )
     ) {
         MaterialTheme(
-            colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
-            typography = AppTypography,
+            colorScheme = if (highContrast) esquemaAltoContraste(esquemaBase, darkTheme) else esquemaBase,
+            typography = tipografiaAcessivel(fontScale, boldText),
             content = content
         )
     }

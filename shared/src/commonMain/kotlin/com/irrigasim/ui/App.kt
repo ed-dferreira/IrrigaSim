@@ -21,6 +21,7 @@ import com.irrigasim.ui.screens.auth.CadastroScreen
 import com.irrigasim.ui.screens.auth.LoginScreen
 import com.irrigasim.ui.theme.AppIcons
 import com.irrigasim.ui.theme.IrrigaSIMTheme
+import com.irrigasim.ui.theme.acessibilidade
 import com.irrigasim.ui.viewmodel.HistoricoViewModel
 import com.irrigasim.ui.viewmodel.PerfilViewModel
 import com.irrigasim.ui.viewmodel.SimulacaoViewModel
@@ -48,7 +49,14 @@ fun IrrigaSIMApp(
     val historico by historicoVm.state.collectAsState()
     val perfil by perfilVm.state.collectAsState()
 
-    IrrigaSIMTheme(darkTheme = perfil.temaEscuro) {
+    IrrigaSIMTheme(
+        darkTheme = perfil.temaEscuro,
+        fontScale = perfil.tamanhoFonte.escala,
+        highContrast = perfil.altoContraste,
+        boldText = perfil.textoNegrito,
+        reducedAnimations = perfil.animacoesReduzidas,
+        screenReaderMode = perfil.modoLeitorTela
+    ) {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
@@ -74,10 +82,28 @@ fun IrrigaSIMApp(
                 }
             }
 
+            // Estatísticas do perfil acompanham os cenários salvos
+            LaunchedEffect(historico.cenarios) {
+                perfilVm.atualizarEstatisticas(historico.cenarios)
+            }
+
             // Sincroniza o pager com a bottom bar: swipe concluído atualiza a aba selecionada
             LaunchedEffect(pagerState) {
                 snapshotFlow { pagerState.settledPage }.collect { page ->
                     navState.onPagerSettled(page)
+                }
+            }
+
+            val acessibilidadeConfig = acessibilidade()
+
+            fun navegarParaAba(index: Int) {
+                navState.selectTab(index)
+                scope.launch {
+                    if (acessibilidadeConfig.animacoesReduzidas) {
+                        pagerState.scrollToPage(index)
+                    } else {
+                        pagerState.animateScrollToPage(index)
+                    }
                 }
             }
 
@@ -118,10 +144,7 @@ fun IrrigaSIMApp(
                             ScreenRoute.TAB_ROOTS.forEachIndexed { index, rota ->
                                 NavigationBarItem(
                                     selected = navState.selectedTab == index,
-                                    onClick = {
-                                        navState.selectTab(index)
-                                        scope.launch { pagerState.animateScrollToPage(index) }
-                                    },
+                                    onClick = { navegarParaAba(index) },
                                     icon = { Icon(tabIcon(rota), contentDescription = null) },
                                     label = { Text(rota.label, style = MaterialTheme.typography.labelLarge) }
                                 )
@@ -149,10 +172,7 @@ fun IrrigaSIMApp(
                                     cenarios = historico.cenarios,
                                     onVisualizarCenario = { abrirCenarioSalvo(it) },
                                     onExcluirCenario = { id -> historicoVm.excluirCenario(id) },
-                                    onNovoCenario = {
-                                        navState.selectTab(0)
-                                        scope.launch { pagerState.animateScrollToPage(0) }
-                                    }
+                                    onNovoCenario = { navegarParaAba(0) }
                                 )
                                 ScreenRoute.Perfil -> PerfilScreen(
                                     viewModel = perfilVm,
