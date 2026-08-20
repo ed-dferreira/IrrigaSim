@@ -1,10 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Paleta alinhada exatamente com Theme.kt (Compose).
+         Todas as combinações texto/fundo cumprem WCAG AA (contraste mínimo 4.5:1). -->
+
+    <!-- ─── Paleta clara (light scheme) ─── -->
+    <color name="irriga_primary">#0061A4</color>
+    <color name="irriga_on_primary">#FFFFFF</color>
+    <color name="irriga_primary_container">#D1E4FF</color>
+    <color name="irriga_on_primary_container">#001D36</color>
+
+    <color name="irriga_secondary">#006D36</color>
+    <color name="irriga_on_secondary">#FFFFFF</color>
+    <color name="irriga_secondary_container">#94F9B3</color>
+    <color name="irriga_on_secondary_container">#00210C</color>
+
+    <color name="irriga_tertiary">#00696B</color>
+    <color name="irriga_on_tertiary">#FFFFFF</color>
+    <color name="irriga_tertiary_container">#9CF1F0</color>
+    <color name="irriga_on_tertiary_container">#002021</color>
+
+    <color name="irriga_error">#BA1A1A</color>
+    <color name="irriga_on_error">#FFFFFF</color>
+    <color name="irriga_error_container">#FFDAD6</color>
+    <color name="irriga_on_error_container">#410002</color>
+
+    <color name="irriga_background">#FDFBFF</color>
+    <color name="irriga_on_background">#1A1C1E</color>
+
+    <!-- ─── Paleta escura (dark scheme) ─── -->
+    <color name="irriga_primary_dark">#9ECAFF</color>
+    <color name="irriga_on_primary_dark">#003258</color>
+    <color name="irriga_primary_container_dark">#00497D</color>
+    <color name="irriga_on_primary_container_dark">#D1E4FF</color>
+
+    <color name="irriga_secondary_dark">#78DC98</color>
+    <color name="irriga_on_secondary_dark">#003919</color>
+    <color name="irriga_secondary_container_dark">#005227</color>
+    <color name="irriga_on_secondary_container_dark">#94F9B3</color>
+
+    <color name="irriga_tertiary_dark">#83D5D4</color>
+    <color name="irriga_on_tertiary_dark">#003737</color>
+    <color name="irriga_tertiary_container_dark">#004F50</color>
+    <color name="irriga_on_tertiary_container_dark">#9CF1F0</color>
+
+    <color name="irriga_error_dark">#FFB4AB</color>
+    <color name="irriga_on_error_dark">#690005</color>
+    <color name="irriga_error_container_dark">#93000A</color>
+    <color name="irriga_on_error_container_dark">#FFDAD6</color>
+
+    <color name="irriga_background_dark">#1A1C1E</color>
+    <color name="irriga_on_background_dark">#E2E2E6</color>
+
     <style name="Theme.IrrigaSIM" parent="android:Theme.Material.Light.NoActionBar">
-        <!-- Cores principais -->
-        <item name="android:colorPrimary">#1565C0</item>
-        <item name="android:colorPrimaryDark">#0D47A1</item>
-        <item name="android:colorAccent">#2E7D32</item>
+        <!-- Cores principais (alinhadas com o lightColorScheme do Compose) -->
+        <item name="android:colorPrimary">@color/irriga_primary</item>
+        <item name="android:colorPrimaryDark">@color/irriga_primary_container_dark</item>
+        <item name="android:colorAccent">@color/irriga_secondary</item>
+
+        <!-- Tertiary e errorContainer ficam disponíveis como recursos
+             @color/irriga_tertiary e @color/irriga_error_container -->
+        <item name="android:colorError">@color/irriga_error</item>
 
         <!-- Status bar -->
         <item name="android:statusBarColor">@android:color/transparent</item>
@@ -13,24 +68,28 @@
         <item name="android:enforceStatusBarContrast">false</item>
 
         <!-- Fundo -->
-        <item name="android:windowBackground">#F0F6FF</item>
+        <item name="android:windowBackground">@color/irriga_background</item>
 
         <!-- Edges -->
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
     </style>
 
-    <!-- Tema escuro para a barra de navegação do sistema -->
+    <!-- Tema escuro para a barra de navegação do sistema (alinhado com o darkColorScheme do Compose) -->
     <style name="Theme.IrrigaSIM.Dark" parent="android:Theme.Material.NoActionBar">
-        <item name="android:colorPrimary">#9ECAFF</item>
-        <item name="android:colorPrimaryDark">#003258</item>
-        <item name="android:colorAccent">#78DC98</item>
+        <item name="android:colorPrimary">@color/irriga_primary_dark</item>
+        <item name="android:colorPrimaryDark">@color/irriga_on_primary_dark</item>
+        <item name="android:colorAccent">@color/irriga_secondary_dark</item>
+
+        <!-- Tertiary e errorContainer ficam disponíveis como recursos
+             @color/irriga_tertiary_dark e @color/irriga_error_container_dark -->
+        <item name="android:colorError">@color/irriga_error_dark</item>
 
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:enforceNavigationBarContrast">false</item>
         <item name="android:enforceStatusBarContrast">false</item>
 
-        <item name="android:windowBackground">#1A1C1E</item>
+        <item name="android:windowBackground">@color/irriga_background_dark</item>
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
     </style>
 </resources>
