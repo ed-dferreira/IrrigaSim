@@ -52,3 +52,6 @@ iosApp/DerivedData/
 # ─── Segredos (NÃO versionar — mas google-services.json já é necessário) ──────
 # google-services.json é intencionalmente versionado (projeto de pesquisa)
 # Para produção: remover esta exceção e usar CI secrets
+
+# multitask (logs/prompts de agentes paralelos)
+.multitask/
