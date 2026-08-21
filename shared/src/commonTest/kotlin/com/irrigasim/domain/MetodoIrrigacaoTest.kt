@@ -11,7 +11,7 @@ class MetodoIrrigacaoTest {
 
     @Test
     fun `SULCO tem nome correto`() {
-        assertEquals("Sulco", MetodoIrrigacao.SULCO.nome)
+        assertEquals("Sulcos", MetodoIrrigacao.SULCO.nome)
     }
 
     @Test
@@ -21,7 +21,7 @@ class MetodoIrrigacaoTest {
 
     @Test
     fun `INUNDACAO tem nome correto`() {
-        assertEquals("Inundação", MetodoIrrigacao.INUNDACAO.nome)
+        assertEquals("Inundação / Bacia", MetodoIrrigacao.INUNDACAO.nome)
     }
 
     @Test

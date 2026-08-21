@@ -11,7 +11,7 @@ object OtimizadorVazao {
         if (vazoesCandidatas.isEmpty()) return Pair(params.vazaoEntrada, emptyList())
 
         val resultados = vazoesCandidatas.map { q ->
-            val p = params.copy(vazaoEntrada = q)
+            val p = params.copy(vazaoEntrada = q, vazoesCandidatas = emptyList())
             val r = SimulacaoFaixas.executar(p)
             ResultadoVazaoTestada(
                 vazaoLsPorMetro = q,
