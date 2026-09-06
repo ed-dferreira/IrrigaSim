@@ -1,0 +1,87 @@
+#!/bin/bash
+
+# ============================================================
+# Commit Message Hook - Conventional Commits
+# ============================================================
+#
+# COMO FUNCIONA:
+# Este hook é executado ANTES de cada commit. Ele verifica
+# se a mensagem segue o padrão Conventional Commits.
+#
+# Formato esperado:
+#   <type>(<scope>): <description>
+#
+# Tipos válidos:
+#   feat     - Nova funcionalidade
+#   fix      - Correção de bug
+#   docs     - Documentação
+#   style    - Formatação (não afeta o código)
+#   refactor - Refatoração (sem mudar comportamento)
+#   test     - Adiciona ou corrige testes
+#   chore    - Tarefas de manutenção
+#   perf     - Melhoria de performance
+#   ci       - Configuração de CI/CD
+#   build    - Sistema de build
+#   revert   - Reverte um commit anterior
+#
+# Exemplos válidos:
+#   feat(auth): adiciona login com Google
+#   fix: corrige crash na tela de irrigação
+#   docs: atualiza README com instruções de setup
+#   refactor(irrigation): extrai cálculos para service
+#
+# Para ignorar o hook (não recomendado):
+#   git commit --no-verify -m "mensagem"
+# ============================================================
+
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# Padrão regex para Conventional Commits
+PATTERN="^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\([a-zA-Z0-9_-]+\))?: .{1,}"
+
+# Cores para output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Verifica se a mensagem corresponde ao padrão
+if ! echo "$COMMIT_MSG" | grep -qE "$PATTERN"; then
+    echo ""
+    echo -e "${RED}╔══════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${RED}║           ❌ COMMIT REJEITADO                           ║${NC}"
+    echo -e "${RED}╚══════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+    echo -e "${YELLOW}A mensagem do commit não segue o padrão Conventional Commits.${NC}"
+    echo ""
+    echo -e "${GREEN}Formato esperado:${NC}"
+    echo "  <type>(<scope>): <description>"
+    echo ""
+    echo -e "${GREEN}Tipos válidos:${NC}"
+    echo "  feat     - Nova funcionalidade"
+    echo "  fix      - Correção de bug"
+    echo "  docs     - Documentação"
+    echo "  style    - Formatação"
+    echo "  refactor - Refatoração"
+    echo "  test     - Testes"
+    echo "  chore    - Manutenção"
+    echo "  perf     - Performance"
+    echo "  ci       - CI/CD"
+    echo "  build    - Build"
+    echo "  revert   - Reverter"
+    echo ""
+    echo -e "${GREEN}Exemplos:${NC}"
+    echo "  feat(auth): adiciona login com Google"
+    echo "  fix: corrige crash na tela de irrigação"
+    echo "  docs: atualiza README"
+    echo ""
+    echo -e "${YELLOW}Seu commit:${NC}"
+    echo "  $COMMIT_MSG"
+    echo ""
+    exit 1
+fi
+
+# Se chegou aqui, a mensagem é válida
+echo -e "${GREEN}✅ Commit message válido!${NC}"
+exit 0
