@@ -19,11 +19,12 @@ class AuthState {
     bool? isLoading,
     String? erro,
     bool clearUser = false,
+    bool clearErro = false,
   }) {
     return AuthState(
       user: clearUser ? null : (user ?? this.user),
       isLoading: isLoading ?? this.isLoading,
-      erro: erro,
+      erro: clearErro ? null : (erro ?? this.erro),
     );
   }
 
@@ -39,12 +40,11 @@ class AuthViewModel extends StateNotifier<AuthState> {
 
   AuthViewModel({
     required this._loginWithEmail,
-    required LoginWithGoogle loginWithGoogle,
+    required this._loginWithGoogle,
     required this._register,
     required this._logout,
     required this._repository,
-  }) : _loginWithGoogle = loginWithGoogle,
-       super(const AuthState()) {
+  }) : super(const AuthState()) {
     _init();
   }
 
@@ -95,6 +95,6 @@ class AuthViewModel extends StateNotifier<AuthState> {
   }
 
   void clearError() {
-    state = state.copyWith(erro: null);
+    state = state.copyWith(clearErro: true);
   }
 }

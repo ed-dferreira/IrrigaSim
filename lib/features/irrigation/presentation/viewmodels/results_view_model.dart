@@ -83,7 +83,7 @@ class ResultsViewModel extends StateNotifier<ResultsState> {
 }
 
 final resultsProvider =
-    StateNotifierProvider<ResultsViewModel, ResultsState>((ref) {
+    StateNotifierProvider.autoDispose<ResultsViewModel, ResultsState>((ref) {
   final repository = ref.watch(irrigationRepositoryProvider);
   return ResultsViewModel(repository);
 });

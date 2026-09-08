@@ -119,7 +119,6 @@ class _AdvancePainter extends CustomPainter {
     for (int i = 0; i < pontos.length; i++) {
       final x = padding.left + (pontos[i].x / maxTempo) * chartWidth;
       final y = padding.top + (1 - pontos[i].y / maxDistancia) * chartHeight;
-      canvas.drawCircle(const Offset(0, 0), 3, dotPaint);
       canvas.drawCircle(Offset(x, y), 3, dotPaint);
     }
 
@@ -191,5 +190,9 @@ class _AdvancePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant _AdvancePainter oldDelegate) {
+    return oldDelegate.pontos != pontos ||
+        oldDelegate.maxDistancia != maxDistancia ||
+        oldDelegate.maxTempo != maxTempo;
+  }
 }

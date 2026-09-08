@@ -170,5 +170,9 @@ class _WaterBalancePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant _WaterBalancePainter oldDelegate) {
+    return oldDelegate.eficiencia != eficiencia ||
+        oldDelegate.perdaPercolacao != perdaPercolacao ||
+        oldDelegate.perdaEscoamento != perdaEscoamento;
+  }
 }

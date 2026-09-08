@@ -67,8 +67,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
 
-    ref.listen<AuthState?>(authProvider, (prev, next) {
-      if (next == null) return;
+    ref.listen<AuthState>(authProvider, (prev, next) {
       if (next.isAuthenticated) {
         context.go('/home');
       }

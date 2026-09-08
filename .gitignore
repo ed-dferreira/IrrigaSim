@@ -49,10 +49,12 @@ iosApp/DerivedData/
 *.bak
 .cache/
 
-# ─── Segredos (NÃO versionar) ─────────────────────────────────────────────────
-lib/config/firebase_options.dart
+# ─── Segredos Firebase (NÃO versionar) ────────────────────────────────────────
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
+lib/firebase_options.dart
+**/firebase_options*.dart
+**/.firebase*
 
 # multitask (logs/prompts de agentes paralelos)
 .multitask/
@@ -104,3 +106,4 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+firebase.json

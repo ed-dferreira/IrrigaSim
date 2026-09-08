@@ -3,6 +3,61 @@ import 'package:flutter/material.dart';
 class AppIcons {
   AppIcons._();
 
+  // ==================== MARCA & NAVEGAÇÃO ====================
+  static const logoApp = Icons.water_drop_rounded;
+  static const navSimulacao = Icons.water_drop_rounded;
+  static const navCenarios = Icons.assignment_rounded;
+  static const navPerfil = Icons.person_rounded;
+
+  // ==================== MÉTODOS DE IRRIGAÇÃO ====================
+  static const sulco = Icons.agriculture_rounded;
+  static const faixa = Icons.straighten_rounded;
+  static const inundacao = Icons.water_rounded;
+
+  // ==================== TUTORIAL / GUIA DIDÁTICO ====================
+  static const guiaDidatico = Icons.menu_book_rounded;
+  static const saudacao = Icons.waving_hand_rounded;
+  static const pularTutorial = Icons.bolt_rounded;
+
+  // ==================== PRESET DE SOLO (Kostiakov-Lewis) ====================
+  static const soloArenoso = Icons.grain_rounded;
+  static const soloFranco = Icons.layers_rounded;
+  static const soloArgiloso = Icons.terrain_rounded;
+
+  // ==================== AÇÕES DE SIMULAÇÃO ====================
+  static const simular = Icons.play_arrow_rounded;
+  static const executarSimulacao = Icons.rocket_launch_rounded;
+  static const resumoConfiguracao = Icons.summarize_rounded;
+  static const declividade = Icons.straighten_rounded;
+
+  // ==================== RESULTADOS & FEEDBACK ====================
+  static const desempenhoExcelente = Icons.emoji_events_rounded;
+  static const atencao = Icons.warning_rounded;
+  static const salvarCenario = Icons.save_rounded;
+  static const sucesso = Icons.check_circle_rounded;
+
+  // ==================== HISTÓRICO DE CENÁRIOS ====================
+  static const novoCenario = Icons.add_rounded;
+  static const criarNovaSimulacao = Icons.add_circle_rounded;
+  static const dataSalvamento = Icons.calendar_today_rounded;
+  static const visualizarCenario = Icons.visibility_rounded;
+  static const excluirCenario = Icons.delete_rounded;
+
+  // ==================== PERFIL & AUTENTICAÇÃO ====================
+  static const editarPerfil = Icons.edit_rounded;
+  static const fecharErro = Icons.close_rounded;
+
+  // ==================== CONFIGURAÇÕES DE ACESSIBILIDADE ====================
+  static const temaEscuro = Icons.dark_mode_rounded;
+  static const altoContraste = Icons.contrast_rounded;
+  static const textoNegrito = Icons.format_bold_rounded;
+  static const animacoesReduzidas = Icons.slow_motion_video_rounded;
+  static const leitorDeTela = Icons.record_voice_over_rounded;
+  static const tamanhoFonte = Icons.format_size_rounded;
+  static const estatisticas = Icons.insights_rounded;
+  static const abrirChangelog = Icons.open_in_new_rounded;
+
+  // ==================== ÍCONES GENÉRICOS ====================
   static const home = Icons.home_rounded;
   static const simulations = Icons.science_rounded;
   static const history = Icons.history_rounded;

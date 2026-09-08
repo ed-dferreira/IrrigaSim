@@ -29,7 +29,9 @@ final irrigationRepositoryProvider = Provider<IrrigationRepository>((ref) {
 });
 
 final cenariosProvider =
-    StreamProvider<List<CenarioSalvo>>((ref) {
+    StreamProvider.autoDispose<List<CenarioSalvo>>((ref) {
   final repository = ref.watch(irrigationRepositoryProvider);
-  return repository.observar();
+  final stream = repository.observar();
+  ref.onDispose(() => stream.drain());
+  return stream;
 });

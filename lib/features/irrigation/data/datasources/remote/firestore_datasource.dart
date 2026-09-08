@@ -6,8 +6,7 @@ class FirestoreDatasource {
   final FirebaseFirestore _firestore;
   final String _userId;
 
-  FirestoreDatasource({required this._firestore, required String userId})
-    : _userId = userId;
+  FirestoreDatasource({required this._firestore, required this._userId});
 
   CollectionReference<Map<String, dynamic>> get _collection =>
       _firestore.collection('usuarios').doc(_userId).collection('cenarios');

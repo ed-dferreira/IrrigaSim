@@ -8,7 +8,8 @@ import 'package:irrigasim/features/irrigation/domain/use_cases/run_basin_simulat
 class ParametersState {
   final MetodoIrrigacao metodo;
   final double comprimento;
-  final double declividade;
+  final double desnivelM;
+  final double distanciaHorizontalM;
   final double larguraOuEspacamento;
   final double k;
   final double a;
@@ -25,7 +26,8 @@ class ParametersState {
   const ParametersState({
     this.metodo = MetodoIrrigacao.sulco,
     this.comprimento = 100,
-    this.declividade = 0.002,
+    this.desnivelM = 0.2,
+    this.distanciaHorizontalM = 100,
     this.larguraOuEspacamento = 0.3,
     this.k = 0.005,
     this.a = 0.5,
@@ -40,10 +42,14 @@ class ParametersState {
     this.erro,
   });
 
+  double get declividade =>
+      distanciaHorizontalM > 0 ? (desnivelM / distanciaHorizontalM) * 100 : 0;
+
   ParametersState copyWith({
     MetodoIrrigacao? metodo,
     double? comprimento,
-    double? declividade,
+    double? desnivelM,
+    double? distanciaHorizontalM,
     double? larguraOuEspacamento,
     double? k,
     double? a,
@@ -60,7 +66,8 @@ class ParametersState {
     return ParametersState(
       metodo: metodo ?? this.metodo,
       comprimento: comprimento ?? this.comprimento,
-      declividade: declividade ?? this.declividade,
+      desnivelM: desnivelM ?? this.desnivelM,
+      distanciaHorizontalM: distanciaHorizontalM ?? this.distanciaHorizontalM,
       larguraOuEspacamento: larguraOuEspacamento ?? this.larguraOuEspacamento,
       k: k ?? this.k,
       a: a ?? this.a,
@@ -79,7 +86,7 @@ class ParametersState {
   IrrigationParameters toIrrigationParameters() {
     return IrrigationParameters(
       comprimento: comprimento,
-      declividade: declividade,
+      declividade: declividade / 100, // Converter de % para m/m
       larguraOuEspacamento: larguraOuEspacamento,
       k: k,
       a: a,
@@ -100,32 +107,61 @@ class ParametersViewModel extends StateNotifier<ParametersState> {
     state = state.copyWith(metodo: metodo);
   }
 
-  void updateField({String? campo, double? valor}) {
+  void loadFromParams(IrrigationParameters params) {
+    // declividade is in m/m; convert to desnivelM/distanciaHorizontalM pair
+    final distancia = 100.0;
+    final desnivel = params.declividade * distancia;
+    state = state.copyWith(
+      comprimento: params.comprimento,
+      desnivelM: desnivel,
+      distanciaHorizontalM: distancia,
+      larguraOuEspacamento: params.larguraOuEspacamento,
+      k: params.k,
+      a: params.a,
+      vib: params.vib,
+      vazao: params.vazao,
+      tempoAplicacao: params.tempoAplicacao,
+      laminaRequerida: params.laminaRequerida,
+      manningN: params.manningN,
+      sigmaZ: params.sigmaZ,
+    );
+  }
+
+  void updateField({String? campo, String? valor}) {
     if (campo == null || valor == null) return;
+    final parsed = double.tryParse(valor.replaceAll(',', '.'));
+    if (parsed == null) return;
+
     switch (campo) {
       case 'comprimento':
-        state = state.copyWith(comprimento: valor);
-      case 'declividade':
-        state = state.copyWith(declividade: valor);
+        state = state.copyWith(comprimento: parsed);
+      case 'desnivelM':
+        state = state.copyWith(desnivelM: parsed);
+      case 'distanciaHorizontalM':
+        state = state.copyWith(distanciaHorizontalM: parsed);
       case 'larguraOuEspacamento':
-        state = state.copyWith(larguraOuEspacamento: valor);
+        state = state.copyWith(larguraOuEspacamento: parsed);
       case 'k':
-        state = state.copyWith(k: valor);
+        state = state.copyWith(k: parsed);
       case 'a':
-        state = state.copyWith(a: valor);
+        state = state.copyWith(a: parsed);
       case 'vib':
-        state = state.copyWith(vib: valor);
+        state = state.copyWith(vib: parsed);
       case 'vazao':
-        state = state.copyWith(vazao: valor);
+        state = state.copyWith(vazao: parsed);
       case 'tempoAplicacao':
-        state = state.copyWith(tempoAplicacao: valor);
+        state = state.copyWith(tempoAplicacao: parsed);
       case 'laminaRequerida':
-        state = state.copyWith(laminaRequerida: valor);
+        state = state.copyWith(laminaRequerida: parsed);
       case 'manningN':
-        state = state.copyWith(manningN: valor);
+        state = state.copyWith(manningN: parsed);
       case 'sigmaZ':
-        state = state.copyWith(sigmaZ: valor);
+        state = state.copyWith(sigmaZ: parsed);
     }
+  }
+
+  double calcularDeclividade() {
+    return state.declividade;
   }
 
   Future<void> executarSimulacao() async {
@@ -145,6 +181,7 @@ class ParametersViewModel extends StateNotifier<ParametersState> {
 }
 
 final parametersProvider =
-    StateNotifierProvider<ParametersViewModel, ParametersState>((ref) {
+    StateNotifierProvider.autoDispose<ParametersViewModel, ParametersState>(
+        (ref) {
   return ParametersViewModel();
 });

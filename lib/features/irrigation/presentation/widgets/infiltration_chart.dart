@@ -309,5 +309,11 @@ class _InfiltrationPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant _InfiltrationPainter oldDelegate) {
+    return oldDelegate.laminas != laminas ||
+        oldDelegate.laminaRequerida != laminaRequerida ||
+        oldDelegate.maxLamina != maxLamina ||
+        oldDelegate.cuc != cuc ||
+        oldDelegate.du != du;
+  }
 }

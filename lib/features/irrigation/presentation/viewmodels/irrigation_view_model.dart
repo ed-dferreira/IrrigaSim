@@ -30,6 +30,7 @@ class IrrigationViewModel extends StateNotifier<IrrigationState> {
 }
 
 final irrigationProvider =
-    StateNotifierProvider<IrrigationViewModel, IrrigationState>((ref) {
+    StateNotifierProvider.autoDispose<IrrigationViewModel, IrrigationState>(
+        (ref) {
   return IrrigationViewModel();
 });

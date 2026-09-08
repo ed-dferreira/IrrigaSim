@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:irrigasim/app/theme/app_colors.dart';
 import 'package:irrigasim/app/theme/app_text_styles.dart';
+import 'package:irrigasim/features/irrigation/domain/entities/simulation_result.dart';
 import 'package:irrigasim/features/irrigation/presentation/viewmodels/irrigation_view_model.dart';
 import 'package:irrigasim/features/irrigation/presentation/viewmodels/parameters_view_model.dart';
 import 'package:irrigasim/features/irrigation/presentation/viewmodels/results_view_model.dart';
@@ -47,7 +48,7 @@ class ResultsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildKPICards(dynamic resultado) {
+  Widget _buildKPICards(SimulationResult resultado) {
     return Padding(
       padding: const EdgeInsets.all(12),
       child: GridView.count(
@@ -124,7 +125,7 @@ class ResultsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildChart(WidgetRef ref, int aba, dynamic resultado) {
+  Widget _buildChart(WidgetRef ref, int aba, SimulationResult resultado) {
     switch (aba) {
       case 0:
         return WaterBalanceChart(resultado: resultado);
@@ -137,7 +138,7 @@ class ResultsScreen extends ConsumerWidget {
     }
   }
 
-  Widget _buildRecommendation(dynamic resultado) {
+  Widget _buildRecommendation(SimulationResult resultado) {
     String recomendacao;
     if (resultado.eficiencia >= 85 && resultado.cuc >= 80) {
       recomendacao = 'Excelente! A simulação atende aos critérios de eficiência.';

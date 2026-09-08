@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:irrigasim/app/theme/app_colors.dart';
 import 'package:irrigasim/app/theme/app_text_styles.dart';
 import '../providers.dart';
 import 'widgets/login_form.dart';
@@ -11,42 +10,86 @@ class LoginScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.listen<AuthState?>(authProvider, (prev, next) {
-      if (next != null && next.isAuthenticated) {
+    final colors = Theme.of(context).colorScheme;
+
+    ref.listen<AuthState>(authProvider, (prev, next) {
+      if (next.isAuthenticated) {
         context.go('/home');
       }
     });
 
     return Scaffold(
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.water_drop_outlined,
-                  size: 72,
-                  color: AppColors.primary,
+        child: Column(
+          children: [
+            Container(
+              width: double.infinity,
+              height: 240,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    colors.primary,
+                    colors.primaryContainer,
+                  ],
                 ),
-                const SizedBox(height: 16),
-                Text('IrrigaSim', style: AppTextStyles.heading1),
-                const SizedBox(height: 8),
-                Text(
-                  'Simulação de irrigação superficial',
-                  style: AppTextStyles.bodySmall,
-                ),
-                const SizedBox(height: 48),
-                const LoginForm(),
-                const SizedBox(height: 16),
-                TextButton(
-                  onPressed: () => context.go('/register'),
-                  child: const Text('Criar conta'),
-                ),
-              ],
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: colors.onPrimary.withValues(alpha: 0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Center(
+                      child: Text(
+                        '💧',
+                        style: TextStyle(fontSize: 42),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'IrrigaSIM',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: colors.onPrimaryContainer,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Simulação de Irrigação por Superfície',
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: colors.onPrimaryContainer.withValues(alpha: 0.8),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Entrar na sua conta',
+                      style: AppTextStyles.titleLarge.copyWith(
+                        color: colors.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    const LoginForm(),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
