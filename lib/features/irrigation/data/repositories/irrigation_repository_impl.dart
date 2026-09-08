@@ -7,8 +7,7 @@ class IrrigationRepositoryImpl implements IrrigationRepository {
   final SimulacoesLocalDatasource _local;
   final FirestoreDatasource? _remote;
 
-  IrrigationRepositoryImpl(this._local, {FirestoreDatasource? remote})
-      : _remote = remote;
+  IrrigationRepositoryImpl(this._local, {this._remote});
 
   @override
   Future<List<CenarioSalvo>> listar() async {

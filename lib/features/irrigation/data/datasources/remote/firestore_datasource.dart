@@ -1,25 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../models/cenario_salvo.dart';
 
 class FirestoreDatasource {
   final FirebaseFirestore _firestore;
   final String _userId;
 
-  FirestoreDatasource({
-    required FirebaseFirestore firestore,
-    required String userId,
-  })  : _firestore = firestore,
-        _userId = userId;
+  FirestoreDatasource({required this._firestore, required String userId})
+    : _userId = userId;
 
   CollectionReference<Map<String, dynamic>> get _collection =>
       _firestore.collection('usuarios').doc(_userId).collection('cenarios');
 
   Future<List<CenarioSalvo>> listar() async {
-    final snapshot =
-        await _collection.orderBy('dataCriacao', descending: true).get();
-    return snapshot.docs
-        .map((doc) => CenarioSalvo.fromFirestore(doc))
-        .toList();
+    final snapshot = await _collection
+        .orderBy('dataCriacao', descending: true)
+        .get();
+    return snapshot.docs.map((doc) => CenarioSalvo.fromFirestore(doc)).toList();
   }
 
   Future<void> salvar(CenarioSalvo cenario) async {
@@ -40,7 +37,10 @@ class FirestoreDatasource {
     return _collection
         .orderBy('dataCriacao', descending: true)
         .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => CenarioSalvo.fromFirestore(doc)).toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => CenarioSalvo.fromFirestore(doc))
+              .toList(),
+        );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../domain/entities/user.dart';
 import '../../domain/use_cases/login_with_email.dart';
 import '../../domain/use_cases/login_with_google.dart';
@@ -11,11 +12,7 @@ class AuthState {
   final bool isLoading;
   final String? erro;
 
-  const AuthState({
-    this.user,
-    this.isLoading = false,
-    this.erro,
-  });
+  const AuthState({this.user, this.isLoading = false, this.erro});
 
   AuthState copyWith({
     User? user,
@@ -41,17 +38,13 @@ class AuthViewModel extends StateNotifier<AuthState> {
   final AuthRepository _repository;
 
   AuthViewModel({
-    required LoginWithEmail loginWithEmail,
+    required this._loginWithEmail,
     required LoginWithGoogle loginWithGoogle,
-    required Register register,
-    required Logout logout,
-    required AuthRepository repository,
-  })  : _loginWithEmail = loginWithEmail,
-        _loginWithGoogle = loginWithGoogle,
-        _register = register,
-        _logout = logout,
-        _repository = repository,
-        super(const AuthState()) {
+    required this._register,
+    required this._logout,
+    required this._repository,
+  }) : _loginWithGoogle = loginWithGoogle,
+       super(const AuthState()) {
     _init();
   }
 

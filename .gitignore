@@ -49,9 +49,10 @@ iosApp/DerivedData/
 *.bak
 .cache/
 
-# ─── Segredos (NÃO versionar — mas google-services.json já é necessário) ──────
-# google-services.json é intencionalmente versionado (projeto de pesquisa)
-# Para produção: remover esta exceção e usar CI secrets
+# ─── Segredos (NÃO versionar) ─────────────────────────────────────────────────
+lib/config/firebase_options.dart
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
 
 # multitask (logs/prompts de agentes paralelos)
 .multitask/
