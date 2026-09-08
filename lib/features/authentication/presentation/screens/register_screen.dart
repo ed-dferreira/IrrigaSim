@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:irrigasim/app/theme/app_colors.dart';
 import 'package:irrigasim/app/theme/app_text_styles.dart';
 import 'package:irrigasim/core/widgets/app_text_field.dart';
 import 'package:irrigasim/core/widgets/app_button.dart';
@@ -66,6 +65,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+    final colorScheme = Theme.of(context).colorScheme;
 
     ref.listen<AuthState>(authProvider, (prev, next) {
       if (next.isAuthenticated) {
@@ -75,7 +75,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(next.erro!),
-            backgroundColor: Theme.of(context).colorScheme.error,
+            backgroundColor: colorScheme.error,
           ),
         );
         ref.read(authProvider.notifier).clearError();
@@ -93,10 +93,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
+                Icon(
                   Icons.person_add_outlined,
                   size: 72,
-                  color: AppColors.primary,
+                  color: colorScheme.primary,
                 ),
                 const SizedBox(height: 16),
                 Text('Criar conta', style: AppTextStyles.heading1),

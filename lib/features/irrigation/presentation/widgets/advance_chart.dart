@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:irrigasim/app/theme/app_colors.dart';
 import 'package:irrigasim/app/theme/app_text_styles.dart';
 import 'package:irrigasim/features/irrigation/domain/entities/simulation_result.dart';
 
@@ -14,6 +13,7 @@ class AdvanceChart extends StatelessWidget {
       return const Center(child: Text('Sem dados de avanço'));
     }
 
+    final colorScheme = Theme.of(context).colorScheme;
     final maxDistancia = resultado.curvaAvanco
         .map((p) => p.y)
         .reduce((a, b) => a > b ? a : b);
@@ -40,6 +40,9 @@ class AdvanceChart extends StatelessWidget {
                 pontos: resultado.curvaAvanco,
                 maxDistancia: maxDistancia,
                 maxTempo: maxTempo,
+                primaryColor: colorScheme.primary,
+                gridColor: colorScheme.outlineVariant,
+                textColor: colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -53,11 +56,17 @@ class _AdvancePainter extends CustomPainter {
   final List<PontoGrafico> pontos;
   final double maxDistancia;
   final double maxTempo;
+  final Color primaryColor;
+  final Color gridColor;
+  final Color textColor;
 
   _AdvancePainter({
     required this.pontos,
     required this.maxDistancia,
     required this.maxTempo,
+    required this.primaryColor,
+    required this.gridColor,
+    required this.textColor,
   });
 
   @override
@@ -71,7 +80,7 @@ class _AdvancePainter extends CustomPainter {
     _drawGrid(canvas, size, padding);
 
     final fillPaint = Paint()
-      ..color = AppColors.primary.withValues(alpha: 0.15)
+      ..color = primaryColor.withValues(alpha: 0.15)
       ..style = PaintingStyle.fill;
 
     final fillPath = Path();
@@ -94,7 +103,7 @@ class _AdvancePainter extends CustomPainter {
     canvas.drawPath(fillPath, fillPaint);
 
     final linePaint = Paint()
-      ..color = AppColors.primary
+      ..color = primaryColor
       ..strokeWidth = 2.5
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
@@ -113,7 +122,7 @@ class _AdvancePainter extends CustomPainter {
     canvas.drawPath(linePath, linePaint);
 
     final dotPaint = Paint()
-      ..color = AppColors.primary
+      ..color = primaryColor
       ..style = PaintingStyle.fill;
 
     for (int i = 0; i < pontos.length; i++) {
@@ -127,7 +136,7 @@ class _AdvancePainter extends CustomPainter {
 
   void _drawGrid(Canvas canvas, Size size, EdgeInsets padding) {
     final gridPaint = Paint()
-      ..color = AppColors.divider
+      ..color = gridColor
       ..strokeWidth = 0.5;
 
     final chartHeight = size.height - padding.top - padding.bottom;
@@ -153,14 +162,14 @@ class _AdvancePainter extends CustomPainter {
 
     textPainter.text = TextSpan(
       text: '0',
-      style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
+      style: TextStyle(fontSize: 10, color: textColor),
     );
     textPainter.layout();
     textPainter.paint(canvas, Offset(padding.left - 5, size.height - 35));
 
     textPainter.text = TextSpan(
       text: '${maxTempo.toStringAsFixed(0)} min',
-      style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
+      style: TextStyle(fontSize: 10, color: textColor),
     );
     textPainter.layout();
     textPainter.paint(
@@ -173,14 +182,14 @@ class _AdvancePainter extends CustomPainter {
 
     textPainter.text = TextSpan(
       text: '${maxDistancia.toStringAsFixed(0)} m',
-      style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
+      style: TextStyle(fontSize: 10, color: textColor),
     );
     textPainter.layout();
     textPainter.paint(canvas, Offset(0, padding.top - 5));
 
     textPainter.text = TextSpan(
       text: 'Distância (m)',
-      style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
+      style: TextStyle(fontSize: 10, color: textColor),
     );
     textPainter.layout();
     textPainter.paint(
@@ -193,6 +202,8 @@ class _AdvancePainter extends CustomPainter {
   bool shouldRepaint(covariant _AdvancePainter oldDelegate) {
     return oldDelegate.pontos != pontos ||
         oldDelegate.maxDistancia != maxDistancia ||
-        oldDelegate.maxTempo != maxTempo;
+        oldDelegate.maxTempo != maxTempo ||
+        oldDelegate.primaryColor != primaryColor ||
+        oldDelegate.gridColor != gridColor;
   }
 }

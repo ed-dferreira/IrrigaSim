@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:irrigasim/app/theme/app_colors.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
-import 'package:irrigasim/app/theme/app_text_styles.dart';
 import 'package:irrigasim/features/authentication/providers.dart';
 import 'perfil_view_model.dart';
 import '../data/tamanho_fonte.dart';
@@ -32,6 +30,8 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
     final authState = ref.watch(authProvider);
     final user = authState.user;
     final viewModel = ref.read(perfilProvider.notifier);
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     ref.listen<AuthState>(authProvider, (prev, next) {
       viewModel.sincronizarCom(next.user);
@@ -44,113 +44,103 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Meu perfil',
-                style: AppTextStyles.heading1.copyWith(
-                  color: AppColors.onBackground,
+              Semantics(
+                header: true,
+                child: Text(
+                  'Meu perfil',
+                  style: textTheme.headlineSmall?.copyWith(
+                    color: colorScheme.onSurface,
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
 
               // Card do perfil
-              Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                elevation: 2,
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      _AvatarUsuario(
-                        fotoUrl: user?.photoUrl,
-                        nome: user?.nome ?? '',
-                      ),
-                      const SizedBox(height: 12),
-                      if (perfilState.editando) ...[
-                        _CampoEdicao(
-                          label: 'Nome',
-                          value: perfilState.nome,
-                          onChanged: viewModel.atualizarNome,
+              Semantics(
+                label: 'Cartão do perfil do usuário',
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      children: [
+                        _AvatarUsuario(
+                          fotoUrl: user?.photoUrl,
+                          nome: user?.nome ?? '',
                         ),
                         const SizedBox(height: 12),
-                        _CampoEdicao(
-                          label: 'Instituição',
-                          value: perfilState.instituicao,
-                          onChanged: viewModel.atualizarInstituicao,
-                        ),
-                        const SizedBox(height: 12),
-                        _CampoEdicao(
-                          label: 'Curso',
-                          value: perfilState.curso,
-                          onChanged: viewModel.atualizarCurso,
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton(
-                                onPressed: viewModel.cancelarEdicao,
-                                style: OutlinedButton.styleFrom(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
+                        if (perfilState.editando) ...[
+                          _CampoEdicao(
+                            label: 'Nome',
+                            value: perfilState.nome,
+                            onChanged: viewModel.atualizarNome,
+                          ),
+                          const SizedBox(height: 12),
+                          _CampoEdicao(
+                            label: 'Instituição',
+                            value: perfilState.instituicao,
+                            onChanged: viewModel.atualizarInstituicao,
+                          ),
+                          const SizedBox(height: 12),
+                          _CampoEdicao(
+                            label: 'Curso',
+                            value: perfilState.curso,
+                            onChanged: viewModel.atualizarCurso,
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: viewModel.cancelarEdicao,
+                                  child: const Text('Cancelar'),
                                 ),
-                                child: const Text('Cancelar'),
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: viewModel.salvarEdicao,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primary,
-                                  foregroundColor: AppColors.onPrimary,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: viewModel.salvarEdicao,
+                                  child: const Text('Salvar'),
                                 ),
-                                child: const Text('Salvar'),
+                              ),
+                            ],
+                          ),
+                        ] else ...[
+                          Text(
+                            user?.nome ?? 'Usuário',
+                            style: textTheme.titleLarge?.copyWith(
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            user?.email ?? '',
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          if (user?.instituicao != null &&
+                              user!.instituicao!.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              '${user.instituicao} • ${user.curso ?? ''}',
+                              style: textTheme.bodyMedium?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ],
-                        ),
-                      ] else ...[
-                        Text(
-                          user?.nome ?? 'Usuário',
-                          style: AppTextStyles.titleLarge.copyWith(
-                            color: AppColors.onSurface,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          user?.email ?? '',
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.onSurfaceVariant,
-                          ),
-                        ),
-                        if (user?.instituicao != null &&
-                            user!.instituicao!.isNotEmpty) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            '${user.instituicao} • ${user.curso ?? ''}',
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              color: AppColors.onSurfaceVariant,
+                          const SizedBox(height: 8),
+                          TextButton(
+                            onPressed: viewModel.iniciarEdicao,
+                            child: Text(
+                              'Editar perfil',
+                              style: textTheme.titleMedium?.copyWith(
+                                color: colorScheme.primary,
+                              ),
                             ),
                           ),
                         ],
-                        const SizedBox(height: 8),
-                        TextButton(
-                          onPressed: viewModel.iniciarEdicao,
-                          child: Text(
-                            '✏️ Editar perfil',
-                            style: AppTextStyles.titleMedium.copyWith(
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ),
                       ],
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -158,33 +148,40 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
               const SizedBox(height: 16),
 
               // Estatísticas
-              _SecaoTitulo('Estatísticas'),
-              const SizedBox(height: 8),
-              Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+              Semantics(
+                header: true,
+                child: Text(
+                  'Estatísticas',
+                  style: textTheme.titleLarge?.copyWith(
+                    color: colorScheme.onSurface,
+                  ),
                 ),
-                elevation: 2,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _CartaoEstatistica(
-                          valor: perfilState.totalSimulacoes.toString(),
-                          rotulo: 'Simulações salvas',
-                          icone: AppIcons.estatisticas,
+              ),
+              const SizedBox(height: 8),
+              Semantics(
+                label: 'Estatísticas do usuário: ${perfilState.totalSimulacoes} simulações salvas, método favorito ${perfilState.metodoFavorito ?? "nenhum"}',
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _CartaoEstatistica(
+                            valor: perfilState.totalSimulacoes.toString(),
+                            rotulo: 'Simulações salvas',
+                            icone: AppIcons.estatisticas,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _CartaoEstatistica(
-                          valor: perfilState.metodoFavorito ?? '—',
-                          rotulo: 'Método favorito',
-                          icone: AppIcons.simulations,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _CartaoEstatistica(
+                            valor: perfilState.metodoFavorito ?? '—',
+                            rotulo: 'Método favorito',
+                            icone: AppIcons.simulations,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -192,13 +189,17 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
               const SizedBox(height: 16),
 
               // Acessibilidade
-              _SecaoTitulo('Acessibilidade'),
+              Semantics(
+                header: true,
+                child: Text(
+                  'Acessibilidade',
+                  style: textTheme.titleLarge?.copyWith(
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+              ),
               const SizedBox(height: 8),
               Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                elevation: 2,
                 child: Column(
                   children: [
                     _ConfigSwitchRow(
@@ -207,40 +208,45 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
                       icone: AppIcons.temaEscuro,
                       checked: perfilState.temaEscuro,
                       onCheckedChange: viewModel.alternarTemaEscuro,
+                      semanticLabel: 'Alternar tema escuro',
                     ),
-                    const Divider(height: 1, indent: 20, endIndent: 20),
+                    Divider(height: 1, indent: 20, endIndent: 20, color: colorScheme.outlineVariant),
                     _ConfigSwitchRow(
                       titulo: 'Alto contraste',
                       descricao: 'Maximiza o contraste de textos e superfícies',
                       icone: AppIcons.altoContraste,
                       checked: perfilState.altoContraste,
                       onCheckedChange: viewModel.alternarAltoContraste,
+                      semanticLabel: 'Alternar alto contraste',
                     ),
-                    const Divider(height: 1, indent: 20, endIndent: 20),
+                    Divider(height: 1, indent: 20, endIndent: 20, color: colorScheme.outlineVariant),
                     _ConfigSwitchRow(
                       titulo: 'Texto em negrito',
                       descricao: 'Engrossa todos os textos do app',
                       icone: AppIcons.textoNegrito,
                       checked: perfilState.textoNegrito,
                       onCheckedChange: viewModel.alternarTextoNegrito,
+                      semanticLabel: 'Alternar texto em negrito',
                     ),
-                    const Divider(height: 1, indent: 20, endIndent: 20),
+                    Divider(height: 1, indent: 20, endIndent: 20, color: colorScheme.outlineVariant),
                     _ConfigSwitchRow(
                       titulo: 'Animações reduzidas',
                       descricao: 'Diminui transições e movimentos na tela',
                       icone: AppIcons.animacoesReduzidas,
                       checked: perfilState.animacoesReduzidas,
                       onCheckedChange: viewModel.alternarAnimacoesReduzidas,
+                      semanticLabel: 'Alternar animações reduzidas',
                     ),
-                    const Divider(height: 1, indent: 20, endIndent: 20),
+                    Divider(height: 1, indent: 20, endIndent: 20, color: colorScheme.outlineVariant),
                     _ConfigSwitchRow(
                       titulo: 'Modo leitor de tela',
                       descricao: 'Amplia descrições para leitores de tela',
                       icone: AppIcons.leitorDeTela,
                       checked: perfilState.modoLeitorTela,
                       onCheckedChange: viewModel.alternarModoLeitorTela,
+                      semanticLabel: 'Alternar modo leitor de tela',
                     ),
-                    const Divider(height: 1, indent: 20, endIndent: 20),
+                    Divider(height: 1, indent: 20, endIndent: 20, color: colorScheme.outlineVariant),
                     _ControleTamanhoFonte(
                       tamanhoSelecionado: perfilState.tamanhoFonte,
                       onSelecionar: viewModel.definirTamanhoFonte,
@@ -252,13 +258,17 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
               const SizedBox(height: 16),
 
               // Sobre
-              _SecaoTitulo('Sobre'),
+              Semantics(
+                header: true,
+                child: Text(
+                  'Sobre',
+                  style: textTheme.titleLarge?.copyWith(
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+              ),
               const SizedBox(height: 8),
               Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                elevation: 2,
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: Column(
@@ -275,8 +285,8 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
                       const SizedBox(height: 12),
                       Text(
                         'Modelos: Kostiakov-Lewis + Balanço de Volume',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.onSurfaceVariant,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -284,21 +294,25 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
                         onTap: () {
                           // TODO: Abrir URL
                         },
-                        child: Row(
-                          children: [
-                            Icon(
-                              AppIcons.abrirChangelog,
-                              size: 18,
-                              color: AppColors.primary,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Novidades da versão $_versaoApp',
-                              style: AppTextStyles.labelLarge.copyWith(
-                                color: AppColors.primary,
+                        child: Semantics(
+                          label: 'Novidades da versão $_versaoApp',
+                          button: true,
+                          child: Row(
+                            children: [
+                              Icon(
+                                AppIcons.abrirChangelog,
+                                size: 18,
+                                color: colorScheme.primary,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 8),
+                              Text(
+                                'Novidades da versão $_versaoApp',
+                                style: textTheme.labelLarge?.copyWith(
+                                  color: colorScheme.primary,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -309,24 +323,28 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
               const SizedBox(height: 16),
 
               // Botão de sair
-              SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: OutlinedButton(
-                  onPressed: () {
-                    ref.read(authProvider.notifier).logout();
-                  },
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.error,
-                    side: const BorderSide(color: AppColors.error),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+              Semantics(
+                label: 'Sair da conta',
+                button: true,
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: OutlinedButton(
+                    onPressed: () {
+                      ref.read(authProvider.notifier).logout();
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: colorScheme.error,
+                      side: BorderSide(color: colorScheme.error),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                  ),
-                  child: Text(
-                    'Sair da conta',
-                    style: AppTextStyles.titleMedium.copyWith(
-                      color: AppColors.error,
+                    child: Text(
+                      'Sair da conta',
+                      style: textTheme.titleMedium?.copyWith(
+                        color: colorScheme.error,
+                      ),
                     ),
                   ),
                 ),
@@ -349,6 +367,7 @@ class _AvatarUsuario extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final iniciais = nome.trim()
         .split(' ')
         .where((s) => s.isNotEmpty)
@@ -357,19 +376,22 @@ class _AvatarUsuario extends StatelessWidget {
         .join('');
     final displayIniciais = iniciais.isEmpty ? '?' : iniciais;
 
-    return Container(
-      width: 96,
-      height: 96,
-      decoration: const BoxDecoration(
-        color: AppColors.primaryContainer,
-        shape: BoxShape.circle,
-      ),
-      child: Center(
-        child: Text(
-          displayIniciais,
-          style: AppTextStyles.heading1.copyWith(
-            color: AppColors.primary,
-            fontSize: 32,
+    return Semantics(
+      label: 'Avatar de $nome',
+      child: Container(
+        width: 96,
+        height: 96,
+        decoration: BoxDecoration(
+          color: colorScheme.primaryContainer,
+          shape: BoxShape.circle,
+        ),
+        child: Center(
+          child: Text(
+            displayIniciais,
+            style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+              color: colorScheme.primary,
+              fontSize: 32,
+            ),
           ),
         ),
       ),
@@ -390,42 +412,13 @@ class _CampoEdicao extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      initialValue: value,
-      onChanged: onChanged,
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: AppColors.primary,
-            width: 2,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SecaoTitulo extends StatelessWidget {
-  final String texto;
-
-  const _SecaoTitulo(this.texto);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 8),
-      child: Text(
-        texto,
-        style: AppTextStyles.titleLarge.copyWith(
-          color: AppColors.onBackground,
+    return Semantics(
+      label: 'Campo de edição: $label',
+      child: TextFormField(
+        initialValue: value,
+        onChanged: onChanged,
+        decoration: InputDecoration(
+          labelText: label,
         ),
       ),
     );
@@ -445,44 +438,51 @@ class _CartaoEstatistica extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceVariant.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: const BoxDecoration(
-              color: AppColors.primaryContainer,
-              shape: BoxShape.circle,
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Semantics(
+      label: '$rotulo: $valor',
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: colorScheme.primaryContainer,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icone,
+                size: 22,
+                color: colorScheme.primary,
+              ),
             ),
-            child: Icon(
-              icone,
-              size: 22,
-              color: AppColors.primary,
+            const SizedBox(height: 8),
+            Text(
+              valor,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: colorScheme.onSurface,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            valor,
-            style: AppTextStyles.titleLarge.copyWith(color: AppColors.onSurface),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            rotulo,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.onSurfaceVariant,
+            const SizedBox(height: 4),
+            Text(
+              rotulo,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -494,6 +494,7 @@ class _ConfigSwitchRow extends StatelessWidget {
   final IconData icone;
   final bool checked;
   final ValueChanged<bool> onCheckedChange;
+  final String? semanticLabel;
 
   const _ConfigSwitchRow({
     required this.titulo,
@@ -501,40 +502,47 @@ class _ConfigSwitchRow extends StatelessWidget {
     required this.icone,
     required this.checked,
     required this.onCheckedChange,
+    this.semanticLabel,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-      child: Row(
-        children: [
-          Icon(icone, color: AppColors.primary),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  titulo,
-                  style: AppTextStyles.titleMedium.copyWith(
-                    color: AppColors.onSurface,
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Semantics(
+      label: semanticLabel ?? titulo,
+      toggled: checked,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        child: Row(
+          children: [
+            Icon(icone, color: colorScheme.primary),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    titulo,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: colorScheme.onSurface,
+                    ),
                   ),
-                ),
-                Text(
-                  descricao,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.onSurfaceVariant,
+                  Text(
+                    descricao,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Switch(
-            value: checked,
-            onChanged: onCheckedChange,
-          ),
-        ],
+            Switch(
+              value: checked,
+              onChanged: onCheckedChange,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -551,6 +559,7 @@ class _ControleTamanhoFonte extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final opcoes = TamanhoFonte.values;
 
     return Padding(
@@ -560,7 +569,7 @@ class _ControleTamanhoFonte extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(AppIcons.tamanhoFonte, color: AppColors.primary),
+              Icon(AppIcons.tamanhoFonte, color: colorScheme.primary),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -568,14 +577,14 @@ class _ControleTamanhoFonte extends StatelessWidget {
                   children: [
                     Text(
                       'Tamanho da fonte',
-                      style: AppTextStyles.titleMedium.copyWith(
-                        color: AppColors.onSurface,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: colorScheme.onSurface,
                       ),
                     ),
                     Text(
                       'Ajusta o texto em todo o app',
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.onSurfaceVariant,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -600,9 +609,9 @@ class _ControleTamanhoFonte extends StatelessWidget {
               final ativo = opcao == tamanhoSelecionado;
               return Text(
                 opcao.label,
-                style: AppTextStyles.labelLarge.copyWith(
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   fontWeight: ativo ? FontWeight.bold : FontWeight.normal,
-                  color: ativo ? AppColors.primary : AppColors.onSurfaceVariant,
+                  color: ativo ? colorScheme.primary : colorScheme.onSurfaceVariant,
                 ),
               );
             }).toList(),
@@ -621,17 +630,21 @@ class _LinhaInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
-          style: AppTextStyles.bodyLarge.copyWith(color: AppColors.onSurface),
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            color: colorScheme.onSurface,
+          ),
         ),
         Text(
           valor,
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: AppColors.onSurfaceVariant,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurfaceVariant,
           ),
         ),
       ],

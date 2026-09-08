@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:irrigasim/app/theme/app_colors.dart';
 import 'package:irrigasim/app/theme/app_text_styles.dart';
 
 class KpiCard extends StatelessWidget {
   final String titulo;
   final String valor;
   final String unidade;
-  final Color color;
+  final Color? color;
   final String? subtitulo;
   final IconData? icon;
 
@@ -15,13 +14,16 @@ class KpiCard extends StatelessWidget {
     required this.titulo,
     required this.valor,
     required this.unidade,
-    this.color = AppColors.primary,
+    this.color,
     this.subtitulo,
     this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final effectiveColor = color ?? colorScheme.primary;
+
     return Card(
       elevation: 1,
       shape: RoundedRectangleBorder(
@@ -31,7 +33,7 @@ class KpiCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          color: color.withValues(alpha: 0.05),
+          color: effectiveColor.withValues(alpha: 0.05),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,7 +42,7 @@ class KpiCard extends StatelessWidget {
             Row(
               children: [
                 if (icon != null) ...[
-                  Icon(icon, size: 16, color: color),
+                  Icon(icon, size: 16, color: effectiveColor),
                   const SizedBox(width: 8),
                 ],
                 Expanded(
@@ -60,7 +62,7 @@ class KpiCard extends StatelessWidget {
                 Flexible(
                   child: Text(
                     valor,
-                    style: AppTextStyles.kpiValue.copyWith(color: color),
+                    style: AppTextStyles.kpiValue.copyWith(color: effectiveColor),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -70,7 +72,7 @@ class KpiCard extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 2),
                   child: Text(
                     unidade,
-                    style: AppTextStyles.bodySmall.copyWith(color: color),
+                    style: AppTextStyles.bodySmall.copyWith(color: effectiveColor),
                   ),
                 ),
               ],

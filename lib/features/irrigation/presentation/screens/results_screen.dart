@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:irrigasim/app/theme/app_colors.dart';
 import 'package:irrigasim/app/theme/app_text_styles.dart';
 import 'package:irrigasim/features/irrigation/domain/entities/simulation_result.dart';
 import 'package:irrigasim/features/irrigation/presentation/viewmodels/irrigation_view_model.dart';
@@ -37,18 +36,19 @@ class ResultsScreen extends ConsumerWidget {
       ),
       body: Column(
         children: [
-          _buildKPICards(resultado),
-          _buildTabs(ref, resultsState),
+          _buildKPICards(resultado, context),
+          _buildTabs(ref, resultsState, context),
           Expanded(
             child: _buildChart(ref, resultsState.abaAtual, resultado),
           ),
-          _buildRecommendation(resultado),
+          _buildRecommendation(resultado, context),
         ],
       ),
     );
   }
 
-  Widget _buildKPICards(SimulationResult resultado) {
+  Widget _buildKPICards(SimulationResult resultado, BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.all(12),
       child: GridView.count(
@@ -59,18 +59,18 @@ class ResultsScreen extends ConsumerWidget {
         crossAxisSpacing: 8,
         childAspectRatio: 1.2,
         children: [
-          _kpiCard('Ea', '${resultado.eficiencia.toStringAsFixed(1)}%', resultado.classificacaoEa),
-          _kpiCard('Er', '${resultado.eficienciaRequerimento.toStringAsFixed(1)}%', ''),
-          _kpiCard('CUC', '${resultado.cuc.toStringAsFixed(1)}%', resultado.classificacaoCuc),
-          _kpiCard('DU', '${resultado.du.toStringAsFixed(1)}%', resultado.classificacaoDu),
-          _kpiCard('Lâmina', '${(resultado.laminaMedia * 1000).toStringAsFixed(1)}', 'mm'),
-          _kpiCard('Avanço', '${resultado.tempoAvanco.toStringAsFixed(0)}', 'min'),
+          _kpiCard('Ea', '${resultado.eficiencia.toStringAsFixed(1)}%', resultado.classificacaoEa, colorScheme),
+          _kpiCard('Er', '${resultado.eficienciaRequerimento.toStringAsFixed(1)}%', '', colorScheme),
+          _kpiCard('CUC', '${resultado.cuc.toStringAsFixed(1)}%', resultado.classificacaoCuc, colorScheme),
+          _kpiCard('DU', '${resultado.du.toStringAsFixed(1)}%', resultado.classificacaoDu, colorScheme),
+          _kpiCard('Lâmina', '${(resultado.laminaMedia * 1000).toStringAsFixed(1)}', 'mm', colorScheme),
+          _kpiCard('Avanço', '${resultado.tempoAvanco.toStringAsFixed(0)}', 'min', colorScheme),
         ],
       ),
     );
   }
 
-  Widget _kpiCard(String label, String value, String classification) {
+  Widget _kpiCard(String label, String value, String classification, ColorScheme colorScheme) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(8),
@@ -85,7 +85,7 @@ class ResultsScreen extends ConsumerWidget {
               Text(
                 classification,
                 style: AppTextStyles.bodySmall.copyWith(
-                  color: _corClassificacao(classification),
+                  color: _corClassificacao(classification, colorScheme),
                   fontSize: 10,
                 ),
               ),
@@ -96,22 +96,22 @@ class ResultsScreen extends ConsumerWidget {
     );
   }
 
-  Color _corClassificacao(String classificacao) {
+  Color _corClassificacao(String classificacao, ColorScheme colorScheme) {
     switch (classificacao) {
       case 'Excelente':
-        return AppColors.excelent;
+        return const Color(0xFF146C2E);
       case 'Bom':
-        return AppColors.good;
+        return const Color(0xFF689F38);
       case 'Regular':
-        return AppColors.regular;
+        return const Color(0xFF7E5800);
       case 'Ruim':
-        return AppColors.bad;
+        return colorScheme.error;
       default:
-        return AppColors.textSecondary;
+        return colorScheme.onSurfaceVariant;
     }
   }
 
-  Widget _buildTabs(WidgetRef ref, ResultsState state) {
+  Widget _buildTabs(WidgetRef ref, ResultsState state, BuildContext context) {
     return SegmentedButton<int>(
       segments: const [
         ButtonSegment(value: 0, label: Text('Balanço')),
@@ -138,7 +138,8 @@ class ResultsScreen extends ConsumerWidget {
     }
   }
 
-  Widget _buildRecommendation(SimulationResult resultado) {
+  Widget _buildRecommendation(SimulationResult resultado, BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     String recomendacao;
     if (resultado.eficiencia >= 85 && resultado.cuc >= 80) {
       recomendacao = 'Excelente! A simulação atende aos critérios de eficiência.';
@@ -148,15 +149,18 @@ class ResultsScreen extends ConsumerWidget {
       recomendacao = 'Atenção. A eficiência está abaixo do ideal. Revise os parâmetros.';
     }
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      margin: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
+    return Semantics(
+      label: 'Recomendação: $recomendacao',
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        margin: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: colorScheme.primary.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(recomendacao, style: AppTextStyles.body),
       ),
-      child: Text(recomendacao, style: AppTextStyles.body),
     );
   }
 

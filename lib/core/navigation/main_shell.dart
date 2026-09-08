@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:irrigasim/app/theme/app_colors.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
 
 class MainShell extends StatelessWidget {
@@ -13,6 +12,8 @@ class MainShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: NavigationBar(
@@ -23,30 +24,28 @@ class MainShell extends StatelessWidget {
             initialLocation: index == navigationShell.currentIndex,
           );
         },
-        backgroundColor: AppColors.surface,
-        indicatorColor: AppColors.primaryContainer,
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(AppIcons.navSimulacao),
+            icon: const Icon(AppIcons.navSimulacao),
             selectedIcon: Icon(
               AppIcons.navSimulacao,
-              color: AppColors.primary,
+              color: colorScheme.primary,
             ),
             label: 'Simulação',
           ),
           NavigationDestination(
-            icon: Icon(AppIcons.navCenarios),
+            icon: const Icon(AppIcons.navCenarios),
             selectedIcon: Icon(
               AppIcons.navCenarios,
-              color: AppColors.primary,
+              color: colorScheme.primary,
             ),
             label: 'Cenários',
           ),
           NavigationDestination(
-            icon: Icon(AppIcons.navPerfil),
+            icon: const Icon(AppIcons.navPerfil),
             selectedIcon: Icon(
               AppIcons.navPerfil,
-              color: AppColors.primary,
+              color: colorScheme.primary,
             ),
             label: 'Perfil',
           ),

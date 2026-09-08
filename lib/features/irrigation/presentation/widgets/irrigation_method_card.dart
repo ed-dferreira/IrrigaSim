@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:irrigasim/app/theme/app_colors.dart';
 import 'package:irrigasim/app/theme/app_text_styles.dart';
 import 'package:irrigasim/features/irrigation/domain/entities/irrigation_parameters.dart';
 
@@ -13,14 +12,14 @@ class IrrigationMethodCard extends StatelessWidget {
     required this.onTap,
   });
 
-  Color get _color {
+  Color _getColor(ColorScheme colorScheme) {
     switch (metodo) {
       case MetodoIrrigacao.sulco:
-        return AppColors.sulco;
+        return const Color(0xFF42A5F5);
       case MetodoIrrigacao.faixa:
-        return AppColors.faixa;
+        return const Color(0xFF66BB6A);
       case MetodoIrrigacao.inundacao:
-        return AppColors.inundacao;
+        return const Color(0xFFFFA726);
     }
   }
 
@@ -48,37 +47,44 @@ class IrrigationMethodCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: _color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
+    final colorScheme = Theme.of(context).colorScheme;
+    final methodColor = _getColor(colorScheme);
+
+    return Semantics(
+      label: 'Método de irrigação: ${metodo.displayName}. $_descricao',
+      button: true,
+      child: Card(
+        elevation: 2,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: methodColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(_icon, color: methodColor, size: 32),
                 ),
-                child: Icon(_icon, color: _color, size: 32),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(metodo.displayName, style: AppTextStyles.heading3),
-                    const SizedBox(height: 4),
-                    Text(_descricao, style: AppTextStyles.bodySmall),
-                  ],
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(metodo.displayName, style: AppTextStyles.heading3),
+                      const SizedBox(height: 4),
+                      Text(_descricao, style: AppTextStyles.bodySmall),
+                    ],
+                  ),
                 ),
-              ),
-              Icon(Icons.chevron_right, color: AppColors.textHint),
-            ],
+                Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6)),
+              ],
+            ),
           ),
         ),
       ),

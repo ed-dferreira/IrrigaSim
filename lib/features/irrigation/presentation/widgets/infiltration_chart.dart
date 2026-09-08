@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:irrigasim/app/theme/app_colors.dart';
 import 'package:irrigasim/app/theme/app_text_styles.dart';
 import 'package:irrigasim/features/irrigation/domain/entities/simulation_result.dart';
 
@@ -15,6 +14,7 @@ class InfiltrationChart extends StatelessWidget {
       return const Center(child: Text('Sem dados de perfil longitudinal'));
     }
 
+    final colorScheme = Theme.of(context).colorScheme;
     final maxLamina =
         resultado.perfilLongitudinal.reduce((a, b) => a > b ? a : b);
     final maxLaminaMm = maxLamina * 1000;
@@ -28,7 +28,7 @@ class InfiltrationChart extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Perfil Longitudinal', style: AppTextStyles.heading3),
-              _buildIndicators(),
+              _buildIndicators(colorScheme),
             ],
           ),
           const SizedBox(height: 16),
@@ -41,6 +41,10 @@ class InfiltrationChart extends StatelessWidget {
                 maxLamina: maxLaminaMm,
                 cuc: resultado.cuc,
                 du: resultado.du,
+                successColor: const Color(0xFF146C2E),
+                errorColor: colorScheme.error,
+                gridColor: colorScheme.outlineVariant,
+                textColor: colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -49,20 +53,20 @@ class InfiltrationChart extends StatelessWidget {
     );
   }
 
-  Widget _buildIndicators() {
+  Widget _buildIndicators(ColorScheme colorScheme) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         _indicator(
           label: 'CUC',
           value: '${resultado.cuc.toStringAsFixed(1)}%',
-          color: _classificationColor(resultado.classificacaoCuc),
+          color: _classificationColor(resultado.classificacaoCuc, colorScheme),
         ),
         const SizedBox(width: 12),
         _indicator(
           label: 'DU',
           value: '${resultado.du.toStringAsFixed(1)}%',
-          color: _classificationColor(resultado.classificacaoDu),
+          color: _classificationColor(resultado.classificacaoDu, colorScheme),
         ),
       ],
     );
@@ -83,18 +87,18 @@ class InfiltrationChart extends StatelessWidget {
     );
   }
 
-  Color _classificationColor(String classificacao) {
+  Color _classificationColor(String classificacao, ColorScheme colorScheme) {
     switch (classificacao) {
       case 'Excelente':
-        return AppColors.excelent;
+        return const Color(0xFF146C2E);
       case 'Bom':
-        return AppColors.good;
+        return const Color(0xFF689F38);
       case 'Regular':
-        return AppColors.regular;
+        return const Color(0xFF7E5800);
       case 'Ruim':
-        return AppColors.bad;
+        return colorScheme.error;
       default:
-        return AppColors.textSecondary;
+        return colorScheme.onSurfaceVariant;
     }
   }
 }
@@ -105,6 +109,10 @@ class _InfiltrationPainter extends CustomPainter {
   final double maxLamina;
   final double cuc;
   final double du;
+  final Color successColor;
+  final Color errorColor;
+  final Color gridColor;
+  final Color textColor;
 
   _InfiltrationPainter({
     required this.laminas,
@@ -112,6 +120,10 @@ class _InfiltrationPainter extends CustomPainter {
     required this.maxLamina,
     required this.cuc,
     required this.du,
+    required this.successColor,
+    required this.errorColor,
+    required this.gridColor,
+    required this.textColor,
   });
 
   @override
@@ -131,7 +143,7 @@ class _InfiltrationPainter extends CustomPainter {
       y1: padding.top + (1 - laminaRequeridaMm / maxLamina) * chartHeight,
       x2: size.width - padding.right,
       y2: padding.top + (1 - laminaRequeridaMm / maxLamina) * chartHeight,
-      color: AppColors.error,
+      color: errorColor,
       strokeWidth: 1.5,
     );
 
@@ -140,11 +152,11 @@ class _InfiltrationPainter extends CustomPainter {
       text: 'LN: ${laminaRequeridaMm.toStringAsFixed(1)} mm',
       x: size.width - padding.right - 80,
       y: padding.top + (1 - laminaRequeridaMm / maxLamina) * chartHeight - 18,
-      color: AppColors.error,
+      color: errorColor,
     );
 
     final fillPaint = Paint()
-      ..color = AppColors.success.withValues(alpha: 0.3)
+      ..color = successColor.withValues(alpha: 0.3)
       ..style = PaintingStyle.fill;
 
     final fillPath = Path();
@@ -162,7 +174,7 @@ class _InfiltrationPainter extends CustomPainter {
     canvas.drawPath(fillPath, fillPaint);
 
     final linePaint = Paint()
-      ..color = AppColors.success
+      ..color = successColor
       ..strokeWidth = 2.5
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
@@ -191,7 +203,7 @@ class _InfiltrationPainter extends CustomPainter {
     double chartHeight,
   ) {
     final gridPaint = Paint()
-      ..color = AppColors.divider
+      ..color = gridColor
       ..strokeWidth = 0.5;
 
     for (int i = 0; i <= 5; i++) {
@@ -265,14 +277,14 @@ class _InfiltrationPainter extends CustomPainter {
 
     textPainter.text = TextSpan(
       text: '0',
-      style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
+      style: TextStyle(fontSize: 10, color: textColor),
     );
     textPainter.layout();
     textPainter.paint(canvas, Offset(padding.left - 5, size.height - 35));
 
     textPainter.text = TextSpan(
       text: '${(laminas.length - 1)} m',
-      style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
+      style: TextStyle(fontSize: 10, color: textColor),
     );
     textPainter.layout();
     textPainter.paint(
@@ -285,21 +297,21 @@ class _InfiltrationPainter extends CustomPainter {
 
     textPainter.text = TextSpan(
       text: '0',
-      style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
+      style: TextStyle(fontSize: 10, color: textColor),
     );
     textPainter.layout();
     textPainter.paint(canvas, Offset(padding.left - 5, size.height - 25));
 
     textPainter.text = TextSpan(
       text: '${maxLamina.toStringAsFixed(0)} mm',
-      style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
+      style: TextStyle(fontSize: 10, color: textColor),
     );
     textPainter.layout();
     textPainter.paint(canvas, Offset(0, padding.top - 5));
 
     textPainter.text = TextSpan(
       text: 'Lâmina (mm)',
-      style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
+      style: TextStyle(fontSize: 10, color: textColor),
     );
     textPainter.layout();
     textPainter.paint(
@@ -314,6 +326,8 @@ class _InfiltrationPainter extends CustomPainter {
         oldDelegate.laminaRequerida != laminaRequerida ||
         oldDelegate.maxLamina != maxLamina ||
         oldDelegate.cuc != cuc ||
-        oldDelegate.du != du;
+        oldDelegate.du != du ||
+        oldDelegate.successColor != successColor ||
+        oldDelegate.errorColor != errorColor;
   }
 }
