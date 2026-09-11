@@ -2,184 +2,126 @@ import 'dart:math';
 
 import 'package:irrigasim/features/irrigation/domain/entities/irrigation_parameters.dart';
 import 'package:irrigasim/features/irrigation/domain/entities/simulation_result.dart';
-import 'package:irrigasim/features/irrigation/domain/services/kostiakov_lewis.dart';
 import 'package:irrigasim/features/irrigation/domain/services/performance_indicators.dart';
+import 'package:irrigasim/features/irrigation/domain/services/surface_irrigation_math.dart';
 
 class RunBasinSimulation {
   SimulationResult call(IrrigationParameters params) {
-    final area = _calcularArea(params.comprimento, params.larguraOuEspacamento);
-    final tempoEnchimento = _calcularTempoEnchimento(
-      area,
-      params.vazao,
-      params.laminaRequerida,
+    _validate(params);
+    final areaM2 = params.comprimento * params.larguraOuEspacamento;
+    final advance = SurfaceIrrigationMath.fitAdvanceCurve(
+      lengthM: params.comprimento,
+      halfTimeMin: params.tempoAvancoMetadeMin,
+      endTimeMin: params.tempoAvancoFinalMin,
     );
-    final tempoCorte = _calcularTempoCorte(params);
-
-    final tempoTotal = tempoEnchimento + tempoCorte;
-
-    final perfil = _calcularPerfilLongitudinal(params, tempoEnchimento, tempoCorte);
-
-    final laminaMedia =
-        perfil.isEmpty ? 0.0 : perfil.reduce((a, b) => a + b) / perfil.length;
-    final laminaAplicada = _calcularLaminaAplicada(
-      params.vazao,
-      tempoTotal,
-      area,
+    final requiredDepthM = params.laminaRequerida / 1000;
+    final finalOpportunityMin = SurfaceIrrigationMath.solveOpportunityTimeMin(
+      targetDepthM: requiredDepthM,
+      kMMinA: params.k,
+      exponent: params.a,
+      basicRateMMin: params.vib,
     );
-
-    final ea = PerformanceIndicators.calcularEa(laminaMedia, laminaAplicada);
-    final er =
-        PerformanceIndicators.calcularEr(perfil, params.laminaRequerida);
-    final cuc = PerformanceIndicators.calcularCuc(perfil);
-    final du = PerformanceIndicators.calcularDu(perfil);
-
-    final perdaPercolacao = PerformanceIndicators.calcularPerdaPercolacao(
-      laminaMedia,
-      params.laminaRequerida,
-      laminaAplicada,
+    final depletionEndMin = params.tempoAvancoFinalMin + finalOpportunityMin;
+    final profile = <double>[];
+    for (var i = 0; i <= 20; i++) {
+      final distance = params.comprimento * i / 20;
+      profile.add(
+        SurfaceIrrigationMath.infiltrationM(
+          depletionEndMin - advance.timeAt(distance),
+          params.k,
+          params.a,
+          params.vib,
+        ),
+      );
+    }
+    final infiltratedDepthM = SurfaceIrrigationMath.trapezoidalMean(profile);
+    final infiltrationVolumeM3 = infiltratedDepthM * areaM2;
+    final durationForVolumeMin =
+        infiltrationVolumeM3 / (params.vazao / 1000) / 60;
+    final applicationTimeMin = max(
+      params.tempoAvancoFinalMin,
+      durationForVolumeMin,
+    ).toDouble();
+    final appliedDepthM =
+        params.vazao * applicationTimeMin * 60 / areaM2 / 1000;
+    final balance = SurfaceIrrigationMath.balance(
+      profileM: profile,
+      requiredDepthM: requiredDepthM,
+      appliedDepthM: appliedDepthM,
     );
-    final perdaEscoamento =
-        PerformanceIndicators.calcularPerdaEscoamento(ea, perdaPercolacao);
-
-    final volumeAplicado = params.vazao * tempoTotal * 60;
-    final volumeArmazenado = laminaMedia * area * 1000;
-
-    final resumo = _gerarResumo(
-      params,
-      ea,
-      er,
-      cuc,
-      du,
-      tempoEnchimento,
-      tempoCorte,
-      laminaMedia,
-      area,
-      volumeAplicado,
-      volumeArmazenado,
+    final cuc = PerformanceIndicators.calcularCuc(profile).clamp(0, 100);
+    final du = PerformanceIndicators.calcularDu(profile).clamp(0, 100);
+    final maxElevationDifferenceM = max(
+      params.desnivelEquivalentLongitudinal,
+      params.desnivelEquivalentTransversal,
     );
 
     return SimulationResult(
-      eficiencia: ea,
-      eficienciaRequerimento: er,
-      cuc: cuc,
-      du: du,
-      laminaMedia: laminaMedia,
-      laminaRequerida: params.laminaRequerida,
-      tempoAvanco: tempoEnchimento,
-      perdaPercolacao: perdaPercolacao,
-      perdaEscoamento: perdaEscoamento,
-      curvaAvanco: _gerarCurvaEnchimento(params, tempoEnchimento, area),
-      perfilLongitudinal: perfil,
-      resumoTextual: resumo,
+      eficiencia: balance.applicationEfficiency,
+      eficienciaRequerimento: balance.requirementEfficiency,
+      cuc: cuc.toDouble(),
+      du: du.toDouble(),
+      laminaMedia: balance.meanInfiltratedDepthM,
+      laminaRequerida: requiredDepthM,
+      tempoAvanco: params.tempoAvancoFinalMin,
+      perdaPercolacao: balance.deepPercolationPercent,
+      perdaEscoamento: balance.runoffPercent,
+      curvaAvanco: advance.points,
+      perfilLongitudinal: profile,
+      alertaVazaoExcedida: maxElevationDifferenceM > requiredDepthM * 2 / 3
+          ? 'A diferença de nível supera 2/3 da lâmina requerida; revise o nivelamento do tabuleiro.'
+          : null,
+      resumoTextual: 'Modelo intermitente em uma direção, com recessão desprezível e depleção até atender a lâmina no final do tabuleiro.',
+      metricas: {
+        'Área do tabuleiro': areaM2,
+        'Vazão total': params.vazao,
+        'Tempo de avanço': params.tempoAvancoFinalMin,
+        'Tempo de oportunidade no final': finalOpportunityMin,
+        'Tempo de aplicação calculado': applicationTimeMin,
+        'Fim da depleção': depletionEndMin,
+        'Volume infiltrado': infiltrationVolumeM3,
+        'Volume aplicado': appliedDepthM * areaM2,
+        'Lâmina aplicada': appliedDepthM * 1000,
+        'Lâmina média infiltrada': balance.meanInfiltratedDepthM * 1000,
+        'Eficiência de distribuição': balance.distributionEfficiency,
+        'Resíduo do balanço': balance.residualPercent,
+      },
+      unidadesMetricas: const {
+        'Área do tabuleiro': 'm²',
+        'Vazão total': 'L/s',
+        'Tempo de avanço': 'min',
+        'Tempo de oportunidade no final': 'min',
+        'Tempo de aplicação calculado': 'min',
+        'Fim da depleção': 'min',
+        'Volume infiltrado': 'm³',
+        'Volume aplicado': 'm³',
+        'Lâmina aplicada': 'mm',
+        'Lâmina média infiltrada': 'mm',
+        'Eficiência de distribuição': '%',
+        'Resíduo do balanço': '%',
+      },
     );
   }
 
-  static double _calcularArea(double comprimento, double largura) {
-    return comprimento * largura;
-  }
-
-  static double _calcularTempoEnchimento(
-    double area,
-    double vazao,
-    double laminaRequerida,
-  ) {
-    if (vazao <= 0 || area <= 0) return 0;
-    final volumeNecessario = area * laminaRequerida / 1000;
-    return volumeNecessario / (vazao / 1000);
-  }
-
-  static double _calcularTempoCorte(IrrigationParameters params) {
-    return KostiakovLewis.tempoParaLamina(
-      params.laminaRequerida,
-      params.k,
-      params.a,
-      params.vib,
-    );
-  }
-
-  static double _calcularLaminaAplicada(
-    double vazao,
-    double tempoTotal,
-    double area,
-  ) {
-    if (area <= 0) return 0;
-    final volumeAplicado = vazao * tempoTotal * 60;
-    return volumeAplicado / (area * 1000);
-  }
-
-  List<double> _calcularPerfilLongitudinal(
-    IrrigationParameters params,
-    double tempoEnchimento,
-    double tempoCorte,
-  ) {
-    const int n = 20;
-    final double dx = params.comprimento / n;
-    List<double> laminas = [];
-
-    for (int i = 0; i <= n; i++) {
-      final double x = i * dx;
-      final double fracaoDistancia = x / params.comprimento;
-
-      final double tauJusante =
-          (tempoEnchimento + tempoCorte) * (1 - fracaoDistancia);
-      final double tau = max(0.0, tauJusante);
-
-      laminas.add(
-          KostiakovLewis.infiltracaoAcumulada(tau, params.k, params.a, params.vib));
+  void _validate(IrrigationParameters params) {
+    if (params.comprimento <= 0 ||
+        params.larguraOuEspacamento <= 0 ||
+        params.vazao <= 0 ||
+        params.laminaRequerida <= 0) {
+      throw const FormatException(
+        'Revise dimensões, vazão e lâmina requerida.',
+      );
     }
-
-    return laminas;
-  }
-
-  List<PontoGrafico> _gerarCurvaEnchimento(
-    IrrigationParameters params,
-    double tempoEnchimento,
-    double area,
-  ) {
-    List<PontoGrafico> curva = [];
-    int passos = max(1, tempoEnchimento.ceil());
-    for (int t = 0; t <= passos; t++) {
-      final tempo = t.toDouble();
-      final volumeAplicado = params.vazao * tempo * 60;
-      final profundidade = area > 0 ? volumeAplicado / (area * 1000) : 0.0;
-      curva.add(PontoGrafico(tempo, profundidade * 1000));
+    if (params.declividade >= 0.02 || params.declividadeTransversal >= 0.02) {
+      throw const FormatException(
+        'A inundação exige declividades longitudinal e transversal inferiores a 2%.',
+      );
     }
-    return curva;
   }
+}
 
-  String _gerarResumo(
-    IrrigationParameters params,
-    double ea,
-    double er,
-    double cuc,
-    double du,
-    double tempoEnchimento,
-    double tempoCorte,
-    double laminaMedia,
-    double area,
-    double volumeAplicado,
-    double volumeArmazenado,
-  ) {
-    final buffer = StringBuffer();
-    buffer.writeln('=== Simulação de Inundação (Basin) ===');
-    buffer.writeln('Vazão: ${params.vazao.toStringAsFixed(2)} L/s');
-    buffer.writeln('Comprimento: ${params.comprimento.toStringAsFixed(1)} m');
-    buffer.writeln('Largura: ${params.larguraOuEspacamento.toStringAsFixed(1)} m');
-    buffer.writeln('Área: ${area.toStringAsFixed(1)} m²');
-    buffer.writeln('');
-    buffer.writeln('Tempo de enchimento: ${tempoEnchimento.toStringAsFixed(1)} min');
-    buffer.writeln('Tempo de corte: ${tempoCorte.toStringAsFixed(1)} min');
-    buffer.writeln('Tempo total: ${(tempoEnchimento + tempoCorte).toStringAsFixed(1)} min');
-    buffer.writeln('');
-    buffer.writeln('Lâmina média: ${(laminaMedia * 1000).toStringAsFixed(2)} mm');
-    buffer.writeln('Lâmina requerida: ${params.laminaRequerida.toStringAsFixed(2)} mm');
-    buffer.writeln('Volume aplicado: ${volumeAplicado.toStringAsFixed(0)} L');
-    buffer.writeln('Volume armazenado: ${volumeArmazenado.toStringAsFixed(0)} L');
-    buffer.writeln('');
-    buffer.writeln('Ea: ${ea.toStringAsFixed(1)}% (${PerformanceIndicators.classificarEa(ea)})');
-    buffer.writeln('Er: ${er.toStringAsFixed(1)}%');
-    buffer.writeln('CUC: ${cuc.toStringAsFixed(1)}% (${PerformanceIndicators.classificarCuc(cuc)})');
-    buffer.writeln('DU: ${du.toStringAsFixed(1)}% (${PerformanceIndicators.classificarDu(du)})');
-    return buffer.toString();
-  }
+extension on IrrigationParameters {
+  double get desnivelEquivalentLongitudinal => declividade * comprimento;
+  double get desnivelEquivalentTransversal =>
+      declividadeTransversal * larguraOuEspacamento;
 }

@@ -18,11 +18,9 @@ class App extends ConsumerWidget {
     final boldText = perfilState.textoNegrito;
     final reducedAnimations = perfilState.animacoesReduzidas;
 
-    final platformBrightness = MediaQuery.platformBrightnessOf(context);
     final systemBold = MediaQuery.boldTextOf(context);
     final systemTextScaler = MediaQuery.textScalerOf(context);
 
-    final effectiveDark = isDark || (platformBrightness == Brightness.dark && !isDark && perfilState.temaEscuro == false);
     final effectiveBold = boldText || systemBold;
     final systemScale = systemTextScaler.scale(14) / 14;
     final effectiveFontScale = fontScale * systemScale;
@@ -39,7 +37,7 @@ class App extends ConsumerWidget {
         highContrast: highContrast,
         boldText: effectiveBold,
       ),
-      themeMode: effectiveDark ? ThemeMode.dark : ThemeMode.light,
+      themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
       routerConfig: router,
       debugShowCheckedModeBanner: false,
       builder: (context, child) {

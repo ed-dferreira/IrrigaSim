@@ -15,7 +15,7 @@ import 'package:irrigasim/core/navigation/main_shell.dart';
 
 class _AuthRefreshNotifier extends ChangeNotifier {
   _AuthRefreshNotifier(this._ref) {
-    _subscription = _ref.listen<AuthState>(authProvider, (_, __) {
+    _subscription = _ref.listen<AuthState>(authProvider, (_, _) {
       notifyListeners();
     });
   }
@@ -39,7 +39,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final authState = ref.read(authProvider);
       final isLoggedIn = authState.isAuthenticated;
-      final isAuthRoute = state.matchedLocation == '/login' ||
+      final isAuthRoute =
+          state.matchedLocation == '/login' ||
           state.matchedLocation == '/register';
 
       if (!isLoggedIn && !isAuthRoute) return '/login';
@@ -47,10 +48,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginScreen(),
-      ),
+      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/register',
         builder: (context, state) => const RegisterScreen(),

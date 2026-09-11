@@ -11,13 +11,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await PreferenciasApp.init();
 
-  // Inicializar Firebase apenas em plataformas suportadas
-  try {
+  // FlutterFire não fornece plugins nativos para Linux. A autenticação
+  // nessa plataforma usa a API REST oficial do Firebase.
+  if (kIsWeb || defaultTargetPlatform != TargetPlatform.linux) {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-  } catch (e) {
-    debugPrint('Firebase initialization skipped: $e');
   }
 
   runApp(const ProviderScope(child: App()));

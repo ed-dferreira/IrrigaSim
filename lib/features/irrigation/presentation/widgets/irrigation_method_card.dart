@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:irrigasim/app/theme/app_text_styles.dart';
+import 'package:irrigasim/app/theme/app_colors.dart';
 import 'package:irrigasim/features/irrigation/domain/entities/irrigation_parameters.dart';
 
 class IrrigationMethodCard extends StatelessWidget {
@@ -15,11 +15,11 @@ class IrrigationMethodCard extends StatelessWidget {
   Color _getColor(ColorScheme colorScheme) {
     switch (metodo) {
       case MetodoIrrigacao.sulco:
-        return const Color(0xFF42A5F5);
+        return AppColors.sulco;
       case MetodoIrrigacao.faixa:
-        return const Color(0xFF66BB6A);
+        return AppColors.faixa;
       case MetodoIrrigacao.inundacao:
-        return const Color(0xFFFFA726);
+        return AppColors.inundacao;
     }
   }
 
@@ -48,16 +48,16 @@ class IrrigationMethodCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final methodColor = _getColor(colorScheme);
 
     return Semantics(
       label: 'Método de irrigação: ${metodo.displayName}. $_descricao',
       button: true,
       child: Card(
-        elevation: 2,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(24),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -76,13 +76,26 @@ class IrrigationMethodCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(metodo.displayName, style: AppTextStyles.heading3),
+                      Text(
+                        metodo.displayName,
+                        style: textTheme.titleMedium?.copyWith(
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
                       const SizedBox(height: 4),
-                      Text(_descricao, style: AppTextStyles.bodySmall),
+                      Text(
+                        _descricao,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6)),
+                Icon(
+                  Icons.chevron_right,
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                ),
               ],
             ),
           ),

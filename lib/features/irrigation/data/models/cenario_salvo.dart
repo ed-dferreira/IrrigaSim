@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:irrigasim/features/irrigation/domain/entities/irrigation_parameters.dart';
 import 'package:irrigasim/features/irrigation/domain/entities/simulation_result.dart';
+
 import 'simulation_result_model.dart';
 
 class CenarioSalvo {
@@ -53,6 +54,7 @@ class CenarioSalvo {
       'parametros': {
         'comprimento': parametros.comprimento,
         'declividade': parametros.declividade,
+        'declividadeTransversal': parametros.declividadeTransversal,
         'larguraOuEspacamento': parametros.larguraOuEspacamento,
         'k': parametros.k,
         'a': parametros.a,
@@ -62,6 +64,21 @@ class CenarioSalvo {
         'laminaRequerida': parametros.laminaRequerida,
         'manningN': parametros.manningN,
         'sigmaZ': parametros.sigmaZ,
+        'texturaSolo': parametros.texturaSolo.name,
+        'tempoAvancoMetadeMin': parametros.tempoAvancoMetadeMin,
+        'tempoAvancoFinalMin': parametros.tempoAvancoFinalMin,
+        'instanteRecessaoInicioMin': parametros.instanteRecessaoInicioMin,
+        'instanteRecessaoFinalMin': parametros.instanteRecessaoFinalMin,
+        'tipoInundacao': parametros.tipoInundacao.name,
+        'areaHectares': parametros.areaHectares,
+        'porosidade': parametros.porosidade,
+        'profundidadeCamadaMm': parametros.profundidadeCamadaMm,
+        'condutividadeHidraulicaMmDia': parametros.condutividadeHidraulicaMmDia,
+        'dtaMmCm': parametros.dtaMmCm,
+        'fatorDisponibilidade': parametros.fatorDisponibilidade,
+        'evapotranspiracaoMmDia': parametros.evapotranspiracaoMmDia,
+        'laminaSuperficialMm': parametros.laminaSuperficialMm,
+        'vazaoDisponivelLps': parametros.vazaoDisponivelLps,
       },
       'resultado': SimulationResultModel.toMap(resultado),
       'dataCriacao': Timestamp.fromDate(dataCriacao),
@@ -79,8 +96,10 @@ class CenarioSalvo {
       parametros: IrrigationParameters(
         comprimento: (paramData['comprimento'] as num).toDouble(),
         declividade: (paramData['declividade'] as num).toDouble(),
-        larguraOuEspacamento:
-            (paramData['larguraOuEspacamento'] as num).toDouble(),
+        declividadeTransversal:
+            (paramData['declividadeTransversal'] as num?)?.toDouble() ?? 0,
+        larguraOuEspacamento: (paramData['larguraOuEspacamento'] as num)
+            .toDouble(),
         k: (paramData['k'] as num).toDouble(),
         a: (paramData['a'] as num).toDouble(),
         vib: (paramData['vib'] as num).toDouble(),
@@ -89,9 +108,40 @@ class CenarioSalvo {
         laminaRequerida: (paramData['laminaRequerida'] as num).toDouble(),
         manningN: (paramData['manningN'] as num?)?.toDouble() ?? 0.015,
         sigmaZ: (paramData['sigmaZ'] as num?)?.toDouble() ?? 0.4,
+        texturaSolo: TexturaSoloExtension.fromString(
+          paramData['texturaSolo'] as String?,
+        ),
+        tempoAvancoMetadeMin:
+            (paramData['tempoAvancoMetadeMin'] as num?)?.toDouble() ?? 20,
+        tempoAvancoFinalMin:
+            (paramData['tempoAvancoFinalMin'] as num?)?.toDouble() ?? 60,
+        instanteRecessaoInicioMin:
+            (paramData['instanteRecessaoInicioMin'] as num?)?.toDouble() ?? 125,
+        instanteRecessaoFinalMin:
+            (paramData['instanteRecessaoFinalMin'] as num?)?.toDouble() ?? 180,
+        tipoInundacao: TipoInundacaoExtension.fromString(
+          paramData['tipoInundacao'] as String?,
+        ),
+        areaHectares: (paramData['areaHectares'] as num?)?.toDouble() ?? 2,
+        porosidade: (paramData['porosidade'] as num?)?.toDouble() ?? 0.5,
+        profundidadeCamadaMm:
+            (paramData['profundidadeCamadaMm'] as num?)?.toDouble() ?? 500,
+        condutividadeHidraulicaMmDia:
+            (paramData['condutividadeHidraulicaMmDia'] as num?)?.toDouble() ??
+            7,
+        dtaMmCm: (paramData['dtaMmCm'] as num?)?.toDouble() ?? 2,
+        fatorDisponibilidade:
+            (paramData['fatorDisponibilidade'] as num?)?.toDouble() ?? 0.5,
+        evapotranspiracaoMmDia:
+            (paramData['evapotranspiracaoMmDia'] as num?)?.toDouble() ?? 7.2,
+        laminaSuperficialMm:
+            (paramData['laminaSuperficialMm'] as num?)?.toDouble() ?? 150,
+        vazaoDisponivelLps:
+            (paramData['vazaoDisponivelLps'] as num?)?.toDouble() ?? 36,
       ),
-      resultado:
-          SimulationResultModel.fromMap(map['resultado'] as Map<String, dynamic>),
+      resultado: SimulationResultModel.fromMap(
+        map['resultado'] as Map<String, dynamic>,
+      ),
       dataCriacao: map['dataCriacao'] is Timestamp
           ? (map['dataCriacao'] as Timestamp).toDate()
           : DateTime.now(),

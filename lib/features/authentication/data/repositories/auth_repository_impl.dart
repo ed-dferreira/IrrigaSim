@@ -1,7 +1,6 @@
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_datasource.dart';
-import '../models/user_model.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource _dataSource;
@@ -35,9 +34,6 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Stream<User?> get authStateChanges {
-    return _dataSource.authStateChanges.map((firebaseUser) {
-      if (firebaseUser == null) return null;
-      return UserModel.fromFirebaseUser(firebaseUser);
-    });
+    return _dataSource.authStateChanges;
   }
 }

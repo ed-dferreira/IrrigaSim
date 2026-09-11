@@ -3,7 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../../../firebase_options.dart';
 import '../models/user_model.dart';
+import 'firebase_auth_rest_client.dart';
 
 class AuthException implements Exception {
   final String message;
@@ -17,41 +19,33 @@ class AuthRemoteDataSource {
   final firebase.FirebaseAuth? _firebaseAuth;
   final GoogleSignIn? _googleSignIn;
   final FirebaseFirestore? _firestore;
+  late final FirebaseAuthRestClient _restAuth = FirebaseAuthRestClient(
+    apiKey: DefaultFirebaseOptions.linux.apiKey,
+  );
 
   AuthRemoteDataSource({
     this._firebaseAuth,
-    GoogleSignIn? googleSignIn,
+    this._googleSignIn,
     this._firestore,
-  }) : _googleSignIn = googleSignIn;
+  });
 
-  bool get _isFirebaseAvailable {
-    if (kIsWeb) return true;
-    if (defaultTargetPlatform == TargetPlatform.linux) return false;
-    return true;
-  }
+  bool get _isLinux => !kIsWeb && defaultTargetPlatform == TargetPlatform.linux;
 
   firebase.FirebaseAuth get _auth =>
       _firebaseAuth ?? firebase.FirebaseAuth.instance;
   GoogleSignIn get _google => _googleSignIn ?? GoogleSignIn();
   FirebaseFirestore get _db => _firestore ?? FirebaseFirestore.instance;
 
-  firebase.User? get currentFirebaseUser {
-    if (!_isFirebaseAvailable) return null;
-    return _auth.currentUser;
-  }
-
-  Stream<firebase.User?> get authStateChanges {
-    if (!_isFirebaseAvailable) {
-      return const Stream.empty();
-    }
-    return _auth.authStateChanges();
+  Stream<UserModel?> get authStateChanges {
+    if (_isLinux) return _restAuth.authStateChanges;
+    return _auth.authStateChanges().map(
+      (user) => user == null ? null : _mapFirebaseUser(user),
+    );
   }
 
   Future<UserModel> loginWithEmail(String email, String password) async {
-    if (!_isFirebaseAvailable) {
-      throw AuthException(
-        'Login não disponível no Linux. Use Android, iOS ou Web.',
-      );
+    if (_isLinux) {
+      return _runRest(() => _restAuth.loginWithEmail(email, password));
     }
     try {
       final credential = await _auth.signInWithEmailAndPassword(
@@ -65,10 +59,29 @@ class AuthRemoteDataSource {
   }
 
   Future<UserModel> loginWithGoogle() async {
-    if (!_isFirebaseAvailable) {
-      throw AuthException('Login com Google não disponível no Linux.');
+    if (_isLinux) {
+      throw AuthException(
+        'Login com Google no Linux requer um OAuth Client Desktop. '
+        'Use email e senha nesta versão.',
+      );
     }
     try {
+      if (kIsWeb) {
+        final result = await _auth.signInWithPopup(
+          firebase.GoogleAuthProvider(),
+        );
+        final user = _mapFirebaseUser(result.user!);
+        await _salvarUsuarioFirestore(user);
+        return user;
+      }
+      if (defaultTargetPlatform == TargetPlatform.windows) {
+        final result = await _auth.signInWithProvider(
+          firebase.GoogleAuthProvider(),
+        );
+        final user = _mapFirebaseUser(result.user!);
+        await _salvarUsuarioFirestore(user);
+        return user;
+      }
       final googleUser = await _google.signIn();
       if (googleUser == null) throw AuthException('Login com Google cancelado');
 
@@ -90,9 +103,7 @@ class AuthRemoteDataSource {
   }
 
   Future<UserModel> cadastrar(String nome, String email, String senha) async {
-    if (!_isFirebaseAvailable) {
-      throw AuthException('Cadastro não disponível no Linux.');
-    }
+    if (_isLinux) return _runRest(() => _restAuth.register(nome, email, senha));
     try {
       final credential = await _auth.createUserWithEmailAndPassword(
         email: email,
@@ -109,16 +120,27 @@ class AuthRemoteDataSource {
   }
 
   Future<void> logout() async {
-    if (!_isFirebaseAvailable) return;
+    if (_isLinux) {
+      _restAuth.signOut();
+      return;
+    }
     await _google.signOut();
     await _auth.signOut();
   }
 
   UserModel? getCurrentUser() {
-    if (!_isFirebaseAvailable) return null;
-    final firebaseUser = currentFirebaseUser;
+    if (_isLinux) return _restAuth.currentUser;
+    final firebaseUser = _auth.currentUser;
     if (firebaseUser == null) return null;
     return _mapFirebaseUser(firebaseUser);
+  }
+
+  Future<UserModel> _runRest(Future<UserModel> Function() operation) async {
+    try {
+      return await operation();
+    } on FirebaseRestAuthException catch (e) {
+      throw AuthException(e.message);
+    }
   }
 
   UserModel _mapFirebaseUser(firebase.User firebaseUser) {

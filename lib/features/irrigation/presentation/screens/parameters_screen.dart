@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:irrigasim/app/theme/app_colors.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
 import 'package:irrigasim/features/irrigation/domain/entities/irrigation_parameters.dart';
 import 'package:irrigasim/features/irrigation/presentation/viewmodels/parameters_view_model.dart';
@@ -15,323 +17,626 @@ class ParametersScreen extends ConsumerStatefulWidget {
 class _ParametersScreenState extends ConsumerState<ParametersScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  // Controladores para os campos de texto
-  final _comprimentoController = TextEditingController();
-  final _desnivelController = TextEditingController();
-  final _distanciaController = TextEditingController();
-  final _larguraController = TextEditingController();
-  final _kController = TextEditingController();
-  final _aController = TextEditingController();
-  final _vibController = TextEditingController();
-  final _vazaoController = TextEditingController();
-  final _tempoController = TextEditingController();
-  final _laminaController = TextEditingController();
-  final _manningController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    final state = ref.read(parametersProvider);
-    _comprimentoController.text = state.comprimento.toString();
-    _desnivelController.text = state.desnivelM.toString();
-    _distanciaController.text = state.distanciaHorizontalM.toString();
-    _larguraController.text = state.larguraOuEspacamento.toString();
-    _kController.text = state.k.toString();
-    _aController.text = state.a.toString();
-    _vibController.text = state.vib.toString();
-    _vazaoController.text = state.vazao.toString();
-    _tempoController.text = state.tempoAplicacao.toString();
-    _laminaController.text = state.laminaRequerida.toString();
-    _manningController.text = state.manningN.toString();
-  }
-
-  @override
-  void dispose() {
-    _comprimentoController.dispose();
-    _desnivelController.dispose();
-    _distanciaController.dispose();
-    _larguraController.dispose();
-    _kController.dispose();
-    _aController.dispose();
-    _vibController.dispose();
-    _vazaoController.dispose();
-    _tempoController.dispose();
-    _laminaController.dispose();
-    _manningController.dispose();
-    super.dispose();
-  }
-
-  void _updateField(String campo, String valor) {
-    ref.read(parametersProvider.notifier).updateField(campo: campo, valor: valor);
-  }
-
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(parametersProvider);
-    final colors = Theme.of(context).colorScheme;
-    final textStyles = Theme.of(context).textTheme;
-    final notifier = ref.read(parametersProvider.notifier);
+    final accent = _methodColor(state.metodo);
+    final wide = MediaQuery.sizeOf(context).width >= 760;
 
-    ref.listen<ParametersState>(parametersProvider, (prev, next) {
-      if (next.resultado != null && prev?.resultado == null) {
+    ref.listen(parametersProvider, (previous, next) {
+      if (next.resultado != null && previous?.resultado == null) {
         context.push('/home/irrigation/results');
       }
-      if (next.erro != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next.erro!)),
-        );
+      if (next.erro != null && next.erro != previous?.erro) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(next.erro!)));
       }
     });
 
-    final declividadeCalculada = notifier.calcularDeclividade();
-
     return Scaffold(
-      body: Column(
-        children: [
-          // Header personalizado
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(16, 48, 16, 16),
-            color: colors.primary,
-            child: Row(
-              children: [
-                GestureDetector(
-                  onTap: () => context.pop(),
-                  child: Icon(
-                    Icons.arrow_back,
-                    color: colors.onPrimary,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Text(
-                  state.metodo.displayName,
-                  style: textStyles.titleLarge?.copyWith(
-                    color: colors.onPrimary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Formulário
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Form(
-                key: _formKey,
+      appBar: AppBar(title: const Text('Nova simulação')),
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+          children: [
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1120),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Geometria do Terreno
-                    Text(
-                      'Geometria do Terreno',
-                      style: textStyles.titleLarge?.copyWith(
-                        color: colors.primary,
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-
-                    _campo(
-                      context: context,
-                      label: 'Comprimento do terreno (m)',
-                      controller: _comprimentoController,
-                      onChanged: (v) => _updateField('comprimento', v),
-                    ),
-
-                    // Declividade
-                    Text(
-                      'Declividade (2 Medidas)',
-                      style: textStyles.labelLarge,
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _campo(
-                            context: context,
-                            label: 'Desnível ΔH (m)',
-                            controller: _desnivelController,
-                            onChanged: (v) => _updateField('desnivelM', v),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _campo(
-                            context: context,
-                            label: 'Distância L (m)',
-                            controller: _distanciaController,
-                            onChanged: (v) => _updateField('distanciaHorizontalM', v),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    // Card de declividade calculada
-                    Card(
-                      color: colors.primaryContainer,
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Row(
-                          children: [
-                            Icon(
-                              AppIcons.declividade,
-                              color: colors.onPrimaryContainer,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Declividade S₀: ${declividadeCalculada.toStringAsFixed(3)}%',
-                              style: textStyles.titleSmall?.copyWith(
-                                color: colors.onPrimaryContainer,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 14),
-
-                    _campo(
-                      context: context,
-                      label: state.metodo == MetodoIrrigacao.sulco
-                          ? 'Espaçamento entre sulcos (m)'
-                          : 'Largura (m)',
-                      controller: _larguraController,
-                      onChanged: (v) => _updateField('larguraOuEspacamento', v),
-                    ),
-
-                    const SizedBox(height: 14),
-
-                    // Solo — Kostiakov-Lewis
-                    Text(
-                      'Solo — Kostiakov-Lewis',
-                      style: textStyles.titleLarge?.copyWith(
-                        color: colors.primary,
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-
-                    _campo(
-                      context: context,
-                      label: 'Coeficiente k (mm/hᵃ)',
-                      controller: _kController,
-                      onChanged: (v) => _updateField('k', v),
-                    ),
-                    _campo(
-                      context: context,
-                      label: 'Expoente a (0 < a < 1)',
-                      controller: _aController,
-                      onChanged: (v) => _updateField('a', v),
-                    ),
-                    _campo(
-                      context: context,
-                      label: 'Taxa básica de infiltração VIB (mm/h)',
-                      controller: _vibController,
-                      onChanged: (v) => _updateField('vib', v),
-                    ),
-
-                    const SizedBox(height: 14),
-
-                    // Manejo & Hidráulica
-                    Text(
-                      'Manejo & Hidráulica',
-                      style: textStyles.titleLarge?.copyWith(
-                        color: colors.primary,
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-
-                    _campo(
-                      context: context,
-                      label: state.metodo == MetodoIrrigacao.sulco
-                          ? 'Vazão por sulco (L/s)'
-                          : state.metodo == MetodoIrrigacao.faixa
-                              ? 'Vazão unitária (L/s/m)'
-                              : 'Vazão total da bacia (L/s)',
-                      controller: _vazaoController,
-                      onChanged: (v) => _updateField('vazao', v),
-                    ),
-                    _campo(
-                      context: context,
-                      label: 'Tempo de aplicação (min)',
-                      controller: _tempoController,
-                      onChanged: (v) => _updateField('tempoAplicacao', v),
-                    ),
-                    _campo(
-                      context: context,
-                      label: 'Lâmina líquida requerida LN (mm)',
-                      controller: _laminaController,
-                      onChanged: (v) => _updateField('laminaRequerida', v),
-                    ),
-                    _campo(
-                      context: context,
-                      label: 'Rugosidade de Manning n',
-                      controller: _manningController,
-                      onChanged: (v) => _updateField('manningN', v),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Botão de executar
-                    SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton(
-                        onPressed: state.executando
-                            ? null
-                            : () => notifier.executarSimulacao(),
-                        style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        child: state.executando
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
+                    _Hero(method: state.metodo, accent: accent),
+                    if (state.metodo == MetodoIrrigacao.inundacao) ...[
+                      const SizedBox(height: 16),
+                      _BentoCard(
+                        title: 'Regime de inundação',
+                        subtitle:
+                            'Escolha o modelo antes de informar os dados.',
+                        icon: Icons.swap_calls_rounded,
+                        accent: accent,
+                        child: SegmentedButton<TipoInundacao>(
+                          segments: TipoInundacao.values
+                              .map(
+                                (tipo) => ButtonSegment(
+                                  value: tipo,
+                                  label: Text(tipo.displayName),
                                 ),
                               )
-                            : Text(
-                                'Executar Simulação →',
-                                style: textStyles.titleMedium,
-                              ),
+                              .toList(),
+                          selected: {state.tipoInundacao},
+                          onSelectionChanged: (value) => ref
+                              .read(parametersProvider.notifier)
+                              .setTipoInundacao(value.first),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 16),
+                    if (state.metodo == MetodoIrrigacao.inundacao &&
+                        state.tipoInundacao == TipoInundacao.permanente) ...[
+                      _GeometryFields(state: state, accent: accent, wide: wide),
+                      const SizedBox(height: 16),
+                      _PermanentFields(
+                        state: state,
+                        accent: accent,
+                        wide: wide,
+                      ),
+                    ] else ...[
+                      _GeometryFields(state: state, accent: accent, wide: wide),
+                      const SizedBox(height: 16),
+                      _SoilFields(state: state, accent: accent, wide: wide),
+                      const SizedBox(height: 16),
+                      _OperationFields(
+                        state: state,
+                        accent: accent,
+                        wide: wide,
+                      ),
+                    ],
+                    const SizedBox(height: 24),
+                    FilledButton.icon(
+                      onPressed: state.executando
+                          ? null
+                          : () {
+                              FocusScope.of(context).unfocus();
+                              if (_formKey.currentState!.validate()) {
+                                ref
+                                    .read(parametersProvider.notifier)
+                                    .executarSimulacao();
+                              }
+                            },
+                      icon: state.executando
+                          ? const SizedBox.square(
+                              dimension: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(AppIcons.executarSimulacao),
+                      label: Text(
+                        state.executando ? 'Calculando…' : 'Calcular simulação',
                       ),
                     ),
-
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Ao finalizar, você poderá salvar o cenário e exportar os dados.',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                   ],
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _campo({
-    required BuildContext context,
-    required String label,
-    required TextEditingController controller,
-    required ValueChanged<String> onChanged,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          ],
         ),
-        onChanged: onChanged,
       ),
     );
   }
 }
+
+class _Hero extends StatelessWidget {
+  const _Hero({required this.method, required this.accent});
+  final MetodoIrrigacao method;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(24),
+    decoration: BoxDecoration(
+      gradient: LinearGradient(colors: [accent, accent.withValues(alpha: .72)]),
+      borderRadius: BorderRadius.circular(28),
+    ),
+    child: Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: .18),
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Icon(_methodIcon(method), color: Colors.white, size: 32),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                method.displayName,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Preencha os blocos abaixo na ordem apresentada.',
+                style: Theme.of(context).textTheme.bodyMedium
+                    ?.copyWith(color: Colors.white.withValues(alpha: .9)),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _GeometryFields extends ConsumerWidget {
+  const _GeometryFields({
+    required this.state,
+    required this.accent,
+    required this.wide,
+  });
+  final ParametersState state;
+  final Color accent;
+  final bool wide;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final fields = <Widget>[
+      _Field(
+        name: 'comprimento',
+        label: 'Comprimento',
+        value: state.comprimento,
+        suffix: 'm',
+      ),
+      _Field(
+        name: 'larguraOuEspacamento',
+        label: state.metodo == MetodoIrrigacao.sulco
+            ? 'Espaçamento entre sulcos'
+            : 'Largura',
+        value: state.larguraOuEspacamento,
+        suffix: 'm',
+      ),
+      _Field(
+        name: 'desnivelM',
+        label: 'Desnível longitudinal (ΔH)',
+        value: state.desnivelM,
+        suffix: 'm',
+        allowZero: true,
+      ),
+      _Field(
+        name: 'distanciaHorizontalM',
+        label: 'Distância longitudinal',
+        value: state.distanciaHorizontalM,
+        suffix: 'm',
+      ),
+      if (state.metodo != MetodoIrrigacao.sulco) ...[
+        _Field(
+          name: 'desnivelTransversalM',
+          label: 'Desnível transversal (ΔH)',
+          value: state.desnivelTransversalM,
+          suffix: 'm',
+          allowZero: true,
+        ),
+        _Field(
+          name: 'distanciaTransversalM',
+          label: 'Distância transversal',
+          value: state.distanciaTransversalM,
+          suffix: 'm',
+        ),
+      ],
+    ];
+    return _BentoCard(
+      title: '1. Geometria do terreno',
+      subtitle: 'Informe medidas em metros. As declividades são calculadas automaticamente.',
+      icon: AppIcons.declividade,
+      accent: accent,
+      child: Column(
+        children: [
+          _FieldGrid(fields: fields, wide: wide),
+          const SizedBox(height: 12),
+          _SlopeSummary(state: state),
+        ],
+      ),
+    );
+  }
+}
+
+class _SoilFields extends ConsumerWidget {
+  const _SoilFields({
+    required this.state,
+    required this.accent,
+    required this.wide,
+  });
+  final ParametersState state;
+  final Color accent;
+  final bool wide;
+  @override
+  Widget build(BuildContext context, WidgetRef ref) => _BentoCard(
+    title: '2. Infiltração do solo',
+    subtitle: 'Parâmetros do modelo Kostiakov–Lewis.',
+    icon: Icons.layers_rounded,
+    accent: accent,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (state.metodo == MetodoIrrigacao.sulco) ...[
+          DropdownButtonFormField<TexturaSolo>(
+            initialValue: state.texturaSolo,
+            decoration: const InputDecoration(
+              labelText: 'Textura do solo',
+              helperText: 'Define o limite de vazão não erosiva',
+            ),
+            items: TexturaSolo.values
+                .map(
+                  (texture) => DropdownMenuItem(
+                    value: texture,
+                    child: Text(texture.displayName),
+                  ),
+                )
+                .toList(),
+            onChanged: (texture) {
+              if (texture != null) {
+                ref.read(parametersProvider.notifier).setTexturaSolo(texture);
+              }
+            },
+          ),
+          const SizedBox(height: 16),
+        ],
+        _FieldGrid(
+          wide: wide,
+          fields: [
+            _Field(
+              name: 'k',
+              label: 'Coeficiente de infiltração k',
+              value: state.k,
+              suffix: 'm/minᵃ',
+            ),
+            _Field(
+              name: 'a',
+              label: 'Expoente a',
+              value: state.a,
+              helper: 'Entre 0 e 1',
+            ),
+            _Field(
+              name: 'vib',
+              label: 'Infiltração básica (VIB)',
+              value: state.vib,
+              suffix: 'm/min',
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'O tempo do ensaio deve estar em minutos; k e VIB devem usar as unidades indicadas.',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ],
+    ),
+  );
+}
+
+class _OperationFields extends StatelessWidget {
+  const _OperationFields({
+    required this.state,
+    required this.accent,
+    required this.wide,
+  });
+  final ParametersState state;
+  final Color accent;
+  final bool wide;
+  @override
+  Widget build(BuildContext context) => _BentoCard(
+    title: '3. Manejo da aplicação',
+    subtitle:
+        'Dados operacionais usados para calcular desempenho e balanço hídrico.',
+    icon: Icons.tune_rounded,
+    accent: accent,
+    child: _FieldGrid(
+      wide: wide,
+      fields: [
+        _Field(
+          name: 'vazao',
+          label: state.metodo == MetodoIrrigacao.sulco
+              ? 'Vazão por sulco'
+              : state.metodo == MetodoIrrigacao.faixa
+              ? 'Vazão unitária'
+              : 'Vazão total',
+          value: state.vazao,
+          suffix: state.metodo == MetodoIrrigacao.faixa ? 'L/s/m' : 'L/s',
+        ),
+        if (state.metodo == MetodoIrrigacao.faixa)
+          _Field(
+            name: 'tempoAplicacao',
+            label: 'Tempo de aplicação adotado',
+            value: state.tempoAplicacao,
+            suffix: 'min',
+          ),
+        _Field(
+          name: 'laminaRequerida',
+          label: 'Lâmina requerida',
+          value: state.laminaRequerida,
+          suffix: 'mm',
+        ),
+        if (state.metodo == MetodoIrrigacao.faixa)
+          _Field(
+            name: 'manningN',
+            label: 'Rugosidade de Manning',
+            value: state.manningN,
+          ),
+        _Field(
+          name: 'tempoAvancoMetadeMin',
+          label: 'Avanço até metade do comprimento',
+          value: state.tempoAvancoMetadeMin,
+          suffix: 'min',
+        ),
+        _Field(
+          name: 'tempoAvancoFinalMin',
+          label: 'Avanço até o final',
+          value: state.tempoAvancoFinalMin,
+          suffix: 'min',
+        ),
+        if (state.metodo == MetodoIrrigacao.faixa) ...[
+          _Field(
+            name: 'instanteRecessaoInicioMin',
+            label: 'Instante de recessão no início',
+            value: state.instanteRecessaoInicioMin,
+            suffix: 'min',
+          ),
+          _Field(
+            name: 'instanteRecessaoFinalMin',
+            label: 'Instante de recessão no final',
+            value: state.instanteRecessaoFinalMin,
+            suffix: 'min',
+          ),
+        ],
+      ],
+    ),
+  );
+}
+
+class _PermanentFields extends StatelessWidget {
+  const _PermanentFields({
+    required this.state,
+    required this.accent,
+    required this.wide,
+  });
+  final ParametersState state;
+  final Color accent;
+  final bool wide;
+  @override
+  Widget build(BuildContext context) => _BentoCard(
+    title: 'Dados da inundação permanente',
+    subtitle:
+        'Dimensionamento por reposição, armazenamento e vazão disponível.',
+    icon: Icons.water_rounded,
+    accent: accent,
+    child: _FieldGrid(
+      wide: wide,
+      fields: [
+        _Field(
+          name: 'areaHectares',
+          label: 'Área irrigada',
+          value: state.areaHectares,
+          suffix: 'ha',
+        ),
+        _Field(
+          name: 'porosidade',
+          label: 'Porosidade',
+          value: state.porosidade,
+          helper: '0 a 1',
+        ),
+        _Field(
+          name: 'profundidadeCamadaMm',
+          label: 'Profundidade da camada',
+          value: state.profundidadeCamadaMm,
+          suffix: 'mm',
+        ),
+        _Field(
+          name: 'condutividadeHidraulicaMmDia',
+          label: 'Condutividade hidráulica K₀',
+          value: state.condutividadeHidraulicaMmDia,
+          suffix: 'mm/dia',
+        ),
+        _Field(
+          name: 'dtaMmCm',
+          label: 'Disponibilidade total de água',
+          value: state.dtaMmCm,
+          suffix: 'mm/cm',
+        ),
+        _Field(
+          name: 'fatorDisponibilidade',
+          label: 'Fator de disponibilidade',
+          value: state.fatorDisponibilidade,
+          helper: '0 a 1',
+        ),
+        _Field(
+          name: 'evapotranspiracaoMmDia',
+          label: 'Evapotranspiração da cultura',
+          value: state.evapotranspiracaoMmDia,
+          suffix: 'mm/dia',
+        ),
+        _Field(
+          name: 'laminaSuperficialMm',
+          label: 'Lâmina superficial',
+          value: state.laminaSuperficialMm,
+          suffix: 'mm',
+        ),
+        _Field(
+          name: 'vazaoDisponivelLps',
+          label: 'Vazão disponível',
+          value: state.vazaoDisponivelLps,
+          suffix: 'L/s',
+        ),
+      ],
+    ),
+  );
+}
+
+class _FieldGrid extends StatelessWidget {
+  const _FieldGrid({required this.fields, required this.wide});
+  final List<Widget> fields;
+  final bool wide;
+  @override
+  Widget build(BuildContext context) {
+    if (!wide) {
+      return Column(
+        children: fields
+            .map(
+              (e) =>
+                  Padding(padding: const EdgeInsets.only(bottom: 12), child: e),
+            )
+            .toList(),
+      );
+    }
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: fields.map((e) => SizedBox(width: 300, child: e)).toList(),
+    );
+  }
+}
+
+class _Field extends ConsumerWidget {
+  const _Field({
+    required this.name,
+    required this.label,
+    required this.value,
+    this.suffix,
+    this.helper,
+    this.allowZero = false,
+  });
+  final String name;
+  final String label;
+  final double value;
+  final String? suffix;
+  final String? helper;
+  final bool allowZero;
+  @override
+  Widget build(BuildContext context, WidgetRef ref) => TextFormField(
+    initialValue: _format(value),
+    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9,.-]'))],
+    decoration: InputDecoration(
+      labelText: label,
+      suffixText: suffix,
+      helperText: helper,
+    ),
+    onChanged: (text) => ref
+        .read(parametersProvider.notifier)
+        .updateField(campo: name, valor: text),
+    validator: (text) {
+      final number = double.tryParse((text ?? '').replaceAll(',', '.'));
+      if (number == null) return 'Informe um número válido';
+      if (allowZero ? number < 0 : number <= 0) {
+        return allowZero
+            ? 'Use zero ou um valor positivo'
+            : 'Use um valor maior que zero';
+      }
+      if ((name == 'a' ||
+              name == 'porosidade' ||
+              name == 'fatorDisponibilidade') &&
+          number > 1) {
+        return 'O valor máximo é 1';
+      }
+      return null;
+    },
+  );
+}
+
+class _SlopeSummary extends StatelessWidget {
+  const _SlopeSummary({required this.state});
+  final ParametersState state;
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.primaryContainer,
+      borderRadius: BorderRadius.circular(18),
+    ),
+    child: Wrap(
+      spacing: 24,
+      runSpacing: 8,
+      children: [
+        Text('Longitudinal: ${state.declividade.toStringAsFixed(4)} m/m'),
+        if (state.metodo != MetodoIrrigacao.sulco)
+          Text(
+            'Transversal: ${state.declividadeTransversal.toStringAsFixed(4)} m/m',
+          ),
+      ],
+    ),
+  );
+}
+
+class _BentoCard extends StatelessWidget {
+  const _BentoCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.accent,
+    required this.child,
+  });
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color accent;
+  final Widget child;
+  @override
+  Widget build(BuildContext context) => Card(
+    margin: EdgeInsets.zero,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+    child: Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: accent),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleLarge
+                      ?.copyWith(fontWeight: FontWeight.w700),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 20),
+          child,
+        ],
+      ),
+    ),
+  );
+}
+
+String _format(double value) => value == value.roundToDouble()
+    ? value.toInt().toString()
+    : value.toString();
+Color _methodColor(MetodoIrrigacao method) => switch (method) {
+  MetodoIrrigacao.sulco => AppColors.sulco,
+  MetodoIrrigacao.faixa => AppColors.faixa,
+  MetodoIrrigacao.inundacao => AppColors.inundacao,
+};
+IconData _methodIcon(MetodoIrrigacao method) => switch (method) {
+  MetodoIrrigacao.sulco => AppIcons.sulco,
+  MetodoIrrigacao.faixa => AppIcons.faixa,
+  MetodoIrrigacao.inundacao => AppIcons.inundacao,
+};

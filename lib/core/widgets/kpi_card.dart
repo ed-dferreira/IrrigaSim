@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:irrigasim/app/theme/app_text_styles.dart';
 
 class KpiCard extends StatelessWidget {
   final String titulo;
@@ -22,13 +21,12 @@ class KpiCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final effectiveColor = color ?? colorScheme.primary;
 
     return Card(
       elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -48,7 +46,9 @@ class KpiCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     titulo,
-                    style: AppTextStyles.kpiLabel,
+                    style: textTheme.labelMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -62,7 +62,10 @@ class KpiCard extends StatelessWidget {
                 Flexible(
                   child: Text(
                     valor,
-                    style: AppTextStyles.kpiValue.copyWith(color: effectiveColor),
+                    style: textTheme.headlineMedium?.copyWith(
+                      color: effectiveColor,
+                      fontWeight: FontWeight.w700,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -72,7 +75,7 @@ class KpiCard extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 2),
                   child: Text(
                     unidade,
-                    style: AppTextStyles.bodySmall.copyWith(color: effectiveColor),
+                    style: textTheme.bodySmall?.copyWith(color: effectiveColor),
                   ),
                 ),
               ],
@@ -81,7 +84,9 @@ class KpiCard extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 subtitulo!,
-                style: AppTextStyles.bodySmall,
+                style: textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),

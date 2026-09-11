@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:irrigasim/app/theme/app_text_styles.dart';
+
 import '../../providers.dart';
 
 class LoginForm extends ConsumerStatefulWidget {
@@ -12,267 +12,212 @@ class LoginForm extends ConsumerStatefulWidget {
 }
 
 class _LoginFormState extends ConsumerState<LoginForm> {
+  final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
-  final _senhaController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _obscurePassword = true;
-  bool _fieldsFilled = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _emailController.addListener(_checkFields);
-    _senhaController.addListener(_checkFields);
-  }
+  bool _submitted = false;
 
   @override
   void dispose() {
-    _emailController.removeListener(_checkFields);
-    _senhaController.removeListener(_checkFields);
     _emailController.dispose();
-    _senhaController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
-  void _checkFields() {
-    final filled =
-        _emailController.text.trim().isNotEmpty && _senhaController.text.isNotEmpty;
-    if (filled != _fieldsFilled) {
-      setState(() => _fieldsFilled = filled);
-    }
-  }
-
-  void _handleLogin() {
-    final email = _emailController.text.trim();
-    final senha = _senhaController.text;
-
-    if (email.isEmpty || senha.isEmpty) {
-      ref.read(authProvider.notifier).clearError();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Preencha email e senha')),
-      );
-      return;
-    }
-
-    ref.read(authProvider.notifier).loginWithEmail(email, senha);
-  }
-
-  void _handleGoogleLogin() {
-    ref.read(authProvider.notifier).loginWithGoogle();
+  void _login() {
+    setState(() => _submitted = true);
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    FocusScope.of(context).unfocus();
+    ref
+        .read(authProvider.notifier)
+        .loginWithEmail(_emailController.text.trim(), _passwordController.text);
   }
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
+    final auth = ref.watch(authProvider);
     final colors = Theme.of(context).colorScheme;
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (authState.erro != null && authState.erro!.isNotEmpty)
-          Card(
-            color: colors.errorContainer,
-            margin: const EdgeInsets.only(bottom: 16),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Text(
-                    '⚠ ${authState.erro}',
-                    style: AppTextStyles.body.copyWith(
-                      color: colors.onErrorContainer,
-                    ),
+    final text = Theme.of(context).textTheme;
+    return AutofillGroup(
+      child: Form(
+        key: _formKey,
+        autovalidateMode: _submitted
+            ? AutovalidateMode.onUserInteraction
+            : AutovalidateMode.disabled,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (auth.erro != null && auth.erro!.isNotEmpty) ...[
+              Semantics(
+                liveRegion: true,
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
+                  decoration: BoxDecoration(
+                    color: colors.errorContainer,
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: () => ref.read(authProvider.notifier).clearError(),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Text(
-                        '✕',
-                        style: TextStyle(
-                          color: colors.onErrorContainer,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.error_outline_rounded,
+                        color: colors.onErrorContainer,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          auth.erro!,
+                          style: text.bodyMedium?.copyWith(
+                            color: colors.onErrorContainer,
+                          ),
                         ),
                       ),
-                    ),
+                      IconButton(
+                        tooltip: 'Fechar mensagem',
+                        onPressed: () =>
+                            ref.read(authProvider.notifier).clearError(),
+                        color: colors.onErrorContainer,
+                        icon: const Icon(Icons.close_rounded),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-          ),
-        TextFormField(
-          controller: _emailController,
-          keyboardType: TextInputType.emailAddress,
-          textInputAction: TextInputAction.next,
-          decoration: InputDecoration(
-            labelText: 'E-mail',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: colors.primary,
-                width: 2,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        TextFormField(
-          controller: _senhaController,
-          obscureText: _obscurePassword,
-          textInputAction: TextInputAction.done,
-          onFieldSubmitted: (_) => _handleLogin(),
-          decoration: InputDecoration(
-            labelText: 'Senha',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: colors.primary,
-                width: 2,
-              ),
-            ),
-            suffixIcon: IconButton(
-              icon: Icon(
-                _obscurePassword
-                    ? Icons.visibility_outlined
-                    : Icons.visibility_off_outlined,
-                size: 20,
-              ),
-              onPressed: () {
-                setState(() => _obscurePassword = !_obscurePassword);
-              },
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        SizedBox(
-          height: 54,
-          child: ElevatedButton(
-            onPressed: (authState.isLoading)
-                ? null
-                : (_fieldsFilled && _senhaController.text.length >= 6)
-                    ? _handleLogin
-                    : null,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: colors.primary,
-              foregroundColor: colors.onPrimary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: authState.isLoading
-                ? SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: colors.onPrimary,
-                    ),
-                  )
-                : Text(
-                    'Entrar',
-                    style: AppTextStyles.titleMedium,
-                  ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: Container(
-                height: 1,
-                color: colors.outlineVariant,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Text(
-                'ou',
-                style: AppTextStyles.labelLarge.copyWith(
-                  color: colors.onSurfaceVariant,
                 ),
               ),
-            ),
-            Expanded(
-              child: Container(
-                height: 1,
-                color: colors.outlineVariant,
+              const SizedBox(height: 18),
+            ],
+            TextFormField(
+              controller: _emailController,
+              enabled: !auth.isLoading,
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
+              autofillHints: const [
+                AutofillHints.username,
+                AutofillHints.email,
+              ],
+              autocorrect: false,
+              decoration: const InputDecoration(
+                labelText: 'E-mail',
+                hintText: 'nome@exemplo.com',
+                prefixIcon: Icon(Icons.email_outlined),
               ),
+              validator: (value) {
+                final email = value?.trim() ?? '';
+                if (email.isEmpty) {
+                  return 'Informe seu e-mail';
+                }
+                if (!email.contains('@') || !email.contains('.')) {
+                  return 'Digite um e-mail válido';
+                }
+                return null;
+              },
             ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        SizedBox(
-          height: 54,
-          child: OutlinedButton(
-            onPressed: (authState.isLoading) ? null : _handleGoogleLogin,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: colors.onSurface,
-              side: BorderSide(color: colors.outline),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _passwordController,
+              enabled: !auth.isLoading,
+              obscureText: _obscurePassword,
+              textInputAction: TextInputAction.done,
+              autofillHints: const [AutofillHints.password],
+              onFieldSubmitted: (_) => _login(),
+              decoration: InputDecoration(
+                labelText: 'Senha',
+                prefixIcon: const Icon(Icons.lock_outline_rounded),
+                suffixIcon: IconButton(
+                  tooltip: _obscurePassword ? 'Mostrar senha' : 'Ocultar senha',
+                  onPressed: () =>
+                      setState(() => _obscurePassword = !_obscurePassword),
+                  icon: Icon(
+                    _obscurePassword
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                  ),
+                ),
               ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Informe sua senha';
+                }
+                if (value.length < 6) {
+                  return 'A senha deve ter pelo menos 6 caracteres';
+                }
+                return null;
+              },
             ),
-            child: Row(
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: auth.isLoading ? null : _login,
+              child: auth.isLoading
+                  ? SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: colors.onPrimary,
+                      ),
+                    )
+                  : const Text('Entrar'),
+            ),
+            const SizedBox(height: 22),
+            Row(
+              children: [
+                const Expanded(child: Divider()),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Text(
+                    'ou continue com',
+                    style: text.labelMedium?.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                const Expanded(child: Divider()),
+              ],
+            ),
+            const SizedBox(height: 18),
+            OutlinedButton.icon(
+              onPressed: auth.isLoading
+                  ? null
+                  : () => ref.read(authProvider.notifier).loginWithGoogle(),
+              icon: Container(
+                width: 24,
+                height: 24,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: colors.surfaceContainerHigh,
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  'G',
+                  style: text.labelLarge?.copyWith(
+                    color: colors.primary,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              label: const Text('Entrar com Google'),
+            ),
+            const SizedBox(height: 22),
+            Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'G',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: colors.primary,
+                  'Ainda não tem conta?',
+                  style: text.bodyMedium?.copyWith(
+                    color: colors.onSurfaceVariant,
                   ),
                 ),
-                const SizedBox(width: 12),
-                Text(
-                  'Entrar com Google',
-                  style: AppTextStyles.titleMedium.copyWith(
-                    color: colors.onSurface,
-                  ),
+                const SizedBox(width: 4),
+                TextButton(
+                  onPressed: auth.isLoading
+                      ? null
+                      : () => context.go('/register'),
+                  child: const Text('Criar conta'),
                 ),
               ],
             ),
-          ),
-        ),
-        const SizedBox(height: 24),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Não tem conta? ',
-              style: AppTextStyles.bodyLarge.copyWith(
-                color: colors.onSurfaceVariant,
-              ),
-            ),
-            GestureDetector(
-              onTap: () {
-                context.go('/register');
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Text(
-                  'Criar conta',
-                  style: AppTextStyles.titleMedium.copyWith(
-                    color: colors.primary,
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
-      ],
+      ),
     );
   }
 }

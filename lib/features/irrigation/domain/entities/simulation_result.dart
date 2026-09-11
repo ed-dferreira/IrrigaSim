@@ -23,6 +23,8 @@ class SimulationResult {
 
   final String resumoTextual;
   final String? alertaVazaoExcedida;
+  final Map<String, double> metricas;
+  final Map<String, String> unidadesMetricas;
 
   const SimulationResult({
     required this.eficiencia,
@@ -38,6 +40,8 @@ class SimulationResult {
     required this.perfilLongitudinal,
     required this.resumoTextual,
     this.alertaVazaoExcedida,
+    this.metricas = const {},
+    this.unidadesMetricas = const {},
   });
 
   String get classificacaoEa => _classificarEa(eficiencia);

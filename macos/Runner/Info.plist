@@ -14,6 +14,19 @@
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>$(PRODUCT_NAME)</string>
+	<key>GIDClientID</key>
+	<string>1019259738242-dh1uscq38ckqv1fd8ch7hbdsm931e84g.apps.googleusercontent.com</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.1019259738242-dh1uscq38ckqv1fd8ch7hbdsm931e84g</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
