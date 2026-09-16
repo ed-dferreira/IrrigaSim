@@ -153,9 +153,9 @@ void main() {
       ),
     );
 
-    expect(result.metricas['Tempo de avanço'], closeTo(45.61, 1.0));
-    expect(result.metricas['Tempo de oportunidade'], closeTo(47.07, 1.0));
-    expect(result.eficiencia, closeTo(79.31, 2.0));
+    expect(result.metricas['Tempo de avanço'], closeTo(45.61, 0.1));
+    expect(result.metricas['Tempo de oportunidade'], closeTo(47.07, 0.1));
+    expect(result.eficiencia, closeTo(79.31, 0.5));
     expectPhysicalBalance(
       result.eficiencia,
       result.perdaPercolacao,

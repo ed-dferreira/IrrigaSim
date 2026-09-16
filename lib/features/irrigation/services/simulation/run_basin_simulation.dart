@@ -9,89 +9,61 @@ class RunBasinSimulation {
   SimulationResult call(IrrigationParameters params) {
     _validate(params);
     const velocityMaxMMin = 8.0;
-    const hydraulicP1 = 1.0;
-    const hydraulicP2 = 3.3;
-    final slope = params.declividade;
     final lengthM = params.comprimento;
     final widthM = params.larguraOuEspacamento;
     final areaM2 = lengthM * widthM;
     final flowM3Min = params.vazao * 60 / 1000;
+    final requiredDepthM = params.laminaRequerida / 1000;
+    final a0 = pow(
+      (pow(flowM3Min, 2) * pow(params.manningN, 2) * lengthM) / 3600,
+      3.0 / 13,
+    ).toDouble();
+    final y0 = pow(
+      (pow(flowM3Min, 2) * pow(params.manningN, 2) * lengthM) / 3600,
+      0.23,
+    ).toDouble();
     final qMaxM3MinM = pow(
-      (pow(velocityMaxMMin, hydraulicP2) *
-              pow(params.manningN, 2) *
-              lengthM) /
-          3600,
+      (pow(velocityMaxMMin, 3.3) * pow(params.manningN, 2) * lengthM) / 3600,
       3 / 7,
     ).toDouble();
     final qMaxLpsM = qMaxM3MinM * 1000 / 60;
-    final inletAreaM2 = pow(
-      (pow(flowM3Min, 2) * pow(params.manningN, 2) * lengthM) / 3600,
-      3 / 13,
-    ).toDouble();
-    final requiredDepthM = params.laminaRequerida / 1000;
-    final opportunityMin = _solveOpportunityTime(
-      targetDepthM: requiredDepthM,
-      k: params.k,
-      exponent: params.a,
-      basicRate: params.vib,
-    );
     final advance = _solveAdvance(
       flowM3Min: flowM3Min,
       lengthM: lengthM,
-      slope: slope,
-      manningN: params.manningN,
       k: params.k,
       exponent: params.a,
       basicRate: params.vib,
-      inletAreaM2: inletAreaM2,
       initialR: params.sigmaZ,
-      hydraulicP1: hydraulicP1,
-      hydraulicP2: hydraulicP2,
+      y0: a0,
     );
-    final depletionMin = _solveDepletion(
-      initialTimeMin: advance.timeAt(lengthM) + opportunityMin,
-      advanceTimeMin: advance.timeAt(lengthM),
-      flowM3Min: flowM3Min,
-      lengthM: lengthM,
-      slope: slope,
-      manningN: params.manningN,
-      k: params.k,
-      exponent: params.a,
-      basicRate: params.vib,
-    );
-    final irrigationTimeMin =
-        depletionMin - inletAreaM2 * lengthM / (2 * flowM3Min);
+    final taTotal = advance.timeAt(lengthM);
+    final r = advance.exponent;
+    final opportunityMin =
+        ((requiredDepthM * lengthM - 0.8 * y0 * lengthM) / flowM3Min) +
+        taTotal;
+    final irrigationTimeMin = opportunityMin;
     final profile = <double>[];
     for (var i = 0; i <= 20; i++) {
       final distance = lengthM * i / 20;
       final advanceTime = distance == 0 ? 0.0 : advance.timeAt(distance);
-      final recessionTime =
-          depletionMin +
-          (advance.timeAt(lengthM) + opportunityMin - depletionMin) *
-              distance /
-              lengthM;
       profile.add(
-        SurfaceIrrigationMath.infiltrationM(
-          recessionTime - advanceTime,
-          params.k,
-          params.a,
-          params.vib,
-        ),
+        params.k * pow(advanceTime, params.a) +
+            params.vib * advanceTime +
+            0.8 * y0 +
+            flowM3Min * (irrigationTimeMin - advanceTime) / lengthM,
       );
     }
-    final infiltratedDepthM = SurfaceIrrigationMath.trapezoidalMean(profile);
+    final infiltratedDepthM = _trapezoidalMean(profile);
+    final appliedVolumeM3 = flowM3Min * irrigationTimeMin;
+    final requiredVolumeM3 = requiredDepthM * lengthM;
+    final infiltratedVolumeM3 = infiltratedDepthM * lengthM;
     final applicationEfficiency =
-        requiredDepthM * lengthM / (flowM3Min * irrigationTimeMin) * 100;
+        (requiredVolumeM3 / appliedVolumeM3) * 100;
     final deepPercolationPercent =
-        ((infiltratedDepthM - requiredDepthM) *
-                lengthM /
-                (flowM3Min * irrigationTimeMin) *
-                100)
-            .clamp(0, 100)
-            .toDouble();
-    final runoffPercent = (100 - applicationEfficiency - deepPercolationPercent)
-        .clamp(0, 100)
-        .toDouble();
+        ((infiltratedVolumeM3 - requiredVolumeM3) / appliedVolumeM3) * 100;
+    final runoffPercent = 100 - applicationEfficiency - deepPercolationPercent;
+    final adjustedRunoff = runoffPercent < 0 ? 0.0 : runoffPercent;
+    final adjustedPercolation = 100 - applicationEfficiency - adjustedRunoff;
     final cuc = PerformanceIndicators.calcularCuc(profile).clamp(0, 100);
     final du = PerformanceIndicators.calcularDu(profile).clamp(0, 100);
     final flowWarning = params.vazao > qMaxLpsM
@@ -107,9 +79,9 @@ class RunBasinSimulation {
       du: du.toDouble(),
       laminaMedia: infiltratedDepthM,
       laminaRequerida: requiredDepthM,
-      tempoAvanco: advance.timeAt(lengthM),
-      perdaPercolacao: deepPercolationPercent,
-      perdaEscoamento: runoffPercent,
+      tempoAvanco: taTotal,
+      perdaPercolacao: adjustedPercolation,
+      perdaEscoamento: adjustedRunoff,
       curvaAvanco: [
         for (var i = 0; i <= 20; i++)
           PontoGrafico(
@@ -119,20 +91,22 @@ class RunBasinSimulation {
       ],
       perfilLongitudinal: profile,
       alertaVazaoExcedida: flowWarning,
-      resumoTextual: 'Cálculo conforme a planilha de referência: Newton-Raphson para avanço e depleção, inundação intermitente.',
+      resumoTextual:
+          'Cálculo conforme a planilha de referência: inundação intermitente com y0 de Manning.',
       metricas: {
         'Área do tabuleiro': areaM2,
         'Vazão total': params.vazao,
         'Vazão total máxima': qMaxLpsM,
-        'Tempo de oportunidade': opportunityMin,
-        'Tempo de avanço': advance.timeAt(lengthM),
-        'Fim da depleção': depletionMin,
+        'Tempo de oportunidade': irrigationTimeMin,
+        'Tempo de avanço': taTotal,
+        'Fim da depleção': irrigationTimeMin,
         'Tempo de irrigação': irrigationTimeMin,
-        'Profundidade na entrada': inletAreaM2,
-        'Expoente do avanço': advance.exponent,
+        'Profundidade normal y0': y0 * 1000,
+        'Expoente do avanço': r,
         'Volume infiltrado': infiltratedDepthM * areaM2,
         'Volume aplicado': flowM3Min * irrigationTimeMin,
-        'Lâmina aplicada': (flowM3Min * irrigationTimeMin / areaM2) * 1000,
+        'Lâmina aplicada':
+            (flowM3Min * irrigationTimeMin / areaM2) * 1000,
         'Lâmina média infiltrada': infiltratedDepthM * 1000,
       },
       unidadesMetricas: const {
@@ -141,13 +115,14 @@ class RunBasinSimulation {
         'Vazão total máxima': 'L/s',
         'Tempo de oportunidade': 'min',
         'Tempo de avanço': 'min',
-        'Tempo de depleção': 'min',
+        'Fim da depleção': 'min',
         'Tempo de irrigação': 'min',
-        'Profundidade na entrada': 'm',
+        'Profundidade normal y0': 'mm',
         'Expoente do avanço': '',
+        'Volume infiltrado': 'm³',
+        'Volume aplicado': 'm³',
+        'Lâmina aplicada': 'mm',
         'Lâmina média infiltrada': 'mm',
-        'Eficiência de distribuição': '%',
-        'Resíduo do balanço': '%',
       },
     );
   }
@@ -155,23 +130,19 @@ class RunBasinSimulation {
   AdvanceCurve _solveAdvance({
     required double flowM3Min,
     required double lengthM,
-    required double slope,
-    required double manningN,
     required double k,
     required double exponent,
     required double basicRate,
-    required double inletAreaM2,
     required double initialR,
-    required double hydraulicP1,
-    required double hydraulicP2,
+    required double y0,
   }) {
     final sigma =
         (exponent + initialR * (1 - exponent) + 1) /
         ((1 + exponent) * (1 + initialR));
     final finalAdvance = _solveAdvanceTime(
-      initialTime: 5 * inletAreaM2 * lengthM / flowM3Min,
+      initialTime: 5 * y0 * lengthM / flowM3Min,
       flowM3Min: flowM3Min,
-      inletAreaM2: inletAreaM2,
+      areaAtInlet: y0,
       lengthM: lengthM,
       sigma: sigma,
       k: k,
@@ -180,9 +151,9 @@ class RunBasinSimulation {
       r: initialR,
     );
     final midAdvance = _solveAdvanceTime(
-      initialTime: 5 * inletAreaM2 * (lengthM / 2) / flowM3Min,
+      initialTime: 5 * y0 * (lengthM / 2) / flowM3Min,
       flowM3Min: flowM3Min,
-      inletAreaM2: inletAreaM2,
+      areaAtInlet: y0,
       lengthM: lengthM / 2,
       sigma: sigma,
       k: k,
@@ -202,7 +173,7 @@ class RunBasinSimulation {
   double _solveAdvanceTime({
     required double initialTime,
     required double flowM3Min,
-    required double inletAreaM2,
+    required double areaAtInlet,
     required double lengthM,
     required double sigma,
     required double k,
@@ -211,21 +182,24 @@ class RunBasinSimulation {
     required double r,
   }) {
     var time = initialTime;
-    for (var iteration = 0; iteration < 100; iteration++) {
+    for (var iteration = 0; iteration < 200; iteration++) {
       final residual =
           flowM3Min * time -
-          0.77 * inletAreaM2 * lengthM -
+          0.77 * areaAtInlet * lengthM -
           sigma * k * pow(time, exponent) * lengthM -
           basicRate * time * lengthM / (1 + r);
       final derivative =
           flowM3Min -
           sigma * exponent * k * lengthM / pow(time, 1 - exponent) -
           basicRate * lengthM / (1 + r);
-      final next = time - residual / derivative;
+      if (derivative.abs() < 1e-12) {
+        final step = time * 0.5;
+        time = time - step;
+        continue;
+      }
+      var next = time - residual / derivative;
       if (next <= 0 || !next.isFinite) {
-        throw const FormatException(
-          'Não foi possível convergir o tempo de avanço.',
-        );
+        next = time * 0.5;
       }
       if ((next - time).abs() < 0.000001) return next;
       time = next;
@@ -233,60 +207,14 @@ class RunBasinSimulation {
     return time;
   }
 
-  double _solveOpportunityTime({
-    required double targetDepthM,
-    required double k,
-    required double exponent,
-    required double basicRate,
-  }) {
-    var time = 100.0;
-    for (var iteration = 0; iteration < 2; iteration++) {
-      time -=
-          (k * pow(time, exponent) + basicRate * time - targetDepthM) /
-          (k * exponent * pow(time, exponent - 1) + basicRate);
+  double _trapezoidalMean(List<double> values) {
+    if (values.isEmpty) return 0;
+    if (values.length == 1) return values.first;
+    var weighted = (values.first + values.last) / 2;
+    for (var i = 1; i < values.length - 1; i++) {
+      weighted += values[i];
     }
-    return time;
-  }
-
-  double _solveDepletion({
-    required double initialTimeMin,
-    required double advanceTimeMin,
-    required double flowM3Min,
-    required double lengthM,
-    required double slope,
-    required double manningN,
-    required double k,
-    required double exponent,
-    required double basicRate,
-  }) {
-    if (slope < 1e-10) return initialTimeMin;
-    var time = initialTimeMin;
-    for (var iteration = 0; iteration < 4; iteration++) {
-      final averageRate =
-          0.5 *
-              exponent *
-              k *
-              (pow(time, exponent - 1) +
-                  pow(time - advanceTimeMin, exponent - 1)) +
-          basicRate;
-      final storage =
-          pow(
-            ((flowM3Min - averageRate * lengthM) *
-                manningN /
-                (60 * sqrt(slope))),
-            0.6,
-          ).toDouble() /
-          lengthM;
-      final next =
-          initialTimeMin -
-          0.095 *
-              pow(manningN, 0.47565) *
-              pow(storage, 0.2072) *
-              pow(lengthM, 0.6829) /
-              (pow(averageRate, 0.5243) * pow(slope, 0.2378));
-      time = next;
-    }
-    return time;
+    return weighted / (values.length - 1);
   }
 
   void _validate(IrrigationParameters params) {

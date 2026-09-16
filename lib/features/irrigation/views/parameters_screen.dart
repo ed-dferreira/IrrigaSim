@@ -179,7 +179,7 @@ class _Hero extends StatelessWidget {
   );
 }
 
-class _GeometryFields extends ConsumerWidget {
+class _GeometryFields extends StatelessWidget {
   const _GeometryFields({
     required this.state,
     required this.accent,
@@ -190,7 +190,7 @@ class _GeometryFields extends ConsumerWidget {
   final bool wide;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final fields = <Widget>[
       _Field(
         name: 'comprimento',
@@ -253,7 +253,7 @@ class _GeometryFields extends ConsumerWidget {
   }
 }
 
-class _SoilFields extends ConsumerWidget {
+class _SoilFields extends StatelessWidget {
   const _SoilFields({
     required this.state,
     required this.accent,
@@ -263,7 +263,7 @@ class _SoilFields extends ConsumerWidget {
   final Color accent;
   final bool wide;
   @override
-  Widget build(BuildContext context, WidgetRef ref) => _BentoCard(
+  Widget build(BuildContext context) => _BentoCard(
     title: '2. Infiltração do solo',
     subtitle: state.metodo == MetodoIrrigacao.sulco
         ? 'Parâmetros da curva de infiltração acumulada.'

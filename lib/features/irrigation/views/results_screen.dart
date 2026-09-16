@@ -1,4 +1,3 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,9 +44,6 @@ class ResultsScreen extends ConsumerWidget {
       );
     }
     final resultsState = ref.watch(resultsProvider);
-    final permanent =
-        state.metodo == MetodoIrrigacao.inundacao &&
-        state.tipoInundacao == TipoInundacao.permanente;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Resultados da simulação'),
@@ -59,15 +55,7 @@ class ResultsScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: permanent
-          ? _PermanentResultsBody(
-              state: state,
-              result: result,
-              resultsState: resultsState,
-              onNameChanged: ref.read(resultsProvider.notifier).setNomeCenario,
-              onSave: () => _saveScenario(context, ref, state, result),
-            )
-          : _StandardResultsBody(
+      body: _StandardResultsBody(
               state: state,
               result: result,
               resultsState: resultsState,
@@ -234,61 +222,6 @@ class _StandardResultsBody extends StatelessWidget {
       ),
     );
   }
-}
-
-class _PermanentResultsBody extends StatelessWidget {
-  const _PermanentResultsBody({
-    required this.state,
-    required this.result,
-    required this.resultsState,
-    required this.onNameChanged,
-    required this.onSave,
-  });
-
-  final ParametersState state;
-  final SimulationResult result;
-  final ResultsState resultsState;
-  final ValueChanged<String> onNameChanged;
-  final VoidCallback onSave;
-
-  @override
-  Widget build(BuildContext context) => ListView(
-    padding: const EdgeInsets.fromLTRB(16, 8, 16, 48),
-    children: [
-      Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 980),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _KpiGrid(result: result, state: state),
-              if (result.metricas.isNotEmpty) ...[
-                const SizedBox(height: 20),
-                _MetricsCard(
-                  result: result,
-                  accent: Theme.of(context).colorScheme.primary,
-                ),
-              ],
-              const SizedBox(height: 20),
-              _PermanentCharts(result: result),
-              const SizedBox(height: 20),
-              _Recommendation(
-                result: result,
-                accent: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(height: 20),
-              _InlineSaveCard(
-                state: state,
-                saving: resultsState.salvando,
-                onNameChanged: onNameChanged,
-                onSave: onSave,
-              ),
-            ],
-          ),
-        ),
-      ),
-    ],
-  );
 }
 
 class _StandardKpiGrid extends StatelessWidget {
@@ -460,19 +393,14 @@ class _SelectedChart extends StatelessWidget {
   final SimulationResult result;
   final bool compact;
 
+  static const _titles = [
+    'Balanço hídrico volumétrico',
+    'Curva de avanço da água',
+    'Perfil longitudinal da lâmina infiltrada',
+  ];
+
   @override
   Widget build(BuildContext context) {
-    final (title, chart) = switch (selectedIndex) {
-      0 => (
-        'Balanço hídrico volumétrico',
-        WaterBalanceChart(resultado: result),
-      ),
-      1 => ('Curva de avanço da água', AdvanceChart(resultado: result)),
-      _ => (
-        'Perfil longitudinal da lâmina infiltrada',
-        InfiltrationChart(resultado: result),
-      ),
-    };
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -480,14 +408,21 @@ class _SelectedChart extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              title,
+              _titles[selectedIndex],
               style: Theme.of(context).textTheme.titleLarge
                   ?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 16),
             SizedBox(
               height: selectedIndex == 0 && compact ? 360 : 340,
-              child: chart,
+              child: IndexedStack(
+                index: selectedIndex,
+                children: [
+                  WaterBalanceChart(resultado: result),
+                  AdvanceChart(resultado: result),
+                  InfiltrationChart(resultado: result),
+                ],
+              ),
             ),
           ],
         ),
@@ -587,472 +522,52 @@ class _InlineSaveCard extends StatelessWidget {
   final VoidCallback onSave;
 
   @override
-  Widget build(BuildContext context) => Card(
-    child: Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Icon(
-                AppIcons.salvarCenario,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(width: 10),
-              Text(
-                'Salvar este cenário',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          TextFormField(
-            onChanged: onNameChanged,
-            textInputAction: TextInputAction.done,
-            onFieldSubmitted: saving ? null : (_) => onSave(),
-            decoration: InputDecoration(
-              labelText: 'Nome do cenário',
-              hintText:
-                  '${state.metodo.displayName} - ${state.comprimento.toStringAsFixed(0)} m (${state.vazao.toStringAsFixed(2)} L/s)',
-            ),
-          ),
-          const SizedBox(height: 16),
-          FilledButton.icon(
-            onPressed: saving ? null : onSave,
-            icon: saving
-                ? const SizedBox.square(
-                    dimension: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(AppIcons.salvarCenario),
-            label: Text(saving ? 'Salvando...' : 'Salvar na minha conta'),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-class _KpiGrid extends StatelessWidget {
-  const _KpiGrid({required this.result, required this.state});
-  final SimulationResult result;
-  final ParametersState state;
-  @override
   Widget build(BuildContext context) {
-    final permanent =
-        state.metodo == MetodoIrrigacao.inundacao &&
-        state.tipoInundacao == TipoInundacao.permanente;
-    final items = permanent
-        ? [
-            (
-              'Turno de rega',
-              '${_metric(result, 'Turno de rega')} dias',
-              'Calculado',
-            ),
-            (
-              'Vazão de enchimento',
-              '${_metric(result, 'Vazão de enchimento')} L/s',
-              'Qe',
-            ),
-            (
-              'Vazão de manutenção',
-              '${_metric(result, 'Vazão de manutenção')} L/s',
-              'Qm',
-            ),
-            (
-              'Vazão disponível',
-              '${_metric(result, 'Vazão disponível')} L/s',
-              'Fonte',
-            ),
-            (
-              'Eficiência de condução',
-              '${result.eficiencia.toStringAsFixed(1)}%',
-              'Ec',
-            ),
-            (
-              'Tempo de enchimento',
-              '${_metric(result, 'Tempo de enchimento')} h',
-              'Com a vazão disponível',
-            ),
-          ]
-        : [
-            (
-              'Eficiência de aplicação',
-              '${result.eficiencia.toStringAsFixed(1)}%',
-              result.classificacaoEa,
-            ),
-            (
-              'Grau de adequação',
-              '${result.eficienciaRequerimento.toStringAsFixed(1)}%',
-              'Er',
-            ),
-            (
-              'Eficiência de distribuição',
-              '${_metric(result, 'Eficiência de distribuição')}%',
-              'Ed',
-            ),
-            (
-              'Percolação profunda',
-              '${result.perdaPercolacao.toStringAsFixed(1)}%',
-              'Pp',
-            ),
-            (
-              'Lâmina média infiltrada',
-              '${(result.laminaMedia * 1000).toStringAsFixed(1)} mm',
-              'Aplicada',
-            ),
-            (
-              'Escoamento superficial',
-              '${result.perdaEscoamento.toStringAsFixed(1)}%',
-              'Pe',
-            ),
-          ];
-    return LayoutBuilder(
-      builder: (context, box) {
-        final columns = box.maxWidth >= 720 ? 3 : 2;
-        final width = (box.maxWidth - (columns - 1) * 12) / columns;
-        return Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: items.map((item) {
-            return SizedBox(
-              width: width,
-              child: Card(
-                margin: EdgeInsets.zero,
-                child: Padding(
-                  padding: const EdgeInsets.all(18),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.$1,
-                        style: Theme.of(context).textTheme.labelLarge,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        item.$2,
-                        style: Theme.of(context).textTheme.headlineSmall
-                            ?.copyWith(fontWeight: FontWeight.w700),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        item.$3,
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
-        );
-      },
-    );
-  }
-}
-
-class _MetricsCard extends StatelessWidget {
-  const _MetricsCard({required this.result, required this.accent});
-  final SimulationResult result;
-  final Color accent;
-  @override
-  Widget build(BuildContext context) => Card(
-    margin: EdgeInsets.zero,
-    child: Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.analytics_rounded, color: accent),
-              const SizedBox(width: 10),
-              Text(
-                'Dados calculados',
-                style: Theme.of(context).textTheme.titleLarge
-                    ?.copyWith(fontWeight: FontWeight.w700),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          LayoutBuilder(
-            builder: (context, box) {
-              final width = box.maxWidth >= 800
-                  ? (box.maxWidth - 32) / 3
-                  : box.maxWidth >= 480
-                  ? (box.maxWidth - 16) / 2
-                  : box.maxWidth;
-              return Wrap(
-                spacing: 16,
-                runSpacing: 16,
-                children: result.metricas.entries.map((entry) {
-                  return SizedBox(
-                    width: width,
-                    child: Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            entry.key,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${_number(entry.value)} ${result.unidadesMetricas[entry.key] ?? ''}',
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w700),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }).toList(),
-              );
-            },
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-class _PermanentCharts extends StatelessWidget {
-  const _PermanentCharts({required this.result});
-  final SimulationResult result;
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final charts = [
-          _BarChartCard(
-            title: 'Comparação de vazões',
-            unit: 'L/s',
-            values: {
-              'Enchimento': result.metricas['Vazão de enchimento'] ?? 0,
-              'Manutenção': result.metricas['Vazão de manutenção'] ?? 0,
-              'Disponível': result.metricas['Vazão disponível'] ?? 0,
-            },
-          ),
-          _BarChartCard(
-            title: 'Componentes do volume de enchimento',
-            unit: 'm³',
-            values: {
-              'Solo': result.metricas['Armazenamento no solo'] ?? 0,
-              'Superfície': result.metricas['Armazenamento superficial'] ?? 0,
-              'ET': result.metricas['ET durante enchimento'] ?? 0,
-              'Percolação':
-                  result.metricas['Percolação durante enchimento'] ?? 0,
-            },
-          ),
-        ];
-        if (constraints.maxWidth < 800) {
-          return Column(
-            children: [charts.first, const SizedBox(height: 16), charts.last],
-          );
-        }
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(child: charts.first),
-            const SizedBox(width: 16),
-            Expanded(child: charts.last),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _BarChartCard extends StatelessWidget {
-  const _BarChartCard({
-    required this.title,
-    required this.unit,
-    required this.values,
-  });
-  final String title;
-  final String unit;
-  final Map<String, double> values;
-
-  @override
-  Widget build(BuildContext context) {
-    final maximum = values.values.fold<double>(
-      0,
-      (current, value) => value > current ? value : current,
-    );
-    final colors = Theme.of(context).colorScheme;
-    final entries = values.entries.toList();
-    final chartMaximum = maximum <= 0 ? 1.0 : maximum * 1.2;
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     return Card(
-      margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleMedium
-                  ?.copyWith(fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 20),
-            Semantics(
-              label:
-                  '$title. ${entries.map((entry) => '${entry.key}: ${_number(entry.value)} $unit').join(', ')}.',
-              child: SizedBox(
-                height: 260,
-                child: ExcludeSemantics(
-                  child: BarChart(
-                    BarChartData(
-                      minY: 0,
-                      maxY: chartMaximum,
-                      alignment: BarChartAlignment.spaceAround,
-                      gridData: FlGridData(
-                        drawVerticalLine: false,
-                        horizontalInterval: chartMaximum / 4,
-                        getDrawingHorizontalLine: (_) => FlLine(
-                          color: colors.outlineVariant,
-                          strokeWidth: 1,
-                        ),
-                      ),
-                      borderData: FlBorderData(show: false),
-                      titlesData: FlTitlesData(
-                        topTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                        rightTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                        leftTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            reservedSize: 40,
-                            interval: chartMaximum / 4,
-                            getTitlesWidget: (value, meta) => SideTitleWidget(
-                              meta: meta,
-                              child: Text(
-                                _number(value),
-                                style: Theme.of(context).textTheme.labelSmall,
-                              ),
-                            ),
-                          ),
-                        ),
-                        bottomTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            reservedSize: 42,
-                            getTitlesWidget: (value, meta) {
-                              final index = value.toInt();
-                              if (index < 0 || index >= entries.length) {
-                                return const SizedBox.shrink();
-                              }
-                              return SideTitleWidget(
-                                meta: meta,
-                                child: Padding(
-                                  padding: const EdgeInsets.only(top: 6),
-                                  child: Text(
-                                    entries[index].key,
-                                    maxLines: 2,
-                                    textAlign: TextAlign.center,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelSmall,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                      barTouchData: BarTouchData(
-                        touchTooltipData: BarTouchTooltipData(
-                          getTooltipColor: (_) => colors.inverseSurface,
-                          getTooltipItem: (group, groupIndex, rod, rodIndex) =>
-                              BarTooltipItem(
-                                '${entries[group.x].key}\n${_number(rod.toY)} $unit',
-                                TextStyle(color: colors.onInverseSurface),
-                              ),
-                        ),
-                      ),
-                      barGroups: [
-                        for (var index = 0; index < entries.length; index++)
-                          BarChartGroupData(
-                            x: index,
-                            barRods: [
-                              BarChartRodData(
-                                toY: entries[index].value,
-                                color: colors.primary,
-                                width: 24,
-                                borderRadius: const BorderRadius.vertical(
-                                  top: Radius.circular(8),
-                                ),
-                              ),
-                            ],
-                          ),
-                      ],
-                    ),
-                    duration: const Duration(milliseconds: 350),
+            Row(
+              children: [
+                Icon(AppIcons.salvarCenario, color: colors.primary),
+                const SizedBox(width: 10),
+                Text(
+                  'Salvar este cenário',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: colors.primary,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            TextFormField(
+              onChanged: onNameChanged,
+              textInputAction: TextInputAction.done,
+              onFieldSubmitted: saving ? null : (_) => onSave(),
+              decoration: InputDecoration(
+                labelText: 'Nome do cenário',
+                hintText:
+                    '${state.metodo.displayName} - ${state.comprimento.toStringAsFixed(0)} m (${state.vazao.toStringAsFixed(2)} L/s)',
               ),
+            ),
+            const SizedBox(height: 16),
+            FilledButton.icon(
+              onPressed: saving ? null : onSave,
+              icon: saving
+                  ? const SizedBox.square(
+                      dimension: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(AppIcons.salvarCenario),
+              label: Text(saving ? 'Salvando...' : 'Salvar na minha conta'),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _Recommendation extends StatelessWidget {
-  const _Recommendation({required this.result, required this.accent});
-  final SimulationResult result;
-  final Color accent;
-  @override
-  Widget build(BuildContext context) {
-    final message =
-        result.alertaVazaoExcedida ??
-        (result.resumoTextual.trim().isNotEmpty
-            ? result.resumoTextual
-            : 'Revise os indicadores calculados antes de adotar este cenário.');
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: accent.withValues(alpha: .12),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(Icons.lightbulb_rounded, color: accent),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Leitura do resultado',
-                  style: Theme.of(context).textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(height: 4),
-                Text(message),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -1093,13 +608,3 @@ String _csv(ParametersState state, SimulationResult result) {
   }
   return rows.join('\n');
 }
-
-String _number(double value) {
-  final absolute = value.abs();
-  if (absolute >= 1000) return value.toStringAsFixed(0);
-  if (absolute >= 10) return value.toStringAsFixed(1);
-  return value.toStringAsFixed(3);
-}
-
-String _metric(SimulationResult result, String key) =>
-    _number(result.metricas[key] ?? 0);

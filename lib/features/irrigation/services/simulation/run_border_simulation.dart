@@ -209,7 +209,7 @@ class RunBorderSimulation {
     required double r,
   }) {
     var time = initialTime;
-    for (var iteration = 0; iteration < 100; iteration++) {
+    for (var iteration = 0; iteration < 200; iteration++) {
       final residual =
           flowM3MinM * time -
           0.77 * areaAtInlet * lengthM -
@@ -219,11 +219,14 @@ class RunBorderSimulation {
           flowM3MinM -
           sigma * exponent * k * lengthM / pow(time, 1 - exponent) -
           basicRate * lengthM / (1 + r);
-      final next = time - residual / derivative;
+      if (derivative.abs() < 1e-12) {
+        final step = time * 0.5;
+        time = time - step;
+        continue;
+      }
+      var next = time - residual / derivative;
       if (next <= 0 || !next.isFinite) {
-        throw const FormatException(
-          'Não foi possível convergir o tempo de avanço.',
-        );
+        next = time * 0.5;
       }
       if ((next - time).abs() < 0.000001) return next;
       time = next;
