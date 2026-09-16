@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:irrigasim/app/router/app_router.dart';
 import 'package:irrigasim/app/theme/app_theme.dart';
-import 'package:irrigasim/features/perfil/presentation/perfil_view_model.dart';
+import 'package:irrigasim/features/perfil/controllers/perfil_controller.dart';
 
 class App extends ConsumerWidget {
   const App({super.key});

@@ -1,37 +1,37 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:irrigasim/features/authentication/providers.dart';
-import 'domain/repositories/irrigation_repository.dart';
-import 'data/datasources/local/simulacoes_local_datasource.dart';
-import 'data/datasources/remote/firestore_datasource.dart';
-import 'data/repositories/irrigation_repository_impl.dart';
-import 'data/models/cenario_salvo.dart';
 
-final simulacoesLocalDatasourceProvider =
-    Provider<SimulacoesLocalDatasource>((ref) {
-  return SimulacoesLocalDatasource();
+import 'services/persistence/local_scenario_store.dart';
+import 'services/persistence/firestore_scenario_store.dart';
+import 'services/scenario_service.dart';
+import 'models/cenario_salvo.dart';
+
+final localScenarioStoreProvider = Provider<LocalScenarioStore>((ref) {
+  final store = LocalScenarioStore();
+  ref.onDispose(store.dispose);
+  return store;
 });
 
-final firestoreDatasourceProvider = Provider<FirestoreDatasource?>((ref) {
+final firestoreScenarioStoreProvider = Provider<FirestoreScenarioStore?>((ref) {
   final authState = ref.watch(authProvider);
-  if (!authState.isAuthenticated) return null;
+  final isLinux = !kIsWeb && defaultTargetPlatform == TargetPlatform.linux;
+  if (!authState.isAuthenticated || isLinux) return null;
   final userId = authState.user!.uid;
-  return FirestoreDatasource(
+  return FirestoreScenarioStore(
     firestore: FirebaseFirestore.instance,
     userId: userId,
   );
 });
 
-final irrigationRepositoryProvider = Provider<IrrigationRepository>((ref) {
-  final local = ref.watch(simulacoesLocalDatasourceProvider);
-  final remote = ref.watch(firestoreDatasourceProvider);
-  return IrrigationRepositoryImpl(local, remote: remote);
+final scenarioServiceProvider = Provider<ScenarioService>((ref) {
+  final local = ref.watch(localScenarioStoreProvider);
+  final remote = ref.watch(firestoreScenarioStoreProvider);
+  return ScenarioService(local, remote);
 });
 
-final cenariosProvider =
-    StreamProvider.autoDispose<List<CenarioSalvo>>((ref) {
-  final repository = ref.watch(irrigationRepositoryProvider);
-  final stream = repository.observar();
-  ref.onDispose(() => stream.drain());
-  return stream;
+final cenariosProvider = StreamProvider.autoDispose<List<CenarioSalvo>>((ref) {
+  final service = ref.watch(scenarioServiceProvider);
+  return service.observar();
 });

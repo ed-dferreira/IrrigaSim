@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:irrigasim/features/authentication/providers.dart';
-import 'package:irrigasim/features/authentication/presentation/login_screen.dart';
-import 'package:irrigasim/features/authentication/presentation/screens/register_screen.dart';
-import 'package:irrigasim/features/home/presentation/home_screen.dart';
-import 'package:irrigasim/features/irrigation/presentation/screens/irrigation_screen.dart';
-import 'package:irrigasim/features/irrigation/presentation/screens/parameters_screen.dart';
-import 'package:irrigasim/features/irrigation/presentation/screens/results_screen.dart';
-import 'package:irrigasim/features/cenarios/presentation/cenarios_screen.dart';
-import 'package:irrigasim/features/tutorial/presentation/tutorial_screen.dart';
-import 'package:irrigasim/features/perfil/presentation/perfil_screen.dart';
+import 'package:irrigasim/features/authentication/views/login_screen.dart';
+import 'package:irrigasim/features/authentication/views/register_screen.dart';
+import 'package:irrigasim/features/home/views/home_screen.dart';
+import 'package:irrigasim/features/irrigation/views/irrigation_screen.dart';
+import 'package:irrigasim/features/irrigation/views/parameters_screen.dart';
+import 'package:irrigasim/features/irrigation/views/results_screen.dart';
+import 'package:irrigasim/features/cenarios/views/cenarios_screen.dart';
+import 'package:irrigasim/features/tutorial/views/tutorial_screen.dart';
+import 'package:irrigasim/features/perfil/views/perfil_screen.dart';
 import 'package:irrigasim/core/navigation/main_shell.dart';
 
 class _AuthRefreshNotifier extends ChangeNotifier {

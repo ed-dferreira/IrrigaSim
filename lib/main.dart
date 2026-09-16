@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/app.dart';
 import 'firebase_options.dart';
-import 'features/perfil/data/preferencias_app.dart';
+import 'features/perfil/services/preferencias_app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

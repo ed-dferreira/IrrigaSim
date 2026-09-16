@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/features/irrigation/domain/entities/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigation/domain/use_cases/run_basin_simulation.dart';
-import 'package:irrigasim/features/irrigation/domain/use_cases/run_border_simulation.dart';
-import 'package:irrigasim/features/irrigation/domain/use_cases/run_furrow_simulation.dart';
-import 'package:irrigasim/features/irrigation/domain/use_cases/run_permanent_basin_simulation.dart';
-import 'package:irrigasim/features/irrigation/presentation/viewmodels/parameters_view_model.dart';
+import 'package:irrigasim/features/irrigation/models/irrigation_parameters.dart';
+import 'package:irrigasim/features/irrigation/services/simulation/run_basin_simulation.dart';
+import 'package:irrigasim/features/irrigation/services/simulation/run_border_simulation.dart';
+import 'package:irrigasim/features/irrigation/services/simulation/run_furrow_simulation.dart';
+import 'package:irrigasim/features/irrigation/services/simulation/run_permanent_basin_simulation.dart';
+import 'package:irrigasim/features/irrigation/controllers/parameters_controller.dart';
 
 void main() {
   IrrigationParameters base() => const IrrigationParameters(
@@ -42,7 +42,7 @@ void main() {
     expect(container.read(parametersProvider).metodo, MetodoIrrigacao.faixa);
   });
 
-  test('sulco calcula limite por textura e fecha o balanço', () {
+  test('sulco calcula limite não erosivo e fecha o balanço', () {
     final result = RunFurrowSimulation()(base());
 
     expect(result.metricas['Vazão máxima não erosiva'], isPositive);
@@ -54,18 +54,47 @@ void main() {
     );
   });
 
-  test('faixa usa avanço e recessão para formar o perfil', () {
-    final result = RunBorderSimulation()(
+  test('sulco reproduz as fórmulas da planilha de referência', () {
+    final result = RunFurrowSimulation()(
       base().copyWith(
         comprimento: 200,
         declividade: 0.005,
-        larguraOuEspacamento: 8,
-        vazao: 1.8,
-        tempoAplicacao: 142,
-        tempoAvancoMetadeMin: 30,
+        larguraOuEspacamento: 0.9,
+        k: 2.83,
+        a: 0.554,
+        vazao: 1,
+        tempoAplicacao: 130,
+        laminaRequerida: 42,
+        tempoAvancoMetadeMin: 35,
         tempoAvancoFinalMin: 90,
-        instanteRecessaoInicioMin: 160,
-        instanteRecessaoFinalMin: 210,
+      ),
+    );
+
+    expect(result.metricas['Vazão máxima não erosiva'], closeTo(1.262, 0.001));
+    expect(result.metricas['Tempo de aplicação calculado'], 220);
+    expect(result.metricas['Lâmina aplicada'], closeTo(73.3333, 0.001));
+    expect(result.eficiencia, closeTo(57.2727, 0.001));
+    expect(
+      result.metricas['Eficiência de distribuição'],
+      closeTo(85.5676, 0.001),
+    );
+    expect(result.perfilLongitudinal.first * 1000, closeTo(56.1680, 0.001));
+    expect(result.perfilLongitudinal.last * 1000, closeTo(41.9673, 0.001));
+  });
+
+  test('faixa usa avanço e recessão para formar o perfil', () {
+    final result = RunBorderSimulation()(
+      base().copyWith(
+        comprimento: 400,
+        declividade: 0.001,
+        larguraOuEspacamento: 50,
+        k: 0.0034,
+        a: 0.45,
+        vib: 0.0001,
+        vazao: 1.8,
+        laminaRequerida: 56,
+        manningN: 0.04,
+        sigmaZ: 0.66,
       ),
     );
 
@@ -73,7 +102,7 @@ void main() {
       result.perfilLongitudinal.first,
       greaterThan(result.perfilLongitudinal.last),
     );
-    expect(result.metricas['Vazão total da faixa'], closeTo(14.4, 0.001));
+    expect(result.metricas['Vazão total da faixa'], closeTo(90, 0.001));
     expectPhysicalBalance(
       result.eficiencia,
       result.perdaPercolacao,
@@ -81,20 +110,52 @@ void main() {
     );
   });
 
-  test('inundação intermitente calcula aplicação sem rugosidade', () {
-    final result = RunBasinSimulation()(
+  test('faixa reproduz o cenário de 1,8 L/s/m da planilha de referência', () {
+    final result = RunBorderSimulation()(
       base().copyWith(
-        comprimento: 100,
-        declividade: 0.0005,
-        larguraOuEspacamento: 20,
-        vazao: 100,
-        tempoAvancoMetadeMin: 15,
-        tempoAvancoFinalMin: 45,
+        comprimento: 400,
+        declividade: 0.001,
+        larguraOuEspacamento: 50,
+        k: 0.0034,
+        a: 0.45,
+        vib: 0.0001,
+        vazao: 1.8,
+        laminaRequerida: 56,
+        manningN: 0.04,
+        sigmaZ: 0.66,
       ),
     );
 
-    expect(result.metricas['Fim da depleção'], greaterThan(45));
-    expect(result.metricas['Volume aplicado'], isPositive);
+    expect(result.metricas['Vazão unitária máxima'], closeTo(8.6239, 0.001));
+    expect(result.metricas['Tempo de oportunidade'], closeTo(195.0770, 0.001));
+    expect(result.metricas['Tempo de avanço'], closeTo(234.0577, 0.001));
+    expect(result.metricas['Tempo de depleção'], closeTo(361.0019, 0.001));
+    expect(result.metricas['Tempo de irrigação'], closeTo(312.9173, 0.001));
+    expect(result.eficiencia, closeTo(66.2819, 0.001));
+    expect(result.perfilLongitudinal.first * 1000, closeTo(84.2238, 0.001));
+    expect(result.perfilLongitudinal.last * 1000, closeTo(55.9891, 0.001));
+  });
+
+  test('inundação intermitente reproduz o cenário de 5 L/s da planilha', () {
+    final result = RunBasinSimulation()(
+      IrrigationParameters(
+        comprimento: 200,
+        declividade: 0,
+        larguraOuEspacamento: 400,
+        k: 0.0034,
+        a: 0.45,
+        vib: 0.0001,
+        vazao: 5,
+        tempoAplicacao: 0,
+        laminaRequerida: 56,
+        manningN: 0.04,
+        sigmaZ: 0.65,
+      ),
+    );
+
+    expect(result.metricas['Tempo de avanço'], closeTo(45.61, 1.0));
+    expect(result.metricas['Tempo de oportunidade'], closeTo(47.07, 1.0));
+    expect(result.eficiencia, closeTo(79.31, 2.0));
     expectPhysicalBalance(
       result.eficiencia,
       result.perdaPercolacao,

@@ -26,7 +26,7 @@
 #
 # Exemplos válidos:
 #   feat(auth): adiciona login com Google
-#   fix: corrige crash na tela de irrigação
+#   fix: corrige crash na tela de 
 #   docs: atualiza README com instruções de setup
 #   refactor(irrigation): extrai cálculos para service
 #

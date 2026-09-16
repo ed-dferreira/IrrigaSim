@@ -35,6 +35,11 @@ class AppIcons {
   static const atencao = Icons.warning_rounded;
   static const salvarCenario = Icons.save_rounded;
   static const sucesso = Icons.check_circle_rounded;
+  static const exportarDados = Icons.download_rounded;
+  static const balancoHidrico = Icons.donut_large_rounded;
+  static const curvaAvanco = Icons.show_chart_rounded;
+  static const perfilInfiltracao = Icons.area_chart_rounded;
+  static const recomendacao = Icons.lightbulb_rounded;
 
   // ==================== HISTÓRICO DE CENÁRIOS ====================
   static const novoCenario = Icons.add_rounded;
@@ -56,6 +61,8 @@ class AppIcons {
   static const tamanhoFonte = Icons.format_size_rounded;
   static const estatisticas = Icons.insights_rounded;
   static const abrirChangelog = Icons.open_in_new_rounded;
+  static const abrirPerfilGitHub = Icons.open_in_new_rounded;
+  static const abrirLinkExterno = Icons.open_in_new_rounded;
 
   // ==================== ÍCONES GENÉRICOS ====================
   static const home = Icons.home_rounded;
