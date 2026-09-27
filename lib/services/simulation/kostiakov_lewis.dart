@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:irrigasim/features/irrigation/models/simulation_result.dart';
+import 'package:irrigasim/models/simulation_result.dart';
 
 class KostiakovLewis {
   static double infiltracaoAcumulada(

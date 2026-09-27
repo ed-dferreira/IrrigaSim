@@ -1,9 +1,9 @@
 import 'dart:math';
 
-import 'package:irrigasim/features/irrigation/models/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigation/models/simulation_result.dart';
-import 'package:irrigasim/features/irrigation/services/simulation/performance_indicators.dart';
-import 'package:irrigasim/features/irrigation/services/simulation/surface_irrigation_math.dart';
+import 'package:irrigasim/models/irrigation_parameters.dart';
+import 'package:irrigasim/models/simulation_result.dart';
+import 'performance_indicators.dart';
+import 'surface_irrigation_math.dart';
 
 class RunBorderSimulation {
   SimulationResult call(IrrigationParameters params) {
@@ -131,6 +131,31 @@ class RunBorderSimulation {
         'Expoente do avanço': advance.exponent,
         'Vazão total da faixa': params.vazao * params.larguraOuEspacamento,
         'Lâmina média infiltrada': infiltratedDepthM * 1000,
+        'Balanço - Aproveitado': applicationEfficiency,
+        'Balanço - Percolação': deepPercolationPercent,
+        'Balanço - Escoamento': runoffPercent,
+        'Lâmina aplicada':
+            (flowM3MinM * irrigationTimeMin / params.comprimento) * 1000,
+        'Lâmina útil':
+            applicationEfficiency / 100 *
+            (flowM3MinM * irrigationTimeMin / params.comprimento) *
+            1000,
+        'Lâmina percolada':
+            deepPercolationPercent / 100 *
+            (flowM3MinM * irrigationTimeMin / params.comprimento) *
+            1000,
+        'Lâmina escoada':
+            runoffPercent / 100 *
+            (flowM3MinM * irrigationTimeMin / params.comprimento) *
+            1000,
+        'Déficit de lâmina':
+            max(
+              0.0,
+              requiredDepthM * 1000 -
+                  applicationEfficiency / 100 *
+                      (flowM3MinM * irrigationTimeMin / params.comprimento) *
+                      1000,
+            ),
       },
       unidadesMetricas: const {
         'Vazão unitária adotada': 'L/s/m',
@@ -143,6 +168,14 @@ class RunBorderSimulation {
         'Expoente do avanço': '',
         'Vazão total da faixa': 'L/s',
         'Lâmina média infiltrada': 'mm',
+        'Balanço - Aproveitado': '%',
+        'Balanço - Percolação': '%',
+        'Balanço - Escoamento': '%',
+        'Lâmina aplicada': 'mm',
+        'Lâmina útil': 'mm',
+        'Lâmina percolada': 'mm',
+        'Lâmina escoada': 'mm',
+        'Déficit de lâmina': 'mm',
       },
     );
   }

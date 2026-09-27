@@ -1,8 +1,26 @@
+import 'package:irrigasim/models/tipo_sulco_info.dart';
+
 enum MetodoIrrigacao { sulco, faixa, inundacao }
 
 enum TipoInundacao { intermitente, permanente }
 
 enum TexturaSolo { muitoFina, fina, media, grossa, muitoGrossa }
+
+enum ManejoSulco { constante, reduzida, surtir }
+
+extension ManejoSulcoExtension on ManejoSulco {
+  String get displayName => switch (this) {
+    ManejoSulco.constante => 'Vazão constante',
+    ManejoSulco.reduzida => 'Vazão reduzida após avanço',
+    ManejoSulco.surtir => 'Surtirção (surge flow)',
+  };
+
+  String get descricao => switch (this) {
+    ManejoSulco.constante => 'Vazão uniforme do início ao fim. Simples, mas pode causar perdas por percolação no início.',
+    ManejoSulco.reduzida => 'Reduz a vazão quando a água atinge o final. Diminui escoamento superficial (§43).',
+    ManejoSulco.surtir => 'Alterna períodos de aplicação e pausa; requer calibração específica para cálculo.',
+  };
+}
 
 extension TexturaSoloExtension on TexturaSolo {
   String get displayName => switch (this) {
@@ -69,6 +87,7 @@ class IrrigationParameters {
   final double manningN;
   final double sigmaZ;
   final TexturaSolo texturaSolo;
+  final TipoSulco? tipoSulco;
   final double tempoAvancoMetadeMin;
   final double tempoAvancoFinalMin;
   final double instanteRecessaoInicioMin;
@@ -84,6 +103,21 @@ class IrrigationParameters {
   final double laminaSuperficialMm;
   final double vazaoDisponivelLps;
 
+  // ---- Campos específicos de irrigação por sulcos ----
+  final ManejoSulco manejoSulco;
+  final double vazaoReduzidaLs;
+  final double tempoMudancaMin;
+  final double cicloSurtirMin;
+  final double jornadaDiariaH;
+  final double perdasConducaoLs;
+  final double precipitacaoEfetivaMmDia;
+  final String nomeCultura;
+  final double kc;
+  final double espacamentoFileirasM;
+  final double espacamentoPlantasM;
+  final double? larguraSulcoM;
+  final double? profundidadeSulcoM;
+
   const IrrigationParameters({
     required this.comprimento,
     required this.declividade,
@@ -98,6 +132,7 @@ class IrrigationParameters {
     this.manningN = 0.015,
     this.sigmaZ = 0.4,
     this.texturaSolo = TexturaSolo.media,
+    this.tipoSulco,
     this.tempoAvancoMetadeMin = 20,
     this.tempoAvancoFinalMin = 60,
     this.instanteRecessaoInicioMin = 125,
@@ -112,6 +147,19 @@ class IrrigationParameters {
     this.evapotranspiracaoMmDia = 7.2,
     this.laminaSuperficialMm = 150,
     this.vazaoDisponivelLps = 36,
+    this.manejoSulco = ManejoSulco.constante,
+    this.vazaoReduzidaLs = 0,
+    this.tempoMudancaMin = 0,
+    this.cicloSurtirMin = 0,
+    this.jornadaDiariaH = 24,
+    this.perdasConducaoLs = 0,
+    this.precipitacaoEfetivaMmDia = 0,
+    this.nomeCultura = '',
+    this.kc = 1.0,
+    this.espacamentoFileirasM = 0.9,
+    this.espacamentoPlantasM = 0.15,
+    this.larguraSulcoM,
+    this.profundidadeSulcoM,
   });
 
   IrrigationParameters copyWith({
@@ -128,6 +176,7 @@ class IrrigationParameters {
     double? manningN,
     double? sigmaZ,
     TexturaSolo? texturaSolo,
+    TipoSulco? tipoSulco,
     double? tempoAvancoMetadeMin,
     double? tempoAvancoFinalMin,
     double? instanteRecessaoInicioMin,
@@ -142,6 +191,19 @@ class IrrigationParameters {
     double? evapotranspiracaoMmDia,
     double? laminaSuperficialMm,
     double? vazaoDisponivelLps,
+    ManejoSulco? manejoSulco,
+    double? vazaoReduzidaLs,
+    double? tempoMudancaMin,
+    double? cicloSurtirMin,
+    double? jornadaDiariaH,
+    double? perdasConducaoLs,
+    double? precipitacaoEfetivaMmDia,
+    String? nomeCultura,
+    double? kc,
+    double? espacamentoFileirasM,
+    double? espacamentoPlantasM,
+    double? larguraSulcoM,
+    double? profundidadeSulcoM,
   }) {
     return IrrigationParameters(
       comprimento: comprimento ?? this.comprimento,
@@ -158,6 +220,7 @@ class IrrigationParameters {
       manningN: manningN ?? this.manningN,
       sigmaZ: sigmaZ ?? this.sigmaZ,
       texturaSolo: texturaSolo ?? this.texturaSolo,
+      tipoSulco: tipoSulco ?? this.tipoSulco,
       tempoAvancoMetadeMin: tempoAvancoMetadeMin ?? this.tempoAvancoMetadeMin,
       tempoAvancoFinalMin: tempoAvancoFinalMin ?? this.tempoAvancoFinalMin,
       instanteRecessaoInicioMin:
@@ -176,6 +239,20 @@ class IrrigationParameters {
           evapotranspiracaoMmDia ?? this.evapotranspiracaoMmDia,
       laminaSuperficialMm: laminaSuperficialMm ?? this.laminaSuperficialMm,
       vazaoDisponivelLps: vazaoDisponivelLps ?? this.vazaoDisponivelLps,
+      manejoSulco: manejoSulco ?? this.manejoSulco,
+      vazaoReduzidaLs: vazaoReduzidaLs ?? this.vazaoReduzidaLs,
+      tempoMudancaMin: tempoMudancaMin ?? this.tempoMudancaMin,
+      cicloSurtirMin: cicloSurtirMin ?? this.cicloSurtirMin,
+      jornadaDiariaH: jornadaDiariaH ?? this.jornadaDiariaH,
+      perdasConducaoLs: perdasConducaoLs ?? this.perdasConducaoLs,
+      precipitacaoEfetivaMmDia:
+          precipitacaoEfetivaMmDia ?? this.precipitacaoEfetivaMmDia,
+      nomeCultura: nomeCultura ?? this.nomeCultura,
+      kc: kc ?? this.kc,
+      espacamentoFileirasM: espacamentoFileirasM ?? this.espacamentoFileirasM,
+      espacamentoPlantasM: espacamentoPlantasM ?? this.espacamentoPlantasM,
+      larguraSulcoM: larguraSulcoM ?? this.larguraSulcoM,
+      profundidadeSulcoM: profundidadeSulcoM ?? this.profundidadeSulcoM,
     );
   }
 }

@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:irrigasim/features/irrigation/services/simulation/kostiakov_lewis.dart';
+import 'kostiakov_lewis.dart';
 
 class PerformanceIndicators {
   static double calcularEa(double laminaArmazenada, double laminaAplicada) {

@@ -41,6 +41,24 @@ class AppIcons {
   static const perfilInfiltracao = Icons.area_chart_rounded;
   static const recomendacao = Icons.lightbulb_rounded;
 
+  // ==================== PROJETO DE IRRIGAÇÃO ====================
+  static const projetoArea = Icons.landscape_rounded;
+  static const projetoSulco = Icons.agriculture_rounded;
+  static const projetoSolo = Icons.layers_rounded;
+  static const projetoCultura = Icons.eco_rounded;
+  static const projetoClima = Icons.cloud_rounded;
+  static const projetoEnsaio = Icons.science_rounded;
+  static const projetoOperacao = Icons.tune_rounded;
+  static const projetoRevisao = Icons.fact_check_rounded;
+  static const projetoCalcular = Icons.calculate_rounded;
+  static const terreno = Icons.grid_on_rounded;
+  static const relatorio = Icons.description_rounded;
+  static const duplicar = Icons.content_copy_rounded;
+  static const comparar = Icons.compare_arrows_rounded;
+  static const lamina = Icons.straighten_rounded;
+  static const indicadores = Icons.bar_chart_rounded;
+  static const oportunidade = Icons.timer_rounded;
+
   // ==================== HISTÓRICO DE CENÁRIOS ====================
   static const novoCenario = Icons.add_rounded;
   static const criarNovaSimulacao = Icons.add_circle_rounded;

@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:irrigasim/app/theme/app_colors.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
-import 'package:irrigasim/features/irrigation/models/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigation/controllers/parameters_controller.dart';
+import 'package:irrigasim/core/widgets/calculated_field.dart';
+import 'package:irrigasim/models/irrigation_parameters.dart';
+import 'package:irrigasim/models/tipo_sulco_info.dart';
+import 'package:irrigasim/viewmodels/parameters_controller.dart';
 
 class ParametersScreen extends ConsumerStatefulWidget {
   const ParametersScreen({super.key});
@@ -47,6 +49,11 @@ class _ParametersScreenState extends ConsumerState<ParametersScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _Hero(method: state.metodo, accent: accent),
+                    if (state.metodo == MetodoIrrigacao.sulco &&
+                        state.tipoSulco != null) ...[
+                      const SizedBox(height: 16),
+                      _TipoSulcoInfoCard(tipo: state.tipoSulco!),
+                    ],
                     if (state.metodo == MetodoIrrigacao.inundacao) ...[
                       const SizedBox(height: 16),
                       _BentoCard(
@@ -126,6 +133,86 @@ class _ParametersScreenState extends ConsumerState<ParametersScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _TipoSulcoInfoCard extends StatelessWidget {
+  const _TipoSulcoInfoCard({required this.tipo});
+  final TipoSulco tipo;
+
+  @override
+  Widget build(BuildContext context) {
+    final info = TipoSulcoInfo.getInfo(tipo);
+    final accent = AppColors.sulco;
+
+    return _BentoCard(
+      title: info.tipo.displayName,
+      subtitle: info.tipo.descricao,
+      icon: Icons.info_outline_rounded,
+      accent: accent,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _InfoRow(label: 'Alinhamento', value: info.alinhamento),
+          _InfoRow(label: 'Formas', value: info.formas.join(', ')),
+          _InfoRow(label: 'Comprimento', value: info.comprimentoFaixa),
+          _InfoRow(
+            label: 'Declividade ideal',
+            value: info.declividade.faixaIdealLabel,
+          ),
+          if (info.declividade.aconselhavelMax != null)
+            _InfoRow(
+              label: 'Declividade aconselhável',
+              value: info.declividade.faixaAconselhavelLabel,
+            ),
+          if (info.declividade.usavelMax != null)
+            _InfoRow(
+              label: 'Declividade usável',
+              value: info.declividade.faixaUsavelLabel,
+            ),
+          const SizedBox(height: 8),
+          Text(
+            'Culturas indicadas:',
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            children: info.culturasIndicadas
+                .map((c) => Chip(label: Text(c), visualDensity: VisualDensity.compact))
+                .toList(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({required this.label, required this.value});
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 160,
+            child: Text(
+              '$label:',
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+          ),
+          Expanded(
+            child: Text(value, style: Theme.of(context).textTheme.bodyMedium),
+          ),
+        ],
       ),
     );
   }
@@ -328,31 +415,67 @@ class _OperationFields extends StatelessWidget {
   Widget build(BuildContext context) => _BentoCard(
     title: '3. Manejo da aplicação',
     subtitle:
-        'Dados operacionais usados para calcular desempenho e balanço hídrico.',
+        state.metodo == MetodoIrrigacao.sulco
+            ? 'Vazão e avanço são calculados pela aplicação; o tempo de oportunidade pode ser editado.'
+            : 'Dados operacionais usados para calcular desempenho e balanço hídrico.',
     icon: Icons.tune_rounded,
     accent: accent,
     child: _FieldGrid(
       wide: wide,
       fields: [
-        _Field(
-          name: 'vazao',
-          label: state.metodo == MetodoIrrigacao.sulco
-              ? 'Vazão por sulco'
-              : state.metodo == MetodoIrrigacao.faixa
-              ? 'Vazão unitária'
-              : 'Vazão total',
-          value: state.vazao,
-          suffix: state.metodo == MetodoIrrigacao.faixa ? 'L/s/m' : 'L/s',
-        ),
-        if (state.metodo == MetodoIrrigacao.sulco)
+        if (state.metodo == MetodoIrrigacao.sulco) ...[
+          CalculatedField(
+            label: 'Vazão por sulco',
+            value: state.vazao,
+            suffix: 'L/s',
+          ),
           _Field(
             name: 'tempoAplicacao',
-            label: state.metodo == MetodoIrrigacao.sulco
-                ? 'Tempo de oportunidade no final'
-                : 'Tempo de aplicação adotado',
+            label: 'Tempo de oportunidade no final',
             value: state.tempoAplicacao,
             suffix: 'min',
           ),
+          CalculatedField(
+            label: 'Avanço até metade do comprimento',
+            value: state.tempoAvancoMetadeMin,
+            suffix: 'min',
+          ),
+          CalculatedField(
+            label: 'Avanço até o final',
+            value: state.tempoAvancoFinalMin,
+            suffix: 'min',
+          ),
+        ] else ...[
+          _Field(
+            name: 'vazao',
+            label: state.metodo == MetodoIrrigacao.faixa
+                ? 'Vazão unitária'
+                : 'Vazão total',
+            value: state.vazao,
+            suffix: state.metodo == MetodoIrrigacao.faixa ? 'L/s/m' : 'L/s',
+          ),
+          if (state.metodo != MetodoIrrigacao.sulco)
+            _Field(
+              name: 'tempoAplicacao',
+              label: 'Tempo de aplicação adotado',
+              value: state.tempoAplicacao,
+              suffix: 'min',
+            ),
+          if (state.metodo != MetodoIrrigacao.faixa) ...[
+            _Field(
+              name: 'tempoAvancoMetadeMin',
+              label: 'Avanço até metade do comprimento',
+              value: state.tempoAvancoMetadeMin,
+              suffix: 'min',
+            ),
+            _Field(
+              name: 'tempoAvancoFinalMin',
+              label: 'Avanço até o final',
+              value: state.tempoAvancoFinalMin,
+              suffix: 'min',
+            ),
+          ],
+        ],
         _Field(
           name: 'laminaRequerida',
           label: 'Lâmina requerida',
@@ -365,20 +488,6 @@ class _OperationFields extends StatelessWidget {
             label: 'Rugosidade de Manning',
             value: state.manningN,
           ),
-        if (state.metodo != MetodoIrrigacao.faixa) ...[
-          _Field(
-            name: 'tempoAvancoMetadeMin',
-            label: 'Avanço até metade do comprimento',
-            value: state.tempoAvancoMetadeMin,
-            suffix: 'min',
-          ),
-          _Field(
-            name: 'tempoAvancoFinalMin',
-            label: 'Avanço até o final',
-            value: state.tempoAvancoFinalMin,
-            suffix: 'min',
-          ),
-        ],
         if (state.metodo == MetodoIrrigacao.faixa) ...[
           _Field(
             name: 'sigmaZ',

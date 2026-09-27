@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
-import 'package:irrigasim/features/perfil/controllers/perfil_controller.dart';
+import 'package:irrigasim/viewmodels/perfil_controller.dart';
 
-import '../providers.dart';
+import '../../viewmodels/auth_providers.dart';
 import 'widgets/login_form.dart';
 
 class LoginScreen extends ConsumerWidget {

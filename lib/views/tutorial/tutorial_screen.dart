@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
-import 'package:irrigasim/features/irrigation/models/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigation/controllers/parameters_controller.dart';
-import 'package:irrigasim/features/irrigation/views/widgets/irrigation_method_card.dart';
+import 'package:irrigasim/models/irrigation_parameters.dart';
+import 'package:irrigasim/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/views/irrigation/widgets/irrigation_method_card.dart';
 
 class TutorialScreen extends ConsumerWidget {
   const TutorialScreen({super.key});

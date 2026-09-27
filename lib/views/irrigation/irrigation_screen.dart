@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:irrigasim/app/theme/app_text_styles.dart';
-import 'package:irrigasim/features/irrigation/models/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigation/controllers/parameters_controller.dart';
-import 'package:irrigasim/features/irrigation/views/widgets/irrigation_method_card.dart';
+import 'package:irrigasim/models/irrigation_parameters.dart';
+import 'package:irrigasim/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/views/irrigation/widgets/irrigation_method_card.dart';
 
 class IrrigationScreen extends ConsumerWidget {
   const IrrigationScreen({super.key});
@@ -42,6 +42,10 @@ class IrrigationScreen extends ConsumerWidget {
 
   void _open(BuildContext context, WidgetRef ref, MetodoIrrigacao method) {
     ref.read(parametersProvider.notifier).setMetodo(method);
-    context.push('/home/irrigation/parameters');
+    if (method == MetodoIrrigacao.sulco) {
+      context.push('/home/irrigation/tipo-sulco');
+    } else {
+      context.push('/home/irrigation/parameters');
+    }
   }
 }

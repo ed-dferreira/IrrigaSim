@@ -4,6 +4,10 @@ Flutter app for irrigation simulation.
 
 **Stack:** Flutter + Dart + MVC + Riverpod + Feature-First
 
+## Idioma
+
+**Sempre responda em português brasileiro (pt-BR).** Todas as respostas, explicações, comentários no código, commits e documentação devem ser escritos em português.
+
 ## Commands
 
 - `flutter pub get` — install dependencies

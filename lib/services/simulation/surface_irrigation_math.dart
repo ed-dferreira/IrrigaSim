@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:irrigasim/features/irrigation/models/simulation_result.dart';
+import 'package:irrigasim/models/simulation_result.dart';
 
 class AdvanceCurve {
   const AdvanceCurve({
@@ -53,7 +53,34 @@ class SurfaceIrrigationMath {
         'O avanço na metade deve ser positivo e menor que o avanço final.',
       );
     }
-    final exponent = (log(halfTimeMin) - log(endTimeMin)) / log(0.5);
+    return fitAdvanceCurveFromTwoPoints(
+      lengthM: lengthM,
+      intermediateDistanceM: lengthM / 2,
+      intermediateTimeMin: halfTimeMin,
+      endTimeMin: endTimeMin,
+      samples: samples,
+    );
+  }
+
+  static AdvanceCurve fitAdvanceCurveFromTwoPoints({
+    required double lengthM,
+    required double intermediateDistanceM,
+    required double intermediateTimeMin,
+    required double endTimeMin,
+    int samples = 20,
+  }) {
+    if (lengthM <= 0 ||
+        intermediateDistanceM <= 0 ||
+        intermediateDistanceM >= lengthM ||
+        intermediateTimeMin <= 0 ||
+        endTimeMin <= intermediateTimeMin) {
+      throw const FormatException(
+        'A distância intermediária deve ficar entre zero e o comprimento e os tempos devem crescer.',
+      );
+    }
+    final exponent =
+        (log(intermediateTimeMin) - log(endTimeMin)) /
+        log(intermediateDistanceM / lengthM);
     if (!exponent.isFinite || exponent <= 0) {
       throw const FormatException(
         'Os dados de avanço não formam uma curva válida.',

@@ -1,9 +1,9 @@
 import 'dart:math';
 
-import 'package:irrigasim/features/irrigation/models/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigation/models/simulation_result.dart';
-import 'package:irrigasim/features/irrigation/services/simulation/performance_indicators.dart';
-import 'package:irrigasim/features/irrigation/services/simulation/surface_irrigation_math.dart';
+import 'package:irrigasim/models/irrigation_parameters.dart';
+import 'package:irrigasim/models/simulation_result.dart';
+import 'performance_indicators.dart';
+import 'surface_irrigation_math.dart';
 
 class RunBasinSimulation {
   SimulationResult call(IrrigationParameters params) {
@@ -108,6 +108,29 @@ class RunBasinSimulation {
         'Lâmina aplicada':
             (flowM3Min * irrigationTimeMin / areaM2) * 1000,
         'Lâmina média infiltrada': infiltratedDepthM * 1000,
+        'Balanço - Aproveitado': applicationEfficiency,
+        'Balanço - Percolação': adjustedPercolation,
+        'Balanço - Escoamento': adjustedRunoff,
+        'Lâmina útil':
+            applicationEfficiency / 100 *
+            (flowM3Min * irrigationTimeMin / areaM2) *
+            1000,
+        'Lâmina percolada':
+            adjustedPercolation / 100 *
+            (flowM3Min * irrigationTimeMin / areaM2) *
+            1000,
+        'Lâmina escoada':
+            adjustedRunoff / 100 *
+            (flowM3Min * irrigationTimeMin / areaM2) *
+            1000,
+        'Déficit de lâmina':
+            max(
+              0.0,
+              requiredDepthM * 1000 -
+                  applicationEfficiency / 100 *
+                      (flowM3Min * irrigationTimeMin / areaM2) *
+                      1000,
+            ),
       },
       unidadesMetricas: const {
         'Área do tabuleiro': 'm²',
@@ -123,6 +146,13 @@ class RunBasinSimulation {
         'Volume aplicado': 'm³',
         'Lâmina aplicada': 'mm',
         'Lâmina média infiltrada': 'mm',
+        'Balanço - Aproveitado': '%',
+        'Balanço - Percolação': '%',
+        'Balanço - Escoamento': '%',
+        'Lâmina útil': 'mm',
+        'Lâmina percolada': 'mm',
+        'Lâmina escoada': 'mm',
+        'Déficit de lâmina': 'mm',
       },
     );
   }

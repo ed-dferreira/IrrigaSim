@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
-import 'package:irrigasim/features/authentication/providers.dart';
+import 'package:irrigasim/viewmodels/auth_providers.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../models/tamanho_fonte.dart';
-import '../controllers/perfil_controller.dart';
+import '../../models/tamanho_fonte.dart';
+import '../../viewmodels/perfil_controller.dart';
 
 const _appVersion = '1.0.0';
 

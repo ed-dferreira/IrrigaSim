@@ -1,12 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-import 'package:irrigasim/features/authentication/providers.dart';
+import 'package:irrigasim/viewmodels/auth_providers.dart';
 
-import 'services/persistence/local_scenario_store.dart';
-import 'services/persistence/firestore_scenario_store.dart';
-import 'services/scenario_service.dart';
-import 'models/cenario_salvo.dart';
+import '../services/persistence/local_scenario_store.dart';
+import '../services/persistence/firestore_scenario_store.dart';
+import '../services/scenario_service.dart';
+import '../models/cenario_salvo.dart';
 
 final localScenarioStoreProvider = Provider<LocalScenarioStore>((ref) {
   final store = LocalScenarioStore();

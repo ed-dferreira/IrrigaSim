@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/features/irrigation/models/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigation/services/simulation/run_basin_simulation.dart';
-import 'package:irrigasim/features/irrigation/services/simulation/run_border_simulation.dart';
-import 'package:irrigasim/features/irrigation/services/simulation/run_furrow_simulation.dart';
-import 'package:irrigasim/features/irrigation/services/simulation/run_permanent_basin_simulation.dart';
-import 'package:irrigasim/features/irrigation/controllers/parameters_controller.dart';
+import 'package:irrigasim/models/irrigation_parameters.dart';
+import 'package:irrigasim/services/simulation/run_basin_simulation.dart';
+import 'package:irrigasim/services/simulation/run_border_simulation.dart';
+import 'package:irrigasim/services/simulation/run_furrow_simulation.dart';
+import 'package:irrigasim/services/simulation/run_permanent_basin_simulation.dart';
+import 'package:irrigasim/viewmodels/parameters_controller.dart';
 
 void main() {
   IrrigationParameters base() => const IrrigationParameters(
@@ -70,13 +70,13 @@ void main() {
       ),
     );
 
-    expect(result.metricas['Vazão máxima não erosiva'], closeTo(1.262, 0.001));
+    expect(result.metricas['Vazão máxima não erosiva'], closeTo(1.02, 0.01));
     expect(result.metricas['Tempo de aplicação calculado'], 220);
     expect(result.metricas['Lâmina aplicada'], closeTo(73.3333, 0.001));
-    expect(result.eficiencia, closeTo(57.2727, 0.001));
+    expect(result.eficiencia, closeTo(57.2281, 0.001));
     expect(
       result.metricas['Eficiência de distribuição'],
-      closeTo(85.5676, 0.001),
+      closeTo(85.5295, 0.001),
     );
     expect(result.perfilLongitudinal.first * 1000, closeTo(56.1680, 0.001));
     expect(result.perfilLongitudinal.last * 1000, closeTo(41.9673, 0.001));

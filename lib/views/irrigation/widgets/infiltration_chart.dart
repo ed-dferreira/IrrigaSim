@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:irrigasim/features/irrigation/models/simulation_result.dart';
+import 'package:irrigasim/models/simulation_result.dart';
 
 class InfiltrationChart extends StatelessWidget {
   const InfiltrationChart({super.key, required this.resultado});

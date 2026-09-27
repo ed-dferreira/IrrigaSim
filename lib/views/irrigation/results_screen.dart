@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
-import 'package:irrigasim/features/irrigation/models/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigation/models/simulation_result.dart';
-import 'package:irrigasim/features/irrigation/controllers/parameters_controller.dart';
-import 'package:irrigasim/features/irrigation/controllers/results_controller.dart';
-import 'package:irrigasim/features/irrigation/views/widgets/advance_chart.dart';
-import 'package:irrigasim/features/irrigation/views/widgets/infiltration_chart.dart';
-import 'package:irrigasim/features/irrigation/views/widgets/water_balance_chart.dart';
+import 'package:irrigasim/models/irrigation_parameters.dart';
+import 'package:irrigasim/models/simulation_result.dart';
+import 'package:irrigasim/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/viewmodels/results_controller.dart';
+import 'package:irrigasim/views/irrigation/widgets/advance_chart.dart';
+import 'package:irrigasim/views/irrigation/widgets/infiltration_chart.dart';
+import 'package:irrigasim/views/irrigation/widgets/water_balance_chart.dart';
 
 class ResultsScreen extends ConsumerWidget {
   const ResultsScreen({super.key});
@@ -56,13 +56,13 @@ class ResultsScreen extends ConsumerWidget {
         ],
       ),
       body: _StandardResultsBody(
-              state: state,
-              result: result,
-              resultsState: resultsState,
-              onTabSelected: ref.read(resultsProvider.notifier).setAba,
-              onNameChanged: ref.read(resultsProvider.notifier).setNomeCenario,
-              onSave: () => _saveScenario(context, ref, state, result),
-            ),
+        state: state,
+        result: result,
+        resultsState: resultsState,
+        onTabSelected: ref.read(resultsProvider.notifier).setAba,
+        onNameChanged: ref.read(resultsProvider.notifier).setNomeCenario,
+        onSave: () => _saveScenario(context, ref, state, result),
+      ),
     );
   }
 
@@ -262,6 +262,10 @@ class _StandardKpiGrid extends StatelessWidget {
         '${result.tempoAvanco.toStringAsFixed(0)} min',
         'Até o final',
       ),
+      if (result.metricas['Eficiência de condução'] case final ec?)
+        ('Eficiência Ec', '${ec.toStringAsFixed(1)}%', 'Condução'),
+      if (result.metricas['Grau de adequação'] case final ga?)
+        ('Grau de adequação GA', '${ga.toStringAsFixed(1)}%', 'Espacial'),
     ];
     return LayoutBuilder(
       builder: (context, constraints) {

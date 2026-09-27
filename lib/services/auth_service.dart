@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../../firebase_options.dart';
+import '../firebase_options.dart';
 import '../models/user_model.dart';
 import 'firebase_auth_rest_client.dart';
 

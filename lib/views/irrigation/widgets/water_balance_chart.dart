@@ -1,6 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:irrigasim/features/irrigation/models/simulation_result.dart';
+import 'package:irrigasim/models/simulation_result.dart';
 
 class WaterBalanceChart extends StatelessWidget {
   const WaterBalanceChart({super.key, required this.resultado});
@@ -10,24 +10,57 @@ class WaterBalanceChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final items = [
-      (
-        label: 'Aproveitado',
-        value: resultado.eficiencia,
-        color: colors.primary,
-      ),
+    final metricas = resultado.metricas;
+
+    final aproveitado = metricas['Balanço - Aproveitado'] ?? resultado.eficiencia;
+    final percolacao =
+        metricas['Balanço - Percolação'] ?? resultado.perdaPercolacao;
+    final escoamento =
+        metricas['Balanço - Escoamento'] ?? resultado.perdaEscoamento;
+    final utilMm = metricas['Lâmina útil'];
+    final percoladaMm = metricas['Lâmina percolada'];
+    final escoadaMm = metricas['Lâmina escoada'];
+    final aplicadaMm = metricas['Lâmina aplicada'];
+    final deficitMm = metricas['Déficit de lâmina'];
+
+    final rawItems = [
+      (label: 'Aproveitado', value: aproveitado, color: colors.primary, mm: utilMm),
       (
         label: 'Percolação profunda',
-        value: resultado.perdaPercolacao,
+        value: percolacao,
         color: colors.tertiary,
+        mm: percoladaMm,
       ),
       (
         label: 'Escoamento superficial',
-        value: resultado.perdaEscoamento,
+        value: escoamento,
         color: colors.error,
+        mm: escoadaMm,
       ),
     ];
-    final total = items.fold<double>(0, (sum, item) => sum + item.value);
+    final positive = rawItems
+        .map((item) => (label: item.label, value: item.value.clamp(0.0, double.infinity), color: item.color, mm: item.mm))
+        .where((item) => item.value > 0)
+        .toList();
+    final total = positive.fold<double>(0, (sum, item) => sum + item.value);
+    final items = total > 0
+        ? positive
+              .map(
+                (item) => (
+                  label: item.label,
+                  value: item.value / total * 100,
+                  color: item.color,
+                  mm: item.mm,
+                ),
+              )
+              .toList()
+        : positive;
+    final displayTotal = items.fold<double>(0, (sum, item) => sum + item.value);
+
+    final deficiteAbaixo =
+        deficitMm != null && deficitMm > 0.5 && utilMm != null && percoladaMm != null
+            ? deficitMm
+            : null;
 
     return Semantics(
       label:
@@ -45,7 +78,7 @@ class WaterBalanceChart extends StatelessWidget {
                     centerSpaceRadius: compact ? 46 : 56,
                     sectionsSpace: 2,
                     startDegreeOffset: -90,
-                    sections: total <= 0
+                    sections: displayTotal <= 0
                         ? [
                             PieChartSectionData(
                               value: 1,
@@ -57,7 +90,7 @@ class WaterBalanceChart extends StatelessWidget {
                         : items
                               .map(
                                 (item) => PieChartSectionData(
-                                  value: item.value.clamp(0, double.infinity),
+                                  value: item.value,
                                   color: item.color,
                                   radius: 24,
                                   showTitle: false,
@@ -72,7 +105,7 @@ class WaterBalanceChart extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        '${resultado.eficiencia.toStringAsFixed(1)}%',
+                        '${aproveitado.toStringAsFixed(1)}%',
                         style: Theme.of(context).textTheme.headlineSmall
                             ?.copyWith(fontWeight: FontWeight.w700),
                       ),
@@ -80,26 +113,57 @@ class WaterBalanceChart extends StatelessWidget {
                         'Aproveitado',
                         style: Theme.of(context).textTheme.labelSmall,
                       ),
+                      if (aplicadaMm != null)
+                        Text(
+                          '${aplicadaMm.toStringAsFixed(0)} mm aplicados',
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(color: colors.onSurfaceVariant),
+                        ),
                     ],
                   ),
                 ),
               ],
             ),
           );
+
           final legend = Column(
             mainAxisSize: MainAxisSize.min,
-            children: items
-                .map(
-                  (item) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ...items.map(
+                (item) {
+                  final mm = item.mm;
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
                     child: _LegendItem(
                       color: item.color,
                       label: item.label,
                       value: '${item.value.toStringAsFixed(1)}%',
+                      detail: mm != null ? '${mm.toStringAsFixed(1)} mm' : null,
+                    ),
+                  );
+                },
+              ),
+              if (deficiteAbaixo != null) ...[
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colors.secondaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    'Déficit: ${deficiteAbaixo.toStringAsFixed(1)} mm da demanda não atendida',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: colors.onSecondaryContainer,
                     ),
                   ),
-                )
-                .toList(),
+                ),
+              ],
+            ],
           );
 
           if (compact) {
@@ -127,11 +191,13 @@ class _LegendItem extends StatelessWidget {
     required this.color,
     required this.label,
     required this.value,
+    this.detail,
   });
 
   final Color color;
   final String label;
   final String value;
+  final String? detail;
 
   @override
   Widget build(BuildContext context) => Row(
@@ -143,6 +209,14 @@ class _LegendItem extends StatelessWidget {
       ),
       const SizedBox(width: 8),
       Expanded(child: Text(label)),
+      if (detail != null) ...[
+        const SizedBox(width: 6),
+        Text(
+          detail!,
+          style: Theme.of(context).textTheme.labelSmall
+              ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+        ),
+      ],
       const SizedBox(width: 8),
       Text(
         value,

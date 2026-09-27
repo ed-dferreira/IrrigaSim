@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:irrigasim/app/theme/app_colors.dart';
-import 'package:irrigasim/features/irrigation/models/irrigation_parameters.dart';
+import 'package:irrigasim/models/irrigation_parameters.dart';
 
 class IrrigationMethodCard extends StatelessWidget {
   final MetodoIrrigacao metodo;

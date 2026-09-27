@@ -1,7 +1,7 @@
 import 'dart:math';
 
-import 'package:irrigasim/features/irrigation/models/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigation/models/simulation_result.dart';
+import 'package:irrigasim/models/irrigation_parameters.dart';
+import 'package:irrigasim/models/simulation_result.dart';
 
 class RunPermanentBasinSimulation {
   SimulationResult call(IrrigationParameters params) {
@@ -97,6 +97,23 @@ class RunPermanentBasinSimulation {
         'Lâmina superficial': params.laminaSuperficialMm,
         'Eficiência de condução': conductionEfficiency.toDouble(),
         'Área do tabuleiro': areaM2,
+        'Balanço - Aproveitado': conductionEfficiency.toDouble(),
+        'Balanço - Percolação': 0.0,
+        'Balanço - Escoamento': (100 - conductionEfficiency).clamp(0, 100).toDouble(),
+        'Lâmina aplicada': params.laminaSuperficialMm,
+        'Lâmina útil':
+            conductionEfficiency / 100 * params.laminaSuperficialMm,
+        'Lâmina percolada': 0.0,
+        'Lâmina escoada':
+            (100 - conductionEfficiency).clamp(0, 100).toDouble() /
+            100 *
+            params.laminaSuperficialMm,
+        'Déficit de lâmina':
+            max(
+              0.0,
+              params.laminaSuperficialMm -
+                  conductionEfficiency / 100 * params.laminaSuperficialMm,
+            ),
       },
       unidadesMetricas: const {
         'Turno de rega': 'dias',
@@ -113,6 +130,14 @@ class RunPermanentBasinSimulation {
         'Lâmina superficial': 'mm',
         'Eficiência de condução': '%',
         'Área do tabuleiro': 'm²',
+        'Balanço - Aproveitado': '%',
+        'Balanço - Percolação': '%',
+        'Balanço - Escoamento': '%',
+        'Lâmina aplicada': 'mm',
+        'Lâmina útil': 'mm',
+        'Lâmina percolada': 'mm',
+        'Lâmina escoada': 'mm',
+        'Déficit de lâmina': 'mm',
       },
       resumoTextual:
           'A vazão de enchimento forma a lâmina inicial. '

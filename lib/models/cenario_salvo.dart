@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:irrigasim/features/irrigation/models/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigation/models/simulation_result.dart';
+
+import 'irrigation_parameters.dart';
+import 'simulation_result.dart';
+import 'tipo_sulco_info.dart';
 
 import 'simulation_result_model.dart';
 
@@ -65,6 +67,7 @@ class CenarioSalvo {
         'manningN': parametros.manningN,
         'sigmaZ': parametros.sigmaZ,
         'texturaSolo': parametros.texturaSolo.name,
+        'tipoSulco': parametros.tipoSulco?.name,
         'tempoAvancoMetadeMin': parametros.tempoAvancoMetadeMin,
         'tempoAvancoFinalMin': parametros.tempoAvancoFinalMin,
         'instanteRecessaoInicioMin': parametros.instanteRecessaoInicioMin,
@@ -79,6 +82,19 @@ class CenarioSalvo {
         'evapotranspiracaoMmDia': parametros.evapotranspiracaoMmDia,
         'laminaSuperficialMm': parametros.laminaSuperficialMm,
         'vazaoDisponivelLps': parametros.vazaoDisponivelLps,
+        'manejoSulco': parametros.manejoSulco.name,
+        'vazaoReduzidaLs': parametros.vazaoReduzidaLs,
+        'tempoMudancaMin': parametros.tempoMudancaMin,
+        'cicloSurtirMin': parametros.cicloSurtirMin,
+        'jornadaDiariaH': parametros.jornadaDiariaH,
+        'perdasConducaoLs': parametros.perdasConducaoLs,
+        'precipitacaoEfetivaMmDia': parametros.precipitacaoEfetivaMmDia,
+        'nomeCultura': parametros.nomeCultura,
+        'kc': parametros.kc,
+        'espacamentoFileirasM': parametros.espacamentoFileirasM,
+        'espacamentoPlantasM': parametros.espacamentoPlantasM,
+        'larguraSulcoM': parametros.larguraSulcoM,
+        'profundidadeSulcoM': parametros.profundidadeSulcoM,
       },
       'resultado': SimulationResultModel.toMap(resultado),
       'dataCriacao': Timestamp.fromDate(dataCriacao),
@@ -111,6 +127,9 @@ class CenarioSalvo {
         texturaSolo: TexturaSoloExtension.fromString(
           paramData['texturaSolo'] as String?,
         ),
+        tipoSulco: TipoSulco.values
+            .where((tipo) => tipo.name == paramData['tipoSulco'])
+            .firstOrNull,
         tempoAvancoMetadeMin:
             (paramData['tempoAvancoMetadeMin'] as num?)?.toDouble() ?? 20,
         tempoAvancoFinalMin:
@@ -138,6 +157,29 @@ class CenarioSalvo {
             (paramData['laminaSuperficialMm'] as num?)?.toDouble() ?? 150,
         vazaoDisponivelLps:
             (paramData['vazaoDisponivelLps'] as num?)?.toDouble() ?? 36,
+        manejoSulco: ManejoSulco.values.firstWhere(
+          (manejo) => manejo.name == paramData['manejoSulco'],
+          orElse: () => ManejoSulco.constante,
+        ),
+        vazaoReduzidaLs:
+            (paramData['vazaoReduzidaLs'] as num?)?.toDouble() ?? 0,
+        tempoMudancaMin:
+            (paramData['tempoMudancaMin'] as num?)?.toDouble() ?? 0,
+        cicloSurtirMin: (paramData['cicloSurtirMin'] as num?)?.toDouble() ?? 0,
+        jornadaDiariaH: (paramData['jornadaDiariaH'] as num?)?.toDouble() ?? 24,
+        perdasConducaoLs:
+            (paramData['perdasConducaoLs'] as num?)?.toDouble() ?? 0,
+        precipitacaoEfetivaMmDia:
+            (paramData['precipitacaoEfetivaMmDia'] as num?)?.toDouble() ?? 0,
+        nomeCultura: paramData['nomeCultura'] as String? ?? '',
+        kc: (paramData['kc'] as num?)?.toDouble() ?? 1,
+        espacamentoFileirasM:
+            (paramData['espacamentoFileirasM'] as num?)?.toDouble() ?? 0.9,
+        espacamentoPlantasM:
+            (paramData['espacamentoPlantasM'] as num?)?.toDouble() ?? 0.15,
+        larguraSulcoM: (paramData['larguraSulcoM'] as num?)?.toDouble(),
+        profundidadeSulcoM: (paramData['profundidadeSulcoM'] as num?)
+            ?.toDouble(),
       ),
       resultado: SimulationResultModel.fromMap(
         map['resultado'] as Map<String, dynamic>,

@@ -1,13 +1,20 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:irrigasim/features/irrigation/models/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigation/models/simulation_result.dart';
-import 'package:irrigasim/features/irrigation/services/simulation/run_border_simulation.dart';
-import 'package:irrigasim/features/irrigation/services/simulation/run_furrow_simulation.dart';
-import 'package:irrigasim/features/irrigation/services/simulation/run_basin_simulation.dart';
-import 'package:irrigasim/features/irrigation/services/simulation/run_permanent_basin_simulation.dart';
+import 'package:irrigasim/models/irrigation_parameters.dart';
+import 'package:irrigasim/models/simulation_result.dart';
+import 'package:irrigasim/models/tipo_sulco_info.dart';
+import 'package:irrigasim/services/simulation/run_border_simulation.dart';
+import 'package:irrigasim/services/simulation/run_furrow_simulation.dart';
+import 'package:irrigasim/services/simulation/run_basin_simulation.dart';
+import 'package:irrigasim/services/simulation/run_permanent_basin_simulation.dart';
+import 'package:irrigasim/services/simulation/lamina_requerida.dart';
+import 'package:irrigasim/services/simulation/flow_management.dart';
+import 'package:irrigasim/services/simulation/surface_irrigation_math.dart';
+
+enum OrigemAvanco { estimativa, ensaio }
 
 class ParametersState {
   final MetodoIrrigacao metodo;
+  final TipoSulco? tipoSulco;
   final double comprimento;
   final double desnivelM;
   final double distanciaHorizontalM;
@@ -25,6 +32,10 @@ class ParametersState {
   final TexturaSolo texturaSolo;
   final double tempoAvancoMetadeMin;
   final double tempoAvancoFinalMin;
+  final double comprimentoMaximoTerrenoM;
+  final OrigemAvanco origemAvanco;
+  final double distanciaEnsaioIntermediariaM;
+  final double tempoEnsaioIntermediarioMin;
   final double instanteRecessaoInicioMin;
   final double instanteRecessaoFinalMin;
   final TipoInundacao tipoInundacao;
@@ -37,12 +48,33 @@ class ParametersState {
   final double evapotranspiracaoMmDia;
   final double laminaSuperficialMm;
   final double vazaoDisponivelLps;
+  final String nomeCultura;
+  final double kc;
+  final double espacamentoFileirasM;
+  final double espacamentoPlantasM;
+  final double precipitacaoEfetivaMmDia;
+  final double uccPercentual;
+  final double upmpPercentual;
+  final double densidadeAparenteGcm3;
+  final double profundidadeRaizesCm;
+  final double fracaoAguaDisponivel;
+  final LaminaRequeridaResultado? laminaRequeridaResultado;
+  final double vazaoReduzidaLs;
+  final double jornadaDiariaH;
+  final double perdasConducaoLs;
+  final ManejoSulco manejoSulco;
+  final double tempoMudancaMin;
+  final double cicloSurtirMin;
+  final double? larguraSulcoM;
+  final double? profundidadeSulcoM;
   final SimulationResult? resultado;
   final bool executando;
   final String? erro;
+  final String? mensagemPlanejamento;
 
   const ParametersState({
     this.metodo = MetodoIrrigacao.sulco,
+    this.tipoSulco,
     this.comprimento = 200,
     this.desnivelM = 1,
     this.distanciaHorizontalM = 200,
@@ -60,6 +92,10 @@ class ParametersState {
     this.texturaSolo = TexturaSolo.media,
     this.tempoAvancoMetadeMin = 35,
     this.tempoAvancoFinalMin = 90,
+    this.comprimentoMaximoTerrenoM = 200,
+    this.origemAvanco = OrigemAvanco.estimativa,
+    this.distanciaEnsaioIntermediariaM = 100,
+    this.tempoEnsaioIntermediarioMin = 35,
     this.instanteRecessaoInicioMin = 125,
     this.instanteRecessaoFinalMin = 180,
     this.tipoInundacao = TipoInundacao.intermitente,
@@ -72,9 +108,29 @@ class ParametersState {
     this.evapotranspiracaoMmDia = 7.2,
     this.laminaSuperficialMm = 150,
     this.vazaoDisponivelLps = 36,
+    this.nomeCultura = '',
+    this.kc = 1.0,
+    this.espacamentoFileirasM = 0.9,
+    this.espacamentoPlantasM = 0.25,
+    this.precipitacaoEfetivaMmDia = 0,
+    this.uccPercentual = 30,
+    this.upmpPercentual = 15,
+    this.densidadeAparenteGcm3 = 1.4,
+    this.profundidadeRaizesCm = 40,
+    this.fracaoAguaDisponivel = 0.5,
+    this.laminaRequeridaResultado,
+    this.vazaoReduzidaLs = 0,
+    this.jornadaDiariaH = 24,
+    this.perdasConducaoLs = 0,
+    this.manejoSulco = ManejoSulco.constante,
+    this.tempoMudancaMin = 0,
+    this.cicloSurtirMin = 30,
+    this.larguraSulcoM,
+    this.profundidadeSulcoM,
     this.resultado,
     this.executando = false,
     this.erro,
+    this.mensagemPlanejamento,
   });
 
   double get declividade =>
@@ -86,6 +142,7 @@ class ParametersState {
 
   ParametersState copyWith({
     MetodoIrrigacao? metodo,
+    TipoSulco? tipoSulco,
     double? comprimento,
     double? desnivelM,
     double? distanciaHorizontalM,
@@ -103,6 +160,10 @@ class ParametersState {
     TexturaSolo? texturaSolo,
     double? tempoAvancoMetadeMin,
     double? tempoAvancoFinalMin,
+    double? comprimentoMaximoTerrenoM,
+    OrigemAvanco? origemAvanco,
+    double? distanciaEnsaioIntermediariaM,
+    double? tempoEnsaioIntermediarioMin,
     double? instanteRecessaoInicioMin,
     double? instanteRecessaoFinalMin,
     TipoInundacao? tipoInundacao,
@@ -115,12 +176,36 @@ class ParametersState {
     double? evapotranspiracaoMmDia,
     double? laminaSuperficialMm,
     double? vazaoDisponivelLps,
+    String? nomeCultura,
+    double? kc,
+    double? espacamentoFileirasM,
+    double? espacamentoPlantasM,
+    double? precipitacaoEfetivaMmDia,
+    double? uccPercentual,
+    double? upmpPercentual,
+    double? densidadeAparenteGcm3,
+    double? profundidadeRaizesCm,
+    double? fracaoAguaDisponivel,
+    LaminaRequeridaResultado? laminaRequeridaResultado,
+    bool clearLaminaRequeridaResultado = false,
+    double? vazaoReduzidaLs,
+    double? jornadaDiariaH,
+    double? perdasConducaoLs,
+    ManejoSulco? manejoSulco,
+    double? tempoMudancaMin,
+    double? cicloSurtirMin,
+    double? larguraSulcoM,
+    double? profundidadeSulcoM,
+    bool clearLarguraSulcoM = false,
+    bool clearProfundidadeSulcoM = false,
     SimulationResult? resultado,
     bool? executando,
     String? erro,
+    String? mensagemPlanejamento,
   }) {
     return ParametersState(
       metodo: metodo ?? this.metodo,
+      tipoSulco: tipoSulco ?? this.tipoSulco,
       comprimento: comprimento ?? this.comprimento,
       desnivelM: desnivelM ?? this.desnivelM,
       distanciaHorizontalM: distanciaHorizontalM ?? this.distanciaHorizontalM,
@@ -139,6 +224,13 @@ class ParametersState {
       texturaSolo: texturaSolo ?? this.texturaSolo,
       tempoAvancoMetadeMin: tempoAvancoMetadeMin ?? this.tempoAvancoMetadeMin,
       tempoAvancoFinalMin: tempoAvancoFinalMin ?? this.tempoAvancoFinalMin,
+      comprimentoMaximoTerrenoM:
+          comprimentoMaximoTerrenoM ?? this.comprimentoMaximoTerrenoM,
+      origemAvanco: origemAvanco ?? this.origemAvanco,
+      distanciaEnsaioIntermediariaM:
+          distanciaEnsaioIntermediariaM ?? this.distanciaEnsaioIntermediariaM,
+      tempoEnsaioIntermediarioMin:
+          tempoEnsaioIntermediarioMin ?? this.tempoEnsaioIntermediarioMin,
       instanteRecessaoInicioMin:
           instanteRecessaoInicioMin ?? this.instanteRecessaoInicioMin,
       instanteRecessaoFinalMin:
@@ -155,9 +247,37 @@ class ParametersState {
           evapotranspiracaoMmDia ?? this.evapotranspiracaoMmDia,
       laminaSuperficialMm: laminaSuperficialMm ?? this.laminaSuperficialMm,
       vazaoDisponivelLps: vazaoDisponivelLps ?? this.vazaoDisponivelLps,
+      nomeCultura: nomeCultura ?? this.nomeCultura,
+      kc: kc ?? this.kc,
+      espacamentoFileirasM: espacamentoFileirasM ?? this.espacamentoFileirasM,
+      espacamentoPlantasM: espacamentoPlantasM ?? this.espacamentoPlantasM,
+      precipitacaoEfetivaMmDia:
+          precipitacaoEfetivaMmDia ?? this.precipitacaoEfetivaMmDia,
+      uccPercentual: uccPercentual ?? this.uccPercentual,
+      upmpPercentual: upmpPercentual ?? this.upmpPercentual,
+      densidadeAparenteGcm3:
+          densidadeAparenteGcm3 ?? this.densidadeAparenteGcm3,
+      profundidadeRaizesCm: profundidadeRaizesCm ?? this.profundidadeRaizesCm,
+      fracaoAguaDisponivel: fracaoAguaDisponivel ?? this.fracaoAguaDisponivel,
+      laminaRequeridaResultado: clearLaminaRequeridaResultado
+          ? null
+          : laminaRequeridaResultado ?? this.laminaRequeridaResultado,
+      vazaoReduzidaLs: vazaoReduzidaLs ?? this.vazaoReduzidaLs,
+      jornadaDiariaH: jornadaDiariaH ?? this.jornadaDiariaH,
+      perdasConducaoLs: perdasConducaoLs ?? this.perdasConducaoLs,
+      manejoSulco: manejoSulco ?? this.manejoSulco,
+      tempoMudancaMin: tempoMudancaMin ?? this.tempoMudancaMin,
+      cicloSurtirMin: cicloSurtirMin ?? this.cicloSurtirMin,
+      larguraSulcoM: clearLarguraSulcoM
+          ? null
+          : larguraSulcoM ?? this.larguraSulcoM,
+      profundidadeSulcoM: clearProfundidadeSulcoM
+          ? null
+          : profundidadeSulcoM ?? this.profundidadeSulcoM,
       resultado: resultado,
       executando: executando ?? this.executando,
       erro: erro,
+      mensagemPlanejamento: mensagemPlanejamento,
     );
   }
 
@@ -176,6 +296,7 @@ class ParametersState {
       manningN: manningN,
       sigmaZ: sigmaZ,
       texturaSolo: texturaSolo,
+      tipoSulco: tipoSulco,
       tempoAvancoMetadeMin: tempoAvancoMetadeMin,
       tempoAvancoFinalMin: tempoAvancoFinalMin,
       instanteRecessaoInicioMin: instanteRecessaoInicioMin,
@@ -190,15 +311,55 @@ class ParametersState {
       evapotranspiracaoMmDia: evapotranspiracaoMmDia,
       laminaSuperficialMm: laminaSuperficialMm,
       vazaoDisponivelLps: vazaoDisponivelLps,
+      manejoSulco: manejoSulco,
+      vazaoReduzidaLs: vazaoReduzidaLs,
+      tempoMudancaMin: tempoMudancaMin,
+      cicloSurtirMin: cicloSurtirMin,
+      jornadaDiariaH: jornadaDiariaH,
+      perdasConducaoLs: perdasConducaoLs,
+      precipitacaoEfetivaMmDia: precipitacaoEfetivaMmDia,
+      nomeCultura: nomeCultura,
+      kc: kc,
+      espacamentoFileirasM: espacamentoFileirasM,
+      espacamentoPlantasM: espacamentoPlantasM,
+      larguraSulcoM: larguraSulcoM,
+      profundidadeSulcoM: profundidadeSulcoM,
     );
   }
 }
 
 class ParametersController extends StateNotifier<ParametersState> {
-  ParametersController() : super(const ParametersState());
+  ParametersController() : super(_recalcularLamina(const ParametersState()));
+
+  static ParametersState _recalcularLamina(ParametersState current) {
+    final demandaLiquida =
+        current.evapotranspiracaoMmDia - current.precipitacaoEfetivaMmDia;
+    if (demandaLiquida <= 0) {
+      return current.copyWith(clearLaminaRequeridaResultado: true);
+    }
+
+    try {
+      final resultado = LaminaRequeridaCalculator.calcular(
+        uccPercentual: current.uccPercentual,
+        upmpPercentual: current.upmpPercentual,
+        densidadeGcm3: current.densidadeAparenteGcm3,
+        profundidadeRaizesCm: current.profundidadeRaizesCm,
+        fracaoAguaDisponivel: current.fracaoAguaDisponivel,
+        demandaLiquidaMmDia: demandaLiquida,
+        etcMmDia: current.evapotranspiracaoMmDia,
+        precipitacaoEfetivaMmDia: current.precipitacaoEfetivaMmDia,
+      );
+      return current.copyWith(
+        laminaRequerida: resultado.irnMm,
+        laminaRequeridaResultado: resultado,
+      );
+    } on ArgumentError {
+      return current.copyWith(clearLaminaRequeridaResultado: true);
+    }
+  }
 
   void setMetodo(MetodoIrrigacao metodo) {
-    state = switch (metodo) {
+    final next = switch (metodo) {
       MetodoIrrigacao.sulco => ParametersState(
         metodo: metodo,
         comprimento: 200,
@@ -239,6 +400,82 @@ class ParametersController extends StateNotifier<ParametersState> {
         tempoAvancoFinalMin: 45,
       ),
     };
+    state = _recalcularLamina(next);
+  }
+
+  void setTipoSulco(TipoSulco tipo) {
+    final defaults = _getDefaultsForTipoSulco(tipo);
+    state = _recalcularLamina(
+      state.copyWith(
+        tipoSulco: tipo,
+        comprimento: defaults.comprimento,
+        larguraOuEspacamento: defaults.larguraOuEspacamento,
+        vazao: defaults.vazao,
+        tempoAplicacao: defaults.tempoAplicacao,
+        laminaRequerida: defaults.laminaRequerida,
+        tempoAvancoMetadeMin: defaults.tempoAvancoMetadeMin,
+        tempoAvancoFinalMin: defaults.tempoAvancoFinalMin,
+      ),
+    );
+  }
+
+  ParametersState _getDefaultsForTipoSulco(TipoSulco tipo) {
+    return switch (tipo) {
+      TipoSulco.sulcos_comuns => const ParametersState(
+        comprimento: 200,
+        larguraOuEspacamento: 0.9,
+        vazao: 1,
+        tempoAplicacao: 130,
+        laminaRequerida: 42,
+        tempoAvancoMetadeMin: 35,
+        tempoAvancoFinalMin: 90,
+      ),
+      TipoSulco.sulcos_contorno => const ParametersState(
+        comprimento: 110,
+        larguraOuEspacamento: 0.9,
+        vazao: 0.8,
+        tempoAplicacao: 120,
+        laminaRequerida: 42,
+        tempoAvancoMetadeMin: 25,
+        tempoAvancoFinalMin: 70,
+      ),
+      TipoSulco.sulcos_corrugados => const ParametersState(
+        comprimento: 100,
+        larguraOuEspacamento: 0.6,
+        vazao: 0.3,
+        tempoAplicacao: 90,
+        laminaRequerida: 30,
+        tempoAvancoMetadeMin: 15,
+        tempoAvancoFinalMin: 45,
+      ),
+      TipoSulco.sulcos_nivel_tabuleiros => const ParametersState(
+        comprimento: 80,
+        larguraOuEspacamento: 1.0,
+        vazao: 0.5,
+        tempoAplicacao: 100,
+        laminaRequerida: 50,
+        tempoAvancoMetadeMin: 20,
+        tempoAvancoFinalMin: 60,
+      ),
+      TipoSulco.sulcos_nivel_fechados => const ParametersState(
+        comprimento: 50,
+        larguraOuEspacamento: 1.2,
+        vazao: 0.6,
+        tempoAplicacao: 80,
+        laminaRequerida: 45,
+        tempoAvancoMetadeMin: 15,
+        tempoAvancoFinalMin: 40,
+      ),
+      TipoSulco.sulcos_em_zigue_zague => const ParametersState(
+        comprimento: 100,
+        larguraOuEspacamento: 0.8,
+        vazao: 0.7,
+        tempoAplicacao: 110,
+        laminaRequerida: 40,
+        tempoAvancoMetadeMin: 20,
+        tempoAvancoFinalMin: 55,
+      ),
+    };
   }
 
   void setTipoInundacao(TipoInundacao tipo) {
@@ -250,45 +487,75 @@ class ParametersController extends StateNotifier<ParametersState> {
     final distancia = 100.0;
     final desnivel = params.declividade * distancia;
     final distanciaTransversal = 10.0;
-    state = state.copyWith(
-      comprimento: params.comprimento,
-      desnivelM: desnivel,
-      distanciaHorizontalM: distancia,
-      desnivelTransversalM:
-          params.declividadeTransversal * distanciaTransversal,
-      distanciaTransversalM: distanciaTransversal,
-      larguraOuEspacamento: params.larguraOuEspacamento,
-      k: params.k,
-      a: params.a,
-      vib: params.vib,
-      vazao: params.vazao,
-      tempoAplicacao: params.tempoAplicacao,
-      laminaRequerida: params.laminaRequerida,
-      manningN: params.manningN,
-      sigmaZ: params.sigmaZ,
-      texturaSolo: params.texturaSolo,
-      tempoAvancoMetadeMin: params.tempoAvancoMetadeMin,
-      tempoAvancoFinalMin: params.tempoAvancoFinalMin,
-      instanteRecessaoInicioMin: params.instanteRecessaoInicioMin,
-      instanteRecessaoFinalMin: params.instanteRecessaoFinalMin,
-      tipoInundacao: params.tipoInundacao,
-      areaHectares: params.areaHectares,
-      porosidade: params.porosidade,
-      profundidadeCamadaMm: params.profundidadeCamadaMm,
-      condutividadeHidraulicaMmDia: params.condutividadeHidraulicaMmDia,
-      dtaMmCm: params.dtaMmCm,
-      fatorDisponibilidade: params.fatorDisponibilidade,
-      evapotranspiracaoMmDia: params.evapotranspiracaoMmDia,
-      laminaSuperficialMm: params.laminaSuperficialMm,
-      vazaoDisponivelLps: params.vazaoDisponivelLps,
+    state = _recalcularLamina(
+      state.copyWith(
+        comprimento: params.comprimento,
+        desnivelM: desnivel,
+        distanciaHorizontalM: distancia,
+        desnivelTransversalM:
+            params.declividadeTransversal * distanciaTransversal,
+        distanciaTransversalM: distanciaTransversal,
+        larguraOuEspacamento: params.larguraOuEspacamento,
+        k: params.k,
+        a: params.a,
+        vib: params.vib,
+        vazao: params.vazao,
+        tempoAplicacao: params.tempoAplicacao,
+        laminaRequerida: params.laminaRequerida,
+        manningN: params.manningN,
+        sigmaZ: params.sigmaZ,
+        texturaSolo: params.texturaSolo,
+        tipoSulco: params.tipoSulco,
+        tempoAvancoMetadeMin: params.tempoAvancoMetadeMin,
+        tempoAvancoFinalMin: params.tempoAvancoFinalMin,
+        instanteRecessaoInicioMin: params.instanteRecessaoInicioMin,
+        instanteRecessaoFinalMin: params.instanteRecessaoFinalMin,
+        tipoInundacao: params.tipoInundacao,
+        areaHectares: params.areaHectares,
+        porosidade: params.porosidade,
+        profundidadeCamadaMm: params.profundidadeCamadaMm,
+        condutividadeHidraulicaMmDia: params.condutividadeHidraulicaMmDia,
+        dtaMmCm: params.dtaMmCm,
+        fatorDisponibilidade: params.fatorDisponibilidade,
+        evapotranspiracaoMmDia: params.evapotranspiracaoMmDia,
+        laminaSuperficialMm: params.laminaSuperficialMm,
+        vazaoDisponivelLps: params.vazaoDisponivelLps,
+        manejoSulco: params.manejoSulco,
+        vazaoReduzidaLs: params.vazaoReduzidaLs,
+        tempoMudancaMin: params.tempoMudancaMin,
+        cicloSurtirMin: params.cicloSurtirMin,
+        jornadaDiariaH: params.jornadaDiariaH,
+        perdasConducaoLs: params.perdasConducaoLs,
+        precipitacaoEfetivaMmDia: params.precipitacaoEfetivaMmDia,
+        nomeCultura: params.nomeCultura,
+        kc: params.kc,
+        espacamentoFileirasM: params.espacamentoFileirasM,
+        espacamentoPlantasM: params.espacamentoPlantasM,
+        larguraSulcoM: params.larguraSulcoM,
+        profundidadeSulcoM: params.profundidadeSulcoM,
+      ),
     );
   }
 
   void updateField({String? campo, String? valor}) {
     if (campo == null || valor == null) return;
+    if (campo == 'larguraSulcoM' || campo == 'profundidadeSulcoM') {
+      final parsedOptional = double.tryParse(valor.replaceAll(',', '.'));
+      state = campo == 'larguraSulcoM'
+          ? state.copyWith(
+              larguraSulcoM: parsedOptional,
+              clearLarguraSulcoM: parsedOptional == null,
+            )
+          : state.copyWith(
+              profundidadeSulcoM: parsedOptional,
+              clearProfundidadeSulcoM: parsedOptional == null,
+            );
+      return;
+    }
     final parsed = double.tryParse(valor.replaceAll(',', '.'));
     if (parsed == null) return;
 
+    var recalcularLamina = false;
     switch (campo) {
       case 'comprimento':
         state = state.copyWith(comprimento: parsed);
@@ -312,8 +579,6 @@ class ParametersController extends StateNotifier<ParametersState> {
         state = state.copyWith(vazao: parsed);
       case 'tempoAplicacao':
         state = state.copyWith(tempoAplicacao: parsed);
-      case 'laminaRequerida':
-        state = state.copyWith(laminaRequerida: parsed);
       case 'manningN':
         state = state.copyWith(manningN: parsed);
       case 'sigmaZ':
@@ -322,6 +587,12 @@ class ParametersController extends StateNotifier<ParametersState> {
         state = state.copyWith(tempoAvancoMetadeMin: parsed);
       case 'tempoAvancoFinalMin':
         state = state.copyWith(tempoAvancoFinalMin: parsed);
+      case 'comprimentoMaximoTerrenoM':
+        state = state.copyWith(comprimentoMaximoTerrenoM: parsed);
+      case 'distanciaEnsaioIntermediariaM':
+        state = state.copyWith(distanciaEnsaioIntermediariaM: parsed);
+      case 'tempoEnsaioIntermediarioMin':
+        state = state.copyWith(tempoEnsaioIntermediarioMin: parsed);
       case 'instanteRecessaoInicioMin':
         state = state.copyWith(instanteRecessaoInicioMin: parsed);
       case 'instanteRecessaoFinalMin':
@@ -340,15 +611,172 @@ class ParametersController extends StateNotifier<ParametersState> {
         state = state.copyWith(fatorDisponibilidade: parsed);
       case 'evapotranspiracaoMmDia':
         state = state.copyWith(evapotranspiracaoMmDia: parsed);
+        recalcularLamina = true;
       case 'laminaSuperficialMm':
         state = state.copyWith(laminaSuperficialMm: parsed);
       case 'vazaoDisponivelLps':
         state = state.copyWith(vazaoDisponivelLps: parsed);
+      case 'kc':
+        state = state.copyWith(kc: parsed);
+      case 'espacamentoFileirasM':
+        state = state.copyWith(espacamentoFileirasM: parsed);
+      case 'espacamentoPlantasM':
+        state = state.copyWith(espacamentoPlantasM: parsed);
+      case 'precipitacaoEfetivaMmDia':
+        state = state.copyWith(precipitacaoEfetivaMmDia: parsed);
+        recalcularLamina = true;
+      case 'uccPercentual':
+        state = state.copyWith(uccPercentual: parsed);
+        recalcularLamina = true;
+      case 'upmpPercentual':
+        state = state.copyWith(upmpPercentual: parsed);
+        recalcularLamina = true;
+      case 'densidadeAparenteGcm3':
+        state = state.copyWith(densidadeAparenteGcm3: parsed);
+        recalcularLamina = true;
+      case 'profundidadeRaizesCm':
+        state = state.copyWith(profundidadeRaizesCm: parsed);
+        recalcularLamina = true;
+      case 'fracaoAguaDisponivel':
+        state = state.copyWith(fracaoAguaDisponivel: parsed);
+        recalcularLamina = true;
+      case 'vazaoReduzidaLs':
+        state = state.copyWith(vazaoReduzidaLs: parsed);
+      case 'jornadaDiariaH':
+        state = state.copyWith(jornadaDiariaH: parsed);
+      case 'perdasConducaoLs':
+        state = state.copyWith(perdasConducaoLs: parsed);
+      case 'tempoMudancaMin':
+        state = state.copyWith(tempoMudancaMin: parsed);
+      case 'cicloSurtirMin':
+        state = state.copyWith(cicloSurtirMin: parsed);
     }
+    if (recalcularLamina) state = _recalcularLamina(state);
   }
 
   void setTexturaSolo(TexturaSolo textura) {
     state = state.copyWith(texturaSolo: textura);
+  }
+
+  void setNomeCultura(String nome) {
+    state = state.copyWith(nomeCultura: nome);
+  }
+
+  void setManejoSulco(ManejoSulco manejo) {
+    state = state.copyWith(manejoSulco: manejo);
+  }
+
+  void setOrigemAvanco(OrigemAvanco origem) {
+    state = state.copyWith(origemAvanco: origem, mensagemPlanejamento: null);
+  }
+
+  String? validarEnsaio() {
+    if (state.origemAvanco != OrigemAvanco.ensaio) return null;
+    if (state.distanciaEnsaioIntermediariaM <= 0 ||
+        state.distanciaEnsaioIntermediariaM >= state.comprimento) {
+      return 'A distância do ensaio deve ser positiva e menor que o comprimento.';
+    }
+    if (state.tempoEnsaioIntermediarioMin <= 0 ||
+        state.tempoAvancoFinalMin <= state.tempoEnsaioIntermediarioMin) {
+      return 'Os tempos do ensaio devem ser positivos e crescentes.';
+    }
+    return null;
+  }
+
+  ParametersState _stateComAvancoDaOrigem(ParametersState source) {
+    final curve = source.origemAvanco == OrigemAvanco.ensaio
+        ? SurfaceIrrigationMath.fitAdvanceCurveFromTwoPoints(
+            lengthM: source.comprimento,
+            intermediateDistanceM: source.distanciaEnsaioIntermediariaM,
+            intermediateTimeMin: source.tempoEnsaioIntermediarioMin,
+            endTimeMin: source.tempoAvancoFinalMin,
+          )
+        : SurfaceIrrigationMath.fitAdvanceCurve(
+            lengthM: source.comprimento,
+            halfTimeMin: source.tempoAvancoMetadeMin,
+            endTimeMin: source.tempoAvancoFinalMin,
+          );
+    return source.copyWith(
+      tempoAvancoMetadeMin: curve.timeAt(source.comprimento / 2),
+    );
+  }
+
+  void recomendarMaiorComprimento() {
+    if (state.metodo != MetodoIrrigacao.sulco) {
+      state = state.copyWith(
+        mensagemPlanejamento:
+            'A recomendação automática está disponível para sulcos.',
+      );
+      return;
+    }
+    final erroEnsaio = validarEnsaio();
+    if (erroEnsaio != null) {
+      state = state.copyWith(mensagemPlanejamento: erroEnsaio);
+      return;
+    }
+
+    try {
+      final declividadePercent = state.declividade * 100;
+      final qmax = FlowManagement.calcularVazaoMaxima(
+        declividadePercent: declividadePercent,
+        textura: state.texturaSolo,
+      ).qmaxLs;
+      if (state.vazao > qmax) {
+        throw const FormatException(
+          'A vazão informada é erosiva para a declividade.',
+        );
+      }
+
+      final base = _stateComAvancoDaOrigem(state);
+      final curve = SurfaceIrrigationMath.fitAdvanceCurve(
+        lengthM: base.comprimento,
+        halfTimeMin: base.tempoAvancoMetadeMin,
+        endTimeMin: base.tempoAvancoFinalMin,
+      );
+      ParametersState? recomendado;
+      for (
+        var comprimento = 50.0;
+        comprimento <= state.comprimentoMaximoTerrenoM;
+        comprimento += 50
+      ) {
+        final candidato = base.copyWith(
+          comprimento: comprimento,
+          tempoAvancoMetadeMin: curve.timeAt(comprimento / 2),
+          tempoAvancoFinalMin: curve.timeAt(comprimento),
+          tempoEnsaioIntermediarioMin: state.origemAvanco == OrigemAvanco.ensaio
+              ? curve.timeAt(state.distanciaEnsaioIntermediariaM)
+              : null,
+        );
+        try {
+          final resultado = RunFurrowSimulation()(
+            candidato.toIrrigationParameters(),
+          );
+          if (resultado.eficiencia >= 60 &&
+              resultado.alertaVazaoExcedida == null) {
+            recomendado = candidato;
+          }
+        } catch (_) {
+          // Candidates outside the model's valid range are not viable.
+        }
+      }
+      if (recomendado == null) {
+        state = state.copyWith(
+          mensagemPlanejamento:
+              'Nenhum comprimento de 50 m atende à eficiência mínima de 60%.',
+        );
+        return;
+      }
+      state = recomendado.copyWith(
+        mensagemPlanejamento:
+            'Maior comprimento viável: ${recomendado.comprimento.toStringAsFixed(0)} m.',
+      );
+    } on FormatException catch (e) {
+      state = state.copyWith(mensagemPlanejamento: e.message.toString());
+    } catch (_) {
+      state = state.copyWith(
+        mensagemPlanejamento: 'Não foi possível avaliar os dados informados.',
+      );
+    }
   }
 
   double calcularDeclividade() {
@@ -356,9 +784,14 @@ class ParametersController extends StateNotifier<ParametersState> {
   }
 
   Future<void> executarSimulacao() async {
+    final erroEnsaio = validarEnsaio();
+    if (erroEnsaio != null) {
+      state = state.copyWith(erro: erroEnsaio);
+      return;
+    }
     state = state.copyWith(executando: true, erro: null);
     try {
-      final params = state.toIrrigationParameters();
+      final params = _stateComAvancoDaOrigem(state).toIrrigationParameters();
       final resultado = switch (state.metodo) {
         MetodoIrrigacao.faixa => RunBorderSimulation()(params),
         MetodoIrrigacao.sulco => RunFurrowSimulation()(params),

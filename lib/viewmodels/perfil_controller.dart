@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/preferencias_app.dart';
 import '../models/tamanho_fonte.dart';
-import '../../authentication/models/user.dart';
+import '../models/user.dart';
 
 class PerfilState {
   final bool editando;
