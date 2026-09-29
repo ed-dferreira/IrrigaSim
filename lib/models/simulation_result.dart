@@ -1,3 +1,5 @@
+import 'package:irrigasim/services/simulation/operational_planning.dart';
+
 class PontoGrafico {
   final double x;
   final double y;
@@ -19,12 +21,29 @@ class SimulationResult {
   final double perdaEscoamento;
 
   final List<PontoGrafico> curvaAvanco;
+  final List<PontoGrafico> curvaOportunidade;
   final List<double> perfilLongitudinal;
 
   final String resumoTextual;
   final String? alertaVazaoExcedida;
   final Map<String, double> metricas;
   final Map<String, String> unidadesMetricas;
+
+  /// Tempos hidráulicos em minutos; nulos indicam que não foram calculados.
+  final double? tempoOportunidadeFinalMin;
+  final double? tempoFornecimentoMin;
+  final double? laminainfiltradaInicioMm;
+  final double? laminainfiltradaFinalMm;
+  final double? laminainfiltradaMediaMm;
+  final double? laminaAplicadaMediaMm;
+  final double? eficienciaDistribuicaoEd;
+  final double? adequacaoUtilGa;
+  final String? origemCurvaAvanco;
+  final String? metodoCurvaAvanco;
+  final String? origemCurvaInfiltracao;
+  final String? hipoteseRecessao;
+  final bool extrapolouAvanco;
+  final PlanejamentoOperacionalResultado? planejamentoOperacional;
 
   const SimulationResult({
     required this.eficiencia,
@@ -37,12 +56,62 @@ class SimulationResult {
     required this.perdaPercolacao,
     required this.perdaEscoamento,
     required this.curvaAvanco,
+    this.curvaOportunidade = const [],
     required this.perfilLongitudinal,
     required this.resumoTextual,
     this.alertaVazaoExcedida,
     this.metricas = const {},
     this.unidadesMetricas = const {},
+    this.tempoOportunidadeFinalMin,
+    this.tempoFornecimentoMin,
+    this.laminainfiltradaInicioMm,
+    this.laminainfiltradaFinalMm,
+    this.laminainfiltradaMediaMm,
+    this.laminaAplicadaMediaMm,
+    this.eficienciaDistribuicaoEd,
+    this.adequacaoUtilGa,
+    this.origemCurvaAvanco,
+    this.metodoCurvaAvanco,
+    this.origemCurvaInfiltracao,
+    this.hipoteseRecessao,
+    this.extrapolouAvanco = false,
+    this.planejamentoOperacional,
   });
+
+  SimulationResult comPlanejamentoOperacional(
+    PlanejamentoOperacionalResultado planejamento,
+  ) => SimulationResult(
+    eficiencia: eficiencia,
+    eficienciaRequerimento: eficienciaRequerimento,
+    cuc: cuc,
+    du: du,
+    laminaMedia: laminaMedia,
+    laminaRequerida: laminaRequerida,
+    tempoAvanco: tempoAvanco,
+    perdaPercolacao: perdaPercolacao,
+    perdaEscoamento: perdaEscoamento,
+    curvaAvanco: curvaAvanco,
+    curvaOportunidade: curvaOportunidade,
+    perfilLongitudinal: perfilLongitudinal,
+    resumoTextual: resumoTextual,
+    alertaVazaoExcedida: alertaVazaoExcedida,
+    metricas: metricas,
+    unidadesMetricas: unidadesMetricas,
+    tempoOportunidadeFinalMin: tempoOportunidadeFinalMin,
+    tempoFornecimentoMin: tempoFornecimentoMin,
+    laminainfiltradaInicioMm: laminainfiltradaInicioMm,
+    laminainfiltradaFinalMm: laminainfiltradaFinalMm,
+    laminainfiltradaMediaMm: laminainfiltradaMediaMm,
+    laminaAplicadaMediaMm: laminaAplicadaMediaMm,
+    eficienciaDistribuicaoEd: eficienciaDistribuicaoEd,
+    adequacaoUtilGa: adequacaoUtilGa,
+    origemCurvaAvanco: origemCurvaAvanco,
+    metodoCurvaAvanco: metodoCurvaAvanco,
+    origemCurvaInfiltracao: origemCurvaInfiltracao,
+    hipoteseRecessao: hipoteseRecessao,
+    extrapolouAvanco: extrapolouAvanco,
+    planejamentoOperacional: planejamento,
+  );
 
   String get classificacaoEa => _classificarEa(eficiencia);
   String get classificacaoCuc => _classificarCuc(cuc);

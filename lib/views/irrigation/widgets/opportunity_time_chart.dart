@@ -22,15 +22,27 @@ class OpportunityTimeChart extends StatelessWidget {
 
     final colors = Theme.of(context).colorScheme;
     final tempoAvanco = resultado.tempoAvanco;
-    final toFinal = resultado.metricas['Tempo de oportunidade'] ?? 0.0;
-    final tempoCorte = tempoAvanco + toFinal;
+    final toFinal =
+        resultado.tempoOportunidadeFinalMin ??
+        resultado.metricas['Tempo de oportunidade'] ??
+        0.0;
+    final tempoCorte =
+        resultado.metricas['Tempo de aplicação calculado'] ??
+        tempoAvanco + toFinal;
 
     final rawSpots = <FlSpot>[];
-    for (final point in resultado.curvaAvanco) {
-      if (!point.x.isFinite || !point.y.isFinite || point.y < 0) continue;
-      final to = tempoCorte - point.x;
-      if (!to.isFinite) continue;
-      rawSpots.add(FlSpot(point.y, math.max(0.0, to)));
+    if (resultado.curvaOportunidade.isNotEmpty) {
+      for (final point in resultado.curvaOportunidade) {
+        if (!point.x.isFinite || !point.y.isFinite || point.y < 0) continue;
+        rawSpots.add(FlSpot(point.x, point.y));
+      }
+    } else {
+      for (final point in resultado.curvaAvanco) {
+        if (!point.x.isFinite || !point.y.isFinite || point.y < 0) continue;
+        final to = tempoCorte - point.x;
+        if (!to.isFinite || to < 0) continue;
+        rawSpots.add(FlSpot(point.y, to));
+      }
     }
     if (rawSpots.isEmpty) {
       return const Center(child: Text('Sem dados de oportunidade'));
@@ -73,7 +85,9 @@ class OpportunityTimeChart extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Tempo de oportunidade To(x) = Ta + To − Tx(x)',
+            resultado.hipoteseRecessao == 'medidaPorEstaca'
+                ? 'To(x) = instante de recessão medido − Tx(x)'
+                : 'Tempo de oportunidade To(x) = Tc − Tx(x)',
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 16),

@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import '../../models/cenario_salvo.dart';
+import '../../models/cenarios/cenario_salvo.dart';
 
 class LocalScenarioStore {
   final List<CenarioSalvo> _cenarios = [];

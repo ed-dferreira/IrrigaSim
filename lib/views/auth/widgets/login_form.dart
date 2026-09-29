@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../viewmodels/auth_providers.dart';
+import 'package:irrigasim/viewmodels/auth/auth_providers.dart';
 
 class LoginForm extends ConsumerStatefulWidget {
   const LoginForm({super.key});

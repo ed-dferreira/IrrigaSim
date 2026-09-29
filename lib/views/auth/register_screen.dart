@@ -5,7 +5,7 @@ import 'package:irrigasim/app/theme/app_text_styles.dart';
 import 'package:irrigasim/core/widgets/app_text_field.dart';
 import 'package:irrigasim/core/widgets/app_button.dart';
 
-import '../../viewmodels/auth_providers.dart';
+import 'package:irrigasim/viewmodels/auth/auth_providers.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});

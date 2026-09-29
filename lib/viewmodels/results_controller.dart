@@ -2,9 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import 'package:irrigasim/models/irrigation_parameters.dart';
 import 'package:irrigasim/models/simulation_result.dart';
-import 'package:irrigasim/models/cenario_salvo.dart';
-import 'package:irrigasim/viewmodels/irrigation_providers.dart';
-import 'package:irrigasim/services/scenario_service.dart';
+import 'package:irrigasim/models/cenarios/cenario_salvo.dart';
+import 'package:irrigasim/viewmodels/cenarios/scenario_providers.dart';
+import 'package:irrigasim/services/cenarios/scenario_service.dart';
 
 class ResultsState {
   final int abaAtual;

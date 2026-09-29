@@ -17,7 +17,9 @@ Flutter app for irrigation simulation.
 
 ## Architecture
 
-Feature-based MVC structure under `lib/`:
+Feature-based MVC structure under `lib/`. The current code is organized by
+layer, with feature folders inside each layer and shared irrigation adapters
+at the layer root:
 
 ```
 lib/
@@ -30,32 +32,58 @@ lib/
 ├── core/
 │   ├── navigation/
 │   └── widgets/
-└── features/
-    ├── authentication/
-    │   ├── controllers/
-    │   ├── models/
-    │   ├── services/
-    │   └── views/
+├── models/
+│   ├── cenarios/
+│   ├── perfil/
+│   ├── sulcos/
+│   ├── user/
+│   └── shared irrigation contracts at the root
+├── services/
+│   ├── auth/
+│   ├── cenarios/
+│   ├── perfil/
+│   ├── persistence/
+│   └── simulation/
+│       ├── faixas/
+│       ├── inundacao/
+│       └── sulcos/
+├── viewmodels/
+│   ├── auth/
+│   ├── cenarios/
+│   ├── faixas/
+│   ├── inundacao/
+│   ├── perfil/
+│   ├── sulcos/
+│   └── shared irrigation dispatchers/providers at the root
+└── views/
+    ├── auth/
     ├── cenarios/
     ├── home/
-    ├── irrigation/
-    │   ├── controllers/
-    │   ├── models/
-    │   ├── services/
-    │   │   ├── persistence/
-    │   │   └── simulation/
-    │   └── views/
     ├── perfil/
-    └── tutorial/
+    ├── tutorial/
+    └── irrigation/
+        ├── sulcos/
+        │   └── widgets/
+        └── shared screens and widgets at the root
 ```
 
-Use the smallest applicable MVC structure for each feature:
+Use the smallest applicable MVC structure for each feature. Keep feature-specific
+models, services, controllers/viewmodels, and views in their corresponding
+feature folders. Irrigation is further divided by method (`sulcos/`, `faixas/`,
+`inundacao/`). Keep shared contracts, adapters, providers, mathematical helpers,
+and widgets at the layer root only when they are genuinely used across methods.
+
+Use the smallest applicable structure for each feature:
 - `models/` - application data and immutable state objects
 - `views/` - screens and feature-specific widgets
-- `controllers/` - Riverpod state and UI workflow coordination
+- `viewmodels/` - Riverpod state and UI workflow coordination
 - `services/` - external integrations, persistence, and reusable domain calculations
 
-Not every feature needs all four folders. Simple, view-only features such as `home` and `tutorial` contain only `views/`.
+Not every feature needs all four layers. Simple, view-only features such as
+`home` and `tutorial` contain only `views/`. Shared irrigation compatibility
+types such as `IrrigationParameters`, `SimulationResult`, `ParametersState`, and
+`ParametersController` remain at their layer roots while method-specific
+contracts and coordination are separated incrementally.
 
 Dependency direction:
 
@@ -79,13 +107,16 @@ Keep providers close to their feature in `providers.dart`. Do not add repository
 Usuário
    │
    ▼
-IrrigationMethodScreen
+IrrigationScreen
    │
    ▼
-ParametersScreen
+ParametersScreen (quick flow) or method-specific project screen
    │
    ▼
 ParametersController
+   │
+   ▼
+Method coordinator in `viewmodels/<method>/`
    │
    ▼
 Simulation service selected by irrigation method
@@ -105,11 +136,17 @@ ResultsController
    │
    ▼
 ResultsScreen
-   │
-   ├── AdvanceChart
-   ├── InfiltrationChart
-   └── WaterBalanceChart
+    │
+    ├── AdvanceChart
+    ├── InfiltrationChart
+    └── WaterBalanceChart
 ```
+
+Method-specific irrigation files live under matching `sulcos/`, `faixas/`, or
+`inundacao/` folders. The current project workflow and terrain/profile widgets
+under `views/irrigation/sulcos/` are specific to furrow irrigation. Quick-flow
+screens and charts used by multiple methods remain shared under
+`views/irrigation/`.
 
 ## Git Hooks
 

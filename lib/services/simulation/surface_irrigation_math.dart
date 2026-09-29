@@ -7,11 +7,13 @@ class AdvanceCurve {
     required this.coefficient,
     required this.exponent,
     required this.points,
+    this.rSquared,
   });
 
   final double coefficient;
   final double exponent;
   final List<PontoGrafico> points;
+  final double? rSquared;
 
   double timeAt(double distanceM) =>
       distanceM <= 0 ? 0 : coefficient * pow(distanceM, exponent);

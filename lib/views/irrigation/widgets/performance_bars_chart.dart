@@ -15,7 +15,7 @@ class PerformanceBarsChart extends StatelessWidget {
       _Indicator('Eficiência Ea', resultado.eficiencia, resultado.classificacaoEa),
       _Indicator('Uniformidade CUC', resultado.cuc, resultado.classificacaoCuc),
       _Indicator('Distribuição DU', resultado.du, resultado.classificacaoDu),
-      _Indicator('Adequação Er', resultado.eficienciaRequerimento, 'Adequação'),
+      _Indicator('Er (requerimento)', resultado.eficienciaRequerimento, 'Eficiência de requerimento'),
     ];
 
     return Semantics(

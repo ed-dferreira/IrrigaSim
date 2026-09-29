@@ -1,5 +1,7 @@
 import 'package:irrigasim/models/irrigation_parameters.dart';
-import 'package:irrigasim/models/cenario_salvo.dart';
+import 'package:irrigasim/models/cenarios/cenario_salvo.dart';
+import 'package:irrigasim/models/simulation_result_model.dart';
+import 'package:irrigasim/models/sulcos/tipo_sulco_info.dart';
 
 class ProjectStore {
   ProjectStore({
@@ -23,11 +25,14 @@ class ProjectStore {
       'unidades': {
         'comprimento': 'm',
         'largura_ou_espacamento': 'm',
+        'area': 'ha',
         'declividade': 'm/m',
         'vazao': 'L/s',
         'tempo': 'min',
         'lamina': 'mm',
         'eficiencia': '%',
+        'jornada': 'h/dia',
+        'periodo_irrigacao': 'dias',
       },
       'parametros': {
         'comprimento': p.comprimento,
@@ -42,11 +47,35 @@ class ProjectStore {
         'manning_n': p.manningN,
         'sigma_z': p.sigmaZ,
         'textura_solo': p.texturaSolo.name,
+        'tipo_sulco': p.tipoSulco?.name,
+        'area_hectares': p.areaHectares,
+        'vazao_disponivel_l_s': p.vazaoDisponivelLps,
+        'desnivel_transversal_m': p.declividadeTransversal,
         'tempo_avanco_metade_min': p.tempoAvancoMetadeMin,
         'tempo_avanco_final_min': p.tempoAvancoFinalMin,
+        'coeficiente_avanco_k': p.coeficienteAvancoK,
+        'expoente_avanco_b': p.expoenteAvancoB,
+        'distancia_referencia_avanco_m': p.distanciaReferenciaAvancoM,
+        'usar_ensaio_avanco': p.usarEnsaioAvanco,
+        'metodo_curva_avanco': p.metodoCurvaAvanco.name,
+        'medicoes_avanco': p.medicoesAvanco
+            .map((point) => point.toMap())
+            .toList(),
+        'origem_curva_infiltracao': p.origemCurvaInfiltracao.name,
+        'distancia_ensaio_infiltracao_m': p.distanciaEnsaioInfiltracaoM,
+        'espacamento_ensaio_infiltracao_m': p.espacamentoEnsaioInfiltracaoM,
+        'medicoes_entrada_saida': p.medicoesEntradaSaida
+            .map((point) => point.toMap())
+            .toList(),
+        'hipotese_recessao': p.hipoteseRecessao.name,
+        'medicoes_recessao': p.medicoesRecessao
+            .map((point) => point.toMap())
+            .toList(),
         'manejo_sulco': p.manejoSulco.name,
         'vazao_reduzida_l_s': p.vazaoReduzidaLs,
         'tempo_mudanca_min': p.tempoMudancaMin,
+        'tempo_mudanca_parcela_min': p.tempoMudancaParcelaMin,
+        'periodo_irrigacao_dias': p.periodoIrrigacaoDias,
         'ciclo_surtir_min': p.cicloSurtirMin,
         'jornada_diaria_h': p.jornadaDiariaH,
         'perdas_conducao_l_s': p.perdasConducaoLs,
@@ -71,6 +100,8 @@ class ProjectStore {
         'metricas': r.metricas,
         'unidades_metricas': r.unidadesMetricas,
         'alerta_vazao_excedida': r.alertaVazaoExcedida,
+        'planejamento_operacional': r.planejamentoOperacional?.toMap(),
+        'resultado_completo': SimulationResultModel.toMap(r),
       },
       'metadados': {
         'data_criacao': cenario.dataCriacao.toIso8601String(),
@@ -101,13 +132,22 @@ class ProjectStore {
       'Espaçamento/Largura: ${p.larguraOuEspacamento.toStringAsFixed(2)} m',
     );
     buffer.writeln('Vazão: ${p.vazao.toStringAsFixed(2)} L/s');
+    buffer.writeln('Declividade longitudinal: ${p.declividade} m/m');
+    buffer.writeln(
+      'Tipo de sulco: ${p.tipoSulco?.displayName ?? 'Não informado'}',
+    );
+    buffer.writeln('Área efetiva: ${p.areaHectares.toStringAsFixed(2)} ha');
+    buffer.writeln('Período de irrigação: ${p.periodoIrrigacaoDias} dias');
+    buffer.writeln(
+      'Tempo entre parcelas: ${p.tempoMudancaParcelaMin.toStringAsFixed(0)} min',
+    );
     buffer.writeln('Manejo: ${p.manejoSulco.displayName}');
     if (p.manejoSulco == ManejoSulco.reduzida) {
       buffer.writeln(
         'Vazão reduzida: ${p.vazaoReduzidaLs.toStringAsFixed(2)} L/s',
       );
       buffer.writeln(
-        'Tempo de mudança: ${p.tempoMudancaMin.toStringAsFixed(0)} min',
+        'Atraso de redução após o avanço: ${p.tempoMudancaMin.toStringAsFixed(0)} min',
       );
     }
     buffer.writeln(
@@ -119,6 +159,12 @@ class ProjectStore {
     buffer.writeln('Coef. infiltração k: ${p.k}');
     buffer.writeln('Expoente a: ${p.a}');
     buffer.writeln('Textura do solo: ${p.texturaSolo.displayName}');
+    buffer.writeln(
+      'Origem do avanço: ${p.usarEnsaioAvanco ? 'ensaio' : 'estimativa'}',
+    );
+    buffer.writeln('Método de avanço: ${p.metodoCurvaAvanco.name}');
+    buffer.writeln('Origem da infiltração: ${p.origemCurvaInfiltracao.name}');
+    buffer.writeln('Hipótese de recessão: ${p.hipoteseRecessao.name}');
     buffer.writeln('');
     buffer.writeln('RESULTADOS');
     buffer.writeln('-' * 30);
@@ -131,12 +177,57 @@ class ProjectStore {
       'Lâmina média infiltrada: ${(r.laminaMedia * 1000).toStringAsFixed(2)} mm',
     );
     buffer.writeln('Tempo de avanço: ${r.tempoAvanco.toStringAsFixed(2)} min');
+    if (r.tempoOportunidadeFinalMin != null) {
+      buffer.writeln(
+        'Oportunidade no final: ${r.tempoOportunidadeFinalMin!.toStringAsFixed(2)} min',
+      );
+    }
+    if (r.tempoFornecimentoMin != null) {
+      buffer.writeln(
+        'Fornecimento Ti/Tt: ${r.tempoFornecimentoMin!.toStringAsFixed(2)} min',
+      );
+    }
+    if (r.laminainfiltradaInicioMm != null) {
+      buffer.writeln(
+        'Lâmina infiltrada no início (Li): ${r.laminainfiltradaInicioMm!.toStringAsFixed(2)} mm',
+      );
+    }
+    if (r.laminainfiltradaFinalMm != null) {
+      buffer.writeln(
+        'Lâmina infiltrada no final (Lf): ${r.laminainfiltradaFinalMm!.toStringAsFixed(2)} mm',
+      );
+    }
+    if (r.laminaAplicadaMediaMm != null) {
+      buffer.writeln(
+        'Lâmina média aplicada (Lm): ${r.laminaAplicadaMediaMm!.toStringAsFixed(2)} mm',
+      );
+    }
     buffer.writeln(
       'Perda por percolação: ${r.perdaPercolacao.toStringAsFixed(2)}%',
     );
     buffer.writeln(
       'Perda por escoamento: ${r.perdaEscoamento.toStringAsFixed(2)}%',
     );
+    if (r.planejamentoOperacional case final planning?) {
+      buffer.writeln('');
+      buffer.writeln('PLANEJAMENTO OPERACIONAL');
+      buffer.writeln('-' * 30);
+      buffer.writeln('NTS: ${planning.ntsOperacional} sulcos');
+      buffer.writeln('NSD: ${planning.nsdOperacional} sulcos/dia');
+      buffer.writeln('TIP: ${planning.tipH.toStringAsFixed(4)} h');
+      buffer.writeln('NPD: ${planning.npdOperacional} parcelas/dia');
+      buffer.writeln('NSP: ${planning.nspOperacional} sulcos simultâneos');
+      buffer.writeln(
+        'Qprojeto: ${planning.qProjetoOperacional.toStringAsFixed(2)} L/s',
+      );
+      buffer.writeln(
+        'Agenda: ${planning.diasNecessariosOperacional} de ${planning.periodoIrrigacaoDias} dias',
+      );
+      buffer.writeln(
+        planning.motivoInviabilidade ??
+            'Operação viável na capacidade informada.',
+      );
+    }
     buffer.writeln('');
     buffer.writeln('CLASSIFICAÇÕES');
     buffer.writeln('-' * 30);

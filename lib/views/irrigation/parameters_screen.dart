@@ -6,7 +6,7 @@ import 'package:irrigasim/app/theme/app_colors.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
 import 'package:irrigasim/core/widgets/calculated_field.dart';
 import 'package:irrigasim/models/irrigation_parameters.dart';
-import 'package:irrigasim/models/tipo_sulco_info.dart';
+import 'package:irrigasim/models/sulcos/tipo_sulco_info.dart';
 import 'package:irrigasim/viewmodels/parameters_controller.dart';
 
 class ParametersScreen extends ConsumerStatefulWidget {

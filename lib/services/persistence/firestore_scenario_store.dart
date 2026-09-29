@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../models/cenario_salvo.dart';
+import '../../models/cenarios/cenario_salvo.dart';
 
 class FirestoreScenarioStore {
   final FirebaseFirestore _firestore;

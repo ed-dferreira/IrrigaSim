@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/models/tipo_sulco_info.dart';
+import 'package:irrigasim/models/sulcos/tipo_sulco_info.dart';
 
 void main() {
   DeclividadeRange range(TipoSulco tipo) =>

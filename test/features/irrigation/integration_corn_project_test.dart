@@ -1,13 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/models/irrigation_parameters.dart';
-import 'package:irrigasim/models/irrigation_project.dart';
-import 'package:irrigasim/services/simulation/advance_curve_model.dart';
-import 'package:irrigasim/services/simulation/depth_performance.dart';
-import 'package:irrigasim/services/simulation/flow_management.dart';
-import 'package:irrigasim/services/simulation/infiltration_model.dart';
+import 'package:irrigasim/models/sulcos/irrigation_project.dart';
+import 'package:irrigasim/services/simulation/sulcos/advance_curve_model.dart';
+import 'package:irrigasim/services/simulation/sulcos/depth_performance.dart';
+import 'package:irrigasim/services/simulation/sulcos/flow_management.dart';
+import 'package:irrigasim/services/simulation/sulcos/infiltration_model.dart';
 import 'package:irrigasim/services/simulation/lamina_requerida.dart';
-import 'package:irrigasim/services/simulation/opportunity_time.dart';
-import 'package:irrigasim/services/simulation/run_furrow_simulation.dart';
+import 'package:irrigasim/services/simulation/sulcos/opportunity_time.dart';
+import 'package:irrigasim/services/simulation/sulcos/run_furrow_simulation.dart';
 
 /// Valores de referência do §56 do documento.
 ///

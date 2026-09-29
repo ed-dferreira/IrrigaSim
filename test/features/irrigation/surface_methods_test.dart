@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/models/irrigation_parameters.dart';
-import 'package:irrigasim/services/simulation/run_basin_simulation.dart';
-import 'package:irrigasim/services/simulation/run_border_simulation.dart';
-import 'package:irrigasim/services/simulation/run_furrow_simulation.dart';
-import 'package:irrigasim/services/simulation/run_permanent_basin_simulation.dart';
+import 'package:irrigasim/services/simulation/inundacao/run_basin_simulation.dart';
+import 'package:irrigasim/services/simulation/faixas/run_border_simulation.dart';
+import 'package:irrigasim/services/simulation/sulcos/run_furrow_simulation.dart';
+import 'package:irrigasim/services/simulation/inundacao/run_permanent_basin_simulation.dart';
 import 'package:irrigasim/viewmodels/parameters_controller.dart';
 
 void main() {

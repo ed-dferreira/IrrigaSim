@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
-import 'package:irrigasim/models/cenario_salvo.dart';
+import 'package:irrigasim/models/cenarios/cenario_salvo.dart';
 import 'package:irrigasim/models/irrigation_parameters.dart';
-import 'package:irrigasim/viewmodels/irrigation_providers.dart';
+import 'package:irrigasim/viewmodels/cenarios/scenario_providers.dart';
 
 class CenariosScreen extends ConsumerStatefulWidget {
   const CenariosScreen({super.key});

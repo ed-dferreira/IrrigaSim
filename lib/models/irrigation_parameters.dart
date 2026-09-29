@@ -1,4 +1,6 @@
-import 'package:irrigasim/models/tipo_sulco_info.dart';
+import 'package:irrigasim/models/sulcos/tipo_sulco_info.dart';
+
+import 'sulcos/field_measurements.dart';
 
 enum MetodoIrrigacao { sulco, faixa, inundacao }
 
@@ -90,6 +92,9 @@ class IrrigationParameters {
   final TipoSulco? tipoSulco;
   final double tempoAvancoMetadeMin;
   final double tempoAvancoFinalMin;
+  final double? coeficienteAvancoK;
+  final double? expoenteAvancoB;
+  final double? distanciaReferenciaAvancoM;
   final double instanteRecessaoInicioMin;
   final double instanteRecessaoFinalMin;
   final TipoInundacao tipoInundacao;
@@ -109,6 +114,8 @@ class IrrigationParameters {
   final double tempoMudancaMin;
   final double cicloSurtirMin;
   final double jornadaDiariaH;
+  final int periodoIrrigacaoDias;
+  final double tempoMudancaParcelaMin;
   final double perdasConducaoLs;
   final double precipitacaoEfetivaMmDia;
   final String nomeCultura;
@@ -117,6 +124,15 @@ class IrrigationParameters {
   final double espacamentoPlantasM;
   final double? larguraSulcoM;
   final double? profundidadeSulcoM;
+  final MetodoCurvaAvanco metodoCurvaAvanco;
+  final bool usarEnsaioAvanco;
+  final List<MedicaoAvanco> medicoesAvanco;
+  final OrigemCurvaInfiltracao origemCurvaInfiltracao;
+  final double distanciaEnsaioInfiltracaoM;
+  final double espacamentoEnsaioInfiltracaoM;
+  final List<MedicaoEntradaSaida> medicoesEntradaSaida;
+  final HipoteseRecessao hipoteseRecessao;
+  final List<MedicaoRecessao> medicoesRecessao;
 
   const IrrigationParameters({
     required this.comprimento,
@@ -135,6 +151,9 @@ class IrrigationParameters {
     this.tipoSulco,
     this.tempoAvancoMetadeMin = 20,
     this.tempoAvancoFinalMin = 60,
+    this.coeficienteAvancoK,
+    this.expoenteAvancoB,
+    this.distanciaReferenciaAvancoM,
     this.instanteRecessaoInicioMin = 125,
     this.instanteRecessaoFinalMin = 180,
     this.tipoInundacao = TipoInundacao.intermitente,
@@ -152,6 +171,8 @@ class IrrigationParameters {
     this.tempoMudancaMin = 0,
     this.cicloSurtirMin = 0,
     this.jornadaDiariaH = 24,
+    this.periodoIrrigacaoDias = 10,
+    this.tempoMudancaParcelaMin = 30,
     this.perdasConducaoLs = 0,
     this.precipitacaoEfetivaMmDia = 0,
     this.nomeCultura = '',
@@ -160,6 +181,16 @@ class IrrigationParameters {
     this.espacamentoPlantasM = 0.15,
     this.larguraSulcoM,
     this.profundidadeSulcoM,
+    this.metodoCurvaAvanco = MetodoCurvaAvanco.doisPontos,
+    this.usarEnsaioAvanco = false,
+    this.medicoesAvanco = const [],
+    this.origemCurvaInfiltracao =
+        OrigemCurvaInfiltracao.equacaoAcumuladaInformada,
+    this.distanciaEnsaioInfiltracaoM = 0,
+    this.espacamentoEnsaioInfiltracaoM = 0,
+    this.medicoesEntradaSaida = const [],
+    this.hipoteseRecessao = HipoteseRecessao.desprezada,
+    this.medicoesRecessao = const [],
   });
 
   IrrigationParameters copyWith({
@@ -179,6 +210,9 @@ class IrrigationParameters {
     TipoSulco? tipoSulco,
     double? tempoAvancoMetadeMin,
     double? tempoAvancoFinalMin,
+    double? coeficienteAvancoK,
+    double? expoenteAvancoB,
+    double? distanciaReferenciaAvancoM,
     double? instanteRecessaoInicioMin,
     double? instanteRecessaoFinalMin,
     TipoInundacao? tipoInundacao,
@@ -196,6 +230,8 @@ class IrrigationParameters {
     double? tempoMudancaMin,
     double? cicloSurtirMin,
     double? jornadaDiariaH,
+    int? periodoIrrigacaoDias,
+    double? tempoMudancaParcelaMin,
     double? perdasConducaoLs,
     double? precipitacaoEfetivaMmDia,
     String? nomeCultura,
@@ -204,6 +240,15 @@ class IrrigationParameters {
     double? espacamentoPlantasM,
     double? larguraSulcoM,
     double? profundidadeSulcoM,
+    MetodoCurvaAvanco? metodoCurvaAvanco,
+    bool? usarEnsaioAvanco,
+    List<MedicaoAvanco>? medicoesAvanco,
+    OrigemCurvaInfiltracao? origemCurvaInfiltracao,
+    double? distanciaEnsaioInfiltracaoM,
+    double? espacamentoEnsaioInfiltracaoM,
+    List<MedicaoEntradaSaida>? medicoesEntradaSaida,
+    HipoteseRecessao? hipoteseRecessao,
+    List<MedicaoRecessao>? medicoesRecessao,
   }) {
     return IrrigationParameters(
       comprimento: comprimento ?? this.comprimento,
@@ -223,6 +268,10 @@ class IrrigationParameters {
       tipoSulco: tipoSulco ?? this.tipoSulco,
       tempoAvancoMetadeMin: tempoAvancoMetadeMin ?? this.tempoAvancoMetadeMin,
       tempoAvancoFinalMin: tempoAvancoFinalMin ?? this.tempoAvancoFinalMin,
+      coeficienteAvancoK: coeficienteAvancoK ?? this.coeficienteAvancoK,
+      expoenteAvancoB: expoenteAvancoB ?? this.expoenteAvancoB,
+      distanciaReferenciaAvancoM:
+          distanciaReferenciaAvancoM ?? this.distanciaReferenciaAvancoM,
       instanteRecessaoInicioMin:
           instanteRecessaoInicioMin ?? this.instanteRecessaoInicioMin,
       instanteRecessaoFinalMin:
@@ -244,6 +293,9 @@ class IrrigationParameters {
       tempoMudancaMin: tempoMudancaMin ?? this.tempoMudancaMin,
       cicloSurtirMin: cicloSurtirMin ?? this.cicloSurtirMin,
       jornadaDiariaH: jornadaDiariaH ?? this.jornadaDiariaH,
+      periodoIrrigacaoDias: periodoIrrigacaoDias ?? this.periodoIrrigacaoDias,
+      tempoMudancaParcelaMin:
+          tempoMudancaParcelaMin ?? this.tempoMudancaParcelaMin,
       perdasConducaoLs: perdasConducaoLs ?? this.perdasConducaoLs,
       precipitacaoEfetivaMmDia:
           precipitacaoEfetivaMmDia ?? this.precipitacaoEfetivaMmDia,
@@ -253,6 +305,18 @@ class IrrigationParameters {
       espacamentoPlantasM: espacamentoPlantasM ?? this.espacamentoPlantasM,
       larguraSulcoM: larguraSulcoM ?? this.larguraSulcoM,
       profundidadeSulcoM: profundidadeSulcoM ?? this.profundidadeSulcoM,
+      metodoCurvaAvanco: metodoCurvaAvanco ?? this.metodoCurvaAvanco,
+      usarEnsaioAvanco: usarEnsaioAvanco ?? this.usarEnsaioAvanco,
+      medicoesAvanco: medicoesAvanco ?? this.medicoesAvanco,
+      origemCurvaInfiltracao:
+          origemCurvaInfiltracao ?? this.origemCurvaInfiltracao,
+      distanciaEnsaioInfiltracaoM:
+          distanciaEnsaioInfiltracaoM ?? this.distanciaEnsaioInfiltracaoM,
+      espacamentoEnsaioInfiltracaoM:
+          espacamentoEnsaioInfiltracaoM ?? this.espacamentoEnsaioInfiltracaoM,
+      medicoesEntradaSaida: medicoesEntradaSaida ?? this.medicoesEntradaSaida,
+      hipoteseRecessao: hipoteseRecessao ?? this.hipoteseRecessao,
+      medicoesRecessao: medicoesRecessao ?? this.medicoesRecessao,
     );
   }
 }
