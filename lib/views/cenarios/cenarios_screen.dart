@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
 import 'package:irrigasim/models/cenarios/cenario_salvo.dart';
 import 'package:irrigasim/models/irrigation_parameters.dart';
+import 'package:irrigasim/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/viewmodels/faixas/border_project_controller.dart';
 import 'package:irrigasim/viewmodels/cenarios/scenario_providers.dart';
 
 class CenariosScreen extends ConsumerStatefulWidget {
@@ -419,11 +421,11 @@ class _MethodBadge extends StatelessWidget {
   }
 }
 
-class _ScenarioDetails extends StatelessWidget {
+class _ScenarioDetails extends ConsumerWidget {
   final CenarioSalvo cenario;
   const _ScenarioDetails({required this.cenario});
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
     return SafeArea(
@@ -521,20 +523,47 @@ class _ScenarioDetails extends StatelessWidget {
                               '${cenario.parametros.declividade.toStringAsFixed(3)} m/m',
                         ),
                         _DetailRow(
-                          label: 'Vazão',
+                          label: cenario.metodo == MetodoIrrigacao.faixa
+                              ? 'Vazão unitária q0'
+                              : 'Vazão',
                           value:
-                              '${cenario.parametros.vazao.toStringAsFixed(2)} L/s',
+                              '${cenario.parametros.vazao.toStringAsFixed(2)} ${cenario.metodo == MetodoIrrigacao.faixa ? 'L/s/m' : 'L/s'}',
                         ),
-                        _DetailRow(
-                          label: 'Tempo de aplicação',
-                          value:
-                              '${cenario.parametros.tempoAplicacao.toStringAsFixed(0)} min',
-                          last: true,
-                        ),
+                        if (cenario.metodo != MetodoIrrigacao.faixa ||
+                            cenario.parametros.projetoFaixa?.legado == true)
+                          _DetailRow(
+                            label: cenario.metodo == MetodoIrrigacao.faixa
+                                ? 'Tempo legado registrado (não define o corte)'
+                                : 'Tempo de aplicação',
+                            value:
+                                '${cenario.parametros.tempoAplicacao.toStringAsFixed(0)} min',
+                            last: true,
+                          ),
                       ],
                     ),
                   ),
                 ),
+                if (cenario.metodo == MetodoIrrigacao.faixa) ...[
+                  const SizedBox(height: 16),
+                  FilledButton.icon(
+                    onPressed: () {
+                      final projeto = cenario.parametros.projetoFaixa!;
+                      if (projeto.legado) {
+                        ref.read(parametersProvider.notifier)
+                          ..setMetodo(MetodoIrrigacao.faixa)
+                          ..loadFromParams(cenario.parametros);
+                        context.go('/home/irrigation/parameters');
+                      } else {
+                        ref
+                            .read(borderProjectProvider.notifier)
+                            .carregar(projeto);
+                        context.go('/home/irrigation/border-project');
+                      }
+                    },
+                    icon: const Icon(AppIcons.visualizarCenario),
+                    label: const Text('Abrir entradas da faixa'),
+                  ),
+                ],
               ],
             ),
           ),

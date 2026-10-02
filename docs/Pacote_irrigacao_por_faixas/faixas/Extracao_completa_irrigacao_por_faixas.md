@@ -12,7 +12,7 @@ Este documento reúne conceitos, tipos, números, tabelas, fórmulas, procedimen
 
 As correções propostas são identificadas. Nenhum número suspeito foi silenciosamente substituído. Não houve consulta a fontes externas: isto é uma extração e auditoria interna do documento, não uma confirmação bibliográfica das equações empíricas.
 
-**Limite decisivo:** o PDF fornece uma metodologia de dimensionamento por balanço volumétrico e recessão aproximada. Não fornece um solucionador hidrodinâmico completo nem algoritmos suficientes para todos os tipos que menciona. O exemplo da p.73 contém somente entradas e a chamada “PLANILHA EXCEL!”. O PDF em si não traz a planilha nem um gabarito; há duas planilhas de faixas em `docs/materiais_origem/`, ainda não auditadas nesta extração. Não assumir que correspondem ao gabarito sem comparar origem, fórmulas e unidades.
+**Limite decisivo:** o PDF fornece uma metodologia de dimensionamento por balanço volumétrico e recessão aproximada. Não fornece um solucionador hidrodinâmico completo nem algoritmos suficientes para todos os tipos que menciona. O exemplo da p.73 contém somente entradas e a chamada “PLANILHA EXCEL!”. A planilha e seu gabarito não fazem parte do anexo.
 
 ## 2. Conceitos, tipos e componentes
 
@@ -508,7 +508,7 @@ Tempo mínimo teórico a 100% de eficiência = 8.960/24
                                              = 373,333333 min = 6,222222 h
 ```
 
-O turno 7 dias é derivação sem chuva, variação de ET ou outros termos de balanço. A frase “disponível a cada sete dias” não informa por quantas horas a água está disponível. Não equivale a sete dias de fornecimento contínuo. A jornada TDF, tmu, altura dos diques, largura das máquinas, Vmax, condição de cobertura e largura adotada não são fornecidas. Por isso não existe dimensionamento único fechado de W0, NFP e cronograma somente com os dados do PDF; as planilhas presentes no repositório precisam de auditoria separada.
+O turno 7 dias é derivação sem chuva, variação de ET ou outros termos de balanço. A frase “disponível a cada sete dias” não informa por quantas horas a água está disponível. Não equivale a sete dias de fornecimento contínuo. A jornada TDF, tmu, altura dos diques, largura das máquinas, Vmax, condição de cobertura e largura adotada não são fornecidas. Por isso não existe dimensionamento único fechado de W0, NFP e cronograma somente com o anexo.
 
 ### 8.3 Casos básicos para teste
 
@@ -568,8 +568,6 @@ São casos de software construídos aqui, distintos do exemplo da aula:
 - Células 1,03;505,5;993,1 da tabela → dado sob revisão, não sugestão automática de equipamento.
 
 ## 9. Fluxo de implementação proposto
-
-**Plano executável para o aplicativo:** [`plano-completo-irrigacao-por-faixas.md`](plano-completo-irrigacao-por-faixas.md). O roteiro abaixo descreve a sequência matemática; o plano vinculado começa com a organização de `models/`, `services/simulation/` e `viewmodels/` por método e prossegue com integração em etapas, arquivos reais, interface, persistência e critérios de aceite. O projeto de sulcos serve de referência visual, sem transpor suas equações.
 
 1. Selecionar objetivo: avaliar ensaio medido, simular faixa ou dimensionar/otimizar projeto.
 2. Escolher tipo de faixa e manejo. Declarar quais modelos estão implementados.
@@ -644,7 +642,7 @@ Status recomendados: `valido_no_modelo`, `aviso_orientativo`, `entrada_invalida`
 | E17 | 12/20/73 | Faixa geral 0,2–6%, tabela inicia em 0,15%, exemplo usa 0,1% | Recomendação, não bloqueio; mostrar fora da faixa usual |
 | E18 | 21/28–29 | Corte antes de L pode preceder fim do avanço | Não aplicar sequência completa mecanicamente |
 | E19 | 69–70 | Contagens podem sair fracionárias | Resolver discretização e revalidar cobertura |
-| E20 | 73 | Exemplo remete a planilha não incluída no PDF; duas planilhas de faixas constam no repositório, sem auditoria nesta extração | Nenhum resultado reconstruído é gabarito oficial |
+| E20 | 73 | Exemplo remete a planilha ausente | Nenhum resultado reconstruído é gabarito oficial |
 
 Não estão no documento: condições de calibração/validade das equações empíricas; erro estatístico dos coeficientes; tabela de rugosidade; velocidade máxima erosiva; chuva, demanda meteorológica completa e cálculo de IRN a partir de solo/raiz; qualidade de água; custos; bombeamento; dimensionamento de canais/comportas; armazenamento e bombeamento de reuso; hidrograma de redução de vazão; modelo completo em nível ou fechado; topografia 2D; solução de conservação de quantidade de movimento; janela diária de fornecimento. O simulador não deve inventar padrões para esses itens sem identificar que são hipóteses adicionais.
 
@@ -722,4 +720,4 @@ Na figura da p.31, a notação T′/4 aparece sem definição quantitativa sufic
 
 Executar localmente com Python 3: `python3 testar_referencia.py`. O comando `python3 nucleo_referencia.py` imprime os dois cenários. Não é necessário instalar pacotes.
 
-Este conjunto permite iniciar um simulador rastreável e testar seu núcleo. Para reproduzir exatamente o exercício da professora e fechar o dimensionamento operacional, ainda são necessárias a conferência das planilhas de faixas disponíveis no repositório com a referência da p.73, a definição dos parâmetros faltantes e a resolução das inconsistências apontadas. A sequência de implementação no aplicativo está no plano vinculado na seção 9.
+Este conjunto permite iniciar um simulador rastreável e testar seu núcleo. Para reproduzir exatamente o exercício da professora e fechar o dimensionamento operacional, ainda são necessários a planilha referida na p.73, os parâmetros faltantes e a resolução das inconsistências apontadas.

@@ -9,7 +9,7 @@
 # O que ele faz:
 # 1. Compila o app Android (APK)
 # 2. Compila o app Android (AAB - para Play Store)
-# 3. Compila o app iOS (ipa)
+# 3. Compila o app iOS e empacota o bundle em ZIP
 # 4. Cria um Release no GitHub com os arquivos compilados
 #
 # Para criar um release:
@@ -80,16 +80,21 @@ jobs:
       - name: Build iOS
         run: flutter build ios --release --no-codesign
 
+      - name: Package iOS build
+        run: ditto -c -k --sequesterRsrc --keepParent build/ios/iphoneos/Runner.app build/ios/iphoneos/Runner.app.zip
+
       - name: Upload iOS build
         uses: actions/upload-artifact@v4
         with:
-          name: ios-release
-          path: build/ios/iphoneos/Runner.app
+          name: ios-release.zip
+          path: build/ios/iphoneos/Runner.app.zip
 
   create-release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
     needs: [build-android, build-ios]
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
@@ -108,7 +113,7 @@ jobs:
       - name: Download iOS
         uses: actions/download-artifact@v4
         with:
-          name: ios-release
+          name: ios-release.zip
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -116,5 +121,5 @@ jobs:
           files: |
             app-release.apk
             app-release.aab
-            ios-release/**
+            Runner.app.zip
           generate_release_notes: true

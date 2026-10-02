@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../irrigation_parameters.dart';
+import '../faixas/border_project.dart';
 import '../simulation_result.dart';
 import '../sulcos/tipo_sulco_info.dart';
 
@@ -56,6 +57,10 @@ class CenarioSalvo {
       'metodo': metodo.name,
       'parametros': {
         'comprimento': parametros.comprimento,
+        if (metodo == MetodoIrrigacao.faixa)
+          'projetoFaixa':
+              (parametros.projetoFaixa ?? BorderProject.fromLegacy(parametros))
+                  .toMap(),
         'declividade': parametros.declividade,
         'declividadeTransversal': parametros.declividadeTransversal,
         'larguraOuEspacamento': parametros.larguraOuEspacamento,
@@ -127,11 +132,46 @@ class CenarioSalvo {
 
   factory CenarioSalvo.fromMap(Map<String, dynamic> map, {String? id}) {
     final paramData = map['parametros'] as Map<String, dynamic>;
+    final metodo = MetodoIrrigacaoExtension.fromString(
+      map['metodo'] ?? 'sulco',
+    );
+    final projetoMap = paramData['projetoFaixa'];
+    // Apenas faixas usam o adaptador legado; outros métodos preservam suas unidades.
+    final projeto = metodo == MetodoIrrigacao.faixa && projetoMap is Map
+        ? BorderProject.fromMap(Map<String, dynamic>.from(projetoMap))
+        : null;
     return CenarioSalvo(
       id: id ?? map['id'] ?? '',
       nome: map['nome'] ?? '',
-      metodo: MetodoIrrigacaoExtension.fromString(map['metodo'] ?? 'sulco'),
+      metodo: metodo,
       parametros: IrrigationParameters(
+        projetoFaixa:
+            projeto ??
+            (metodo == MetodoIrrigacao.faixa
+                ? BorderProject.fromLegacy(
+                    IrrigationParameters(
+                      comprimento: (paramData['comprimento'] as num).toDouble(),
+                      declividade: (paramData['declividade'] as num).toDouble(),
+                      declividadeTransversal:
+                          (paramData['declividadeTransversal'] as num?)
+                              ?.toDouble() ??
+                          0,
+                      larguraOuEspacamento:
+                          (paramData['larguraOuEspacamento'] as num).toDouble(),
+                      k: (paramData['k'] as num).toDouble(),
+                      a: (paramData['a'] as num).toDouble(),
+                      vib: (paramData['vib'] as num).toDouble(),
+                      vazao: (paramData['vazao'] as num).toDouble(),
+                      tempoAplicacao: (paramData['tempoAplicacao'] as num)
+                          .toDouble(),
+                      laminaRequerida: (paramData['laminaRequerida'] as num)
+                          .toDouble(),
+                      manningN:
+                          (paramData['manningN'] as num?)?.toDouble() ?? 0.015,
+                      sigmaZ: (paramData['sigmaZ'] as num?)?.toDouble() ?? 0.4,
+                    ),
+                  )
+                : null),
         comprimento: (paramData['comprimento'] as num).toDouble(),
         declividade: (paramData['declividade'] as num).toDouble(),
         declividadeTransversal:

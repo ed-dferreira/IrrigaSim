@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:irrigasim/models/irrigation_parameters.dart';
+import 'package:irrigasim/models/faixas/border_project.dart';
 import 'package:irrigasim/models/simulation_result.dart';
 import 'package:irrigasim/models/sulcos/tipo_sulco_info.dart';
 import 'package:irrigasim/viewmodels/faixas/border_simulation_coordinator.dart';
@@ -360,6 +361,26 @@ class ParametersState {
 
   IrrigationParameters toIrrigationParameters() {
     return IrrigationParameters(
+      projetoFaixa: metodo == MetodoIrrigacao.faixa
+          ? BorderProject(
+              versao: 0,
+              legado: true,
+              comprimentoM: comprimento,
+              larguraM: larguraOuEspacamento,
+              desnivelLongitudinalM: desnivelM,
+              baseLongitudinalM: distanciaHorizontalM,
+              desnivelTransversalM: desnivelTransversalM,
+              baseTransversalM: distanciaTransversalM,
+              k: k,
+              a: a,
+              vibMMin: vib,
+              vazaoUnitariaLsM: vazao,
+              irnMm: laminaRequerida,
+              rugosidadeN: manningN,
+              rInicial: sigmaZ,
+              tempoAplicacaoLegadoMin: tempoAplicacao,
+            )
+          : null,
       comprimento: comprimento,
       declividade: declividade,
       declividadeTransversal: declividadeTransversal,
@@ -446,6 +467,7 @@ class ParametersController extends StateNotifier<ParametersState> {
   ParametersController() : super(_recalcularLamina(const ParametersState()));
 
   static ParametersState _recalcularLamina(ParametersState current) {
+    if (current.metodo == MetodoIrrigacao.faixa) return current;
     final demandaLiquida =
         current.evapotranspiracaoMmDia - current.precipitacaoEfetivaMmDia;
     if (demandaLiquida <= 0) {
@@ -491,13 +513,13 @@ class ParametersController extends StateNotifier<ParametersState> {
       MetodoIrrigacao.faixa => ParametersState(
         metodo: metodo,
         comprimento: 400,
-        desnivelM: 0.4,
+        desnivelM: 0.8,
         distanciaHorizontalM: 400,
-        larguraOuEspacamento: 50,
+        larguraOuEspacamento: 10,
         k: 0.0034,
         a: 0.45,
         vib: 0.0001,
-        vazao: 1.8,
+        vazao: 3.33,
         laminaRequerida: 56,
         manningN: 0.04,
         sigmaZ: 0.66,
@@ -1141,6 +1163,16 @@ class ParametersController extends StateNotifier<ParametersState> {
   }
 
   Future<void> executarSimulacao() async {
+    if (state.metodo == MetodoIrrigacao.faixa) {
+      final impedimento = state
+          .toIrrigationParameters()
+          .projetoFaixa!
+          .impedimentoModelo;
+      if (impedimento != null) {
+        state = state.copyWith(erro: impedimento);
+        return;
+      }
+    }
     final erroEnsaio = validarEnsaio();
     if (erroEnsaio != null) {
       state = state.copyWith(erro: erroEnsaio);
@@ -1160,8 +1192,8 @@ class ParametersController extends StateNotifier<ParametersState> {
           params,
           curvaAvanco: selectedCurve,
         ),
-        MetodoIrrigacao.inundacao => const BasinSimulationCoordinator()
-            .executar(params),
+        MetodoIrrigacao.inundacao =>
+          const BasinSimulationCoordinator().executar(params),
       };
       state = state.copyWith(resultado: resultado, executando: false);
     } catch (e) {

@@ -41,6 +41,11 @@ class AppIcons {
   static const perfilInfiltracao = Icons.area_chart_rounded;
   static const recomendacao = Icons.lightbulb_rounded;
 
+  // ==================== STATUS DE RESULTADO ====================
+  // Sucesso e atenção reutilizam AppIcons.sucesso/atencao; apenas o
+  // bloqueio tem ícone próprio (junto com sucesso, define os três estados).
+  static const statusBloqueio = Icons.cancel_rounded;
+
   // ==================== PROJETO DE IRRIGAÇÃO ====================
   static const projetoArea = Icons.landscape_rounded;
   static const projetoSulco = Icons.agriculture_rounded;
@@ -51,6 +56,8 @@ class AppIcons {
   static const projetoOperacao = Icons.tune_rounded;
   static const projetoRevisao = Icons.fact_check_rounded;
   static const projetoCalcular = Icons.calculate_rounded;
+  static const etapasAnteriores = Icons.chevron_left_rounded;
+  static const etapasSeguintes = Icons.chevron_right_rounded;
   static const terreno = Icons.grid_on_rounded;
   static const relatorio = Icons.description_rounded;
   static const duplicar = Icons.content_copy_rounded;

@@ -18,6 +18,7 @@ import 'package:irrigasim/views/irrigation/widgets/performance_bars_chart.dart';
 import 'package:irrigasim/views/irrigation/sulcos/widgets/depth_along_furrow_chart.dart';
 import 'package:irrigasim/views/irrigation/sulcos/widgets/terrain_view.dart';
 import 'package:irrigasim/views/irrigation/widgets/scenario_comparison_chart.dart';
+import 'package:irrigasim/views/irrigation/widgets/auditable_widgets.dart';
 
 class ProjectResultsScreen extends ConsumerWidget {
   const ProjectResultsScreen({super.key});
@@ -240,7 +241,57 @@ class _AuditResultsBody extends StatelessWidget {
               children: [
                 _RecommendationBanner(state: state, result: result),
                 const SizedBox(height: 20),
+                _ChartSection(
+                  title: 'Gráficos',
+                  selectedIndex: resultsState.abaAtual.clamp(0, 6),
+                  onTabSelected: onTabSelected,
+                  result: result,
+                ),
+                const SizedBox(height: 20),
+                TerrainView(
+                  comprimentoM: state.comprimento,
+                  larguraM: state.larguraOuEspacamento * 10,
+                  espacamentoSulcosM: state.larguraOuEspacamento,
+                  declividadePercentual: state.declividade * 100,
+                  tipoSulco: state.metodo == MetodoIrrigacao.sulco
+                      ? state.tipoSulco
+                      : null,
+                ),
+                const SizedBox(height: 20),
                 _KpiGrid(result: result),
+                const SizedBox(height: 20),
+                _AuditableSection(
+                  title: 'Medidas de segurança',
+                  icon: Icons.shield_rounded,
+                  children: [
+                    _AuditRow(
+                      'Percolação',
+                      '${result.perdaPercolacao.toStringAsFixed(1)}%',
+                      detail: result.perdaPercolacao > 15
+                          ? 'Limite excedido (>15%)'
+                          : 'Dentro do limite',
+                      isWarning: result.perdaPercolacao > 15,
+                    ),
+                    _AuditRow(
+                      'Escoamento',
+                      '${result.perdaEscoamento.toStringAsFixed(1)}%',
+                      detail: result.perdaEscoamento > 10
+                          ? 'Limite excedido (>10%)'
+                          : 'Dentro do limite',
+                      isWarning: result.perdaEscoamento > 10,
+                    ),
+                    _AuditRow(
+                      'Eficiência',
+                      '${result.eficiencia.toStringAsFixed(1)}%',
+                      detail: result.eficiencia < 60
+                          ? 'Abaixo do mínimo (60%)'
+                          : result.eficiencia >= 75
+                          ? 'Ideal (≥75%)'
+                          : 'Aceitável',
+                      isWarning: result.eficiencia < 60,
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 20),
                 _AuditableSection(
                   title: 'Dados de entrada',
@@ -612,56 +663,6 @@ class _AuditResultsBody extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-                _AuditableSection(
-                  title: 'Medidas de segurança',
-                  icon: Icons.shield_rounded,
-                  children: [
-                    _AuditRow(
-                      'Percolação',
-                      '${result.perdaPercolacao.toStringAsFixed(1)}%',
-                      detail: result.perdaPercolacao > 15
-                          ? 'Limite excedido (>15%)'
-                          : 'Dentro do limite',
-                      isWarning: result.perdaPercolacao > 15,
-                    ),
-                    _AuditRow(
-                      'Escoamento',
-                      '${result.perdaEscoamento.toStringAsFixed(1)}%',
-                      detail: result.perdaEscoamento > 10
-                          ? 'Limite excedido (>10%)'
-                          : 'Dentro do limite',
-                      isWarning: result.perdaEscoamento > 10,
-                    ),
-                    _AuditRow(
-                      'Eficiência',
-                      '${result.eficiencia.toStringAsFixed(1)}%',
-                      detail: result.eficiencia < 60
-                          ? 'Abaixo do mínimo (60%)'
-                          : result.eficiencia >= 75
-                          ? 'Ideal (≥75%)'
-                          : 'Aceitável',
-                      isWarning: result.eficiencia < 60,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                _ChartSection(
-                  title: 'Gráficos',
-                  selectedIndex: resultsState.abaAtual.clamp(0, 6),
-                  onTabSelected: onTabSelected,
-                  result: result,
-                ),
-                const SizedBox(height: 20),
-                TerrainView(
-                  comprimentoM: state.comprimento,
-                  larguraM: state.larguraOuEspacamento * 10,
-                  espacamentoSulcosM: state.larguraOuEspacamento,
-                  declividadePercentual: state.declividade * 100,
-                  tipoSulco: state.metodo == MetodoIrrigacao.sulco
-                      ? state.tipoSulco
-                      : null,
-                ),
-                const SizedBox(height: 20),
                 if (result.alertaVazaoExcedida != null)
                   _AlertBanner(message: result.alertaVazaoExcedida!),
                 const SizedBox(height: 16),
@@ -854,35 +855,7 @@ class _AuditableSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  icon,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.w700),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            ...children,
-          ],
-        ),
-      ),
-    );
+    return IrrigationAuditSection(title: title, icon: icon, children: children);
   }
 }
 
@@ -899,58 +872,8 @@ class _AuditRow extends StatelessWidget {
   final bool isWarning;
 
   @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final valueContent = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          value,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: isWarning ? colors.error : null,
-          ),
-        ),
-        if (detail != null)
-          Text(
-            detail!,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: isWarning ? colors.error : colors.onSurfaceVariant,
-            ),
-          ),
-      ],
-    );
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxWidth < 520) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label, style: Theme.of(context).textTheme.labelLarge),
-                const SizedBox(height: 2),
-                valueContent,
-              ],
-            );
-          }
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: 220,
-                child: Text(
-                  label,
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-              ),
-              Expanded(child: valueContent),
-            ],
-          );
-        },
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      IrrigationAuditRow(label, value, detail: detail, isWarning: isWarning);
 }
 
 // ──────────────────────── Formula Card ────────────────────────
@@ -961,35 +884,8 @@ class _FormulaCard extends StatelessWidget {
   final String description;
 
   @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: colors.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            formula,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              fontFamily: 'monospace',
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            description,
-            style: Theme.of(context).textTheme.bodySmall
-                ?.copyWith(color: colors.onSurfaceVariant),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      IrrigationFormulaCard(formula: formula, description: description);
 }
 
 // ──────────────────────── Alert Banner ────────────────────────
@@ -999,30 +895,7 @@ class _AlertBanner extends StatelessWidget {
   final String message;
 
   @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colors.errorContainer,
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(AppIcons.atencao, color: colors.onErrorContainer, size: 24),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              message,
-              style: Theme.of(context).textTheme.bodyMedium
-                  ?.copyWith(color: colors.onErrorContainer),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => IrrigationAlertBanner(message: message);
 }
 
 // ──────────────────────── Chart Section ────────────────────────

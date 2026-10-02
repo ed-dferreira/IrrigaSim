@@ -109,6 +109,12 @@ class TutorialScreen extends ConsumerWidget {
 
   void _open(BuildContext context, WidgetRef ref, MetodoIrrigacao method) {
     ref.read(parametersProvider.notifier).setMetodo(method);
-    context.push('/home/irrigation/parameters');
+    if (method == MetodoIrrigacao.faixa) {
+      context.push('/home/irrigation/border-project');
+    } else if (method == MetodoIrrigacao.sulco) {
+      context.push('/home/irrigation/tipo-sulco');
+    } else {
+      context.push('/home/irrigation/parameters');
+    }
   }
 }

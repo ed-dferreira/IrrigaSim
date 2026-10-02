@@ -1,4 +1,5 @@
 import 'package:irrigasim/services/simulation/operational_planning.dart';
+import 'package:irrigasim/models/faixas/border_result.dart';
 
 class PontoGrafico {
   final double x;
@@ -7,6 +8,7 @@ class PontoGrafico {
 }
 
 class SimulationResult {
+  final BorderResult? borderResult;
   final double eficiencia;
   final double eficienciaRequerimento;
   final double cuc;
@@ -46,6 +48,7 @@ class SimulationResult {
   final PlanejamentoOperacionalResultado? planejamentoOperacional;
 
   const SimulationResult({
+    this.borderResult,
     required this.eficiencia,
     required this.eficienciaRequerimento,
     required this.cuc,
@@ -81,6 +84,7 @@ class SimulationResult {
   SimulationResult comPlanejamentoOperacional(
     PlanejamentoOperacionalResultado planejamento,
   ) => SimulationResult(
+    borderResult: borderResult,
     eficiencia: eficiencia,
     eficienciaRequerimento: eficienciaRequerimento,
     cuc: cuc,

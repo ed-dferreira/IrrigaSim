@@ -1,3 +1,6 @@
+// Os nomes deste enum fazem parte do formato persistido dos cenários existentes.
+// ignore_for_file: constant_identifier_names
+
 enum TipoSulco {
   sulcos_comuns,
   sulcos_contorno,

@@ -1,10 +1,13 @@
 import 'simulation_result.dart';
+import 'faixas/border_result.dart';
 
 import 'package:irrigasim/services/simulation/operational_planning.dart';
 
 class SimulationResultModel {
   static Map<String, dynamic> toMap(SimulationResult result) {
     return {
+      if (result.borderResult != null)
+        'resultadoFaixa': result.borderResult!.toMap(),
       'eficiencia': result.eficiencia,
       'eficienciaRequerimento': result.eficienciaRequerimento,
       'cuc': result.cuc,
@@ -44,6 +47,11 @@ class SimulationResultModel {
 
   static SimulationResult fromMap(Map<String, dynamic> map) {
     return SimulationResult(
+      borderResult: map['resultadoFaixa'] is Map
+          ? BorderResult.fromMap(
+              Map<String, dynamic>.from(map['resultadoFaixa'] as Map),
+            )
+          : null,
       eficiencia: (map['eficiencia'] as num).toDouble(),
       eficienciaRequerimento: (map['eficienciaRequerimento'] as num).toDouble(),
       cuc: (map['cuc'] as num).toDouble(),

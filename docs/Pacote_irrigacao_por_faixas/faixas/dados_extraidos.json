@@ -1,0 +1,609 @@
+{
+  "fonte": {
+    "arquivo": "Aula 7 - Irrigação por faixas.pdf",
+    "paginas": 73,
+    "autora": "Chaiane Guerra da Conceição",
+    "instituicao": "UNIPAMPA",
+    "extracao": "2026-09-29",
+    "validacao_externa": false
+  },
+  "tabela_marr": {
+    "pagina": 20,
+    "natureza": "sugestoes",
+    "linhas": [
+      {
+        "textura": "muito_fina",
+        "declive_min_percent": 0.15,
+        "declive_max_percent": 0.6,
+        "q_min_L_s_m": 3,
+        "q_max_L_s_m": 4,
+        "lamina_min_mm": 100,
+        "lamina_max_mm": 150,
+        "largura_min_m": 5,
+        "largura_max_m": 18,
+        "comprimento_min_m": 150,
+        "comprimento_max_m": 300
+      },
+      {
+        "textura": "muito_fina",
+        "declive_min_percent": 0.6,
+        "declive_max_percent": 1.5,
+        "q_min_L_s_m": 2,
+        "q_max_L_s_m": 3,
+        "lamina_min_mm": 100,
+        "lamina_max_mm": 150,
+        "largura_min_m": 5,
+        "largura_max_m": 6,
+        "comprimento_min_m": 150,
+        "comprimento_max_m": 400
+      },
+      {
+        "textura": "muito_fina",
+        "declive_min_percent": 1.5,
+        "declive_max_percent": 4,
+        "q_min_L_s_m": 1,
+        "q_max_L_s_m": 2,
+        "lamina_min_mm": 100,
+        "lamina_max_mm": 150,
+        "largura_min_m": 5,
+        "largura_max_m": 6,
+        "comprimento_min_m": 200,
+        "comprimento_max_m": 200
+      },
+      {
+        "textura": "fina",
+        "declive_min_percent": 0.15,
+        "declive_max_percent": 0.6,
+        "q_min_L_s_m": 6,
+        "q_max_L_s_m": 8,
+        "lamina_min_mm": 50,
+        "lamina_max_mm": 100,
+        "largura_min_m": 5,
+        "largura_max_m": 18,
+        "comprimento_min_m": 90,
+        "comprimento_max_m": 180
+      },
+      {
+        "textura": "fina",
+        "declive_min_percent": 0.6,
+        "declive_max_percent": 1.5,
+        "q_min_L_s_m": 4,
+        "q_max_L_s_m": 6,
+        "lamina_min_mm": 50,
+        "lamina_max_mm": 100,
+        "largura_min_m": 5,
+        "largura_max_m": 6,
+        "comprimento_min_m": 100,
+        "comprimento_max_m": 200
+      },
+      {
+        "textura": "fina",
+        "declive_min_percent": 1.5,
+        "declive_max_percent": 4,
+        "q_min_L_s_m": 2,
+        "q_max_L_s_m": 4,
+        "lamina_min_mm": 50,
+        "lamina_max_mm": 100,
+        "largura_min_m": 5,
+        "largura_max_m": 6,
+        "comprimento_min_m": 100,
+        "comprimento_max_m": 100
+      },
+      {
+        "textura": "media",
+        "declive_min_percent": 1,
+        "declive_max_percent": 4,
+        "q_min_L_s_m": 1,
+        "q_max_L_s_m": 4,
+        "lamina_min_mm": 25,
+        "lamina_max_mm": 75,
+        "largura_min_m": 5,
+        "largura_max_m": 6,
+        "comprimento_min_m": 100,
+        "comprimento_max_m": 300
+      }
+    ]
+  },
+  "tabela_booher": [
+    {
+      "diametro_cm": 10,
+      "carga_cm": 5,
+      "vazao_impressa_L_s": 4.7,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 10,
+      "carga_cm": 7.5,
+      "vazao_impressa_L_s": 5.7,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 10,
+      "carga_cm": 10,
+      "vazao_impressa_L_s": 6.6,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 10,
+      "carga_cm": 12.5,
+      "vazao_impressa_L_s": 7.4,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 10,
+      "carga_cm": 15,
+      "vazao_impressa_L_s": 8.1,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 10,
+      "carga_cm": 20,
+      "vazao_impressa_L_s": 9.3,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 10,
+      "carga_cm": 25,
+      "vazao_impressa_L_s": 10.4,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 12.5,
+      "carga_cm": 5,
+      "vazao_impressa_L_s": 7.3,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 12.5,
+      "carga_cm": 7.5,
+      "vazao_impressa_L_s": 8.9,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 12.5,
+      "carga_cm": 10,
+      "vazao_impressa_L_s": 1.03,
+      "correcao_proposta_L_s": 10.3,
+      "status": "suspeito_nao_confirmado",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 12.5,
+      "carga_cm": 12.5,
+      "vazao_impressa_L_s": 11.5,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 12.5,
+      "carga_cm": 15,
+      "vazao_impressa_L_s": 12.6,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 12.5,
+      "carga_cm": 20,
+      "vazao_impressa_L_s": 14.6,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 12.5,
+      "carga_cm": 25,
+      "vazao_impressa_L_s": 16.3,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 15,
+      "carga_cm": 5,
+      "vazao_impressa_L_s": 10.5,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 15,
+      "carga_cm": 7.5,
+      "vazao_impressa_L_s": 12.9,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 15,
+      "carga_cm": 10,
+      "vazao_impressa_L_s": 14.9,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 15,
+      "carga_cm": 12.5,
+      "vazao_impressa_L_s": 16.6,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 15,
+      "carga_cm": 15,
+      "vazao_impressa_L_s": 18.2,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 15,
+      "carga_cm": 20,
+      "vazao_impressa_L_s": 21,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 15,
+      "carga_cm": 25,
+      "vazao_impressa_L_s": 23.5,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 20,
+      "carga_cm": 5,
+      "vazao_impressa_L_s": 18.7,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 20,
+      "carga_cm": 7.5,
+      "vazao_impressa_L_s": 22.9,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 20,
+      "carga_cm": 10,
+      "vazao_impressa_L_s": 26.4,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 20,
+      "carga_cm": 12.5,
+      "vazao_impressa_L_s": 29.5,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 20,
+      "carga_cm": 15,
+      "vazao_impressa_L_s": 32.3,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 20,
+      "carga_cm": 20,
+      "vazao_impressa_L_s": 37.3,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 20,
+      "carga_cm": 25,
+      "vazao_impressa_L_s": 41.8,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 25,
+      "carga_cm": 5,
+      "vazao_impressa_L_s": 29.2,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 25,
+      "carga_cm": 7.5,
+      "vazao_impressa_L_s": 35.7,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 25,
+      "carga_cm": 10,
+      "vazao_impressa_L_s": 41.3,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 25,
+      "carga_cm": 12.5,
+      "vazao_impressa_L_s": 46.1,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 25,
+      "carga_cm": 15,
+      "vazao_impressa_L_s": 505.5,
+      "correcao_proposta_L_s": 50.5,
+      "status": "suspeito_nao_confirmado",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 25,
+      "carga_cm": 20,
+      "vazao_impressa_L_s": 58.4,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 25,
+      "carga_cm": 25,
+      "vazao_impressa_L_s": 65.2,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 30,
+      "carga_cm": 5,
+      "vazao_impressa_L_s": 42,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 30,
+      "carga_cm": 7.5,
+      "vazao_impressa_L_s": 51.5,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 30,
+      "carga_cm": 10,
+      "vazao_impressa_L_s": 59.4,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 30,
+      "carga_cm": 12.5,
+      "vazao_impressa_L_s": 66.4,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 30,
+      "carga_cm": 15,
+      "vazao_impressa_L_s": 72.8,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 30,
+      "carga_cm": 20,
+      "vazao_impressa_L_s": 84,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 30,
+      "carga_cm": 25,
+      "vazao_impressa_L_s": 94,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 35,
+      "carga_cm": 5,
+      "vazao_impressa_L_s": 57.2,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 35,
+      "carga_cm": 7.5,
+      "vazao_impressa_L_s": 70,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 35,
+      "carga_cm": 10,
+      "vazao_impressa_L_s": 80.9,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 35,
+      "carga_cm": 12.5,
+      "vazao_impressa_L_s": 90.4,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 35,
+      "carga_cm": 15,
+      "vazao_impressa_L_s": 993.1,
+      "correcao_proposta_L_s": 99.1,
+      "status": "suspeito_nao_confirmado",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 35,
+      "carga_cm": 20,
+      "vazao_impressa_L_s": 114.4,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    },
+    {
+      "diametro_cm": 35,
+      "carga_cm": 25,
+      "vazao_impressa_L_s": 127.9,
+      "correcao_proposta_L_s": null,
+      "status": "transcrito_sem_anomalia_observada",
+      "pagina": 26
+    }
+  ],
+  "exemplo_pdf": {
+    "pagina": 73,
+    "comprimento_area_m": 400,
+    "largura_area_m": 400,
+    "declive_longitudinal_percent": 0.1,
+    "declive_transversal_percent": 0,
+    "manning_n": 0.04,
+    "rho1": 1,
+    "rho2": 3.33,
+    "irn_mm": 56,
+    "et_max_mm_dia": 8,
+    "Q_disponivel_L_s": 400,
+    "intervalo_fornecimento_dias": 7,
+    "janela_fornecimento_horas": null,
+    "altura_dique_m": null,
+    "TDF_min_dia": null,
+    "tmu_min": null,
+    "Vmax": null,
+    "cenarios": [
+      {
+        "nome": "primeira",
+        "k": 0.0035,
+        "a": 0.47,
+        "VIB": 0.00011
+      },
+      {
+        "nome": "terceira",
+        "k": 0.0034,
+        "a": 0.45,
+        "VIB": 0.0001
+      }
+    ],
+    "unidade_I_impressa": "m³/min",
+    "unidade_I_adotada_calculos": "m de lâmina; normalização por coerência, não confirmação da planilha"
+  },
+  "tipos": {
+    "faixas": [
+      "abertas",
+      "fechadas_com_diques"
+    ],
+    "manejos": [
+      "escoamento_livre",
+      "reducao_vazao",
+      "reuso_escoamento"
+    ],
+    "diques": [
+      "temporarios",
+      "permanentes"
+    ],
+    "dispositivos": [
+      "comporta_retangular",
+      "sifao",
+      "tubo_horizontal",
+      "valvula"
+    ]
+  },
+  "criterios": {
+    "declividade_longitudinal_usual_percent": [
+      0.2,
+      6
+    ],
+    "comprimento_usual_m": [
+      50,
+      400
+    ],
+    "largura_usual_m": [
+      4,
+      20
+    ],
+    "trecho_final_plano_m": [
+      30,
+      50
+    ],
+    "fracao_corte_avanco": [
+      0.6666666666666666,
+      0.75
+    ],
+    "espacamento_estacoes_m": [
+      10,
+      30
+    ],
+    "sulcos_inicio": 2,
+    "sulcos_adicionais_se_declive_maior_3percent": 3,
+    "base_diques_ilustrados_m": [
+      0.6,
+      1.2,
+      1
+    ],
+    "largura_ilustrativa_p7_m": 12,
+    "area_infografico_min_ha": 4
+  },
+  "unidades_internas": {
+    "comprimento": "m",
+    "tempo": "min",
+    "I_IRN": "m",
+    "q": "m³/min/m",
+    "Qtotal": "m³/min",
+    "VIB": "m/min",
+    "k": "m/min^a",
+    "declividade": "decimal"
+  },
+  "alertas": [
+    "Três células suspeitas de Booher não corrigidas automaticamente.",
+    "Sy da segunda fórmula p.44 conflita com yf/L.",
+    "tr=ti da p.62 conflita com corte/depleção.",
+    "Expoentes p.43 diferem por arredondamento de p.63/66.",
+    "Planilha de resultados do exemplo não anexada."
+  ]
+}

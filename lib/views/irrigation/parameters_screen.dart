@@ -181,7 +181,12 @@ class _TipoSulcoInfoCard extends StatelessWidget {
             spacing: 8,
             runSpacing: 4,
             children: info.culturasIndicadas
-                .map((c) => Chip(label: Text(c), visualDensity: VisualDensity.compact))
+                .map(
+                  (c) => Chip(
+                    label: Text(c),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                )
                 .toList(),
           ),
         ],
@@ -414,10 +419,9 @@ class _OperationFields extends StatelessWidget {
   @override
   Widget build(BuildContext context) => _BentoCard(
     title: '3. Manejo da aplicação',
-    subtitle:
-        state.metodo == MetodoIrrigacao.sulco
-            ? 'Vazão e avanço são calculados pela aplicação; o tempo de oportunidade pode ser editado.'
-            : 'Dados operacionais usados para calcular desempenho e balanço hídrico.',
+    subtitle: state.metodo == MetodoIrrigacao.sulco
+        ? 'Vazão e avanço são calculados pela aplicação; o tempo de oportunidade pode ser editado.'
+        : 'Dados operacionais usados para calcular desempenho e balanço hídrico.',
     icon: Icons.tune_rounded,
     accent: accent,
     child: _FieldGrid(
@@ -454,7 +458,7 @@ class _OperationFields extends StatelessWidget {
             value: state.vazao,
             suffix: state.metodo == MetodoIrrigacao.faixa ? 'L/s/m' : 'L/s',
           ),
-          if (state.metodo != MetodoIrrigacao.sulco)
+          if (state.metodo == MetodoIrrigacao.inundacao)
             _Field(
               name: 'tempoAplicacao',
               label: 'Tempo de aplicação adotado',

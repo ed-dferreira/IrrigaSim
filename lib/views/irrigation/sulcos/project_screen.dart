@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -183,7 +184,7 @@ class _ProjectScreenState extends ConsumerState<ProjectScreen> {
 
 // ──────────────────────── Step Indicator ────────────────────────
 
-class _StepIndicator extends StatelessWidget {
+class _StepIndicator extends StatefulWidget {
   const _StepIndicator({
     required this.currentStep,
     required this.completedSteps,
@@ -201,83 +202,197 @@ class _StepIndicator extends StatelessWidget {
   final ValueChanged<int> onStepTapped;
 
   @override
+  State<_StepIndicator> createState() => _StepIndicatorState();
+}
+
+class _StepIndicatorState extends State<_StepIndicator> {
+  final _scrollController = ScrollController();
+  late final List<GlobalKey> _stepKeys = List.generate(
+    widget.titles.length,
+    (_) => GlobalKey(),
+  );
+  bool _canScrollBack = false;
+  bool _canScrollForward = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_updateScrollAvailability);
+  }
+
+  @override
+  void didUpdateWidget(covariant _StepIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentStep != widget.currentStep) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final target = _stepKeys[widget.currentStep].currentContext;
+        if (target != null) {
+          _scrollController.position.ensureVisible(
+            target.findRenderObject()!,
+            duration: const Duration(milliseconds: 250),
+            alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+          );
+        }
+      });
+    }
+  }
+
+  void _updateScrollAvailability() {
+    if (!_scrollController.hasClients) return;
+    final position = _scrollController.position;
+    final back = position.pixels > position.minScrollExtent;
+    final forward = position.pixels < position.maxScrollExtent;
+    if (back != _canScrollBack || forward != _canScrollForward) {
+      setState(() {
+        _canScrollBack = back;
+        _canScrollForward = forward;
+      });
+    }
+  }
+
+  void _scroll(int direction) {
+    final position = _scrollController.position;
+    final target =
+        (position.pixels + direction * position.viewportDimension * 0.7).clamp(
+          position.minScrollExtent,
+          position.maxScrollExtent,
+        );
+    _scrollController.animateTo(
+      target,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final showArrows = MediaQuery.sizeOf(context).width >= 760;
     return SizedBox(
       height: 72,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        itemCount: titles.length,
-        separatorBuilder: (_, index) => const SizedBox(width: 8),
-        itemBuilder: (context, index) {
-          final isCompleted = completedSteps.contains(index);
-          final isCurrent = index == currentStep;
-          return Semantics(
-            button: true,
-            selected: isCurrent,
-            label:
-                '${isCompleted
-                    ? "Preenchida: "
-                    : isCurrent
-                    ? "Etapa atual: "
-                    : ""}${titles[index]}',
-            child: InkWell(
-              onTap: () => onStepTapped(index),
-              borderRadius: BorderRadius.circular(14),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 10,
+      child: Row(
+        children: [
+          if (showArrows)
+            IconButton(
+              tooltip: 'Ver etapas anteriores',
+              onPressed: _canScrollBack ? () => _scroll(-1) : null,
+              icon: const Icon(AppIcons.etapasAnteriores),
+            ),
+          Expanded(
+            child: NotificationListener<ScrollMetricsNotification>(
+              onNotification: (_) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) _updateScrollAvailability();
+                });
+                return false;
+              },
+              child: ScrollConfiguration(
+                behavior: ScrollConfiguration.of(context).copyWith(
+                  dragDevices: {
+                    PointerDeviceKind.touch,
+                    PointerDeviceKind.mouse,
+                    PointerDeviceKind.trackpad,
+                    PointerDeviceKind.stylus,
+                  },
                 ),
-                decoration: BoxDecoration(
-                  color: isCurrent
-                      ? accent.withValues(alpha: 0.12)
-                      : isCompleted
-                      ? colors.primaryContainer
-                      : colors.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: isCurrent
-                        ? accent
-                        : isCompleted
-                        ? colors.primary
-                        : colors.outlineVariant,
-                    width: isCurrent ? 2 : 1,
+                child: SingleChildScrollView(
+                  controller: _scrollController,
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      for (
+                        var index = 0;
+                        index < widget.titles.length;
+                        index++
+                      ) ...[
+                        if (index > 0) const SizedBox(width: 8),
+                        _buildStep(context, colors, index),
+                      ],
+                    ],
                   ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (isCompleted)
-                      Icon(Icons.check_rounded, size: 18, color: colors.primary)
-                    else
-                      Icon(
-                        icons[index],
-                        size: 18,
-                        color: isCurrent ? accent : colors.onSurfaceVariant,
-                      ),
-                    const SizedBox(width: 8),
-                    Text(
-                      titles[index],
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: isCurrent
-                            ? accent
-                            : isCompleted
-                            ? colors.primary
-                            : colors.onSurfaceVariant,
-                        fontWeight: isCurrent
-                            ? FontWeight.w700
-                            : FontWeight.w500,
-                      ),
-                    ),
-                  ],
                 ),
               ),
             ),
-          );
-        },
+          ),
+          if (showArrows)
+            IconButton(
+              tooltip: 'Ver próximas etapas',
+              onPressed: _canScrollForward ? () => _scroll(1) : null,
+              icon: const Icon(AppIcons.etapasSeguintes),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStep(BuildContext context, ColorScheme colors, int index) {
+    final isCompleted = widget.completedSteps.contains(index);
+    final isCurrent = index == widget.currentStep;
+    return Semantics(
+      key: _stepKeys[index],
+      button: true,
+      selected: isCurrent,
+      label:
+          '${isCompleted
+              ? "Preenchida: "
+              : isCurrent
+              ? "Etapa atual: "
+              : ""}${widget.titles[index]}',
+      child: InkWell(
+        onTap: () => widget.onStepTapped(index),
+        borderRadius: BorderRadius.circular(14),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: isCurrent
+                ? widget.accent.withValues(alpha: 0.12)
+                : isCompleted
+                ? colors.primaryContainer
+                : colors.surfaceContainerHigh,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: isCurrent
+                  ? widget.accent
+                  : isCompleted
+                  ? colors.primary
+                  : colors.outlineVariant,
+              width: isCurrent ? 2 : 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (isCompleted)
+                Icon(Icons.check_rounded, size: 18, color: colors.primary)
+              else
+                Icon(
+                  widget.icons[index],
+                  size: 18,
+                  color: isCurrent ? widget.accent : colors.onSurfaceVariant,
+                ),
+              const SizedBox(width: 8),
+              Text(
+                widget.titles[index],
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: isCurrent
+                      ? widget.accent
+                      : isCompleted
+                      ? colors.primary
+                      : colors.onSurfaceVariant,
+                  fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -7,6 +7,8 @@ import 'package:irrigasim/views/auth/register_screen.dart';
 import 'package:irrigasim/views/home/home_screen.dart';
 import 'package:irrigasim/views/irrigation/irrigation_screen.dart';
 import 'package:irrigasim/views/irrigation/parameters_screen.dart';
+import 'package:irrigasim/views/irrigation/faixas/border_project_screen.dart';
+import 'package:irrigasim/views/irrigation/faixas/border_results_screen.dart';
 import 'package:irrigasim/views/irrigation/sulcos/project_screen.dart';
 import 'package:irrigasim/views/irrigation/sulcos/project_results_screen.dart';
 import 'package:irrigasim/views/irrigation/results_screen.dart';
@@ -78,6 +80,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'irrigation/parameters',
                     builder: (context, state) => const ParametersScreen(),
+                  ),
+                  GoRoute(
+                    path: 'irrigation/border-project',
+                    builder: (context, state) => const BorderProjectScreen(),
+                  ),
+                  GoRoute(
+                    path: 'irrigation/border-results',
+                    builder: (context, state) => const BorderResultsScreen(),
                   ),
                   GoRoute(
                     path: 'irrigation/project',

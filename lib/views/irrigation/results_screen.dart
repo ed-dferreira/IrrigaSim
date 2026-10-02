@@ -9,6 +9,7 @@ import 'package:irrigasim/viewmodels/results_controller.dart';
 import 'package:irrigasim/views/irrigation/widgets/advance_chart.dart';
 import 'package:irrigasim/views/irrigation/widgets/infiltration_chart.dart';
 import 'package:irrigasim/views/irrigation/widgets/water_balance_chart.dart';
+import 'package:irrigasim/views/irrigation/faixas/border_results_screen.dart';
 
 class ResultsScreen extends ConsumerWidget {
   const ResultsScreen({super.key});
@@ -41,6 +42,12 @@ class ResultsScreen extends ConsumerWidget {
             ),
           ),
         ),
+      );
+    }
+    if (state.metodo == MetodoIrrigacao.faixa && result.borderResult != null) {
+      return BorderResultsScreen(
+        projectOverride: state.toIrrigationParameters().projetoFaixa,
+        resultOverride: result,
       );
     }
     final resultsState = ref.watch(resultsProvider);

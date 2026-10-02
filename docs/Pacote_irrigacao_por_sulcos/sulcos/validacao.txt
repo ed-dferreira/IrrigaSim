@@ -1,0 +1,23 @@
+test_balanco_solo_turno (__main__.ValidacaoSulcos.test_balanco_solo_turno) ... ok
+test_cronograma_projeto (__main__.ValidacaoSulcos.test_cronograma_projeto) ... ok
+test_derivada_integral_unidades (__main__.ValidacaoSulcos.test_derivada_integral_unidades) ... ok
+test_dois_pontos_reconstroi_medicoes (__main__.ValidacaoSulcos.test_dois_pontos_reconstroi_medicoes) ... ok
+test_dominios_invalidos (__main__.ValidacaoSulcos.test_dominios_invalidos) ... ok
+test_ensaio_11_pares_e_conversao (__main__.ValidacaoSulcos.test_ensaio_11_pares_e_conversao) ... ok
+test_erosao_percentual (__main__.ValidacaoSulcos.test_erosao_percentual) ... ok
+test_exercicio101_e_alerta_VIB (__main__.ValidacaoSulcos.test_exercicio101_e_alerta_VIB) ... ok
+test_exercicio_35 (__main__.ValidacaoSulcos.test_exercicio_35) ... ok
+test_inconsistencias_infiltracao_detectadas (__main__.ValidacaoSulcos.test_inconsistencias_infiltracao_detectadas) ... ok
+test_interpolacao (__main__.ValidacaoSulcos.test_interpolacao) ... ok
+test_laminas_hidrogramas (__main__.ValidacaoSulcos.test_laminas_hidrogramas) ... ok
+test_manejo_30mm_inconsistencia (__main__.ValidacaoSulcos.test_manejo_30mm_inconsistencia) ... ok
+test_regressao_conjunto_A (__main__.ValidacaoSulcos.test_regressao_conjunto_A) ... ok
+test_regressao_conjunto_B (__main__.ValidacaoSulcos.test_regressao_conjunto_B) ... ok
+test_somatorio_p96 (__main__.ValidacaoSulcos.test_somatorio_p96) ... ok
+test_trapezios_perfil_deficit_excesso (__main__.ValidacaoSulcos.test_trapezios_perfil_deficit_excesso) ... ok
+test_unidades_escala_lamina (__main__.ValidacaoSulcos.test_unidades_escala_lamina) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 0.003s
+
+OK

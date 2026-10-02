@@ -1,4 +1,5 @@
 import 'package:irrigasim/models/sulcos/tipo_sulco_info.dart';
+import 'package:irrigasim/models/faixas/border_project.dart';
 
 import 'sulcos/field_measurements.dart';
 
@@ -73,6 +74,7 @@ extension MetodoIrrigacaoExtension on MetodoIrrigacao {
 }
 
 class IrrigationParameters {
+  final BorderProject? projetoFaixa;
   final double comprimento;
   final double declividade;
   final double declividadeTransversal;
@@ -135,6 +137,7 @@ class IrrigationParameters {
   final List<MedicaoRecessao> medicoesRecessao;
 
   const IrrigationParameters({
+    this.projetoFaixa,
     required this.comprimento,
     required this.declividade,
     this.declividadeTransversal = 0,
@@ -194,6 +197,7 @@ class IrrigationParameters {
   });
 
   IrrigationParameters copyWith({
+    BorderProject? projetoFaixa,
     double? comprimento,
     double? declividade,
     double? declividadeTransversal,
@@ -251,6 +255,7 @@ class IrrigationParameters {
     List<MedicaoRecessao>? medicoesRecessao,
   }) {
     return IrrigationParameters(
+      projetoFaixa: projetoFaixa ?? this.projetoFaixa,
       comprimento: comprimento ?? this.comprimento,
       declividade: declividade ?? this.declividade,
       declividadeTransversal:

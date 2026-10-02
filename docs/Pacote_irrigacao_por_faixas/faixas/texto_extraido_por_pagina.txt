@@ -1,0 +1,1424 @@
+ATENÇÃO: extração textual bruta; equações e tabelas em imagem estão transcritas no relatório.
+
+===== PÁGINA 1 =====
+                       Ministério da Educação
+                   Universidade Federal do Pampa
+              Curso Bacharelado em Engenharia Agrícola
+
+
+
+
+       Irrigação por
+            FAIXAS
+
+Prof.ª Chaiane Guerra da Conceição
+      Engenheira Agrícola, Dr.ª
+
+
+
+  1
+
+
+===== PÁGINA 2 =====
+                                  FAIXAS
+
+
+❑ É o método de aplicação de água ao solo por meio de faixas de terreno
+
+  compreendidas entre diques paralelos.
+
+
+
+
+❑ As faixas possuem pouca ou nenhuma declividade transversal, mas
+
+  apresentam declividade longitudinal que determinará a direção do
+
+  movimento da água sobre a faixa .
+
+
+
+
+  2
+
+
+===== PÁGINA 3 =====
+    FAIXAS
+
+
+
+
+3
+
+
+===== PÁGINA 4 =====
+    FAIXAS
+
+
+
+
+4
+
+
+===== PÁGINA 5 =====
+    FAIXAS
+
+
+
+
+5
+
+
+===== PÁGINA 6 =====
+    FAIXAS
+
+
+
+
+6
+
+
+===== PÁGINA 7 =====
+    FAIXAS
+
+
+
+
+7
+
+
+===== PÁGINA 8 =====
+    FAIXAS
+
+
+
+
+8
+
+
+===== PÁGINA 9 =====
+    FAIXAS
+
+
+
+
+9
+
+
+===== PÁGINA 10 =====
+     FAIXAS - Características
+
+
+
+
+10
+
+
+===== PÁGINA 11 =====
+                            FAIXAS - Características
+
+❑ A capacidade de infiltração dos solos é fator importante, pois a eficiência de
+
+  sua aplicação é tão variável na irrigação por faixa quanto na irrigação por sulco.
+
+
+
+❑ A velocidade de avanço da água sobre a faixa é dependente:
+
+    • da largura,
+
+    • do comprimento,
+
+    • da vazão aplicada,
+
+    • da declividade
+
+    • da resistência ao movimento da lâmina de água por causa da cobertura
+
+        vegetal e da capacidade de infiltração do solo.
+
+
+   11
+
+
+===== PÁGINA 12 =====
+                           FAIXAS - Declividade
+
+❑ A declividade na direção do comprimento deve ser uniforme ou,
+
+  quando possível, decrescente no final da faixa;
+
+
+
+❑ Nos últimos 30 a 50 m, pode ser plana, ou seja, sem declividade para
+
+  acumular a água, evitando assim o escoamento;
+
+
+
+❑ A declividade no sentido longitudinal da faixa pode variar entre 0,2% e 6%,
+
+  devendo, entretanto, estar próxima da declividade que melhor se adapta à
+
+  superfície   do   solo   para minimizar a movimentação de terra com a
+
+  sistematização desta.
+
+
+   12
+
+
+===== PÁGINA 13 =====
+                            FAIXAS - Declividade
+
+❑    Na direção transversal, o ideal é não ter nenhuma declividade, porém pode-se
+
+    permitir uma pequena declividade;
+
+
+
+❑ A diferença de nível transversal máxima permitida é, aproximadamente, de
+
+    dois quintos (2/5) da lâmina normal que se movimentará sobre a faixa;
+
+
+
+❑ Diferença de nível transversal máxima permitida:
+
+
+
+
+    13
+
+
+===== PÁGINA 14 =====
+                            FAIXAS - Declividade
+
+❑ A lâmina normal que se movimenta sobre a faixa decresce com o
+
+  aumento da declividade         longitudinal,   verifica-se   que,   para   mesma
+
+  declividade transversal, a largura máxima da faixa decrescerá com o aumento
+
+  da declividade longitudinal.
+
+
+
+
+  14
+
+
+===== PÁGINA 15 =====
+                              FAIXAS - Declividade
+
+
+
+❑        Para permitir melhor distribuição da lâmina da água em toda a largura da
+
+    faixa, devem- se construir dois sulcos transversais e sem declividade, no início
+
+    da faixa.
+
+
+
+❑ Para as faixas com declividades longitudinais maiores que 3%, devem-se
+
+    também construir uns três destes sulcos transversais e sem declividade,
+
+    equidistantes ao longo da faixa.
+
+
+
+
+    15
+
+
+===== PÁGINA 16 =====
+                          FAIXAS - Comprimento
+
+
+❑ As faixas devem ser o mais compridas possível, desde que se possa irrigar
+
+  eficientemente, pois, quanto mais comprida for a faixa, menor será o custo
+
+  com os sistemas de distribuição de água, bem como a quantidade de mão-de
+
+  obra necessária para a irrigação.
+
+
+
+❑ Semelhantemente à      irrigação    por   sulco   o comprimento é FUNÇÃO da
+
+  velocidade de infiltração básica do solo e da vazão máxima não-erosiva.
+
+
+
+
+   16
+
+
+===== PÁGINA 17 =====
+                                 FAIXAS - Comprimento
+
+
+
+❑ O comprimento da faixa é inversamente proporcional à capacidade de
+
+  infiltração do solo, ou seja, quanto mais baixa for a capacidade de infiltração do
+
+  solo, maior poderá ser o comprimento da faixa.
+
+
+
+❑ O comprimento também é dependente da forma e das dimensões da
+
+  área   a     ser   irrigada,   bem como da lâmina de água que se aplicará por
+
+  irrigação.
+
+
+
+
+  17
+
+
+===== PÁGINA 18 =====
+                          FAIXAS - Comprimento
+
+
+
+❑ Em geral, o comprimento das faixas varia entre 50 e 400 metros.
+
+
+
+❑ De modo semelhante ao da irrigação por sulco, geralmente FIXA-SE o
+
+  comprimento e DETERMINA-SE a vazão que maximiza a eficiência de
+
+  aplicação.
+
+
+
+
+   18
+
+
+===== PÁGINA 19 =====
+                                FAIXAS - Largura
+
+
+❑ A largura das faixas DEPENDE:
+
+    • da declividade transversal;
+
+    • da declividade longitudinal;
+
+    • da vazão disponível e;
+
+    • da largura das máquinas colhedoras que se movimentarão sobre a faixa.
+
+
+
+❑ Em geral, a largura das faixas varia entre 4 e 20 metros, sendo definida a máxima:
+
+
+
+
+   19
+
+
+===== PÁGINA 20 =====
+                              FAIXAS - Largura
+
+
+
+     Tabela 1 - Sugestões para dimensionamento de faixas, segundo Marr (1958).
+
+
+
+
+20
+
+
+===== PÁGINA 21 =====
+                        FAIXAS – Manejo da irrigação
+
+
+❑ A aplicação de água na faixa é, em geral, por meio de comportas, tubos,
+
+  sifões ou válvulas.
+
+
+
+❑ A vazão aplicada na faixa, em geral, é cortada quando a frente de avanço
+
+  atinge de 2/3 a 3/4 do comprimento da faixa, desde que o tempo de
+
+  aplicação de água seja igual ou maior do que o tempo necessário para se
+
+  aplicar a lâmina de irrigação desejada, a fim de evitar excesso de escoamento
+
+  no final da faixa.
+
+
+
+
+  21
+
+
+===== PÁGINA 22 =====
+     FAIXAS – Manejo da irrigação
+
+
+
+
+22
+
+
+===== PÁGINA 23 =====
+                               FAIXAS – Diques
+
+❑ Os diques, também conhecidos como taipas, servem para limitar a largura das
+  faixas e podem ser classificados em duas categorias:
+
+    • Temporários
+    • Permanentes
+
+
+
+
+   23
+
+
+===== PÁGINA 24 =====
+                        FAIXAS – Controle de vazão
+
+❑ Como a vazão aplicada por faixa é relativamente grande, o seu controle é
+
+  fundamental para uma boa eficiência de irrigação.
+
+
+
+❑ A distribuição de água no campo é normalmente feita por meio de canais, os
+
+  principais tipos de estruturas, normalmente usadas para controle da vazão, vêm
+
+  sendo:
+
+    • comportas retangulares,
+
+    • sifões de diâmetros grandes
+
+    • tubos instalados horizontalmente, através da parede dos canais.
+
+
+
+
+   24
+
+
+===== PÁGINA 25 =====
+     FAIXAS – Controle de vazão
+
+
+
+
+25
+
+
+===== PÁGINA 26 =====
+                               FAIXAS – Controle de vazão
+
+Tabela 2 - Vazão em litros por segundo, em sifões ou tubos usados para derivar água, em
+irrigação por faixa, segundo Booher.
+
+
+
+
+Não se deve esquecer da construção dos dois sulcos transversais e sem declividade, a fim de espalhar a água,
+                               após a derivação, para toda a largura da faixa.
+
+
+
+  26
+
+
+===== PÁGINA 27 =====
+                  AVALIAÇÃO DA IRRIGAÇÃO POR FAIXAS
+
+  NA IRRIGAÇÃO POR FAIXA, deve-se usar VAZÃO POR UNIDADE DE LARGURA em vez de
+
+  vazão por sulco, sendo retangular A ÁREA DA SEÇÃO TRANSVERSAL, TAMBÉM COM
+
+                                    LARGURA UNITÁRIA.
+
+
+
+
+❑ A infiltração durante a recessão na irrigação por faixa deve ser considerada.
+
+
+❑ Após a fase de reposição, têm-se a fase de depleção, que ocorre no período de tempo
+
+
+   entre o corte da vazão no início e a exposição da superfície do solo em qualquer ponto
+
+
+   ao longo da área.
+
+
+❑ A fase de recessão, ocorre posteriormente.
+
+
+
+   27
+
+
+===== PÁGINA 28 =====
+              AVALIAÇÃO DA IRRIGAÇÃO POR FAIXAS
+            T=0
+Irrigação
+
+
+
+
+                                            T = Ta
+
+
+
+
+                                            T = Ti
+
+
+
+
+28
+
+
+===== PÁGINA 29 =====
+     AVALIAÇÃO DA IRRIGAÇÃO POR FAIXAS
+
+
+             Lâmina começa a diminuir...
+
+
+
+
+       Superfície começa a ser exposta     T = Td
+
+
+
+
+              Lâmina recua toda área            T = Tr
+
+
+
+
+29
+
+
+===== PÁGINA 30 =====
+     AVALIAÇÃO DA IRRIGAÇÃO POR FAIXAS
+
+
+
+
+30
+
+
+===== PÁGINA 31 =====
+     AVALIAÇÃO DA IRRIGAÇÃO POR FAIXAS
+
+
+
+
+31
+
+
+===== PÁGINA 32 =====
+     AVALIAÇÃO DA IRRIGAÇÃO POR FAIXAS
+
+
+
+
+32
+
+
+===== PÁGINA 33 =====
+     OBTENÇÃO DA FASE DE AVANÇO E RECESSÃO
+
+
+
+                          10 a 30m
+
+
+
+
+33
+
+
+===== PÁGINA 34 =====
+     OBTENÇÃO DA FASE DE AVANÇO E RECESSÃO
+
+
+
+                          10 a 30m
+
+
+
+
+         Ta1
+
+
+
+
+34
+
+
+===== PÁGINA 35 =====
+     OBTENÇÃO DA FASE DE AVANÇO E RECESSÃO
+
+
+
+                          10 a 30m
+
+
+
+
+         Ta1
+
+
+               Ta2
+
+
+
+
+35
+
+
+===== PÁGINA 36 =====
+     OBTENÇÃO DA FASE DE AVANÇO E RECESSÃO
+
+
+
+                           10 a 30m
+
+
+
+
+         Ta1
+
+
+               Ta2
+
+
+                     Ta3
+
+
+
+
+36
+
+
+===== PÁGINA 37 =====
+     OBTENÇÃO DA FASE DE AVANÇO E RECESSÃO
+
+
+
+                                 10 a 30m
+
+
+
+
+         Ta1
+
+
+               Ta2
+
+
+                     Ta3
+
+
+                           Ta4
+
+
+
+
+37
+
+
+===== PÁGINA 38 =====
+     OBTENÇÃO DA FASE DE AVANÇO E RECESSÃO
+
+
+
+                          10 a 30m
+
+
+
+
+         Tr1
+
+
+
+
+38
+
+
+===== PÁGINA 39 =====
+     OBTENÇÃO DA FASE DE AVANÇO E RECESSÃO
+
+
+
+                          10 a 30m
+
+
+
+
+         Tr1
+
+
+               Tr2
+
+
+
+
+39
+
+
+===== PÁGINA 40 =====
+     OBTENÇÃO DA FASE DE AVANÇO E RECESSÃO
+
+
+
+                           10 a 30m
+
+
+
+
+         Tr1
+
+
+               Tr2
+
+
+                     Ta3
+
+
+
+
+40
+
+
+===== PÁGINA 41 =====
+     OBTENÇÃO DA FASE DE AVANÇO E RECESSÃO
+
+
+
+                                 10 a 30m
+
+
+
+
+         Tr1
+
+
+               Tr2
+
+
+                     Ta3
+
+
+                           Ta4
+
+
+
+
+41
+
+
+===== PÁGINA 42 =====
+        OBTENÇÃO DA FASE DE AVANÇO E RECESSÃO
+
+
+
+
+                  Curvas de avanço e recessão em irrigação por faixa.
+
+
+     Quanto mais paralela for a curva de recessão, relativamente à curva de
+       avanço, mais uniforme será a aplicação de água ao longo da faixa.
+
+
+
+
+42
+
+
+===== PÁGINA 43 =====
+            OBTENÇÃO DA FASE DE AVANÇO E RECESSÃO
+
+❑ A determinação da CURVA DE RECESSÃO diretamente no campo muitas
+
+
+  vezes é difícil, devido à cobertura vegetal;
+
+
+❑ Por isso, em 1977, Strelkoff desenvolveu uma metodologia para estimá-la.
+
+
+❑ O TEMPO DE DEPLEÇÃO (td) e a DURAÇÃO DA FASE DE RECESSÃO (tr-td)
+
+
+  podem ser estimados:
+
+
+
+
+  43
+
+
+===== PÁGINA 44 =====
+                  OBTENÇÃO DA FASE DE AVANÇO E RECESSÃO
+
+
+
+
+VIM = velocidade de infiltração média ao longo da faixa no instante td, ou seja, no final da fase de depleção.
+
+
+
+    44
+
+
+===== PÁGINA 45 =====
+     OBTENÇÃO DA FASE DE AVANÇO E RECESSÃO
+
+
+
+
+45
+
+
+===== PÁGINA 46 =====
+                  OBTENÇÃO DA FASE DE AVANÇO E RECESSÃO
+
+
+
+
+Onde:
+
+
+Ea = eficiência de aplicação (%);
+Er = eficiência de armazenamento (%);
+Pp = perdas por percolação (%);
+Pe = perdas por escoamento (%);
+IRN = irrigação real necessária (m³/m);
+Q0= Vazão no inicio do sulco/faixa (m³/min);
+Ti = tempo de aplicação de água no inicio do sulco/faixa (min);
+Va = volume de água infiltrada na região adequadamente irrigada (m³);
+Vd = volume de água infiltrada na região deficientemente irrigada (m³);
+
+
+
+  46
+
+
+===== PÁGINA 47 =====
+     OBTENÇÃO DA FASE DE AVANÇO E RECESSÃO
+
+
+
+
+47
+
+
+===== PÁGINA 48 =====
+     ASPECTOS E PARÂMETROS
+
+     DE DIMENSIONAMENTO
+
+
+
+
+48
+
+
+===== PÁGINA 49 =====
+            DIMENSIONAMENTO DA IRRIGAÇÃO POR FAIXA
+
+❑ O dimensionamento da irrigação por faixa é similar ao da irrigação por sulco,
+
+  com duas importantes diferenças:
+
+
+
+    •   a geometria de escoamento é mais simples, uma vez que ela pode ser
+
+        considerada um canal de grande largura;
+
+
+
+    • as fases de depleção e recessão são muito importantes na irrigação
+
+        por faixa, enquanto estas poderiam ser desprezíveis na irrigação por
+
+        sulco
+
+
+
+  49
+
+
+===== PÁGINA 50 =====
+             DIMENSIONAMENTO DA IRRIGAÇÃO POR FAIXA
+
+
+❑ As faixas podem ser:
+
+       • abertas, permitindo o escoamento livre no final da área;
+
+       • fechadas com diques.
+
+
+
+❑ O dimensionamento da irrigação por faixa pode ser:
+
+       • com escoamento livre;
+
+       • com redução de vazão;
+
+       • com reuso de escoamento superficial.
+
+
+
+
+  50
+
+
+===== PÁGINA 51 =====
+        DIMENSIONAMENTO DA IRRIGAÇÃO POR FAIXA
+
+
+
+
+                  METODOLOGIA
+
+     para o dimensionamento com escoamento livre
+
+
+
+
+51
+
+
+===== PÁGINA 52 =====
+            DIMENSIONAMENTO DA IRRIGAÇÃO POR FAIXA
+
+
+1) Identifique os seguintes dados de entrada:
+
+
+
+      • características de infiltração de água no solo: a, k e VIB;
+
+      • declividade (So), comprimento da área (L) e coeficiente de rugosidade (n);
+
+      • irrigação real necessária (IRN);
+
+      • vazão total disponível (Qt );
+
+      • largura da área a ser irrigada.
+
+
+
+
+ 52
+
+
+===== PÁGINA 53 =====
+              DIMENSIONAMENTO DA IRRIGAÇÃO POR FAIXA
+
+2) Selecione a vazão por unidade de largura no início da faixa, Q0 (m3/min/m).
+
+        • Essa vazão deve estar próxima da vazão máxima não-erosiva.
+
+        • Hart et al. (1980) sugeriram:
+
+
+
+
+                              (m³/min)                    Dec.
+
+
+
+
+                     Para o cálculo da vazão não-erosiva de solos com culturas que não
+
+cobrem toda a superfície; e um valor duas vezes maior para solos com culturas que
+
+cobrem toda a superfície.
+                                    Ou...
+
+
+   53
+
+
+===== PÁGINA 54 =====
+            DIMENSIONAMENTO DA IRRIGAÇÃO POR FAIXA
+
+2) Selecione a vazão por unidade de largura no início da faixa, Q0 (m3/min/m).
+
+
+
+
+       • Já Walker   e      Skogerboe   (1984)   consideram          a equação anterior
+
+         conservadora, sugerindo que a VAZÃO DE ENTRADA DEVE TER UM
+
+         VALOR MÍNIMO estimado por:
+
+
+
+
+                 (m³/min)                        (m)   declividade
+
+
+
+
+  54
+
+
+===== PÁGINA 55 =====
+          DIMENSIONAMENTO DA IRRIGAÇÃO POR FAIXA
+
+3) Determine o comprimento da faixa, arredondando o valor para o submúltiplo
+
+do comprimento da área imediatamente inferior. Selecione a vazão por unidade
+
+de largura no início da faixa, Q0 (m3/min/m).
+
+
+
+
+4) Determine a profundidade na entrada da faixa.
+
+
+
+
+                **Verifique se esse valor não excede a altura dos diques.
+
+
+  55
+
+
+===== PÁGINA 56 =====
+             DIMENSIONAMENTO DA IRRIGAÇÃO POR FAIXA
+
+5) Determine o tempo de oportunidade utilizando o mesmo procedimento para
+
+irrigação por sulco.
+
+• Método numérico, de Newton-Raphson, para obter o to a partir da equação de Kostiakov
+  Lewis
+
+  a) Assume-se um valor inicial para t0, t0i = 100 min.
+  b) Calcula-se o tempo de oportunidade corrigido.
+
+
+
+
+  c)   Se a diferença entre to(i) e to(i+1) for menor que 0,1 min, o problema está solucionado e
+       to(i) = to(i+1). CASO CONTRÁRIO, faça to = to(i+1) e repita os passos b e c.
+
+
+
+  56
+
+
+===== PÁGINA 57 =====
+          DIMENSIONAMENTO DA IRRIGAÇÃO POR FAIXA
+
+6) Calcule o tempo de avanço usando o mesmo procedimento para irrigação por
+
+sulco.
+
+ • USA-SE: a equação de avanço ajustada aos dados estabelecidos no teste de avanço
+   diretamente no campo.
+
+
+
+
+                                                                          ou...
+
+  57
+
+
+===== PÁGINA 58 =====
+             DIMENSIONAMENTO DA IRRIGAÇÃO POR FAIXA
+
+Simulação do tempo de avanço
+
+•   O método utilizado será o do balanço volumétrico.
+
+•   Reescrevendo a equação do balanço volumétrico para a distância X igual a L e Q0 igual a
+
+    vazão máxima não erosiva, tem-se:
+
+
+
+
+    Onde:
+
+
+
+
+    58
+
+
+===== PÁGINA 59 =====
+             DIMENSIONAMENTO DA IRRIGAÇÃO POR FAIXA
+
+Simulação do tempo de avanço
+
+•   O método utilizado será o do balanço volumétrico.
+
+•   Reescrevendo a equação do balanço volumétrico para a distância X igual a L e Q0 igual a
+
+    vazão máxima não erosiva, tem-se:
+
+
+
+
+    Onde:                                                Variáveis desconhecidas!!
+
+                                                             Devem ser resolvidas
+                                                           numericamente usando o
+                                                              método de Newton,
+                                                           conforme o procedimento
+                                                                  a seguir...
+
+
+
+
+    59
+
+
+===== PÁGINA 60 =====
+              DIMENSIONAMENTO DA IRRIGAÇÃO POR FAIXA
+
+Simulação do tempo de avanço
+
+a) Assume-se um valor inicial de r entre 0,5 e 0,9, por exemplo r(i) = 0,7.
+
+b) Calcula-se:
+
+
+
+c) Calcula-se o tempo de avanço, tx, pelo método de Newton-Raphson:
+
+
+                                                 SE o valor absoluto da correção (corr) for desprezível,
+                                                 assume-se tx= tx(i+1) e prossegue-se no item d.
+
+
+                                                 CASO CONTRÁRIO, define-se tx(i) = tx(i+1) e repetem-se
+                                                 os passos ii e iii.
+
+
+                                             Observe-se que: se Q0 for muito pequeno para o comprimento
+                                             L, esse procedimento não convergirá, indicando que a vazão
+                                             deve ser aumentada ou o comprimento, reduzido.
+
+
+   60
+
+
+===== PÁGINA 61 =====
+                DIMENSIONAMENTO DA IRRIGAÇÃO POR FAIXA
+
+Simulação do tempo de avanço
+
+d) Calcula-se o tempo de avanço (txméd.) para a distância X igual à metade do comprimento da faixa
+
+(L/2), utilizando o mesmo procedimento para calcular tx, no passo c.
+
+        •   No caso de solos em declive, substitui-se L por 0,5 L, na equação “corr”, para o cálculo de
+
+            txméd.
+
+        •   No caso de solos em nível, em irrigação por faixa ou inundação, deve-se substituir, também, A0
+
+            nas equações “corr” e “Q0tx”, pela equação da área molhada:
+
+
+
+
+   61
+
+
+===== PÁGINA 62 =====
+              DIMENSIONAMENTO DA IRRIGAÇÃO POR FAIXA
+
+Simulação do tempo de avanço
+
+e) Calcula-se o valor revisado de r:
+
+
+
+
+f) Compare r(i) com r(i+1):
+
+         •   SE a diferença for desprezível, tx = tx(i+1).
+
+         •   CASO CONTRÁRIO, faça r(i) = r(i+1) e repita os passos de b a f.
+
+
+
+g) Calcule o tempo de recessão para aplicar a irrigação real necessária (IRN) no final da
+
+faixa:
+
+
+
+
+   62
+
+
+===== PÁGINA 63 =====
+              DIMENSIONAMENTO DA IRRIGAÇÃO POR FAIXA
+
+Simulação do tempo de avanço
+
+h) Determine o tempo de depleção:
+
+
+
+
+SE td(i) ≠ td(i+1), → FAÇA td (i) = td(i+1); repita os passos ii a iv.
+
+SE td(i) = td(i+1), → td = td(i+1).
+
+
+   63
+
+
+===== PÁGINA 64 =====
+                 DIMENSIONAMENTO DA IRRIGAÇÃO POR FAIXA
+
+Simulação do tempo de avanço
+
+i)        Determine a infiltração acumulada na entrada da faixa e verifique se a irrigação é
+
+          adequada.
+
+
+
+
+     Se           , a irrigação é adequada. ➔ td > to
+
+     Se           , a irrigação é inadequada. ➔ td < to
+
+
+j) Se a irrigação for adequada, calcule a Eficiência de aplicação.
+
+     O tempo de irrigação será:
+
+
+
+
+      64
+
+
+===== PÁGINA 65 =====
+           DIMENSIONAMENTO DA IRRIGAÇÃO POR FAIXA
+
+Simulação do tempo de avanço
+
+
+k) Se a irrigação for inadequada, significa que o tempo de depleção está menor que o
+
+tempo de oportunidade; logo, deve-se agir da seguinte forma:
+
+
+
+
+  65
+
+
+===== PÁGINA 66 =====
+            DIMENSIONAMENTO DA IRRIGAÇÃO POR FAIXA
+
+Simulação do tempo de avanço
+
+
+k) Se a irrigação for inadequada, significa que o tempo de depleção está menor que o
+
+tempo de oportunidade; logo, deve-se agir da seguinte forma:
+
+ iv. Determine o tempo de recessão, utilizando t0 no lugar de td(i+1).
+
+
+
+
+ v.
+
+
+
+
+      66
+
+
+===== PÁGINA 67 =====
+             DIMENSIONAMENTO DA IRRIGAÇÃO POR FAIXA
+
+Simulação do tempo de avanço
+
+
+l) Determine Ea:
+
+
+
+
+m) A vazão inicial Q0 deve ser decrescida de um ∆Q, por exemplo 0,05 L/s, e o
+
+procedimento de d) a l) deve ser repetido até que a eficiência   de aplicação seja
+
+maximizada.
+
+         Quando isso acontecer, têm-se, os valores:
+
+         •    da vazão a ser aplicada no início da faixa, Q0;
+
+         •    do tempo de irrigação, ti;
+
+         •    da eficiência de aplicação.
+
+
+  67
+
+
+===== PÁGINA 68 =====
+           DIMENSIONAMENTO DA IRRIGAÇÃO POR FAIXA
+
+Simulação do tempo de avanço
+
+
+n) Conhecendo as equações de avanço e de infiltração, e assumindo que o tempo de
+
+recessão varia linearmente de td a tr , PODE-SE obter o perfil de infiltração ao longo
+
+da faixa e, CONSEQÜENTEMENTE, o volume total infiltrado:
+
+
+                 Determinam-se as perdas por percolação e escoamento:
+
+
+
+
+  68
+
+
+===== PÁGINA 69 =====
+                DIMENSIONAMENTO DA IRRIGAÇÃO POR FAIXA
+
+Simulação do tempo de avanço
+
+
+O tempo de irrigação por parcela (TIP) pode ser calculado para um tempo necessário
+
+para mudar o sistema de distribuição de água para outra parcela (tmu):
+
+
+
+O número de parcelas irrigadas por dia (NPD) é calculado para uma jornada de trabalho
+
+diária (TDF):
+
+
+
+A área irrigada por parcela (APP) depende, também, da largura (Wt) e do comprimento
+
+(Lt) da área total irrigada e do período de irrigação (PI):
+
+
+
+
+   69
+
+
+===== PÁGINA 70 =====
+             DIMENSIONAMENTO DA IRRIGAÇÃO POR FAIXA
+
+Simulação do tempo de avanço
+
+
+o) A largura da faixa (WO) e o número de faixas por parcela (NFP) têm a seguinte relação:
+
+
+
+
+A largura da faixa deve ser um submúltiplo da largura da área para que todas as faixas tenham a mesma
+largura. Além disso, a largura da faixa depende da declividade transversal, como abordado
+anteriormente.
+
+
+
+p) Conhecendo o período de irrigação, pode-se determinar o número total de faixas
+
+(NTF):
+
+
+
+
+   70
+
+
+===== PÁGINA 71 =====
+            DIMENSIONAMENTO DA IRRIGAÇÃO POR FAIXA
+
+Simulação do tempo de avanço
+
+
+q) A vazão total necessária no projeto (Qt) é determinada por:
+
+
+
+
+  71
+
+
+===== PÁGINA 72 =====
+     EXEMPLO DE PROJETO DE IRRIGAÇÃO POR FAIXA,
+
+                com escoamento livre
+
+
+
+
+72
+
+
+===== PÁGINA 73 =====
+                                 PROJETO - EXEMPLO
+
+a) Dados de entrada:
+•   Os testes de infiltração propiciaram as seguintes equações para condição de primeira e
+    terceira irrigações ,respectivamente:
+
+
+                    I (m3/min) = 0,0035 to(min)0,47 + 0,00011 to (min)
+
+                    I (m3/min)= 0,0034 to(min)0,45 + 0,00010 to (min)
+
+•   A área é de 400 X 400m, com declividade de 0,1% numa direção e 0,0% na outra, com
+    coeficiente de rugosidade estimado de 0,040; ρ1 = 1; ρ2 = 3,33.
+
+
+•   Os dados de solo, clima e planta propiciaram uma irrigação real necessária de 56mm e
+    uma evapotranspiração máxima de 8,0mm/dia.
+                                                                            PLANILHA
+•   Vazão total disponível (Qt) é de 400L/s, disponível a cada sete dias.    EXCEL!
+
+
+    73

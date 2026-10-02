@@ -110,31 +110,41 @@ void main() {
     );
   });
 
-  test('faixa reproduz o cenário de 1,8 L/s/m da planilha de referência', () {
-    final result = RunBorderSimulation()(
-      base().copyWith(
-        comprimento: 400,
-        declividade: 0.001,
-        larguraOuEspacamento: 50,
-        k: 0.0034,
-        a: 0.45,
-        vib: 0.0001,
-        vazao: 1.8,
-        laminaRequerida: 56,
-        manningN: 0.04,
-        sigmaZ: 0.66,
-      ),
-    );
+  test(
+    'faixa calcula cenário com resíduos e balanço integral, sem F02 presumida',
+    () {
+      final result = RunBorderSimulation()(
+        base().copyWith(
+          comprimento: 400,
+          declividade: 0.001,
+          larguraOuEspacamento: 50,
+          k: 0.0034,
+          a: 0.45,
+          vib: 0.0001,
+          vazao: 1.8,
+          laminaRequerida: 56,
+          manningN: 0.04,
+          sigmaZ: 0.66,
+        ),
+      );
 
-    expect(result.metricas['Vazão unitária máxima'], closeTo(8.6239, 0.001));
-    expect(result.metricas['Tempo de oportunidade'], closeTo(195.0770, 0.001));
-    expect(result.metricas['Tempo de avanço'], closeTo(234.0577, 0.001));
-    expect(result.metricas['Tempo de depleção'], closeTo(361.0019, 0.001));
-    expect(result.metricas['Tempo de irrigação'], closeTo(312.9173, 0.001));
-    expect(result.eficiencia, closeTo(66.2819, 0.001));
-    expect(result.perfilLongitudinal.first * 1000, closeTo(84.2238, 0.001));
-    expect(result.perfilLongitudinal.last * 1000, closeTo(55.9891, 0.001));
-  });
+      expect(result.metricas.containsKey('Vazão unitária máxima'), isFalse);
+      expect(
+        result.metricas['Tempo de oportunidade'],
+        closeTo(195.13612, 0.001),
+      );
+      expect(result.borderResult!.residualAvancoM3M, lessThan(0.00001));
+      expect(
+        result.borderResult!.tiMin,
+        greaterThanOrEqualTo(result.tempoAvanco),
+      );
+      expectPhysicalBalance(
+        result.eficiencia,
+        result.perdaPercolacao,
+        result.perdaEscoamento,
+      );
+    },
+  );
 
   test('inundação intermitente reproduz o cenário de 5 L/s da planilha', () {
     final result = RunBasinSimulation()(

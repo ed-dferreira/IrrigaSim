@@ -1,0 +1,261 @@
+[
+  {
+    "id": "F01",
+    "paginas": [
+      22,
+      23
+    ],
+    "expressao": "ta = k_av x^b_av",
+    "unidades_notas": "min,m"
+  },
+  {
+    "id": "F02",
+    "paginas": [
+      24
+    ],
+    "expressao": "b = ln(t2/t1)/ln(x2/x1); k=t2/x2^b",
+    "unidades_notas": "min,m"
+  },
+  {
+    "id": "F03",
+    "paginas": [
+      27,
+      28
+    ],
+    "expressao": "b = cov(logx,logt)/var(logx); A=media(logt)-b*media(logx); k=10^A",
+    "unidades_notas": "log10"
+  },
+  {
+    "id": "F04",
+    "paginas": [
+      39
+    ],
+    "expressao": "VI_mm_h=3600*(qin-qout)/(L*E)",
+    "unidades_notas": "L/s,m; armazenamento desprezado"
+  },
+  {
+    "id": "F05",
+    "paginas": [
+      45
+    ],
+    "expressao": "I_mm=K_vi*t^(n_vi+1)/(60*(n_vi+1))",
+    "unidades_notas": "VI mm/h; t min"
+  },
+  {
+    "id": "F06",
+    "paginas": [
+      91
+    ],
+    "expressao": "I_L_m=K_vi*t^(n_vi+1)/(n_vi+1)",
+    "unidades_notas": "VI L/min/m; t min"
+  },
+  {
+    "id": "F07",
+    "paginas": [
+      93
+    ],
+    "expressao": "I_mm=I_L_m/E",
+    "unidades_notas": "L/m; E m"
+  },
+  {
+    "id": "F08",
+    "paginas": [
+      50
+    ],
+    "expressao": "tau_i=tc-ta_i+duracao_deplecao+duracao_recessao_local",
+    "unidades_notas": "min"
+  },
+  {
+    "id": "F09",
+    "paginas": [
+      79
+    ],
+    "expressao": "ti=t0+ta_L",
+    "unidades_notas": "min, recessao desprezada"
+  },
+  {
+    "id": "F10",
+    "paginas": [
+      21,
+      51
+    ],
+    "expressao": "ta_L=t0/4",
+    "unidades_notas": "regra pratica"
+  },
+  {
+    "id": "F11",
+    "paginas": [
+      52
+    ],
+    "expressao": "E<=2*z",
+    "unidades_notas": "mesma unidade"
+  },
+  {
+    "id": "F12",
+    "paginas": [
+      55
+    ],
+    "expressao": "qmax=C/S_percent^a",
+    "unidades_notas": "L/s; S em %"
+  },
+  {
+    "id": "F13",
+    "paginas": [
+      56
+    ],
+    "expressao": "qmax=0.631/S_percent",
+    "unidades_notas": "L/s; S em %"
+  },
+  {
+    "id": "F14",
+    "paginas": [
+      57
+    ],
+    "expressao": "Lm=60*q_L_s*ti_min/(L*E)",
+    "unidades_notas": "mm"
+  },
+  {
+    "id": "F15",
+    "paginas": [
+      59
+    ],
+    "expressao": "Lm=60*((tt-tr)*qi+tr*qr)/(L*E)",
+    "unidades_notas": "min,L/s,m"
+  },
+  {
+    "id": "F16",
+    "paginas": [
+      58
+    ],
+    "expressao": "Lmi=media(amostras); aproximacao_extremos=(Li+Lf)/2",
+    "unidades_notas": "mm; nao identidades gerais"
+  },
+  {
+    "id": "F17",
+    "paginas": [
+      61
+    ],
+    "expressao": "Ec=100*V_aplicado/V_derivado",
+    "unidades_notas": "%"
+  },
+  {
+    "id": "F18",
+    "paginas": [
+      62
+    ],
+    "expressao": "Ed=100*Lf/((Li+Lf)/2)",
+    "unidades_notas": "%"
+  },
+  {
+    "id": "F19",
+    "paginas": [
+      63
+    ],
+    "expressao": "Ea_slide=100*Lf/Lm",
+    "unidades_notas": "%"
+  },
+  {
+    "id": "F20",
+    "paginas": [
+      64
+    ],
+    "expressao": "GA=100*lamina_infiltrada_util/lamina_requerida",
+    "unidades_notas": "definicao ambigua"
+  },
+  {
+    "id": "F21",
+    "paginas": [
+      65
+    ],
+    "expressao": "Pp_slide=100*(Lmi-LL)/Lm",
+    "unidades_notas": "%"
+  },
+  {
+    "id": "F22",
+    "paginas": [
+      65
+    ],
+    "expressao": "Pe_slide=100*(Lm-Lmi)/Lm",
+    "unidades_notas": "%"
+  },
+  {
+    "id": "F23",
+    "paginas": [
+      77
+    ],
+    "expressao": "qr=1.1*fo*L*E/3600",
+    "unidades_notas": "fo mm/h; qr L/s; fator omitido na substituicao impressa"
+  },
+  {
+    "id": "F24",
+    "paginas": [
+      96
+    ],
+    "expressao": "qr_L_min=sum(dx*(VI_j+VI_j1)/2)",
+    "unidades_notas": "VI L/min/m"
+  },
+  {
+    "id": "F25",
+    "paginas": [
+      92
+    ],
+    "expressao": "IRN=(UCC-UPMP)/10*Ds*z_cm*f",
+    "unidades_notas": "umidade gravimetrica %,Ds g/cm3; mm"
+  },
+  {
+    "id": "F26",
+    "paginas": [
+      80
+    ],
+    "expressao": "TR=CRA/(ETc-Pef)",
+    "unidades_notas": "dias"
+  },
+  {
+    "id": "F27",
+    "paginas": [
+      81
+    ],
+    "expressao": "NTS=Lt*Wt/(L*E)",
+    "unidades_notas": "contagem"
+  },
+  {
+    "id": "F28",
+    "paginas": [
+      82
+    ],
+    "expressao": "NSD=NTS/PI",
+    "unidades_notas": "sulcos/dia"
+  },
+  {
+    "id": "F29",
+    "paginas": [
+      83
+    ],
+    "expressao": "TIP=ti+tmud",
+    "unidades_notas": "unidades iguais"
+  },
+  {
+    "id": "F30",
+    "paginas": [
+      84
+    ],
+    "expressao": "NPD=TDF/TIP",
+    "unidades_notas": "parcelas/dia"
+  },
+  {
+    "id": "F31",
+    "paginas": [
+      85
+    ],
+    "expressao": "NSP=NSD/NPD",
+    "unidades_notas": "sulcos/parcela"
+  },
+  {
+    "id": "F32",
+    "paginas": [
+      86
+    ],
+    "expressao": "Qprojeto=NSP*q0+PC",
+    "unidades_notas": "PC na mesma unidade de vazao"
+  }
+]

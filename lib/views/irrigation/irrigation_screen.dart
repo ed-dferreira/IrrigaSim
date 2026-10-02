@@ -44,6 +44,8 @@ class IrrigationScreen extends ConsumerWidget {
     ref.read(parametersProvider.notifier).setMetodo(method);
     if (method == MetodoIrrigacao.sulco) {
       context.push('/home/irrigation/tipo-sulco');
+    } else if (method == MetodoIrrigacao.faixa) {
+      context.push('/home/irrigation/border-project');
     } else {
       context.push('/home/irrigation/parameters');
     }

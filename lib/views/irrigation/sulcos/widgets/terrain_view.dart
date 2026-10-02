@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
 import 'package:irrigasim/models/sulcos/tipo_sulco_info.dart';
+
 import 'terrain_painter.dart';
 
 class TerrainView extends StatelessWidget {
@@ -14,6 +15,7 @@ class TerrainView extends StatelessWidget {
     this.furrowColors,
     this.flowingIndex,
     this.showTitle = true,
+    this.distributionName = 'sulcos',
   });
 
   final double comprimentoM;
@@ -25,16 +27,18 @@ class TerrainView extends StatelessWidget {
   final int? flowingIndex;
   final bool showTitle;
 
+  /// Termo apresentado no desenho. Pode ser `faixas` no projeto de faixas.
+  final String distributionName;
+
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final numSulcos =
-        (larguraM / espacamentoSulcosM).floor().clamp(1, 20);
+    final numSulcos = (larguraM / espacamentoSulcosM).floor().clamp(1, 20);
     final tipoLabel = tipoSulco?.displayName;
 
     return Semantics(
       label:
-          'Representação visual do terreno. Área de ${comprimentoM.toStringAsFixed(0)} metros por ${larguraM.toStringAsFixed(0)} metros com $numSulcos sulcos${tipoLabel != null ? ', tipo $tipoLabel' : ''} e declividade de ${declividadePercentual.toStringAsFixed(2)} por cento.',
+          'Representação visual do terreno. Área de ${comprimentoM.toStringAsFixed(0)} metros por ${larguraM.toStringAsFixed(0)} metros com $numSulcos $distributionName${tipoLabel != null ? ', tipo $tipoLabel' : ''} e declividade de ${declividadePercentual.toStringAsFixed(2)} por cento.',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -47,10 +51,11 @@ class TerrainView extends StatelessWidget {
                   child: Text(
                     tipoLabel != null
                         ? 'Distribuição — $tipoLabel'
-                        : 'Distribuição dos sulcos na área',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
+                        : distributionName == 'sulcos'
+                        ? 'Distribuição dos sulcos na área'
+                        : 'Distribuição das $distributionName na área',
+                    style: Theme.of(context).textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w700),
                   ),
                 ),
               ],
@@ -86,6 +91,7 @@ class TerrainView extends StatelessWidget {
                     numSulcos: numSulcos,
                     espacamento: espacamentoSulcosM,
                     tipo: tipoSulco,
+                    distributionName: distributionName,
                   ),
                 ],
               ),
@@ -102,10 +108,12 @@ class _TerrainLegend extends StatelessWidget {
     required this.numSulcos,
     required this.espacamento,
     this.tipo,
+    required this.distributionName,
   });
   final int numSulcos;
   final double espacamento;
   final TipoSulco? tipo;
+  final String distributionName;
 
   @override
   Widget build(BuildContext context) {
@@ -116,17 +124,14 @@ class _TerrainLegend extends StatelessWidget {
       children: [
         _LegendDot(
           color: colors.primary,
-          label: '$numSulcos sulcos',
+          label: '$numSulcos $distributionName',
         ),
         _LegendDot(
           color: colors.onSurfaceVariant,
           label: 'Espaçamento: ${espacamento.toStringAsFixed(2)} m',
         ),
         if (tipo != null)
-          _LegendDot(
-            color: colors.tertiary,
-            label: tipo!.displayName,
-          ),
+          _LegendDot(color: colors.tertiary, label: tipo!.displayName),
       ],
     );
   }
