@@ -1,0 +1,251 @@
+{
+  "origem": "recalculo_interno; distinguir dados impressos e hipóteses no relatório",
+  "dois_pontos_p25": {
+    "k": 0.09399444259216042,
+    "b": 1.3027685166039074
+  },
+  "regressao_p26": {
+    "k": 0.09780307638266077,
+    "b": 1.2944313738180784,
+    "intercepto_log10": -1.0096474843228194,
+    "N": 10,
+    "R2_log": 0.9978008885768188,
+    "soma_log_x": 19.570062989516607,
+    "soma_log_y": 15.23562867799812,
+    "soma_xy": 30.996885483269686,
+    "soma_x2": 39.21084684386484
+  },
+  "regressao_p29": {
+    "k": 0.011346522076825027,
+    "b": 1.659920634260717,
+    "intercepto_log10": -1.9451372375289506,
+    "N": 10,
+    "R2_log": 0.9884118663811137,
+    "soma_log_x": 19.570062989516607,
+    "soma_log_y": 13.033378994791086,
+    "soma_xy": 27.02043550127209,
+    "soma_x2": 39.21084684386484
+  },
+  "exercicio_p35": {
+    "k": 0.0717117561860592,
+    "b": 1.398549376490275,
+    "T80_min": 32.89695289843265,
+    "X53_m": 112.50878536999546,
+    "T80_coef_impressos": 33.00773194392694,
+    "X53_coef_impressos": 112.47265710741114
+  },
+  "regressao_infiltracao": {
+    "deltaq": {
+      "k": 0.9778615783997018,
+      "b": -0.3107752603256488,
+      "intercepto_log10": -0.009722617596692018,
+      "N": 11,
+      "R2_log": 0.9947705292468385,
+      "soma_log_x": 17.592871859490295,
+      "soma_log_y": -5.574378125572489,
+      "soma_xy": -9.911712954480123,
+      "soma_x2": 31.343113279853256
+    },
+    "VI_convertida_sem_arredondar": {
+      "k": 35.203016822389266,
+      "b": -0.3107752603256488,
+      "intercepto_log10": 1.5465798831705952,
+      "N": 11,
+      "R2_log": 0.9947705292468385,
+      "soma_log_x": 17.592871859490295,
+      "soma_log_y": 11.54494938286767,
+      "soma_xy": 17.468117516123055,
+      "soma_x2": 31.343113279853256
+    },
+    "VI_tabela_arredondada": {
+      "k": 35.236467370405144,
+      "b": -0.311442661875435,
+      "intercepto_log10": 1.5469923617592294,
+      "N": 11,
+      "R2_log": 0.9947236907616568,
+      "soma_log_x": 17.592871859490295,
+      "soma_log_y": 11.537745137398433,
+      "soma_xy": 17.45445575669958,
+      "soma_x2": 31.343113279853256
+    },
+    "coef_I_derivado_de_35_23": [
+      0.8634803921568627,
+      0.6799999999999999
+    ],
+    "intercepto_expressao_p41": 0.0020000000000000018,
+    "expoente_formula_p40_com_N10": -0.2814950274305426
+  },
+  "manejo_p72": {
+    "reproducao_indices_do_slide": {
+      "Lmi": 30.6,
+      "Ed": 98.0392156862745,
+      "Ea": 50.0,
+      "Pp": 1.0000000000000024,
+      "Pe": 49.0
+    },
+    "I140_mm": 24.478566988434302,
+    "I200_mm": 31.19746619300399,
+    "tempo_para_30mm": 188.8134104505291,
+    "tempo_total_para_30mm": 248.8134104505291,
+    "qr_sem_fator_L_s": 0.4388888888888889,
+    "qr_com_fator_1_1_L_s": 0.48277777777777786,
+    "Lm_60min_1_e_140min_044": 36.48,
+    "Lm_fator_1_1": 38.27666666666667
+  },
+  "somatorio_p96": {
+    "taxas_L_min_m": [
+      0.17340670106201467,
+      0.17704211385955554,
+      0.18013565417240263,
+      0.1859995917764255,
+      0.19453877323790375,
+      0.20570729354301606,
+      0.21926416361875192,
+      0.23816579935654353,
+      0.2636331887031307,
+      0.30505608918047183,
+      0.3709092256410627
+    ],
+    "total_L_min": 44.8340126159948,
+    "total_L_s": 0.7472335435999133
+  },
+  "projeto_resolvido": {
+    "IRN_mm": 42.0,
+    "TR_com_ETc7_dias": 10.5,
+    "ETc_sem_arredondar": 7.040000000000001,
+    "TR_com_ETc_exata_dias": 10.396039603960393,
+    "t0_sem_arredondar_min": 130.18288436872177,
+    "I130_mm": 41.96730224931663,
+    "Lm_100m_165min": 110.0,
+    "Lm_200m_220min": 73.33333333333333,
+    "Lm_reduzida_110_110": 64.16666666666667,
+    "Ea_reduzida_simplificada": 65.45454545454545,
+    "Lm_resumo_incorreto_90_20": 35.0,
+    "organizar": {
+      "NTS": 600,
+      "NSD_medio": 60.0,
+      "TIP_min": 250,
+      "NPD_continuo": 3.36,
+      "NPD_inteiro": 3,
+      "NSP": 20,
+      "baterias_total": 30,
+      "dias_necessarios": 10,
+      "Qprojeto_L_s": 20
+    },
+    "perfil_hipotese_avanco_interpolado": {
+      "constante": {
+        "status": "valido_no_modelo",
+        "Lmi_mm": 50.39121285824422,
+        "lamina_util_mm": 41.99997062264334,
+        "lamina_percolada_mm": 8.391242235600878,
+        "deficit_mm": 2.937735666108665e-05,
+        "lamina_escoada_mm": 22.942120475089112,
+        "Ea_integral": 57.272687212695466,
+        "Er": 99.99993005391272,
+        "Pp_integral": 11.442603048546653,
+        "Pe_integral": 31.284709738757883,
+        "volume_aplicado_m3": 13.2,
+        "volume_util_m3": 7.559994712075801,
+        "volume_percolado_m3": 1.5104236024081579,
+        "volume_escoado_m3": 4.12958168551604
+      },
+      "reduzida_condicional": {
+        "status": "valido_no_modelo",
+        "Lmi_mm": 50.39121285824422,
+        "lamina_util_mm": 41.99997062264334,
+        "lamina_percolada_mm": 8.391242235600878,
+        "deficit_mm": 2.937735666108665e-05,
+        "lamina_escoada_mm": 13.775453808422455,
+        "Ea_integral": 65.45449967165196,
+        "Er": 99.99993005391272,
+        "Pp_integral": 13.077260626910459,
+        "Pe_integral": 21.468239701437593,
+        "volume_aplicado_m3": 11.55,
+        "volume_util_m3": 7.559994712075801,
+        "volume_percolado_m3": 1.5104236024081579,
+        "volume_escoado_m3": 2.4795816855160417
+      }
+    }
+  },
+  "exercicio_p101": {
+    "status": "formal_com_alerta_VI_inferior_a_VIB",
+    "IRN_mm": 38.5,
+    "coef_I": 0.8823529411764707,
+    "a_I": 0.6799999999999999,
+    "t0_min": 257.92749189258575,
+    "TR_sem_chuva_dias": 9.166666666666666,
+    "tempo_VI_igual_VIB_min": 76.10925536017415,
+    "VI_no_t0_mm_h": 6.090083645112797,
+    "Lmax_Criddle_m": 204.91487770778042,
+    "qmax_S0_05_L_s": 1.262,
+    "qmax_S0_01_L_s": 6.31,
+    "candidatos": [
+      {
+        "L_m": 100,
+        "ta_min": 15.803511650950748,
+        "ti_min": 273.7310035435365,
+        "Lm_mm": 164.2386021261219,
+        "Ea_simplificada": 23.441504921257874,
+        "NTS": 1600.0,
+        "status": "valido_no_modelo",
+        "Lmi_mm": 39.554048799070465,
+        "lamina_util_mm": 38.5,
+        "lamina_percolada_mm": 1.0540487990704648,
+        "deficit_mm": 0.0,
+        "lamina_escoada_mm": 124.68455332705142,
+        "Ea_integral": 23.441504921257874,
+        "Er": 100.0,
+        "Pp_integral": 0.6417789639131494,
+        "Pe_integral": 75.91671611482897,
+        "volume_aplicado_m3": 16.42386021261219,
+        "volume_util_m3": 3.85,
+        "volume_percolado_m3": 0.10540487990704649,
+        "volume_escoado_m3": 12.468455332705142
+      },
+      {
+        "L_m": 200,
+        "ta_min": 61.485455175139755,
+        "ti_min": 319.4129470677255,
+        "Lm_mm": 95.82388412031766,
+        "Ea_simplificada": 40.17787460134566,
+        "NTS": 800.0,
+        "status": "valido_no_modelo",
+        "Lmi_mm": 42.516927263427654,
+        "lamina_util_mm": 38.5,
+        "lamina_percolada_mm": 4.016927263427654,
+        "deficit_mm": 0.0,
+        "lamina_escoada_mm": 53.306956856890004,
+        "Ea_integral": 40.17787460134566,
+        "Er": 100.0,
+        "Pp_integral": 4.19198960708371,
+        "Pe_integral": 55.63013579157063,
+        "volume_aplicado_m3": 19.164776824063534,
+        "volume_util_m3": 7.7,
+        "volume_percolado_m3": 0.8033854526855309,
+        "volume_escoado_m3": 10.661391371378002
+      },
+      {
+        "L_m": 400,
+        "ta_min": 239.216528679984,
+        "ti_min": 497.14402057256973,
+        "Lm_mm": 74.57160308588546,
+        "Ea_simplificada": 51.62823166837229,
+        "NTS": 400.0,
+        "status": "valido_no_modelo",
+        "Lmi_mm": 53.13416716252861,
+        "lamina_util_mm": 38.5,
+        "lamina_percolada_mm": 14.634167162528612,
+        "deficit_mm": 0.0,
+        "lamina_escoada_mm": 21.437435923356844,
+        "Ea_integral": 51.62823166837229,
+        "Er": 100.0,
+        "Pp_integral": 19.62431616988866,
+        "Pe_integral": 28.74745216173905,
+        "volume_aplicado_m3": 29.828641234354183,
+        "volume_util_m3": 15.4,
+        "volume_percolado_m3": 5.853666865011445,
+        "volume_escoado_m3": 8.574974369342739
+      }
+    ]
+  }
+}

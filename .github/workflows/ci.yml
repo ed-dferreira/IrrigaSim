@@ -1,0 +1,51 @@
+# ============================================================
+# CI (Continuous Integration) - IrrigaSim
+# ============================================================
+#
+# COMO FUNCIONA:
+# Este workflow é executado automaticamente toda vez que:
+# - Um Pull Request é aberto ou atualizado para a branch 'main'
+# - Um commit é feito diretamente na branch 'main'
+#
+# O que ele faz:
+# 1. Configura o ambiente Flutter
+# 2. Instala as dependências
+# 3. Roda o analyzer (verifica erros de código)
+# 4. Roda os testes automatizados
+#
+# Se qualquer etapa falhar, o PR não poderá ser merged.
+# ============================================================
+
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  analyze-and-test:
+    name: Analyze & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Verify Flutter installation
+        run: flutter doctor -v
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze code
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test

@@ -1,0 +1,91 @@
+{
+  "tipo": "reconstrucao_com_hipoteses_nao_gabarito_oficial",
+  "modelo": "faixa_aberta_declive_vazao_constante_recessao_linear",
+  "adicoes_ao_pdf": {
+    "q_m3_min_m": 0.2,
+    "comprimento_faixa_m": 400,
+    "n_segmentos": 2000,
+    "expoentes_recessao": "p43",
+    "Sy": "yf/L",
+    "recessao_alvo": "t0+ta, sem igualdade com ti"
+  },
+  "tolerancias_comparacao_sugeridas": {
+    "tempos_min": 0.0001,
+    "laminas_m": 1e-07,
+    "eficiencias_pontos_percentuais": 0.0001
+  },
+  "cenarios": [
+    {
+      "nome": "primeira",
+      "k": 0.0035,
+      "a": 0.47,
+      "VIB_m_min": 0.00011,
+      "resultados": {
+        "ta": 122.19071896869593,
+        "ta_meio": 47.63724100854745,
+        "r": 0.7358498225642746,
+        "p": 11.649660987755077,
+        "sigma_z": 0.728926190599208,
+        "y0": 0.03758055953191424,
+        "iteracoes_r": 10,
+        "t0": 161.7196543885683,
+        "td": 214.70148443458754,
+        "tr": 283.91037335726423,
+        "ti": 177.1209249026733,
+        "VIM": 0.00023243604875293835,
+        "Sy": 6.456212383483163e-05,
+        "qf": 0.10702558049882467,
+        "ajuste_td_para_t0": false,
+        "I_inicio": 0.06727181387870985,
+        "I_final": 0.055999999999999564,
+        "I_min": 0.055999999999999564,
+        "volume_aplicado_unitario": 35.42418498053466,
+        "volume_infiltrado_unitario": 25.464875961496357,
+        "volume_util_unitario": 22.400000000000002,
+        "volume_percolado_unitario": 3.064875961496355,
+        "volume_escoado_unitario": 9.959309019038304,
+        "Ea": 63.23363547335991,
+        "Er": 99.99999999999999,
+        "Pp": 8.65193077322875,
+        "Pe": 28.114433753411333,
+        "Ea_simplificada": 63.23363547335991
+      }
+    },
+    {
+      "nome": "terceira",
+      "k": 0.0034,
+      "a": 0.45,
+      "VIB_m_min": 0.0001,
+      "resultados": {
+        "ta": 112.15362800492983,
+        "ta_meio": 45.332670022330035,
+        "r": 0.765196858025303,
+        "p": 10.803121835815059,
+        "sigma_z": 0.7309366534468422,
+        "y0": 0.03758055953191424,
+        "iteracoes_r": 10,
+        "t0": 195.13612258749333,
+        "td": 229.91528771216505,
+        "tr": 307.28975059242316,
+        "ti": 192.3347281802508,
+        "VIM": 0.000193981828529974,
+        "Sy": 6.997929735466666e-05,
+        "qf": 0.1224072685880104,
+        "ajuste_td_para_t0": false,
+        "I_inicio": 0.062272701893342455,
+        "I_final": 0.05600000000000013,
+        "I_min": 0.05600000000000013,
+        "volume_aplicado_unitario": 38.46694563605016,
+        "volume_infiltrado_unitario": 24.197576628338368,
+        "volume_util_unitario": 22.400000000000002,
+        "volume_percolado_unitario": 1.7975766283383656,
+        "volume_escoado_unitario": 14.269369007711795,
+        "Ea": 58.23181339099441,
+        "Er": 99.99999999999999,
+        "Pp": 4.673042266848777,
+        "Pe": 37.09514434215681,
+        "Ea_simplificada": 58.23181339099441
+      }
+    }
+  ]
+}

@@ -1,0 +1,981 @@
+{
+  "fonte": {
+    "nome": "Aula 6 - Irrigação por sulcos.pdf",
+    "paginas": 101,
+    "autora": "Chaiane Guerra da Conceição",
+    "data_extracao": "2026-09-30",
+    "validacao_bibliografica_externa": false
+  },
+  "tipos": [
+    {
+      "tipo": "comuns",
+      "ideal_percent": [
+        0.1,
+        0.1
+      ],
+      "aconselhavel_percent": [
+        0.05,
+        0.5
+      ],
+      "usavel_percent": [
+        0.02,
+        1
+      ],
+      "L_m": [
+        100,
+        500
+      ],
+      "pagina": 5
+    },
+    {
+      "tipo": "contorno",
+      "ideal_percent": [
+        1,
+        1
+      ],
+      "aconselhavel_percent": [
+        0.5,
+        2
+      ],
+      "usavel_percent": null,
+      "L_m": [
+        70,
+        150
+      ],
+      "pagina": 6
+    },
+    {
+      "tipo": "corrugados",
+      "ideal_percent": [
+        1,
+        2
+      ],
+      "aconselhavel_percent": [
+        0.5,
+        12
+      ],
+      "usavel_max_percent": 15,
+      "L_m": [
+        30,
+        180
+      ],
+      "q_L_s": [
+        0.05,
+        0.5
+      ],
+      "profundidade_m": 0.1,
+      "E_m": [
+        0.4,
+        0.75
+      ],
+      "paginas": [
+        7,
+        8
+      ]
+    },
+    {
+      "tipo": "nivel_tabuleiros",
+      "ideal_percent": null,
+      "aconselhavel_percent": null,
+      "usavel_percent": null,
+      "E_aproximado_m": 1,
+      "pagina": 10
+    },
+    {
+      "tipo": "nivel_fechados",
+      "ideal_percent": null,
+      "aconselhavel_percent": null,
+      "usavel_percent": null,
+      "declive_texto": "sem declividade ou muito pequena",
+      "pagina": 11
+    },
+    {
+      "tipo": "zigue_zague",
+      "ideal_percent": null,
+      "aconselhavel_percent": null,
+      "usavel_percent": null,
+      "paginas": [
+        12,
+        13,
+        14
+      ]
+    }
+  ],
+  "corrugacao_booher": [
+    {
+      "raizes": "profundas",
+      "S_percent": 2,
+      "textura": "fina",
+      "comprimento_m": 180,
+      "espacamento_m": 0.75,
+      "pagina": 9
+    },
+    {
+      "raizes": "profundas",
+      "S_percent": 2,
+      "textura": "media",
+      "comprimento_m": 130,
+      "espacamento_m": 0.7,
+      "pagina": 9
+    },
+    {
+      "raizes": "profundas",
+      "S_percent": 2,
+      "textura": "grossa",
+      "comprimento_m": 70,
+      "espacamento_m": 0.6,
+      "pagina": 9
+    },
+    {
+      "raizes": "profundas",
+      "S_percent": 4,
+      "textura": "fina",
+      "comprimento_m": 120,
+      "espacamento_m": 0.65,
+      "pagina": 9
+    },
+    {
+      "raizes": "profundas",
+      "S_percent": 4,
+      "textura": "media",
+      "comprimento_m": 90,
+      "espacamento_m": 0.65,
+      "pagina": 9
+    },
+    {
+      "raizes": "profundas",
+      "S_percent": 4,
+      "textura": "grossa",
+      "comprimento_m": 45,
+      "espacamento_m": 0.55,
+      "pagina": 9
+    },
+    {
+      "raizes": "profundas",
+      "S_percent": 6,
+      "textura": "fina",
+      "comprimento_m": 90,
+      "espacamento_m": 0.6,
+      "pagina": 9
+    },
+    {
+      "raizes": "profundas",
+      "S_percent": 6,
+      "textura": "media",
+      "comprimento_m": 75,
+      "espacamento_m": 0.6,
+      "pagina": 9
+    },
+    {
+      "raizes": "profundas",
+      "S_percent": 6,
+      "textura": "grossa",
+      "comprimento_m": 40,
+      "espacamento_m": 0.5,
+      "pagina": 9
+    },
+    {
+      "raizes": "profundas",
+      "S_percent": 8,
+      "textura": "fina",
+      "comprimento_m": 80,
+      "espacamento_m": 0.55,
+      "pagina": 9
+    },
+    {
+      "raizes": "profundas",
+      "S_percent": 8,
+      "textura": "media",
+      "comprimento_m": 60,
+      "espacamento_m": 0.55,
+      "pagina": 9
+    },
+    {
+      "raizes": "profundas",
+      "S_percent": 8,
+      "textura": "grossa",
+      "comprimento_m": 30,
+      "espacamento_m": 0.45,
+      "pagina": 9
+    },
+    {
+      "raizes": "profundas",
+      "S_percent": 10,
+      "textura": "fina",
+      "comprimento_m": 70,
+      "espacamento_m": 0.5,
+      "pagina": 9
+    },
+    {
+      "raizes": "profundas",
+      "S_percent": 10,
+      "textura": "media",
+      "comprimento_m": 50,
+      "espacamento_m": 0.5,
+      "pagina": 9
+    },
+    {
+      "raizes": "profundas",
+      "S_percent": 10,
+      "textura": "grossa",
+      "comprimento_m": null,
+      "espacamento_m": null,
+      "pagina": 9
+    },
+    {
+      "raizes": "profundas",
+      "S_percent": 12,
+      "textura": "fina",
+      "comprimento_m": 60,
+      "espacamento_m": 0.45,
+      "pagina": 9
+    },
+    {
+      "raizes": "profundas",
+      "S_percent": 12,
+      "textura": "media",
+      "comprimento_m": 40,
+      "espacamento_m": 0.45,
+      "pagina": 9
+    },
+    {
+      "raizes": "profundas",
+      "S_percent": 12,
+      "textura": "grossa",
+      "comprimento_m": null,
+      "espacamento_m": null,
+      "pagina": 9
+    },
+    {
+      "raizes": "rasas",
+      "S_percent": 2,
+      "textura": "fina",
+      "comprimento_m": 120,
+      "espacamento_m": 0.65,
+      "pagina": 9
+    },
+    {
+      "raizes": "rasas",
+      "S_percent": 2,
+      "textura": "media",
+      "comprimento_m": 90,
+      "espacamento_m": 0.55,
+      "pagina": 9
+    },
+    {
+      "raizes": "rasas",
+      "S_percent": 2,
+      "textura": "grossa",
+      "comprimento_m": 45,
+      "espacamento_m": 0.45,
+      "pagina": 9
+    },
+    {
+      "raizes": "rasas",
+      "S_percent": 4,
+      "textura": "fina",
+      "comprimento_m": 85,
+      "espacamento_m": 0.6,
+      "pagina": 9
+    },
+    {
+      "raizes": "rasas",
+      "S_percent": 4,
+      "textura": "media",
+      "comprimento_m": 60,
+      "espacamento_m": 0.5,
+      "pagina": 9
+    },
+    {
+      "raizes": "rasas",
+      "S_percent": 4,
+      "textura": "grossa",
+      "comprimento_m": 30,
+      "espacamento_m": 0.45,
+      "pagina": 9
+    },
+    {
+      "raizes": "rasas",
+      "S_percent": 6,
+      "textura": "fina",
+      "comprimento_m": 70,
+      "espacamento_m": 0.55,
+      "pagina": 9
+    },
+    {
+      "raizes": "rasas",
+      "S_percent": 6,
+      "textura": "media",
+      "comprimento_m": 50,
+      "espacamento_m": 0.45,
+      "pagina": 9
+    },
+    {
+      "raizes": "rasas",
+      "S_percent": 6,
+      "textura": "grossa",
+      "comprimento_m": null,
+      "espacamento_m": null,
+      "pagina": 9
+    },
+    {
+      "raizes": "rasas",
+      "S_percent": 8,
+      "textura": "fina",
+      "comprimento_m": 60,
+      "espacamento_m": 0.5,
+      "pagina": 9
+    },
+    {
+      "raizes": "rasas",
+      "S_percent": 8,
+      "textura": "media",
+      "comprimento_m": 45,
+      "espacamento_m": 0.45,
+      "pagina": 9
+    },
+    {
+      "raizes": "rasas",
+      "S_percent": 8,
+      "textura": "grossa",
+      "comprimento_m": null,
+      "espacamento_m": null,
+      "pagina": 9
+    },
+    {
+      "raizes": "rasas",
+      "S_percent": 10,
+      "textura": "fina",
+      "comprimento_m": 55,
+      "espacamento_m": 0.45,
+      "pagina": 9
+    },
+    {
+      "raizes": "rasas",
+      "S_percent": 10,
+      "textura": "media",
+      "comprimento_m": 40,
+      "espacamento_m": 0.4,
+      "pagina": 9
+    },
+    {
+      "raizes": "rasas",
+      "S_percent": 10,
+      "textura": "grossa",
+      "comprimento_m": null,
+      "espacamento_m": null,
+      "pagina": 9
+    },
+    {
+      "raizes": "rasas",
+      "S_percent": 12,
+      "textura": "fina",
+      "comprimento_m": 50,
+      "espacamento_m": 0.4,
+      "pagina": 9
+    },
+    {
+      "raizes": "rasas",
+      "S_percent": 12,
+      "textura": "media",
+      "comprimento_m": 35,
+      "espacamento_m": 0.4,
+      "pagina": 9
+    },
+    {
+      "raizes": "rasas",
+      "S_percent": 12,
+      "textura": "grossa",
+      "comprimento_m": null,
+      "espacamento_m": null,
+      "pagina": 9
+    }
+  ],
+  "vazao_nao_erosiva_coeficientes": [
+    {
+      "textura": "muito_fina",
+      "C": 0.892,
+      "a": 0.937,
+      "pagina": 55
+    },
+    {
+      "textura": "fina",
+      "C": 0.988,
+      "a": 0.55,
+      "pagina": 55
+    },
+    {
+      "textura": "media",
+      "C": 0.613,
+      "a": 0.733,
+      "pagina": 55
+    },
+    {
+      "textura": "grossa",
+      "C": 0.644,
+      "a": 0.704,
+      "pagina": 55
+    },
+    {
+      "textura": "muito_grossa",
+      "C": 0.665,
+      "a": 0.548,
+      "pagina": 55
+    }
+  ],
+  "avanco_dois_pontos_p25": [
+    {
+      "x_m": 0,
+      "ta_min": 0
+    },
+    {
+      "x_m": 20,
+      "ta_min": 5
+    },
+    {
+      "x_m": 40,
+      "ta_min": 10.5
+    },
+    {
+      "x_m": 60,
+      "ta_min": 19.2
+    },
+    {
+      "x_m": 80,
+      "ta_min": 30
+    },
+    {
+      "x_m": 100,
+      "ta_min": 37.9
+    },
+    {
+      "x_m": 120,
+      "ta_min": 48
+    },
+    {
+      "x_m": 140,
+      "ta_min": 60.5
+    },
+    {
+      "x_m": 160,
+      "ta_min": 68
+    },
+    {
+      "x_m": 180,
+      "ta_min": 81.3
+    },
+    {
+      "x_m": 200,
+      "ta_min": 93.5
+    }
+  ],
+  "avanco_mmq_p29": [
+    {
+      "x_m": 0,
+      "ta_min": 0
+    },
+    {
+      "x_m": 20,
+      "ta_min": 2
+    },
+    {
+      "x_m": 40,
+      "ta_min": 5
+    },
+    {
+      "x_m": 60,
+      "ta_min": 9
+    },
+    {
+      "x_m": 80,
+      "ta_min": 14
+    },
+    {
+      "x_m": 100,
+      "ta_min": 21
+    },
+    {
+      "x_m": 120,
+      "ta_min": 30
+    },
+    {
+      "x_m": 140,
+      "ta_min": 40
+    },
+    {
+      "x_m": 160,
+      "ta_min": 53
+    },
+    {
+      "x_m": 180,
+      "ta_min": 69
+    },
+    {
+      "x_m": 200,
+      "ta_min": 93
+    }
+  ],
+  "log_avanco_impresso_p29": {
+    "colunas": [
+      "log_x",
+      "log_t",
+      "produto",
+      "log_x_quadrado"
+    ],
+    "linhas": [
+      [
+        1.3,
+        0.3,
+        0.39,
+        1.69
+      ],
+      [
+        1.6,
+        0.7,
+        1.12,
+        2.57
+      ],
+      [
+        1.78,
+        0.95,
+        1.7,
+        3.16
+      ],
+      [
+        1.9,
+        1.15,
+        2.18,
+        3.62
+      ],
+      [
+        2,
+        1.32,
+        2.64,
+        4
+      ],
+      [
+        2.08,
+        1.48,
+        3.07,
+        4.32
+      ],
+      [
+        2.15,
+        1.6,
+        3.44,
+        4.61
+      ],
+      [
+        2.2,
+        1.72,
+        3.8,
+        4.86
+      ],
+      [
+        2.26,
+        1.84,
+        4.15,
+        5.09
+      ],
+      [
+        2.3,
+        1.97,
+        4.53,
+        5.29
+      ]
+    ],
+    "somas": [
+      19.57,
+      13.03,
+      27.02,
+      39.21
+    ],
+    "medias": [
+      1.96,
+      1.3,
+      2.7,
+      3.92
+    ]
+  },
+  "ensaio_entrada_saida_p39": [
+    {
+      "tempo_min": 0,
+      "qentrada_L_s": 1,
+      "qsaida_L_s": 0,
+      "deltaq_L_s": null,
+      "VI_mm_h_impressa": null
+    },
+    {
+      "tempo_min": 2,
+      "qentrada_L_s": 1,
+      "qsaida_L_s": 0.19,
+      "deltaq_L_s": 0.81,
+      "VI_mm_h_impressa": 29.2
+    },
+    {
+      "tempo_min": 9,
+      "qentrada_L_s": 1,
+      "qsaida_L_s": 0.5,
+      "deltaq_L_s": 0.5,
+      "VI_mm_h_impressa": 18
+    },
+    {
+      "tempo_min": 19,
+      "qentrada_L_s": 1,
+      "qsaida_L_s": 0.63,
+      "deltaq_L_s": 0.37,
+      "VI_mm_h_impressa": 13.3
+    },
+    {
+      "tempo_min": 29,
+      "qentrada_L_s": 1,
+      "qsaida_L_s": 0.66,
+      "deltaq_L_s": 0.34,
+      "VI_mm_h_impressa": 12.2
+    },
+    {
+      "tempo_min": 49,
+      "qentrada_L_s": 1,
+      "qsaida_L_s": 0.71,
+      "deltaq_L_s": 0.29,
+      "VI_mm_h_impressa": 10.4
+    },
+    {
+      "tempo_min": 64,
+      "qentrada_L_s": 1,
+      "qsaida_L_s": 0.73,
+      "deltaq_L_s": 0.27,
+      "VI_mm_h_impressa": 9.7
+    },
+    {
+      "tempo_min": 79,
+      "qentrada_L_s": 1,
+      "qsaida_L_s": 0.75,
+      "deltaq_L_s": 0.25,
+      "VI_mm_h_impressa": 9
+    },
+    {
+      "tempo_min": 89,
+      "qentrada_L_s": 1,
+      "qsaida_L_s": 0.76,
+      "deltaq_L_s": 0.24,
+      "VI_mm_h_impressa": 8.6
+    },
+    {
+      "tempo_min": 101,
+      "qentrada_L_s": 1,
+      "qsaida_L_s": 0.77,
+      "deltaq_L_s": 0.23,
+      "VI_mm_h_impressa": 8.3
+    },
+    {
+      "tempo_min": 119,
+      "qentrada_L_s": 1,
+      "qsaida_L_s": 0.78,
+      "deltaq_L_s": 0.22,
+      "VI_mm_h_impressa": 7.9
+    },
+    {
+      "tempo_min": 149,
+      "qentrada_L_s": 1,
+      "qsaida_L_s": 0.78,
+      "deltaq_L_s": 0.22,
+      "VI_mm_h_impressa": 7.9
+    }
+  ],
+  "log_infiltracao_impresso_p40": {
+    "colunas": [
+      "log_t",
+      "log_deltaq",
+      "produto",
+      "log_t_quadrado"
+    ],
+    "linhas": [
+      [
+        0.3,
+        -0.09,
+        -0.03,
+        0.09
+      ],
+      [
+        0.95,
+        -0.3,
+        -0.29,
+        0.91
+      ],
+      [
+        1.28,
+        -0.43,
+        -0.55,
+        1.64
+      ],
+      [
+        1.46,
+        -0.47,
+        -0.69,
+        2.14
+      ],
+      [
+        1.69,
+        -0.54,
+        -0.91,
+        2.86
+      ],
+      [
+        1.81,
+        -0.57,
+        -1.03,
+        3.26
+      ],
+      [
+        1.9,
+        -0.6,
+        -1.14,
+        3.6
+      ],
+      [
+        1.95,
+        -0.62,
+        -1.21,
+        3.8
+      ],
+      [
+        2,
+        -0.64,
+        -1.28,
+        4.02
+      ],
+      [
+        2.08,
+        -0.66,
+        -1.36,
+        4.31
+      ],
+      [
+        2.17,
+        -0.66,
+        -1.43,
+        4.72
+      ]
+    ],
+    "somas": [
+      17.59,
+      -5.57,
+      -9.91,
+      31.34
+    ],
+    "medias": [
+      1.6,
+      -0.51,
+      -0.9,
+      2.85
+    ],
+    "N_impresso": 10,
+    "N_positivo_real": 11
+  },
+  "tabela_somatorio_p96": {
+    "x_m": [
+      0,
+      20,
+      40,
+      60,
+      80,
+      100,
+      120,
+      140,
+      160,
+      180,
+      200
+    ],
+    "ta_min": [
+      0,
+      5,
+      9,
+      16,
+      25,
+      35,
+      45,
+      56,
+      67,
+      79,
+      90
+    ],
+    "oportunidade_min": [
+      110,
+      105,
+      101,
+      94,
+      85,
+      75,
+      65,
+      54,
+      43,
+      31,
+      20
+    ],
+    "VI_L_min_m_impressa": [
+      0.173,
+      0.177,
+      0.18,
+      0.186,
+      0.195,
+      0.206,
+      0.219,
+      0.238,
+      0.264,
+      0.305,
+      0.371
+    ],
+    "medias_por_m_impressas": [
+      0.175,
+      0.179,
+      0.183,
+      0.191,
+      0.201,
+      0.213,
+      0.229,
+      0.251,
+      0.285,
+      0.338
+    ],
+    "parcelas_L_min_impressas": [
+      3.5,
+      3.57,
+      3.66,
+      3.81,
+      4.01,
+      4.25,
+      4.57,
+      5.02,
+      5.69,
+      6.76
+    ],
+    "total_L_min_impresso": 44.81,
+    "total_L_s_adotado": 0.75
+  },
+  "exemplo_manejo_p72": {
+    "L_m": 200,
+    "E_m": 1,
+    "q_L_s": 1,
+    "ta_min": 60,
+    "t0_min": 140,
+    "ti_min": 200,
+    "LL_mm": 30,
+    "I_k_mm": 0.85,
+    "I_a": 0.68,
+    "resultados_impressos": {
+      "Lm": 60,
+      "Li": 31.2,
+      "Lf": 30,
+      "Lmi": 30.6,
+      "Ed": 98,
+      "Ea": 50,
+      "Pp": 1,
+      "Pe": 49,
+      "qr": 0.44,
+      "Lm_reduzida": 36.45,
+      "Ea_reduzida": 82.3,
+      "Pp_reduzida": 1.64,
+      "Pe_reduzida": 16.04
+    }
+  },
+  "projeto_p89": {
+    "Lt_m": 200,
+    "Wt_m": 540,
+    "E_m": 0.9,
+    "espacamento_plantas_m": 0.2,
+    "z_cm": 50,
+    "S_percent": 0.5,
+    "periodo_cultura": "segunda quinzena de janeiro",
+    "ETo_mm_dia": 6.4,
+    "kc": 1.1,
+    "ETc_adotada_mm_dia": 7,
+    "precipitacao_provavel_mm_dia": 3,
+    "probabilidade_percent": 80,
+    "demanda_adotada_mm_dia": 4,
+    "UCC_percent": 30.5,
+    "UPMP_percent": 18,
+    "Ds_g_cm3": 1.12,
+    "VIB_mm_h": 9,
+    "f": 0.6,
+    "vazoes_testadas_L_s": [
+      0.4,
+      0.6,
+      0.8,
+      1,
+      1.5
+    ],
+    "vazao_erosiva_observada_L_s": 1.5,
+    "VI_K_L_min_m": 1.411,
+    "VI_n": -0.446,
+    "I_K_L_m": 2.547,
+    "I_a": 0.554,
+    "IRN_mm": 42,
+    "t0_adotado_min": 130,
+    "ti_adotado_min": 220,
+    "q_inicial_L_s": 1,
+    "q_reduzida_L_s": 0.75,
+    "instante_reducao_min": 110,
+    "TDF_h": 14,
+    "tmud_min": 30,
+    "PI_adotado_dias": 10
+  },
+  "exercicio_p101": {
+    "Lt_m": 400,
+    "Wt_m": 400,
+    "E_m": 1,
+    "z_cm": 50,
+    "f": 0.5,
+    "ETm_mm_dia": 4.2,
+    "UCC_percent": 28,
+    "UPMP_percent": 17,
+    "Ds_g_cm3": 1.4,
+    "VIB_mm_h": 9,
+    "S_direcoes_percent": [
+      0.5,
+      0.1
+    ],
+    "q_L_s": 1,
+    "C_erosao": 0.631,
+    "a_erosao": 1,
+    "avanco_k": 0.0019,
+    "avanco_b": 1.96,
+    "VI_K_mm_h": 36,
+    "VI_n": -0.32,
+    "TDF_h": null,
+    "tmud_min": null,
+    "chuva_efetiva_mm_dia": null
+  },
+  "limites_desempenho_impressos": [
+    {
+      "pagina": 62,
+      "indicador": "Ed",
+      "texto": ">70%, exceto solos muito permeáveis"
+    },
+    {
+      "pagina": 63,
+      "indicador": "Ea",
+      "texto": "mínimo 60%, ideal >70%"
+    },
+    {
+      "pagina": 75,
+      "indicador": "Ed",
+      "texto": ">80% OK no exemplo"
+    },
+    {
+      "pagina": 75,
+      "indicador": "Ea",
+      "texto": "aceitável >60%, ideal >75%"
+    },
+    {
+      "pagina": 76,
+      "indicador": "Pp",
+      "texto": "até 15% aceitável"
+    },
+    {
+      "pagina": 76,
+      "indicador": "Pe",
+      "texto": "até 10%"
+    }
+  ]
+}

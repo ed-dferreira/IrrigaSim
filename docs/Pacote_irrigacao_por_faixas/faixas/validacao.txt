@@ -1,0 +1,14 @@
+test_ajuste_deplecao (__main__.Validacao.test_ajuste_deplecao) ... ok
+test_dominios_invalidos (__main__.Validacao.test_dominios_invalidos) ... ok
+test_formulas_basicas (__main__.Validacao.test_formulas_basicas) ... ok
+test_oportunidade_dois_metodos (__main__.Validacao.test_oportunidade_dois_metodos) ... ok
+test_refinamento_quadratura (__main__.Validacao.test_refinamento_quadratura) ... ok
+test_residuo_avanco (__main__.Validacao.test_residuo_avanco) ... ok
+test_simulacoes_balanco_e_perfil (__main__.Validacao.test_simulacoes_balanco_e_perfil) ... ok
+test_trapezios_e_particoes (__main__.Validacao.test_trapezios_e_particoes) ... ok
+test_vib_zero (__main__.Validacao.test_vib_zero) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.019s
+
+OK
