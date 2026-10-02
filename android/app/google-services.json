@@ -1,0 +1,98 @@
+{
+  "project_info": {
+    "project_number": "1019259738242",
+    "project_id": "irrigasim-3c73d",
+    "storage_bucket": "irrigasim-3c73d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1019259738242:android:12a7527340771203307c9b",
+        "android_client_info": {
+          "package_name": "com.example.irrigasim"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1019259738242-bi1dfhv5fks1vh1ar8br5jdb24onigua.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.irrigasim",
+            "certificate_hash": "d490df97f2674679ac062588af929dd67a453d19"
+          }
+        },
+        {
+          "client_id": "1019259738242-a322irkvho4c48d8pvlhli90pev2e1le.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyClAReAZI9anFtnI7ev3zBKHa4prbDEl4s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1019259738242-a322irkvho4c48d8pvlhli90pev2e1le.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1019259738242-dh1uscq38ckqv1fd8ch7hbdsm931e84g.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.irrigasim"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1019259738242:android:479b4aa5df7e2f9e307c9b",
+        "android_client_info": {
+          "package_name": "com.irrigasim.android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1019259738242-mjn48g6f6h0mt59qs78jf3lp49pjje3n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.irrigasim.android",
+            "certificate_hash": "328fc73f45cbb267667f281db31e322cdc677ac1"
+          }
+        },
+        {
+          "client_id": "1019259738242-a322irkvho4c48d8pvlhli90pev2e1le.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyClAReAZI9anFtnI7ev3zBKHa4prbDEl4s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1019259738242-a322irkvho4c48d8pvlhli90pev2e1le.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1019259738242-dh1uscq38ckqv1fd8ch7hbdsm931e84g.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.irrigasim"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
