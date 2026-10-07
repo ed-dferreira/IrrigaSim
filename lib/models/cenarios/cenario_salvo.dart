@@ -7,6 +7,7 @@ import '../sulcos/tipo_sulco_info.dart';
 
 import '../simulation_result_model.dart';
 import '../sulcos/field_measurements.dart';
+import '../sulcos/entradas_projeto_sulco.dart';
 
 class CenarioSalvo {
   final String id;
@@ -56,6 +57,8 @@ class CenarioSalvo {
       'nome': nome,
       'metodo': metodo.name,
       'parametros': {
+        if (metodo == MetodoIrrigacao.sulco)
+          'entradasProjetoSulco': parametros.entradasProjetoSulco?.toMap(),
         'comprimento': parametros.comprimento,
         if (metodo == MetodoIrrigacao.faixa)
           'projetoFaixa':
@@ -93,6 +96,11 @@ class CenarioSalvo {
         'vazaoDisponivelLps': parametros.vazaoDisponivelLps,
         'manejoSulco': parametros.manejoSulco.name,
         'vazaoReduzidaLs': parametros.vazaoReduzidaLs,
+        'origemVazaoReduzida': parametros.origemVazaoReduzida.name,
+        'fator11Vib': parametros.fator11Vib,
+        'vazaoEnsaioAvancoLs': parametros.vazaoEnsaioAvancoLs,
+        'condicoesEnsaioAvanco': parametros.condicoesEnsaioAvanco,
+        'ensaioErosao': parametros.ensaioErosao?.toMap(),
         'tempoMudancaMin': parametros.tempoMudancaMin,
         'cicloSurtirMin': parametros.cicloSurtirMin,
         'jornadaDiariaH': parametros.jornadaDiariaH,
@@ -145,6 +153,15 @@ class CenarioSalvo {
       nome: map['nome'] ?? '',
       metodo: metodo,
       parametros: IrrigationParameters(
+        entradasProjetoSulco:
+            metodo == MetodoIrrigacao.sulco &&
+                paramData['entradasProjetoSulco'] is Map
+            ? EntradasProjetoSulco.fromMap(
+                Map<String, dynamic>.from(
+                  paramData['entradasProjetoSulco'] as Map,
+                ),
+              )
+            : null,
         projetoFaixa:
             projeto ??
             (metodo == MetodoIrrigacao.faixa
@@ -230,6 +247,21 @@ class CenarioSalvo {
         ),
         vazaoReduzidaLs:
             (paramData['vazaoReduzidaLs'] as num?)?.toDouble() ?? 0,
+        origemVazaoReduzida: OrigemVazaoReduzida.values.firstWhere(
+          (value) => value.name == paramData['origemVazaoReduzida'],
+          orElse: () => (paramData['vazaoReduzidaLs'] as num? ?? 0) > 0
+              ? OrigemVazaoReduzida.informada
+              : OrigemVazaoReduzida.taxaFinalDaCurva,
+        ),
+        fator11Vib: paramData['fator11Vib'] as bool? ?? false,
+        vazaoEnsaioAvancoLs: (paramData['vazaoEnsaioAvancoLs'] as num?)
+            ?.toDouble(),
+        condicoesEnsaioAvanco: paramData['condicoesEnsaioAvanco'] as String?,
+        ensaioErosao: paramData['ensaioErosao'] is Map
+            ? EnsaioErosaoSulco.fromMap(
+                Map<String, dynamic>.from(paramData['ensaioErosao'] as Map),
+              )
+            : null,
         tempoMudancaMin:
             (paramData['tempoMudancaMin'] as num?)?.toDouble() ?? 0,
         cicloSurtirMin: (paramData['cicloSurtirMin'] as num?)?.toDouble() ?? 0,

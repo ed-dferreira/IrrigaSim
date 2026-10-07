@@ -1,0 +1,19 @@
+REVISÃO 2 — VALIDAÇÃO E COBERTURA
+Fonte: Aula 8 - Irrigação por Inundação(2).pdf.
+84/84 páginas conferidas visualmente; texto, imagens e tabelas comparados ao pacote.
+84 registros individuais; 84 imagens de evidência presentes.
+Tabela p.16: quatro classes de solo. Tabela p.38: 49 células transcritas.
+Células suspeitas de p.38 mantidas sem correção inferida.
+JSONs reabertos e sintaticamente verificados.
+Resultados originais de balanço preservados: resíduo <1e-7 m³/m.
+Newton verificado por cálculo independente e comparado com bisseção:
+primeira: Newton independente = 22.029325408391 min; diferença <1e-5 min
+terceira: Newton independente = 21.795724239886 min; diferença <1e-5 min
+Solução parcial do exercício 84 calculada sem preencher Ua, saco, área ou tempos.
+Casos sintéticos dos testes estão identificados; não são dados da aula.
+SDK Dart não disponível: NÃO houve compilação, dart analyze ou execução dos testes Dart.
+Funções novas foram revisadas e seus casos numéricos conferidos por cálculo independente.
+Perfis CSV são aproximações simuladas, não medições; mesma interpretação anterior.
+A seleção de vazão retorna o melhor candidato fornecido, não o ótimo global.
+O planejamento exige conferir vazão disponível, geometria e definições de PI.
+As restrições e ambiguidades da fonte constam do resumo e da auditoria.

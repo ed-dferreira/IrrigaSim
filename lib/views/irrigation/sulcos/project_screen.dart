@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,10 +7,13 @@ import 'package:go_router/go_router.dart';
 import 'package:irrigasim/app/theme/app_colors.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
 import 'package:irrigasim/core/widgets/calculated_field.dart';
+import 'package:irrigasim/views/irrigation/widgets/irrigation_project_components.dart';
 import 'package:irrigasim/models/irrigation_parameters.dart';
 import 'package:irrigasim/models/sulcos/irrigation_project.dart'
     show PontoEnsaio;
 import 'package:irrigasim/models/sulcos/field_measurements.dart';
+import 'package:irrigasim/models/sulcos/curva_infiltracao_sulco.dart';
+import 'package:irrigasim/models/sulcos/entradas_projeto_sulco.dart';
 import 'package:irrigasim/models/sulcos/tipo_sulco_info.dart';
 import 'package:irrigasim/services/simulation/lamina_requerida.dart';
 import 'package:irrigasim/viewmodels/parameters_controller.dart';
@@ -29,8 +31,7 @@ class _ProjectScreenState extends ConsumerState<ProjectScreen> {
   final Set<int> _completedSteps = <int>{};
 
   static const _stepTitles = [
-    'Área e geometria',
-    'Dimensões do sulco',
+    'Área, geometria e sulco',
     'Solo',
     'Cultura e raízes',
     'Clima e demanda',
@@ -41,7 +42,6 @@ class _ProjectScreenState extends ConsumerState<ProjectScreen> {
 
   static const _stepIcons = [
     AppIcons.projetoArea,
-    AppIcons.projetoSulco,
     AppIcons.projetoSolo,
     AppIcons.projetoCultura,
     AppIcons.projetoClima,
@@ -60,7 +60,7 @@ class _ProjectScreenState extends ConsumerState<ProjectScreen> {
   bool _confirmCurrentStep() {
     final valid = _formKey.currentState?.validate() ?? false;
     if (!valid) return false;
-    if (_currentStep == 5) {
+    if (_currentStep == 4) {
       final error = ref.read(parametersProvider.notifier).validarEnsaio();
       if (error != null) {
         ScaffoldMessenger.of(context)
@@ -72,12 +72,12 @@ class _ProjectScreenState extends ConsumerState<ProjectScreen> {
     return true;
   }
 
-  /// Etapas 0..6 precisam estar confirmadas para liberar o cálculo.
+  /// Etapas 0..5 precisam estar confirmadas para liberar o cálculo.
   bool get _allStepsConfirmed =>
-      _completedSteps.containsAll(const {0, 1, 2, 3, 4, 5, 6});
+      _completedSteps.containsAll(const {0, 1, 2, 3, 4, 5});
 
   List<int> get _unconfirmedSteps =>
-      [0, 1, 2, 3, 4, 5, 6].where((s) => !_completedSteps.contains(s)).toList();
+      [0, 1, 2, 3, 4, 5].where((s) => !_completedSteps.contains(s)).toList();
 
   @override
   Widget build(BuildContext context) {
@@ -99,9 +99,9 @@ class _ProjectScreenState extends ConsumerState<ProjectScreen> {
       appBar: AppBar(
         title: const Text('Novo projeto'),
         actions: [
-          if (_currentStep < 7)
+          if (_currentStep < 6)
             TextButton(
-              onPressed: () => _goToStep(7),
+              onPressed: () => _goToStep(6),
               child: const Text('Pular para revisão'),
             ),
         ],
@@ -117,7 +117,7 @@ class _ProjectScreenState extends ConsumerState<ProjectScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _StepIndicator(
+                    IrrigationStepIndicator(
                       currentStep: _currentStep,
                       completedSteps: _completedSteps,
                       titles: _stepTitles,
@@ -128,7 +128,7 @@ class _ProjectScreenState extends ConsumerState<ProjectScreen> {
                     const SizedBox(height: 20),
                     _buildStepContent(state, accent, wide),
                     const SizedBox(height: 24),
-                    if (_currentStep == 7 && !_allStepsConfirmed)
+                    if (_currentStep == 6 && !_allStepsConfirmed)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: _PendingConfirmationsAlert(
@@ -139,7 +139,7 @@ class _ProjectScreenState extends ConsumerState<ProjectScreen> {
                     _NavigationButtons(
                       currentStep: _currentStep,
                       isFirst: _currentStep == 0,
-                      isLast: _currentStep == 7,
+                      isLast: _currentStep == 6,
                       executando: state.executando,
                       isConfirmed: _completedSteps.contains(_currentStep),
                       canCalculate: _allStepsConfirmed,
@@ -170,231 +170,14 @@ class _ProjectScreenState extends ConsumerState<ProjectScreen> {
   Widget _buildStepContent(ParametersState state, Color accent, bool wide) {
     return switch (_currentStep) {
       0 => _AreaStep(state: state, accent: accent, wide: wide),
-      1 => _SulcoStep(state: state, accent: accent, wide: wide),
-      2 => _SoloStep(state: state, accent: accent, wide: wide),
-      3 => _CulturaStep(state: state, accent: accent, wide: wide),
-      4 => _ClimaStep(state: state, accent: accent, wide: wide),
-      5 => _OrigemAvancoStep(state: state, accent: accent, wide: wide),
-      6 => _OperacaoStep(state: state, accent: accent, wide: wide),
-      7 => _RevisaoStep(state: state, accent: accent),
+      1 => _SoloStep(state: state, accent: accent, wide: wide),
+      2 => _CulturaStep(state: state, accent: accent, wide: wide),
+      3 => _ClimaStep(state: state, accent: accent, wide: wide),
+      4 => _OrigemAvancoStep(state: state, accent: accent, wide: wide),
+      5 => _OperacaoStep(state: state, accent: accent, wide: wide),
+      6 => _RevisaoStep(state: state, accent: accent),
       _ => const SizedBox.shrink(),
     };
-  }
-}
-
-// ──────────────────────── Step Indicator ────────────────────────
-
-class _StepIndicator extends StatefulWidget {
-  const _StepIndicator({
-    required this.currentStep,
-    required this.completedSteps,
-    required this.titles,
-    required this.icons,
-    required this.accent,
-    required this.onStepTapped,
-  });
-
-  final int currentStep;
-  final Set<int> completedSteps;
-  final List<String> titles;
-  final List<IconData> icons;
-  final Color accent;
-  final ValueChanged<int> onStepTapped;
-
-  @override
-  State<_StepIndicator> createState() => _StepIndicatorState();
-}
-
-class _StepIndicatorState extends State<_StepIndicator> {
-  final _scrollController = ScrollController();
-  late final List<GlobalKey> _stepKeys = List.generate(
-    widget.titles.length,
-    (_) => GlobalKey(),
-  );
-  bool _canScrollBack = false;
-  bool _canScrollForward = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController.addListener(_updateScrollAvailability);
-  }
-
-  @override
-  void didUpdateWidget(covariant _StepIndicator oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.currentStep != widget.currentStep) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        final target = _stepKeys[widget.currentStep].currentContext;
-        if (target != null) {
-          _scrollController.position.ensureVisible(
-            target.findRenderObject()!,
-            duration: const Duration(milliseconds: 250),
-            alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
-          );
-        }
-      });
-    }
-  }
-
-  void _updateScrollAvailability() {
-    if (!_scrollController.hasClients) return;
-    final position = _scrollController.position;
-    final back = position.pixels > position.minScrollExtent;
-    final forward = position.pixels < position.maxScrollExtent;
-    if (back != _canScrollBack || forward != _canScrollForward) {
-      setState(() {
-        _canScrollBack = back;
-        _canScrollForward = forward;
-      });
-    }
-  }
-
-  void _scroll(int direction) {
-    final position = _scrollController.position;
-    final target =
-        (position.pixels + direction * position.viewportDimension * 0.7).clamp(
-          position.minScrollExtent,
-          position.maxScrollExtent,
-        );
-    _scrollController.animateTo(
-      target,
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.easeOut,
-    );
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final showArrows = MediaQuery.sizeOf(context).width >= 760;
-    return SizedBox(
-      height: 72,
-      child: Row(
-        children: [
-          if (showArrows)
-            IconButton(
-              tooltip: 'Ver etapas anteriores',
-              onPressed: _canScrollBack ? () => _scroll(-1) : null,
-              icon: const Icon(AppIcons.etapasAnteriores),
-            ),
-          Expanded(
-            child: NotificationListener<ScrollMetricsNotification>(
-              onNotification: (_) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (mounted) _updateScrollAvailability();
-                });
-                return false;
-              },
-              child: ScrollConfiguration(
-                behavior: ScrollConfiguration.of(context).copyWith(
-                  dragDevices: {
-                    PointerDeviceKind.touch,
-                    PointerDeviceKind.mouse,
-                    PointerDeviceKind.trackpad,
-                    PointerDeviceKind.stylus,
-                  },
-                ),
-                child: SingleChildScrollView(
-                  controller: _scrollController,
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      for (
-                        var index = 0;
-                        index < widget.titles.length;
-                        index++
-                      ) ...[
-                        if (index > 0) const SizedBox(width: 8),
-                        _buildStep(context, colors, index),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          if (showArrows)
-            IconButton(
-              tooltip: 'Ver próximas etapas',
-              onPressed: _canScrollForward ? () => _scroll(1) : null,
-              icon: const Icon(AppIcons.etapasSeguintes),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStep(BuildContext context, ColorScheme colors, int index) {
-    final isCompleted = widget.completedSteps.contains(index);
-    final isCurrent = index == widget.currentStep;
-    return Semantics(
-      key: _stepKeys[index],
-      button: true,
-      selected: isCurrent,
-      label:
-          '${isCompleted
-              ? "Preenchida: "
-              : isCurrent
-              ? "Etapa atual: "
-              : ""}${widget.titles[index]}',
-      child: InkWell(
-        onTap: () => widget.onStepTapped(index),
-        borderRadius: BorderRadius.circular(14),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            color: isCurrent
-                ? widget.accent.withValues(alpha: 0.12)
-                : isCompleted
-                ? colors.primaryContainer
-                : colors.surfaceContainerHigh,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: isCurrent
-                  ? widget.accent
-                  : isCompleted
-                  ? colors.primary
-                  : colors.outlineVariant,
-              width: isCurrent ? 2 : 1,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (isCompleted)
-                Icon(Icons.check_rounded, size: 18, color: colors.primary)
-              else
-                Icon(
-                  widget.icons[index],
-                  size: 18,
-                  color: isCurrent ? widget.accent : colors.onSurfaceVariant,
-                ),
-              const SizedBox(width: 8),
-              Text(
-                widget.titles[index],
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: isCurrent
-                      ? widget.accent
-                      : isCompleted
-                      ? colors.primary
-                      : colors.onSurfaceVariant,
-                  fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }
 
@@ -428,50 +211,53 @@ class _NavigationButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    return Row(
-      children: [
-        if (!isFirst)
-          OutlinedButton.icon(
-            onPressed: onPrevious,
-            icon: const Icon(Icons.arrow_back_rounded, size: 18),
-            label: const Text('Voltar'),
-          ),
-        const Spacer(),
-        if (!isLast) ...[
-          isConfirmed
-              ? Chip(
-                  avatar: Icon(
-                    Icons.check_rounded,
-                    size: 16,
-                    color: colors.primary,
-                  ),
-                  label: const Text('Confirmada'),
-                  backgroundColor: colors.primaryContainer,
-                  side: BorderSide.none,
-                )
-              : OutlinedButton.icon(
-                  onPressed: onConfirm,
-                  icon: const Icon(Icons.check_circle_outline, size: 18),
-                  label: const Text('Confirmar'),
+    final children = <Widget>[
+      if (!isFirst)
+        OutlinedButton.icon(
+          onPressed: onPrevious,
+          icon: const Icon(Icons.arrow_back_rounded, size: 18),
+          label: const Text('Voltar'),
+        ),
+      if (!isLast)
+        isConfirmed
+            ? Chip(
+                avatar: Icon(
+                  Icons.check_rounded,
+                  size: 16,
+                  color: colors.primary,
                 ),
-          const SizedBox(width: 8),
-          FilledButton.icon(
-            onPressed: onNext,
-            icon: const Icon(Icons.arrow_forward_rounded, size: 18),
-            label: const Text('Próximo'),
-          ),
-        ] else
-          FilledButton.icon(
-            onPressed: executando || !canCalculate ? null : onCalculate,
-            icon: executando
-                ? const SizedBox.square(
-                    dimension: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(AppIcons.executarSimulacao),
-            label: Text(executando ? 'Calculando…' : 'Calcular projeto'),
-          ),
-      ],
+                label: const Text('Confirmada'),
+                backgroundColor: colors.primaryContainer,
+                side: BorderSide.none,
+              )
+            : OutlinedButton.icon(
+                onPressed: onConfirm,
+                icon: const Icon(Icons.check_circle_outline, size: 18),
+                label: const Text('Confirmar'),
+              ),
+      if (!isLast)
+        FilledButton.icon(
+          onPressed: onNext,
+          icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+          label: const Text('Próximo'),
+        )
+      else
+        FilledButton.icon(
+          onPressed: executando || !canCalculate ? null : onCalculate,
+          icon: executando
+              ? const SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(AppIcons.executarSimulacao),
+          label: Text(executando ? 'Calculando…' : 'Calcular projeto'),
+        ),
+    ];
+    return Wrap(
+      alignment: WrapAlignment.spaceBetween,
+      spacing: 8,
+      runSpacing: 8,
+      children: children,
     );
   }
 }
@@ -493,39 +279,12 @@ class _BentoCard extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => Card(
-    margin: EdgeInsets.zero,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-    child: Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: accent),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleLarge
-                      ?.copyWith(fontWeight: FontWeight.w700),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 20),
-          child,
-        ],
-      ),
-    ),
+  Widget build(BuildContext context) => IrrigationProjectStepCard(
+    title: title,
+    subtitle: subtitle,
+    icon: icon,
+    accent: accent,
+    child: child,
   );
 }
 
@@ -623,7 +382,7 @@ class _StringField extends ConsumerWidget {
 }
 
 class _FieldGrid extends StatelessWidget {
-  const _FieldGrid({required this.fields, required this.wide});
+  const _FieldGrid({super.key, required this.fields, required this.wide});
   final List<Widget> fields;
   final bool wide;
 
@@ -671,12 +430,6 @@ class _AreaStep extends ConsumerWidget {
         child: _FieldGrid(
           wide: wide,
           fields: [
-            _Field(
-              name: 'comprimento',
-              label: 'Comprimento do sulco',
-              value: state.comprimento,
-              suffix: 'm',
-            ),
             _Field(
               name: 'comprimentoMaximoTerrenoM',
               label: 'Limite de comprimento do terreno',
@@ -731,25 +484,41 @@ class _AreaStep extends ConsumerWidget {
           ],
         ),
       ),
+      if (state.metodo == MetodoIrrigacao.sulco) ...[
+        const SizedBox(height: 12),
+        _SulcoStep(state: state, accent: accent, wide: wide),
+        if (state.tipoSulco == TipoSulco.sulcos_contorno) ...[
+          const SizedBox(height: 12),
+          _BentoCard(
+            title: 'Declives distintos em contorno',
+            subtitle: 'A faixa do catálogo refere-se à encosta; o motor usa o declive longitudinal medido do sulco.',
+            icon: AppIcons.projetoArea,
+            accent: accent,
+            child: _OptionalNumericCurveField(
+              name: 'decliveEncostaPercent',
+              label: 'Declive geral da encosta (%)',
+              value: state.decliveEncostaPercent,
+            ),
+          ),
+        ],
+      ],
       const SizedBox(height: 12),
       _SlopeSummaryCard(state: state),
       const SizedBox(height: 12),
-      Semantics(
-        button: true,
-        label: 'Usar maior comprimento viável',
-        child: FilledButton.icon(
-          onPressed: () => ref
-              .read(parametersProvider.notifier)
-              .recomendarMaiorComprimento(),
-          icon: const Icon(AppIcons.recomendacao),
-          label: const Text('Usar maior comprimento viável'),
-        ),
+      OutlinedButton.icon(
+        onPressed: () =>
+            ref.read(parametersProvider.notifier).recomendarMaiorComprimento(),
+        icon: const Icon(AppIcons.recomendacao),
+        label: const Text('Avaliar candidatos pela eficiência'),
       ),
       if (state.mensagemPlanejamento != null) ...[
         const SizedBox(height: 8),
-        Text(
-          state.mensagemPlanejamento!,
-          style: Theme.of(context).textTheme.bodyMedium,
+        Semantics(
+          liveRegion: true,
+          child: Text(
+            state.mensagemPlanejamento!,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
         ),
       ],
       const SizedBox(height: 12),
@@ -769,7 +538,16 @@ class _SlopeRangeAlert extends StatelessWidget {
     if (tipo == null) return const SizedBox.shrink();
 
     final info = TipoSulcoInfo.getInfo(tipo);
-    final percent = state.declividade * 100;
+    if (tipo == TipoSulco.sulcos_contorno &&
+        state.decliveEncostaPercent == null) {
+      return Text(
+        'Declive geral da encosta não informado; não é possível classificar o sulco em contorno pela faixa da aula.',
+        style: Theme.of(context).textTheme.bodyMedium,
+      );
+    }
+    final percent = tipo == TipoSulco.sulcos_contorno
+        ? state.decliveEncostaPercent!
+        : state.declividade * 100;
     final faixa = info.declividade.classificar(percent);
     final mensagem = info.declividade.alertaDeclividade(
       tipo: tipo,
@@ -788,6 +566,7 @@ class _SlopeRangeAlert extends StatelessWidget {
     final titulo = switch (faixa) {
       FaixaDeclividade.usavel => 'Declividade fora do aconselhável',
       FaixaDeclividade.fora => 'Declividade fora da faixa usável',
+      FaixaDeclividade.naoInformada => 'Faixa usável não informada na aula',
       FaixaDeclividade.ideal || FaixaDeclividade.aconselhavel => '',
     };
 
@@ -883,7 +662,7 @@ class _PendingConfirmationsAlert extends StatelessWidget {
 
 // ──────────────────────── Step 1: Sulco ────────────────────────
 
-class _SulcoStep extends StatelessWidget {
+class _SulcoStep extends ConsumerWidget {
   const _SulcoStep({
     required this.state,
     required this.accent,
@@ -894,15 +673,28 @@ class _SulcoStep extends StatelessWidget {
   final bool wide;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final fields = <Widget>[
-      _Field(
-        name: 'larguraOuEspacamento',
-        label: 'Espaçamento entre sulcos',
-        value: state.larguraOuEspacamento,
-        suffix: 'm',
-      ),
       if (state.metodo == MetodoIrrigacao.sulco) ...[
+        if (state.dimensionarComprimentoCriddle &&
+            state.origemGeometria == ProvenienciaSulco.calculado)
+          CalculatedField(
+            label: 'Comprimento dimensionado por Criddle',
+            value: state.comprimento,
+            suffix: 'm',
+          )
+        else if (state.dimensionarComprimentoCriddle)
+          Text(
+            'Comprimento aguardando dados válidos para o dimensionamento automático.',
+            style: Theme.of(context).textTheme.bodySmall,
+          )
+        else
+          _Field(
+            name: 'comprimento',
+            label: 'Comprimento informado do sulco',
+            value: state.comprimento,
+            suffix: 'm',
+          ),
         _Field(
           name: 'larguraSulcoM',
           label: 'Largura superior do sulco (opcional)',
@@ -918,17 +710,6 @@ class _SulcoStep extends StatelessWidget {
           suffix: 'm',
           helper: 'Mantenha em branco quando não medida.',
           optional: true,
-        ),
-        CalculatedField(
-          label: 'Vazão por sulco',
-          value: state.vazao,
-          suffix: 'L/s',
-        ),
-        _Field(
-          name: 'tempoAplicacao',
-          label: 'Tempo de oportunidade no final',
-          value: state.tempoAplicacao,
-          suffix: 'min',
         ),
         CalculatedField(
           label: 'Avanço até metade do comprimento',
@@ -959,9 +740,90 @@ class _SulcoStep extends StatelessWidget {
           subtitle: 'Geometria e espaçamento. Vazão e tempos de avanço são calculados pela aplicação; o tempo de oportunidade pode ser editado.',
           icon: AppIcons.projetoSulco,
           accent: accent,
-          child: _FieldGrid(fields: fields, wide: wide),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (state.metodo == MetodoIrrigacao.sulco) ...[
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    ChoiceChip(
+                      avatar: const Icon(AppIcons.editarPerfil),
+                      label: const Text('Informar comprimento'),
+                      selected: !state.dimensionarComprimentoCriddle,
+                      onSelected: (_) => ref
+                          .read(parametersProvider.notifier)
+                          .setDimensionarComprimentoCriddle(false),
+                    ),
+                    ChoiceChip(
+                      avatar: const Icon(AppIcons.curvaAvanco),
+                      label: const Text('Dimensionar por Criddle'),
+                      selected: state.dimensionarComprimentoCriddle,
+                      onSelected: (_) => ref
+                          .read(parametersProvider.notifier)
+                          .setDimensionarComprimentoCriddle(true),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+              ],
+              _FieldGrid(fields: fields, wide: wide),
+              if (state.metodo == MetodoIrrigacao.sulco &&
+                  state.dimensionarComprimentoCriddle &&
+                  state.origemGeometria == ProvenienciaSulco.calculado) ...[
+                const SizedBox(height: 12),
+                _ComprimentoCriddleResult(state: state),
+              ],
+            ],
+          ),
         ),
       ],
+    );
+  }
+}
+
+class _ComprimentoCriddleResult extends StatelessWidget {
+  const _ComprimentoCriddleResult({required this.state});
+
+  final ParametersState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colors.primaryContainer,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colors.primary.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(AppIcons.sucesso, color: colors.onPrimaryContainer),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Dimensionamento por Criddle',
+                  style: Theme.of(context).textTheme.titleSmall
+                      ?.copyWith(color: colors.onPrimaryContainer),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Tempo de oportunidade To: ${state.tempoAplicacao.toStringAsFixed(1)} min · '
+                  'tempo alvo Ta = To/4: ${state.tempoAvancoFinalMin.toStringAsFixed(1)} min',
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(color: colors.onPrimaryContainer),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -1073,12 +935,85 @@ class _SoloStep extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (state.metodo == MetodoIrrigacao.sulco &&
+                state.origemCurvaInfiltracao ==
+                    OrigemCurvaInfiltracao.equacaoAcumuladaInformada) ...[
+              if (state.entradasSulco.curvaInfiltracao case final curva?) ...[
+                DropdownButtonFormField<TipoCurvaInfiltracaoSulco>(
+                  initialValue: curva.tipo,
+                  decoration: const InputDecoration(
+                    labelText: 'Lei de infiltração informada',
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: TipoCurvaInfiltracaoSulco.acumulada,
+                      child: Text('Acumulada I = K·T^a'),
+                    ),
+                    DropdownMenuItem(
+                      value: TipoCurvaInfiltracaoSulco.taxa,
+                      child: Text('Taxa VI = K·T^n'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      ref
+                          .read(parametersProvider.notifier)
+                          .configurarCurvaInfiltracao(tipo: value);
+                    }
+                  },
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<BaseInfiltracaoSulco>(
+                  initialValue: curva.base,
+                  decoration: const InputDecoration(labelText: 'Base da curva'),
+                  items: [
+                    DropdownMenuItem(
+                      value: BaseInfiltracaoSulco.milimetros,
+                      child: Text(
+                        curva.tipo == TipoCurvaInfiltracaoSulco.taxa
+                            ? 'mm/h'
+                            : 'mm',
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: BaseInfiltracaoSulco.litrosPorMetro,
+                      child: Text(
+                        curva.tipo == TipoCurvaInfiltracaoSulco.taxa
+                            ? 'L/min/m'
+                            : 'L/m',
+                      ),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      ref
+                          .read(parametersProvider.notifier)
+                          .configurarCurvaInfiltracao(base: value);
+                    }
+                  },
+                ),
+                const SizedBox(height: 12),
+              ] else
+                OutlinedButton(
+                  onPressed: () => ref
+                      .read(parametersProvider.notifier)
+                      .configurarCurvaInfiltracao(),
+                  child: const Text(
+                    'Informar origem e unidades da curva legada',
+                  ),
+                ),
+            ],
             _FieldGrid(
               wide: wide,
               fields: [
                 if (state.metodo != MetodoIrrigacao.sulco ||
-                    state.origemCurvaInfiltracao ==
-                        OrigemCurvaInfiltracao.equacaoAcumuladaInformada) ...[
+                    (state.origemCurvaInfiltracao ==
+                            OrigemCurvaInfiltracao.equacaoAcumuladaInformada &&
+                        (state.entradasSulco.curvaInfiltracao == null ||
+                            (state.entradasSulco.curvaInfiltracao!.tipo ==
+                                    TipoCurvaInfiltracaoSulco.acumulada &&
+                                state.entradasSulco.curvaInfiltracao!.base ==
+                                    BaseInfiltracaoSulco.milimetros)))) ...[
                   _Field(
                     name: 'k',
                     label: state.metodo == MetodoIrrigacao.sulco
@@ -1098,6 +1033,29 @@ class _SoloStep extends ConsumerWidget {
                     helper: 'Entre 0 e 1',
                   ),
                 ],
+                if (state.metodo == MetodoIrrigacao.sulco &&
+                    state.origemCurvaInfiltracao ==
+                        OrigemCurvaInfiltracao.equacaoAcumuladaInformada &&
+                    state.entradasSulco.curvaInfiltracao != null &&
+                    (state.entradasSulco.curvaInfiltracao!.tipo !=
+                            TipoCurvaInfiltracaoSulco.acumulada ||
+                        state.entradasSulco.curvaInfiltracao!.base !=
+                            BaseInfiltracaoSulco.milimetros)) ...[
+                  _Field(
+                    name: 'curvaCoeficiente',
+                    label: 'Coeficiente K da curva',
+                    value: state.entradasSulco.curvaInfiltracao!.coeficiente,
+                    suffix: state
+                        .entradasSulco
+                        .curvaInfiltracao!
+                        .unidadeCoeficiente,
+                  ),
+                  _Field(
+                    name: 'curvaExpoente',
+                    label: 'Expoente da curva',
+                    value: state.entradasSulco.curvaInfiltracao!.expoente,
+                  ),
+                ],
                 if (state.metodo != MetodoIrrigacao.sulco)
                   _Field(
                     name: 'vib',
@@ -1107,10 +1065,62 @@ class _SoloStep extends ConsumerWidget {
                   ),
               ],
             ),
+            if (state.metodo == MetodoIrrigacao.sulco &&
+                state.origemCurvaInfiltracao ==
+                    OrigemCurvaInfiltracao.equacaoAcumuladaInformada) ...[
+              if (state.entradasSulco.curvaInfiltracao case final curva?) ...[
+                if (curva.base == BaseInfiltracaoSulco.litrosPorMetro)
+                  _OptionalNumericCurveField(
+                    label: 'E medido para converter L/m em mm (m)',
+                    value: curva.espacamentoConversaoM,
+                    name: 'curvaEspacamentoM',
+                  ),
+                _OptionalNumericCurveField(
+                  label: 'VIB separada da curva (mm/h, opcional)',
+                  value: curva.vibMmHora,
+                  name: 'curvaVibMmHora',
+                ),
+                _OptionalNumericCurveField(
+                  label: 'Início do intervalo calibrado (min, opcional)',
+                  value: curva.tempoMinCalibrado,
+                  name: 'curvaTempoMin',
+                ),
+                _OptionalNumericCurveField(
+                  label: 'Fim do intervalo calibrado (min, opcional)',
+                  value: curva.tempoMaxCalibrado,
+                  name: 'curvaTempoMax',
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton(
+                  onPressed: () async {
+                    final data = await showDatePicker(
+                      context: context,
+                      initialDate: curva.dataEnsaio ?? DateTime.now(),
+                      firstDate: DateTime(1950),
+                      lastDate: DateTime(2100),
+                    );
+                    if (data != null && context.mounted) {
+                      ref
+                          .read(parametersProvider.notifier)
+                          .setDataCurvaInfiltracao(data);
+                    }
+                  },
+                  child: Text(
+                    curva.dataEnsaio == null
+                        ? 'Informar data do ensaio (opcional)'
+                        : 'Data do ensaio: ${curva.dataEnsaio!.day}/${curva.dataEnsaio!.month}/${curva.dataEnsaio!.year}',
+                  ),
+                ),
+                Text(
+                  'VIB não é somada automaticamente à lei potencial. Valores além do intervalo calibrado ou VI < VIB serão sinalizados.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ],
             const SizedBox(height: 8),
             Text(
               state.metodo == MetodoIrrigacao.sulco
-                  ? 'A lâmina infiltrada é calculada por aI·Toⁿ, com tempo em minutos.'
+                  ? 'A lâmina infiltrada usa a curva selecionada, integrada se a entrada for VI(T); tempo em minutos.'
                   : 'O tempo do ensaio deve estar em minutos; k e VIB devem usar as unidades indicadas.',
               style: Theme.of(context).textTheme.bodySmall,
             ),
@@ -1120,7 +1130,7 @@ class _SoloStep extends ConsumerWidget {
                 segments: const [
                   ButtonSegment(
                     value: OrigemCurvaInfiltracao.equacaoAcumuladaInformada,
-                    label: Text('Equação acumulada'),
+                    label: Text('Equação informada'),
                   ),
                   ButtonSegment(
                     value: OrigemCurvaInfiltracao.ensaioEntradaSaida,
@@ -1176,6 +1186,61 @@ class _SoloStep extends ConsumerWidget {
   );
 }
 
+class _CulturaPreset {
+  const _CulturaPreset(
+    this.nome,
+    this.kc,
+    this.fileiras,
+    this.plantas,
+    this.raizes,
+    this.fracao,
+  );
+
+  final String nome;
+  final double kc;
+  final double fileiras;
+  final double plantas;
+  final double raizes;
+  final double fracao;
+}
+
+const _culturaPresets = <_CulturaPreset>[
+  _CulturaPreset('Soja', 1.15, 0.45, 0.07, 60, 0.50),
+  _CulturaPreset('Arroz irrigado', 1.20, 0.17, 0.03, 20, 0.20),
+  _CulturaPreset('Milho', 1.20, 0.80, 0.20, 100, 0.55),
+  _CulturaPreset('Trigo', 1.15, 0.17, 0.02, 100, 0.55),
+  _CulturaPreset('Fumo', 1.10, 1.10, 0.50, 60, 0.30),
+  _CulturaPreset('Feijão', 1.15, 0.45, 0.07, 50, 0.45),
+  _CulturaPreset('Cevada', 1.15, 0.17, 0.02, 100, 0.55),
+  _CulturaPreset('Aveia', 1.15, 0.17, 0.02, 100, 0.55),
+  _CulturaPreset('Mandioca', 0.80, 1.00, 0.60, 80, 0.35),
+  _CulturaPreset('Cana-de-açúcar', 1.25, 1.40, 0.50, 120, 0.65),
+  _CulturaPreset('Uva', 0.70, 2.50, 1.20, 100, 0.35),
+  _CulturaPreset('Batata', 1.15, 0.80, 0.30, 40, 0.35),
+  _CulturaPreset('Cebola', 1.05, 0.30, 0.10, 30, 0.30),
+  _CulturaPreset('Canola', 1.15, 0.35, 0.04, 100, 0.60),
+  _CulturaPreset('Sorgo', 1.00, 0.50, 0.05, 100, 0.55),
+  _CulturaPreset('Tomate', 1.15, 1.00, 0.50, 70, 0.40),
+  _CulturaPreset('Melancia', 1.00, 2.00, 1.00, 80, 0.40),
+  _CulturaPreset('Amendoim', 1.15, 0.50, 0.10, 50, 0.50),
+  _CulturaPreset('Triticale', 1.15, 0.17, 0.02, 100, 0.55),
+  _CulturaPreset('Azevém (forragem)', 1.05, 0.17, 0.02, 40, 0.60),
+];
+
+_CulturaPreset? _culturaPreset(ParametersState state) {
+  for (final preset in _culturaPresets) {
+    if (preset.nome == state.nomeCultura &&
+        preset.kc == state.kc &&
+        preset.fileiras == state.espacamentoFileirasM &&
+        preset.plantas == state.espacamentoPlantasM &&
+        preset.raizes == state.profundidadeRaizesCm &&
+        preset.fracao == state.fracaoAguaDisponivel) {
+      return preset;
+    }
+  }
+  return null;
+}
+
 // ──────────────────────── Step 3: Cultura ────────────────────────
 
 class _CulturaStep extends ConsumerWidget {
@@ -1197,7 +1262,48 @@ class _CulturaStep extends ConsumerWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        DropdownButtonFormField<_CulturaPreset?>(
+          isExpanded: true,
+          initialValue: _culturaPreset(state),
+          decoration: const InputDecoration(
+            labelText: 'Predefinição de cultura',
+            helperText: 'Selecione uma cultura para preencher os parâmetros; eles podem ser ajustados depois.',
+          ),
+          items: [
+            const DropdownMenuItem<_CulturaPreset?>(
+              value: null,
+              child: Text('Personalizada / sem predefinição'),
+            ),
+            ..._culturaPresets.map(
+              (preset) => DropdownMenuItem<_CulturaPreset?>(
+                value: preset,
+                child: Text(preset.nome),
+              ),
+            ),
+          ],
+          onChanged: (preset) {
+            if (preset == null) return;
+            final controller = ref.read(parametersProvider.notifier);
+            controller.setNomeCultura(preset.nome);
+            for (final entry in {
+              'kc': preset.kc,
+              'espacamentoFileirasM': preset.fileiras,
+              'espacamentoPlantasM': preset.plantas,
+              'profundidadeRaizesCm': preset.raizes,
+              'fracaoAguaDisponivel': preset.fracao,
+            }.entries) {
+              controller.updateField(
+                campo: entry.key,
+                valor: entry.value.toString(),
+              );
+            }
+          },
+        ),
+        const SizedBox(height: 12),
         _FieldGrid(
+          key: ValueKey(
+            '${state.nomeCultura}-${state.kc}-${state.espacamentoFileirasM}-${state.espacamentoPlantasM}-${state.profundidadeRaizesCm}-${state.fracaoAguaDisponivel}',
+          ),
           wide: wide,
           fields: [
             _StringField(
@@ -1239,7 +1345,10 @@ class _CulturaStep extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: 8),
-        _LaminaRequeridaCard(resultado: state.laminaRequeridaResultado),
+        _LaminaRequeridaCard(
+          resultado: state.laminaRequeridaResultado,
+          areaHectares: state.areaHectares,
+        ),
       ],
     ),
   );
@@ -1247,7 +1356,7 @@ class _CulturaStep extends ConsumerWidget {
 
 // ──────────────────────── Step 4: Clima ────────────────────────
 
-class _ClimaStep extends StatelessWidget {
+class _ClimaStep extends ConsumerWidget {
   const _ClimaStep({
     required this.state,
     required this.accent,
@@ -1258,7 +1367,7 @@ class _ClimaStep extends StatelessWidget {
   final bool wide;
 
   @override
-  Widget build(BuildContext context) => _BentoCard(
+  Widget build(BuildContext context, WidgetRef ref) => _BentoCard(
     title: 'Clima e demanda hídrica',
     subtitle: 'Evapotranspiração, precipitação e demanda líquida para cálculo do turno de rega.',
     icon: AppIcons.projetoClima,
@@ -1266,18 +1375,199 @@ class _ClimaStep extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (state.metodo == MetodoIrrigacao.sulco) ...[
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              ChoiceChip(
+                avatar: const Icon(AppIcons.editarPerfil),
+                label: const Text('Informar dados'),
+                selected: state.metodoEtc != MetodoEtcSulco.blaneyCriddle,
+                onSelected: (_) => ref
+                    .read(parametersProvider.notifier)
+                    .setMetodoEtc(MetodoEtcSulco.adotada),
+              ),
+              ChoiceChip(
+                avatar: const Icon(AppIcons.climaSolar),
+                label: const Text('Blaney–Criddle'),
+                selected: state.metodoEtc == MetodoEtcSulco.blaneyCriddle,
+                onSelected: (_) => ref
+                    .read(parametersProvider.notifier)
+                    .setMetodoEtc(MetodoEtcSulco.blaneyCriddle),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (state.metodoEtc != MetodoEtcSulco.blaneyCriddle)
+            DropdownButtonFormField<MetodoEtcSulco>(
+              isExpanded: true,
+              initialValue: state.metodoEtc,
+              decoration: const InputDecoration(labelText: 'Dados manuais'),
+              items: const [
+                DropdownMenuItem(
+                  value: MetodoEtcSulco.adotada,
+                  child: Text('Informar ETc diretamente'),
+                ),
+                DropdownMenuItem(
+                  value: MetodoEtcSulco.etoVezesKc,
+                  child: Text('Informar ETo e calcular ETc = ETo × Kc'),
+                ),
+              ],
+              onChanged: (value) {
+                if (value != null) {
+                  ref.read(parametersProvider.notifier).setMetodoEtc(value);
+                }
+              },
+            ),
+          if (state.metodoEtc == MetodoEtcSulco.blaneyCriddle) ...[
+            Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                'O método estima a ETo e aplica o Kc informado na etapa Cultura. '
+                'A necessidade líquida e o comprimento também consideram os dados de solo, chuva e avanço configurados.',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
+            _FieldGrid(
+              wide: wide,
+              fields: [
+                _OptionalNumericCurveField(
+                  name: 'temperaturaMediaC',
+                  label: 'Temperatura média do ar (°C)',
+                  value: state.temperaturaMediaC,
+                ),
+                _OptionalNumericCurveField(
+                  name: 'latitudeGraus',
+                  label: 'Latitude (°; sul negativa)',
+                  value: state.latitudeGraus,
+                ),
+                DropdownButtonFormField<int>(
+                  isExpanded: true,
+                  initialValue: state.mesReferencia,
+                  decoration: const InputDecoration(
+                    labelText: 'Mês de referência',
+                  ),
+                  items:
+                      const [
+                            'Janeiro',
+                            'Fevereiro',
+                            'Março',
+                            'Abril',
+                            'Maio',
+                            'Junho',
+                            'Julho',
+                            'Agosto',
+                            'Setembro',
+                            'Outubro',
+                            'Novembro',
+                            'Dezembro',
+                          ]
+                          .asMap()
+                          .entries
+                          .map(
+                            (entry) => DropdownMenuItem(
+                              value: entry.key + 1,
+                              child: Text(entry.value),
+                            ),
+                          )
+                          .toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      ref
+                          .read(parametersProvider.notifier)
+                          .setMesReferencia(value);
+                    }
+                  },
+                ),
+              ],
+            ),
+            if (state.etoBlaneyCriddle != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Text(
+                  'ETo estimada: ${state.etoBlaneyCriddle!.toStringAsFixed(2)} mm/dia · '
+                  'ETc (ETo × Kc): ${(state.etoBlaneyCriddle! * state.kc).toStringAsFixed(2)} mm/dia',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ),
+            if (state.etoBlaneyCriddle == null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  'Preencha os três dados climáticos. Use latitude entre −60° e 60° (negativa no hemisfério sul).',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+          ],
+          const SizedBox(height: 12),
+          DropdownButtonFormField<OrigemChuvaSulco>(
+            isExpanded: true,
+            initialValue: state.origemChuva,
+            decoration: const InputDecoration(
+              labelText: 'Origem da precipitação',
+            ),
+            items: const [
+              DropdownMenuItem(
+                value: OrigemChuvaSulco.naoInformada,
+                child: Text('Não informada'),
+              ),
+              DropdownMenuItem(
+                value: OrigemChuvaSulco.efetiva,
+                child: Text('Efetiva adotada'),
+              ),
+              DropdownMenuItem(
+                value: OrigemChuvaSulco.observada,
+                child: Text('Efetiva observada'),
+              ),
+              DropdownMenuItem(
+                value: OrigemChuvaSulco.provavel,
+                child: Text('Provável (não convertida em efetiva)'),
+              ),
+            ],
+            onChanged: (value) {
+              if (value != null) {
+                ref.read(parametersProvider.notifier).setOrigemChuva(value);
+              }
+            },
+          ),
+          if (state.origemChuva == OrigemChuvaSulco.provavel)
+            Text(
+              'Chuva provável foi registrada, mas não pode ser subtraída da ETc como Pef sem um método explícito.',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          const SizedBox(height: 12),
+        ],
         _FieldGrid(
           wide: wide,
           fields: [
-            _Field(
-              name: 'evapotranspiracaoMmDia',
-              label: 'Evapotranspiração da cultura (ETc)',
-              value: state.evapotranspiracaoMmDia,
-              suffix: 'mm/dia',
-            ),
+            if (state.metodoEtc == MetodoEtcSulco.adotada ||
+                state.metodo != MetodoIrrigacao.sulco)
+              _Field(
+                name: 'evapotranspiracaoMmDia',
+                label: 'Evapotranspiração da cultura (ETc adotada)',
+                value: state.evapotranspiracaoMmDia,
+                suffix: 'mm/dia',
+              ),
+            if (state.metodo == MetodoIrrigacao.sulco &&
+                state.metodoEtc == MetodoEtcSulco.etoVezesKc)
+              _OptionalNumericCurveField(
+                name: 'etoMmDia',
+                label: 'Evapotranspiração de referência (ETo, mm/dia)',
+                value: state.etoMmDia,
+              ),
             _Field(
               name: 'precipitacaoEfetivaMmDia',
-              label: 'Precipitação efetiva (Pef)',
+              label: state.origemChuva == OrigemChuvaSulco.provavel
+                  ? 'Precipitação provável (não é Pef)'
+                  : 'Precipitação efetiva (Pef)',
               value: state.precipitacaoEfetivaMmDia,
               suffix: 'mm/dia',
               allowZero: true,
@@ -1285,16 +1575,23 @@ class _ClimaStep extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        _LaminaRequeridaCard(resultado: state.laminaRequeridaResultado),
+        _LaminaRequeridaCard(
+          resultado: state.laminaRequeridaResultado,
+          areaHectares: state.areaHectares,
+        ),
       ],
     ),
   );
 }
 
 class _LaminaRequeridaCard extends StatelessWidget {
-  const _LaminaRequeridaCard({required this.resultado});
+  const _LaminaRequeridaCard({
+    required this.resultado,
+    required this.areaHectares,
+  });
 
   final LaminaRequeridaResultado? resultado;
+  final double areaHectares;
 
   @override
   Widget build(BuildContext context) {
@@ -1313,6 +1610,7 @@ class _LaminaRequeridaCard extends StatelessWidget {
         ),
       );
     }
+    final volumeM3 = res.irnMm * areaHectares * 10;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1321,6 +1619,8 @@ class _LaminaRequeridaCard extends StatelessWidget {
       ),
       child: Text(
         'Lâmina requerida (IRN): ${res.irnMm.toStringAsFixed(1)} mm\n'
+        'Volume líquido estimado para ${areaHectares.toStringAsFixed(2)} ha: '
+        '${volumeM3.toStringAsFixed(0)} m³\n'
         'Demanda líquida: ${res.demandaLiquidaMmDia.toStringAsFixed(1)} mm/dia\n'
         'Turno de rega: ${res.turnoCalculadoDias.toStringAsFixed(1)} dias '
         '(operacional: ${res.turnoOperacionalDias} dias)',
@@ -1415,6 +1715,25 @@ class _OrigemAvancoStep extends ConsumerWidget {
               ),
               if (state.origemAvanco == OrigemAvanco.ensaio) ...[
                 const SizedBox(height: 12),
+                _Field(
+                  name: 'vazaoEnsaioAvancoLs',
+                  label: 'Vazão medida no ensaio de avanço',
+                  value: state.vazaoEnsaioAvancoLs ?? 0,
+                  suffix: 'L/s',
+                  allowZero: true,
+                ),
+                const SizedBox(height: 10),
+                TextFormField(
+                  initialValue: state.condicoesEnsaioAvanco,
+                  onChanged: ref
+                      .read(parametersProvider.notifier)
+                      .setCondicoesEnsaioAvanco,
+                  decoration: const InputDecoration(
+                    labelText: 'Solo, seção e orientação ensaiados',
+                    helperText: 'Descreva as condições em que a curva de avanço foi medida.',
+                  ),
+                ),
+                const SizedBox(height: 10),
                 SegmentedButton<MetodoCurvaAvanco>(
                   segments: const [
                     ButtonSegment(
@@ -1440,6 +1759,82 @@ class _OrigemAvancoStep extends ConsumerWidget {
                       .read(parametersProvider.notifier)
                       .setPontosEnsaioAvanco,
                 ),
+              ],
+              if (state.metodo == MetodoIrrigacao.sulco) ...[
+                const SizedBox(height: 16),
+                OutlinedButton(
+                  onPressed: () => ref
+                      .read(parametersProvider.notifier)
+                      .setEnsaioErosao(
+                        state.ensaioErosao == null
+                            ? EnsaioErosaoSulco(
+                                vazaoLs: state.vazao,
+                                condicoes: '',
+                                erosaoObservada: false,
+                              )
+                            : null,
+                      ),
+                  child: Text(
+                    state.ensaioErosao == null
+                        ? 'Registrar ensaio de erosão'
+                        : 'Remover ensaio de erosão',
+                  ),
+                ),
+                if (state.ensaioErosao case final ensaio?) ...[
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    initialValue: ensaio.vazaoLs.toString(),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    onChanged: (value) => ref
+                        .read(parametersProvider.notifier)
+                        .setEnsaioErosao(
+                          EnsaioErosaoSulco(
+                            vazaoLs:
+                                double.tryParse(value.replaceAll(',', '.')) ??
+                                double.nan,
+                            condicoes: ensaio.condicoes,
+                            erosaoObservada: ensaio.erosaoObservada,
+                          ),
+                        ),
+                    decoration: const InputDecoration(
+                      labelText: 'Vazão ensaiada (L/s)',
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    initialValue: ensaio.condicoes,
+                    onChanged: (value) => ref
+                        .read(parametersProvider.notifier)
+                        .setEnsaioErosao(
+                          EnsaioErosaoSulco(
+                            vazaoLs: state.ensaioErosao!.vazaoLs,
+                            condicoes: value,
+                            erosaoObservada:
+                                state.ensaioErosao!.erosaoObservada,
+                          ),
+                        ),
+                    decoration: const InputDecoration(
+                      labelText: 'Condições do ensaio de erosão',
+                      helperText:
+                          'Descreva solo, seção e orientação do mesmo local.',
+                    ),
+                  ),
+                  SwitchListTile(
+                    title: const Text('Erosão observada em campo'),
+                    value: ensaio.erosaoObservada,
+                    onChanged: (value) => ref
+                        .read(parametersProvider.notifier)
+                        .setEnsaioErosao(
+                          EnsaioErosaoSulco(
+                            vazaoLs: state.ensaioErosao!.vazaoLs,
+                            condicoes: state.ensaioErosao!.condicoes,
+                            erosaoObservada: value,
+                          ),
+                        ),
+                  ),
+                ],
               ],
               if (state.metodo == MetodoIrrigacao.sulco) ...[
                 const SizedBox(height: 12),
@@ -1619,6 +2014,31 @@ class _PontosAvancoEditorState extends State<_PontosAvancoEditor> {
         style: Theme.of(context).textTheme.bodySmall,
       ),
     ],
+  );
+}
+
+class _OptionalNumericCurveField extends ConsumerWidget {
+  const _OptionalNumericCurveField({
+    required this.label,
+    required this.value,
+    required this.name,
+  });
+  final String label;
+  final double? value;
+  final String name;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) => Padding(
+    padding: const EdgeInsets.only(top: 12),
+    child: TextFormField(
+      key: ValueKey(name),
+      initialValue: value?.toString() ?? '',
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      decoration: InputDecoration(labelText: label),
+      onChanged: (text) => ref
+          .read(parametersProvider.notifier)
+          .updateField(campo: name, valor: text),
+    ),
   );
 }
 
@@ -1822,12 +2242,25 @@ class _OperacaoStep extends ConsumerWidget {
                 value: state.vazao,
                 suffix: 'L/s',
               ),
-              _Field(
-                name: 'tempoAplicacao',
-                label: 'Tempo de oportunidade no final',
-                value: state.tempoAplicacao,
-                suffix: 'min',
-              ),
+              if (state.dimensionarComprimentoCriddle &&
+                  state.origemGeometria == ProvenienciaSulco.calculado)
+                CalculatedField(
+                  label: 'Tempo de oportunidade (To)',
+                  value: state.tempoAplicacao,
+                  suffix: 'min',
+                )
+              else if (state.dimensionarComprimentoCriddle)
+                Text(
+                  'To será calculado junto com o comprimento.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                )
+              else
+                _Field(
+                  name: 'tempoAplicacao',
+                  label: 'Tempo de oportunidade no final',
+                  value: state.tempoAplicacao,
+                  suffix: 'min',
+                ),
             ] else ...[
               _Field(
                 name: 'vazao',
@@ -1846,13 +2279,14 @@ class _OperacaoStep extends ConsumerWidget {
             ],
             if (state.metodo == MetodoIrrigacao.sulco &&
                 state.manejoSulco == ManejoSulco.reduzida) ...[
-              _Field(
-                name: 'vazaoReduzidaLs',
-                label: 'Vazão reduzida (após avanço)',
-                value: state.vazaoReduzidaLs,
-                suffix: 'L/s',
-                allowZero: true,
-              ),
+              if (state.origemVazaoReduzida == OrigemVazaoReduzida.informada)
+                _Field(
+                  name: 'vazaoReduzidaLs',
+                  label: 'Vazão reduzida informada',
+                  value: state.vazaoReduzidaLs,
+                  suffix: 'L/s',
+                  allowZero: true,
+                ),
               _Field(
                 name: 'tempoMudancaMin',
                 label: 'Atraso para redução após avanço',
@@ -1927,6 +2361,79 @@ class _OperacaoStep extends ConsumerWidget {
           ],
         ),
       ),
+      if (state.metodo == MetodoIrrigacao.sulco &&
+          state.manejoSulco == ManejoSulco.reduzida) ...[
+        const SizedBox(height: 12),
+        _BentoCard(
+          title: 'Origem da vazão reduzida',
+          subtitle: 'F23 e F24 são estimativas diferentes; a curva de avanço após a troca não é prevista.',
+          icon: AppIcons.projetoOperacao,
+          accent: accent,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              DropdownButtonFormField<OrigemVazaoReduzida>(
+                initialValue: state.origemVazaoReduzida,
+                decoration: const InputDecoration(
+                  labelText: 'Método de escolha de qr',
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: OrigemVazaoReduzida.informada,
+                    child: Text('Vazão informada'),
+                  ),
+                  DropdownMenuItem(
+                    value: OrigemVazaoReduzida.taxaFinalDaCurva,
+                    child: Text('Taxa no fim da curva (estimativa)'),
+                  ),
+                  DropdownMenuItem(
+                    value: OrigemVazaoReduzida.vib,
+                    child: Text('VIB · F23'),
+                  ),
+                  DropdownMenuItem(
+                    value: OrigemVazaoReduzida.somatorioEspacial,
+                    child: Text('Estacas medidas · F24 (p.96)'),
+                  ),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    ref
+                        .read(parametersProvider.notifier)
+                        .setOrigemVazaoReduzida(value);
+                  }
+                },
+              ),
+              if (state.origemVazaoReduzida == OrigemVazaoReduzida.vib) ...[
+                const SizedBox(height: 12),
+                _Field(
+                  name: 'vib',
+                  label: 'VIB para F23',
+                  value: state.vib,
+                  suffix: 'm/min',
+                ),
+                SwitchListTile(
+                  title: const Text('Aplicar fator 1,1 à estimativa F23'),
+                  value: state.fator11Vib,
+                  onChanged: ref
+                      .read(parametersProvider.notifier)
+                      .setFator11Vib,
+                ),
+              ],
+              if (state.origemVazaoReduzida ==
+                  OrigemVazaoReduzida.somatorioEspacial)
+                Text(
+                  'F24 integra VI(x) entre estacas medidas até o comprimento escolhido, no instante Ta + atraso. Sem estacas e cobertura completas, não há estimativa.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              const SizedBox(height: 8),
+              Text(
+                'A simulação condiciona o perfil à manutenção da cobertura. A oferta e o balanço são testados; não há previsão hidráulica da mudança de vazão.',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ),
+        ),
+      ],
     ],
   );
 
@@ -1946,6 +2453,22 @@ class _RevisaoStep extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (state.metodo == MetodoIrrigacao.sulco &&
+            !state.entradasSulco.podeRecalcularIrrigacao) ...[
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                'Entradas agronômicas originais ausentes ou não utilizáveis. '
+                'A IRN histórica permanece registrada, mas o turno não será '
+                'recalculado com valores ilustrativos. Informe UCC, UPMP, Ds, '
+                'raízes, fração, ETc (ou ETo×Kc) e Pef efetiva para recalcular.',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
@@ -2154,8 +2677,14 @@ class _RevisaoStep extends StatelessWidget {
         rows: [
           _ReviewRow(
             'Evapotranspiração (ETc)',
-            '${state.evapotranspiracaoMmDia.toStringAsFixed(1)} mm/dia',
+            '${state.evapotranspiracaoCulturaMmDia.toStringAsFixed(1)} mm/dia',
           ),
+          if (state.metodoEtc == MetodoEtcSulco.blaneyCriddle &&
+              state.etoBlaneyCriddle != null)
+            _ReviewRow(
+              'ETo estimada (Blaney–Criddle)',
+              '${state.etoBlaneyCriddle!.toStringAsFixed(2)} mm/dia',
+            ),
           _ReviewRow(
             'Precipitação efetiva (Pef)',
             '${state.precipitacaoEfetivaMmDia.toStringAsFixed(1)} mm/dia',
@@ -2340,9 +2869,12 @@ class _RevisaoStep extends StatelessWidget {
           ],
           if (state.metodo == MetodoIrrigacao.sulco &&
               state.manejoSulco == ManejoSulco.reduzida) ...[
+            _ReviewRow('Origem da redução', state.origemVazaoReduzida.name),
             _ReviewRow(
-              'Vazão reduzida',
-              '${state.vazaoReduzidaLs.toStringAsFixed(2)} L/s',
+              'Vazão reduzida informada',
+              state.origemVazaoReduzida == OrigemVazaoReduzida.informada
+                  ? '${state.vazaoReduzidaLs.toStringAsFixed(2)} L/s'
+                  : 'Calculada conforme origem selecionada',
             ),
             _ReviewRow(
               'Atraso para redução',

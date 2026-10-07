@@ -197,7 +197,22 @@ class InfiltrationModel {
     required double tempoMin,
     required InfiltrationParameters parametros,
   }) {
-    if (tempoMin <= 0) return 0;
+    if (!parametros.k.isFinite || !parametros.n.isFinite || parametros.k <= 0) {
+      throw const FormatException(
+        'VI exige coeficiente positivo e expoente finito.',
+      );
+    }
+    if (!tempoMin.isFinite || tempoMin < 0) {
+      throw const FormatException(
+        'Tempo de infiltração fora do domínio (T ≥ 0).',
+      );
+    }
+    if (tempoMin == 0 && parametros.n < 0) {
+      throw const FormatException(
+        'VI singular em T = 0 para expoente negativo.',
+      );
+    }
+    if (tempoMin == 0 && parametros.n > 0) return 0;
     return parametros.k * pow(tempoMin, parametros.n);
   }
 
@@ -212,16 +227,22 @@ class InfiltrationModel {
     required double tempoMin,
     required InfiltrationParameters parametros,
   }) {
-    if (tempoMin <= 0) return 0;
-
-    final nMais1 = parametros.n + 1;
-    if (nMais1.abs() < 1e-15) {
-      throw ArgumentError(
-        'n+1 não pode ser zero (n=${parametros.n}). '
-        'Verifique os parâmetros de infiltração.',
+    if (!tempoMin.isFinite || tempoMin < 0) {
+      throw const FormatException(
+        'Tempo de infiltração fora do domínio (T ≥ 0).',
       );
     }
+    if (!parametros.k.isFinite ||
+        !parametros.n.isFinite ||
+        parametros.k <= 0 ||
+        parametros.n <= -1) {
+      throw const FormatException(
+        'Curva de infiltração acumulada fora do domínio (K > 0, n > −1).',
+      );
+    }
+    if (tempoMin == 0) return 0;
 
+    final nMais1 = parametros.n + 1;
     // I = [K / (60 * (n+1))] * T^(n+1)
     // Fator 60 converte K de mm/h para mm/min
     return (parametros.k / (60 * nMais1)) * pow(tempoMin, nMais1);
@@ -233,7 +254,6 @@ class InfiltrationModel {
     required double tempoMin,
     required InfiltrationParameters parametros,
   }) {
-    if (tempoMin <= 0) return 0;
     return vi(tempoMin: tempoMin, parametros: parametros);
   }
 

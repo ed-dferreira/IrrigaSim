@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/models/faixas/border_project.dart';
+import 'package:irrigasim/models/faixas/border_measurements.dart';
 import 'package:irrigasim/models/faixas/border_result.dart';
 import 'package:irrigasim/services/simulation/faixas/border_hydraulics.dart';
 import 'package:irrigasim/services/simulation/faixas/border_planning.dart';
@@ -36,6 +37,111 @@ void main() {
     final level = planning.geometry(base.copyWith(desnivelTransversalM: 0), r);
     expect(level.larguraMaximaM, isNull);
   });
+
+  test('valida opcionais operacionais quando informados e preserva seleção de equipamento', () {
+    expect(
+      base.copyWith(alturaDiqueM: 0).impedimento?.status,
+      BorderStatus.entradaInvalida,
+    );
+    expect(
+      base.copyWith(laminaSuperficialM: double.nan).impedimento?.status,
+      BorderStatus.entradaInvalida,
+    );
+    expect(
+      base.copyWith(vazaoDisponivelLs: -1).impedimento?.status,
+      BorderStatus.entradaInvalida,
+    );
+    expect(
+      base
+          .copyWith(inicioFornecimentoH: 23, janelaFornecimentoHorasDia: 2)
+          .impedimento
+          ?.status,
+      BorderStatus.entradaInvalida,
+    );
+    expect(
+      base.copyWith(rho2F02: 2).impedimento?.status,
+      BorderStatus.entradaInvalida,
+    );
+    expect(
+      base.copyWith(fracaoCortePlanejada: .7).impedimento?.status,
+      BorderStatus.modeloNaoImplementado,
+    );
+    expect(
+      base.copyWith(fracaoCortePlanejada: .8).impedimento?.status,
+      BorderStatus.entradaInvalida,
+    );
+    final project = base.copyWith(
+      dispositivoDiametroCm: 12.5,
+      dispositivoCargaCm: 10,
+      rho1F02: 1,
+      rho2F02: 3.33,
+      vmaxF02: 2.5,
+      unidadeVmaxF02: 'sem convenção confirmada',
+      areaUtilM2: 150000,
+      orientacaoArea: 'Norte–Sul',
+      tipoDique: 'permanente',
+      dataEnsaioIso: '2025-09-29',
+      referenciaRelogioEnsaio: 'cronômetro iniciado no corte da comporta',
+      observacoesEnsaio: 'vento moderado',
+    );
+    final restored = BorderProject.fromMap(project.toMap());
+    expect(restored.dispositivoDiametroCm, 12.5);
+    expect(restored.dispositivoCargaCm, 10);
+    expect(restored.vmaxF02, 2.5);
+    expect(restored.areaUtilM2, 150000);
+    expect(restored.orientacaoArea, 'Norte–Sul');
+    expect(restored.dataEnsaioIso, '2025-09-29');
+    expect(restored.observacoesEnsaio, 'vento moderado');
+  });
+
+  test('mantém k, a e VIB próprios por cenário e os calcula em paralelo', () {
+    final controller = BorderProjectController();
+    controller.setCenarioInfiltracao(CenarioInfiltracaoFaixa.primeira);
+    controller.setNumero('k', '0.004');
+    controller.setNumero('a', '0.5');
+    controller.setNumero('vibMMin', '0.0002');
+    controller.setCenarioInfiltracao(CenarioInfiltracaoFaixa.terceira);
+    expect(controller.state.k, BorderProject.ilustrativo.k);
+    controller.setNumero('k', '0.003');
+    controller.setNumero('a', '0.4');
+    controller.setNumero('vibMMin', '0.0001');
+    final project = BorderProject.fromMap(controller.state.toMap());
+    expect(project.dadosPrimeira?.k, .004);
+    expect(project.dadosTerceira?.k, .003);
+    final comparison = calcularComparacaoCenarios(project);
+    expect(
+      comparison.primeira.perfil.last.infiltracaoM,
+      isNot(comparison.terceira.perfil.last.infiltracaoM),
+    );
+    controller.dispose();
+  });
+
+  test(
+    'registra topografia uniforme e bloqueia perfil variável/terminal plano',
+    () {
+      final uniform = base.copyWith(
+        perfilLongitudinal: const [
+          BorderTerrainPoint(0, .4),
+          BorderTerrainPoint(200, .2),
+          BorderTerrainPoint(400, 0),
+        ],
+      );
+      expect(uniform.impedimento, isNull);
+      final restored = BorderProject.fromMap(uniform.toMap());
+      expect(restored.perfilLongitudinal.length, 3);
+      final flatTerminal = base.copyWith(
+        perfilLongitudinal: const [
+          BorderTerrainPoint(0, .4),
+          BorderTerrainPoint(350, .05),
+          BorderTerrainPoint(400, .05),
+        ],
+      );
+      expect(
+        flatTerminal.impedimento?.status,
+        BorderStatus.modeloNaoImplementado,
+      );
+    },
+  );
 
   test('cronograma contabiliza lote final parcial e compara oferta', () {
     final r = const BorderHydraulics().dimensionar(base);
@@ -86,5 +192,36 @@ void main() {
     }
     expect(grid.melhor, isNotNull);
     expect(grid.toRecords().length, grid.candidatos.length);
+    final erGrid = planning.explore(
+      ready,
+      menorLsM: 2.5,
+      maiorLsM: 3.5,
+      passoLsM: .5,
+      objetivo: 'Er',
+    );
+    expect(erGrid.objetivo, 'Er');
+    expect(erGrid.menorLsM, 2.5);
+    expect(erGrid.maiorLsM, 3.5);
+    expect(erGrid.passoLsM, .5);
+    expect(
+      erGrid.melhor!.resultado!.er,
+      erGrid.candidatos
+          .where((candidate) => candidate.resultado != null)
+          .map((candidate) => candidate.resultado!.er)
+          .reduce((a, b) => a > b ? a : b),
+    );
+    final savedProject = ready.copyWith(alternativas: erGrid.toRecords());
+    final restored = BorderProject.fromMap(savedProject.toMap());
+    final selected = restored.alternativas.singleWhere(
+      (record) => record.selecionada,
+    );
+    expect(selected.objetivo, 'Er');
+    expect(selected.gradeMenorLsM, 2.5);
+    expect(selected.gradeMaiorLsM, 3.5);
+    expect(selected.gradePassoLsM, .5);
+    expect(selected.erPercentual, isNotNull);
+    expect(selected.ppPercentual, isNotNull);
+    expect(selected.pePercentual, isNotNull);
+    expect(selected.demandaLs, isNotNull);
   });
 }

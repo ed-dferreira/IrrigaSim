@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,10 +8,65 @@ import 'package:irrigasim/models/faixas/border_project.dart';
 import 'package:irrigasim/models/faixas/border_measurements.dart';
 import 'package:irrigasim/models/irrigation_parameters.dart';
 import 'package:irrigasim/services/simulation/faixas/border_field_trial.dart';
+import 'package:irrigasim/services/simulation/faixas/border_hydraulics.dart';
 import 'package:irrigasim/services/simulation/faixas/border_csv.dart';
 import 'package:irrigasim/services/simulation/faixas/border_reference_tables.dart';
 import 'package:irrigasim/viewmodels/faixas/border_project_controller.dart';
 import 'package:irrigasim/views/irrigation/widgets/auditable_widgets.dart';
+import 'package:irrigasim/views/irrigation/widgets/irrigation_project_components.dart';
+
+import 'border_trial_chart.dart';
+
+class _BorderCropPreset {
+  const _BorderCropPreset(
+    this.name,
+    this.kc,
+    this.rows,
+    this.plants,
+    this.roots,
+    this.fraction,
+  );
+
+  final String name;
+  final double kc, rows, plants, roots, fraction;
+}
+
+const _borderCropPresets = <_BorderCropPreset>[
+  _BorderCropPreset('Soja', 1.15, .45, .07, 60, .50),
+  _BorderCropPreset('Arroz irrigado', 1.20, .17, .03, 20, .20),
+  _BorderCropPreset('Milho', 1.20, .80, .20, 100, .55),
+  _BorderCropPreset('Trigo', 1.15, .17, .02, 100, .55),
+  _BorderCropPreset('Fumo', 1.10, 1.10, .50, 60, .30),
+  _BorderCropPreset('Feijão', 1.15, .45, .07, 50, .45),
+  _BorderCropPreset('Cevada', 1.15, .17, .02, 100, .55),
+  _BorderCropPreset('Aveia', 1.15, .17, .02, 100, .55),
+  _BorderCropPreset('Mandioca', .80, 1.00, .60, 80, .35),
+  _BorderCropPreset('Cana-de-açúcar', 1.25, 1.40, .50, 120, .65),
+  _BorderCropPreset('Uva', .70, 2.50, 1.20, 100, .35),
+  _BorderCropPreset('Batata', 1.15, .80, .30, 40, .35),
+  _BorderCropPreset('Cebola', 1.05, .30, .10, 30, .30),
+  _BorderCropPreset('Canola', 1.15, .35, .04, 100, .60),
+  _BorderCropPreset('Sorgo', 1.00, .50, .05, 100, .55),
+  _BorderCropPreset('Tomate', 1.15, 1.00, .50, 70, .40),
+  _BorderCropPreset('Melancia', 1.00, 2.00, 1.00, 80, .40),
+  _BorderCropPreset('Amendoim', 1.15, .50, .10, 50, .50),
+  _BorderCropPreset('Triticale', 1.15, .17, .02, 100, .55),
+  _BorderCropPreset('Azevém (forragem)', 1.05, .17, .02, 40, .60),
+];
+
+_BorderCropPreset? _selectedBorderCropPreset(BorderProject project) {
+  for (final preset in _borderCropPresets) {
+    if (preset.name == project.cultura &&
+        preset.kc == project.agronomia?.kc &&
+        preset.rows == project.agronomia?.espacamentoFileirasM &&
+        preset.plants == project.agronomia?.espacamentoPlantasM &&
+        preset.roots == project.agronomia?.profundidadeRaizesCm &&
+        preset.fraction == project.agronomia?.fracaoDisponivel) {
+      return preset;
+    }
+  }
+  return null;
+}
 
 class BorderProjectScreen extends ConsumerStatefulWidget {
   const BorderProjectScreen({super.key});
@@ -39,221 +93,12 @@ class _BorderInput extends StatelessWidget {
   );
 }
 
-class _BorderStepIndicator extends StatefulWidget {
-  const _BorderStepIndicator({
-    required this.titles,
-    required this.icons,
-    required this.currentStep,
-    required this.confirmedSteps,
-    required this.onTap,
-  });
-
-  final List<String> titles;
-  final List<IconData> icons;
-  final int currentStep;
-  final Set<int> confirmedSteps;
-  final ValueChanged<int> onTap;
-
-  @override
-  State<_BorderStepIndicator> createState() => _BorderStepIndicatorState();
-}
-
-class _BorderStepIndicatorState extends State<_BorderStepIndicator> {
-  final _controller = ScrollController();
-  late final _keys = List.generate(widget.titles.length, (_) => GlobalKey());
-  bool _back = false;
-  bool _forward = false;
-
-  void _updateArrows() {
-    if (!_controller.hasClients) return;
-    final position = _controller.position;
-    final back = position.pixels > position.minScrollExtent;
-    final forward = position.pixels < position.maxScrollExtent;
-    if (back != _back || forward != _forward) {
-      setState(() {
-        _back = back;
-        _forward = forward;
-      });
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _controller.addListener(_updateArrows);
-  }
-
-  @override
-  void didUpdateWidget(covariant _BorderStepIndicator oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.currentStep != widget.currentStep) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        final target = _keys[widget.currentStep].currentContext;
-        if (target != null) {
-          Scrollable.ensureVisible(
-            target,
-            duration: MediaQuery.disableAnimationsOf(context)
-                ? Duration.zero
-                : const Duration(milliseconds: 250),
-            alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
-          );
-        }
-      });
-    }
-  }
-
-  void _scroll(int direction) {
-    final position = _controller.position;
-    _controller.animateTo(
-      (position.pixels + direction * position.viewportDimension * .7).clamp(
-        position.minScrollExtent,
-        position.maxScrollExtent,
-      ),
-      duration: MediaQuery.disableAnimationsOf(context)
-          ? Duration.zero
-          : const Duration(milliseconds: 250),
-      curve: Curves.easeOut,
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final arrows = MediaQuery.sizeOf(context).width >= 760;
-    return Row(
-      children: [
-        if (arrows)
-          IconButton(
-            tooltip: 'Ver etapas anteriores',
-            onPressed: _back ? () => _scroll(-1) : null,
-            icon: const Icon(AppIcons.etapasAnteriores),
-          ),
-        Expanded(
-          child: NotificationListener<ScrollMetricsNotification>(
-            onNotification: (_) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (mounted) _updateArrows();
-              });
-              return false;
-            },
-            child: ScrollConfiguration(
-              behavior: ScrollConfiguration.of(context).copyWith(
-                dragDevices: {
-                  PointerDeviceKind.touch,
-                  PointerDeviceKind.mouse,
-                  PointerDeviceKind.trackpad,
-                  PointerDeviceKind.stylus,
-                },
-              ),
-              child: SingleChildScrollView(
-                controller: _controller,
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    for (var i = 0; i < widget.titles.length; i++) ...[
-                      if (i > 0) const SizedBox(width: 8),
-                      _step(context, colors, i),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-        if (arrows)
-          IconButton(
-            tooltip: 'Ver próximas etapas',
-            onPressed: _forward ? () => _scroll(1) : null,
-            icon: const Icon(AppIcons.etapasSeguintes),
-          ),
-      ],
-    );
-  }
-
-  Widget _step(BuildContext context, ColorScheme colors, int index) {
-    final active = index == widget.currentStep;
-    final completed = widget.confirmedSteps.contains(index);
-    final accent = AppColors.faixa;
-    return Semantics(
-      key: _keys[index],
-      button: true,
-      selected: active,
-      label:
-          '${completed
-              ? 'Preenchida: '
-              : active
-              ? 'Etapa atual: '
-              : ''}${widget.titles[index]}',
-      child: InkWell(
-        onTap: () => widget.onTap(index),
-        borderRadius: BorderRadius.circular(14),
-        child: AnimatedContainer(
-          duration: MediaQuery.disableAnimationsOf(context)
-              ? Duration.zero
-              : const Duration(milliseconds: 250),
-          constraints: const BoxConstraints(minHeight: 48),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            color: active
-                ? accent.withValues(alpha: .12)
-                : completed
-                ? colors.primaryContainer
-                : colors.surfaceContainerHigh,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: active
-                  ? accent
-                  : completed
-                  ? colors.primary
-                  : colors.outlineVariant,
-              width: active ? 2 : 1,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                completed ? AppIcons.sucesso : widget.icons[index],
-                size: 18,
-                color: active
-                    ? accent
-                    : completed
-                    ? colors.primary
-                    : colors.onSurfaceVariant,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '${index + 1}. ${widget.titles[index]}',
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: active
-                      ? accent
-                      : completed
-                      ? colors.primary
-                      : colors.onSurfaceVariant,
-                  fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _BorderProjectScreenState extends ConsumerState<BorderProjectScreen> {
   static const _titles = [
     'Área e geometria',
     'Dimensões da faixa',
     'Solo',
-    'Cultura e raízes',
+    'Cultura e sistema radicular',
     'Clima e demanda',
     'Avanço e manejo',
     'Operação',
@@ -274,74 +119,54 @@ class _BorderProjectScreenState extends ConsumerState<BorderProjectScreen> {
   final Set<int> _confirmedSteps = {};
   bool _calculando = false;
   String? _erroEstacas;
+  String? _erroPerfil;
+  double _diametroBooherCm = 10;
+  double _cargaBooherCm = 5;
+  int _cropPresetRevision = 0;
 
   @override
   Widget build(BuildContext context) {
     final project = ref.watch(borderProjectProvider);
     final colors = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(title: const Text('Projeto de faixas')),
+      appBar: AppBar(
+        title: const Text('Projeto de faixas'),
+        actions: [
+          if (_step < 7)
+            TextButton(
+              onPressed: () => setState(() => _step = 7),
+              child: const Text('Pular para revisão'),
+            ),
+        ],
+      ),
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
           children: [
             Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 900),
+                constraints: const BoxConstraints(maxWidth: 1120),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(
-                      'Exemplo ilustrativo de faixa — ajuste às medidas do seu terreno.',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: 16),
-                    _BorderStepIndicator(
+                    IrrigationStepIndicator(
                       titles: _titles,
                       icons: _icons,
                       currentStep: _step,
-                      confirmedSteps: _confirmedSteps,
-                      onTap: (index) => setState(() => _step = index),
+                      completedSteps: _confirmedSteps,
+                      accent: AppColors.faixa,
+                      onStepTapped: (index) => setState(() => _step = index),
                     ),
-                    const SizedBox(height: 16),
-                    Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(_icons[_step], color: AppColors.faixa),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    _titles[_step],
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleLarge
-                                        ?.copyWith(fontWeight: FontWeight.w700),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Etapa ${_step + 1} de ${_titles.length}',
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(color: colors.onSurfaceVariant),
-                            ),
-                            const SizedBox(height: 16),
-                            _layoutFields(_fields(project)),
-                          ],
-                        ),
-                      ),
+                    const SizedBox(height: IrrigationSpacing.major),
+                    IrrigationProjectStepCard(
+                      title: _titles[_step],
+                      subtitle: 'Etapa ${_step + 1} de ${_titles.length}',
+                      icon: _icons[_step],
+                      accent: AppColors.faixa,
+                      child: _layoutFields(_fields(project)),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: IrrigationSpacing.major),
                     if (_step == 7) ...[
                       Card(
                         color: colors.tertiaryContainer,
@@ -386,20 +211,9 @@ class _BorderProjectScreenState extends ConsumerState<BorderProjectScreen> {
                         const SizedBox(height: 12),
                       ],
                     ],
-                    Wrap(
-                      spacing: 12,
-                      runSpacing: 8,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Tooltip(
-                          message: 'Voltar para a etapa anterior',
-                          child: OutlinedButton.icon(
-                            onPressed: _step == 0
-                                ? null
-                                : () => setState(() => _step--),
-                            icon: const Icon(AppIcons.etapasAnteriores),
-                            label: const Text('Anterior'),
-                          ),
-                        ),
                         if (_step < 7)
                           _confirmedSteps.contains(_step)
                               ? Chip(
@@ -415,79 +229,84 @@ class _BorderProjectScreenState extends ConsumerState<BorderProjectScreen> {
                                   onPressed: () {
                                     if ((_formKey.currentState?.validate() ??
                                             false) &&
-                                        _erroEstacas == null) {
+                                        _erroEstacas == null &&
+                                        _erroPerfil == null) {
                                       setState(
                                         () => _confirmedSteps.add(_step),
                                       );
                                     }
                                   },
                                   icon: const Icon(AppIcons.sucesso),
-                                  label: const Text('Confirmar etapa'),
+                                  label: const Text('Confirmar'),
                                 ),
+                        if (_step < 7) const SizedBox(width: 12),
                         Tooltip(
                           message: _step == 7
                               ? 'Calcular a simulação da faixa'
                               : 'Avançar para a próxima etapa',
-                          child: FilledButton.icon(
-                            onPressed: _step == 7
-                                ? project.impedimentoModelo != null ||
-                                          _calculando ||
-                                          !_titles
-                                              .asMap()
-                                              .keys
-                                              .where((i) => i < 7)
-                                              .every(_confirmedSteps.contains)
-                                      ? null
-                                      : () {
-                                          setState(() => _calculando = true);
-                                          try {
-                                            final result = calcularProjetoFaixa(
-                                              project,
-                                            );
-                                            ref
-                                                    .read(
-                                                      borderProjectResultProvider
-                                                          .notifier,
-                                                    )
-                                                    .state =
-                                                result;
-                                            context.push(
-                                              '/home/irrigation/border-results',
-                                            );
-                                          } on FormatException catch (e) {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(e.message),
-                                                  ),
-                                                );
-                                          } finally {
-                                            if (mounted) {
-                                              setState(
-                                                () => _calculando = false,
+                          child: SizedBox(
+                            width: 160,
+                            height: 48,
+                            child: FilledButton.icon(
+                              onPressed: _step == 7
+                                  ? project.impedimentoModelo != null ||
+                                            _calculando ||
+                                            !_titles
+                                                .asMap()
+                                                .keys
+                                                .where((i) => i < 7)
+                                                .every(_confirmedSteps.contains)
+                                        ? null
+                                        : () {
+                                            setState(() => _calculando = true);
+                                            try {
+                                              final result =
+                                                  calcularProjetoFaixa(project);
+                                              ref
+                                                      .read(
+                                                        borderProjectResultProvider
+                                                            .notifier,
+                                                      )
+                                                      .state =
+                                                  result;
+                                              context.push(
+                                                '/home/irrigation/border-results',
                                               );
+                                            } on FormatException catch (e) {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(e.message),
+                                                    ),
+                                                  );
+                                            } finally {
+                                              if (mounted) {
+                                                setState(
+                                                  () => _calculando = false,
+                                                );
+                                              }
                                             }
                                           }
-                                        }
-                                : () => setState(() => _step++),
-                            icon: _calculando
-                                ? const SizedBox.square(
-                                    dimension: 18,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
+                                  : () => setState(() => _step++),
+                              icon: _calculando
+                                  ? const SizedBox.square(
+                                      dimension: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : Icon(
+                                      _step == 7
+                                          ? AppIcons.executarSimulacao
+                                          : AppIcons.etapasSeguintes,
                                     ),
-                                  )
-                                : Icon(
-                                    _step == 7
-                                        ? AppIcons.executarSimulacao
-                                        : AppIcons.etapasSeguintes,
-                                  ),
-                            label: Text(
-                              _calculando
-                                  ? 'Calculando…'
-                                  : _step == 7
-                                  ? 'Calcular faixa'
-                                  : 'Próxima etapa',
+                              label: Text(
+                                _calculando
+                                    ? 'Calculando…'
+                                    : _step == 7
+                                    ? 'Calcular projeto'
+                                    : 'Próximo',
+                              ),
                             ),
                           ),
                         ),
@@ -512,13 +331,16 @@ class _BorderProjectScreenState extends ConsumerState<BorderProjectScreen> {
       void flush() {
         if (group.isEmpty) return;
         output.add(
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              for (final field in group)
-                SizedBox(width: fieldWidth, child: field),
-            ],
+          Padding(
+            padding: const EdgeInsets.only(bottom: IrrigationSpacing.field),
+            child: Wrap(
+              spacing: IrrigationSpacing.field,
+              runSpacing: IrrigationSpacing.field,
+              children: [
+                for (final field in group)
+                  SizedBox(width: fieldWidth, child: field),
+              ],
+            ),
           ),
         );
         group.clear();
@@ -530,7 +352,10 @@ class _BorderProjectScreenState extends ConsumerState<BorderProjectScreen> {
         } else {
           flush();
           output.add(
-            Padding(padding: const EdgeInsets.only(bottom: 12), child: field),
+            Padding(
+              padding: const EdgeInsets.only(bottom: IrrigationSpacing.field),
+              child: field,
+            ),
           );
         }
       }
@@ -553,7 +378,27 @@ class _BorderProjectScreenState extends ConsumerState<BorderProjectScreen> {
         p.comprimentoAreaM,
         'm',
       ),
-      _number('larguraAreaM', 'Largura da área', p.larguraAreaM, 'm'),
+      _number('larguraAreaM', 'Largura da área bruta', p.larguraAreaM, 'm'),
+      _number(
+        'areaUtilM2',
+        'Área útil irrigável (opcional)',
+        p.areaUtilM2,
+        'm²',
+        optional: true,
+      ),
+      _BorderInput(
+        label: 'Orientação da área (opcional)',
+        child: TextFormField(
+          initialValue: p.orientacaoArea,
+          decoration: const InputDecoration(
+            hintText: 'Ex.: Norte–Sul; sentido do avanço',
+          ),
+          onChanged: (value) {
+            ref.read(borderProjectProvider.notifier).setOrientacaoArea(value);
+            setState(() => _confirmedSteps.remove(_step));
+          },
+        ),
+      ),
       _number(
         'desnivelLongitudinalM',
         'Desnível longitudinal',
@@ -566,6 +411,49 @@ class _BorderProjectScreenState extends ConsumerState<BorderProjectScreen> {
         'Distância medida no sentido longitudinal',
         p.baseLongitudinalM,
         'm',
+      ),
+      TextFormField(
+        key: const ValueKey('perfilLongitudinal'),
+        initialValue: p.perfilLongitudinal
+            .map((point) => '${point.xM};${point.cotaM}')
+            .join('\n'),
+        maxLines: 4,
+        decoration: InputDecoration(
+          labelText: 'Perfil longitudinal levantado (opcional)',
+          helperText: 'Uma estaca por linha: distância m;cota m. Inclua 0 e o comprimento total. Perfil variável/terminal plano fica registrado, mas requer motor por trechos.',
+          errorText: _erroPerfil,
+        ),
+        onChanged: (text) {
+          try {
+            final points = text.trim().isEmpty
+                ? <BorderTerrainPoint>[]
+                : text.trim().split('\n').map((line) {
+                    final values = line
+                        .split(';')
+                        .map(
+                          (value) =>
+                              double.parse(value.trim().replaceAll(',', '.')),
+                        )
+                        .toList();
+                    if (values.length != 2 ||
+                        values.any((value) => !value.isFinite)) {
+                      throw const FormatException(
+                        'Use distância;cota, ambas em metros.',
+                      );
+                    }
+                    return BorderTerrainPoint(values[0], values[1]);
+                  }).toList();
+            ref
+                .read(borderProjectProvider.notifier)
+                .setPerfilLongitudinal(points);
+            setState(() {
+              _erroPerfil = null;
+              _confirmedSteps.remove(_step);
+            });
+          } on FormatException catch (error) {
+            setState(() => _erroPerfil = error.message);
+          }
+        },
       ),
       _number(
         'desnivelTransversalM',
@@ -614,6 +502,20 @@ class _BorderProjectScreenState extends ConsumerState<BorderProjectScreen> {
         p.laminaSuperficialM,
         'm',
         optional: true,
+      ),
+      _BorderInput(
+        label: 'Tipo de dique (registro construtivo opcional)',
+        child: TextFormField(
+          initialValue: p.tipoDique,
+          decoration: const InputDecoration(
+            hintText: 'Ex.: dique de terra compactada',
+            helperText: 'Registro descritivo; não altera o cálculo hidráulico.',
+          ),
+          onChanged: (value) {
+            ref.read(borderProjectProvider.notifier).setTipoDique(value);
+            setState(() => _confirmedSteps.remove(_step));
+          },
+        ),
       ),
     ],
     2 => [
@@ -726,32 +628,260 @@ class _BorderProjectScreenState extends ConsumerState<BorderProjectScreen> {
             ),
         ],
       ),
-    ],
-    3 => [
-      const Text(
-        'A cultura define a zona de extração de água. Profundidade radicular e fração disponível participam da lâmina real necessária; a cultura também informa a cobertura usada como hipótese hidráulica.',
-      ),
       _BorderInput(
-        label: 'Cultura (opcional)',
-        child: TextFormField(
-          initialValue: p.cultura,
-          onChanged: (value) {
-            ref.read(borderProjectProvider.notifier).setCultura(value);
-            setState(() => _confirmedSteps.remove(_step));
-          },
+        label: 'Consulta de quantidade de dispositivos (orientativa)',
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            DropdownButtonFormField<double>(
+              initialValue: p.dispositivoDiametroCm ?? _diametroBooherCm,
+              decoration: const InputDecoration(labelText: 'Diâmetro impresso'),
+              items: [
+                for (final value in BorderReferenceTables.diametrosCm)
+                  DropdownMenuItem(value: value, child: Text('$value cm')),
+              ],
+              onChanged: (value) {
+                if (value == null) return;
+                setState(() => _diametroBooherCm = value);
+                ref
+                    .read(borderProjectProvider.notifier)
+                    .setDispositivo(
+                      diametroCm: value,
+                      cargaCm: p.dispositivoCargaCm ?? _cargaBooherCm,
+                    );
+                setState(() => _confirmedSteps.remove(_step));
+              },
+            ),
+            const SizedBox(height: IrrigationSpacing.field),
+            DropdownButtonFormField<double>(
+              initialValue: p.dispositivoCargaCm ?? _cargaBooherCm,
+              decoration: const InputDecoration(labelText: 'Carga impressa'),
+              items: [
+                for (final value in BorderReferenceTables.cargasCm)
+                  DropdownMenuItem(value: value, child: Text('$value cm')),
+              ],
+              onChanged: (value) {
+                if (value == null) return;
+                setState(() => _cargaBooherCm = value);
+                ref
+                    .read(borderProjectProvider.notifier)
+                    .setDispositivo(
+                      diametroCm: p.dispositivoDiametroCm ?? _diametroBooherCm,
+                      cargaCm: value,
+                    );
+                setState(() => _confirmedSteps.remove(_step));
+              },
+            ),
+            const SizedBox(height: IrrigationSpacing.field),
+            Builder(
+              builder: (context) {
+                final cell = const BorderReferenceTables().booher(
+                  p.dispositivoDiametroCm ?? _diametroBooherCm,
+                  p.dispositivoCargaCm ?? _cargaBooherCm,
+                )!;
+                final eligible = const BorderReferenceTables().sugestao(
+                  p.dispositivoDiametroCm ?? _diametroBooherCm,
+                  p.dispositivoCargaCm ?? _cargaBooherCm,
+                );
+                if (eligible == null) {
+                  return IrrigationAlertBanner(
+                    message:
+                        'Bloqueado: célula sob revisão. Valor impresso ${cell.impressoLs} L/s; hipótese proposta ${cell.propostoLs} L/s. Não usada para dimensionar dispositivos.',
+                  );
+                }
+                final perDevice = eligible.impressoLs;
+                final count = p.vazaoFaixaLs == null
+                    ? null
+                    : (p.vazaoFaixaLs! / perDevice).ceil();
+                final simultaneasPelaOferta =
+                    p.vazaoDisponivelLs == null || p.vazaoFaixaLs == null
+                    ? null
+                    : (p.vazaoDisponivelLs! / p.vazaoFaixaLs!).floor();
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    IrrigationFormulaCard(
+                      formula:
+                          'Booher impresso: ${eligible.impressoLs} L/s por dispositivo',
+                      description: count == null
+                          ? 'Informe q0 e W para estimar quantidade. Consulta orientativa; carga e vazão real devem ser confirmadas em campo.'
+                          : '$count dispositivos por faixa (arredondamento para cima) · vazão total estimada ${_fmt(count * perDevice)} L/s para Qfaixa ${_fmt(p.vazaoFaixaLs)} L/s. Não representa cálculo hidráulico de comportas.',
+                    ),
+                    if (p.vazaoDisponivelLs == null)
+                      const Padding(
+                        padding: EdgeInsets.only(
+                          bottom: IrrigationSpacing.field,
+                        ),
+                        child: Text(
+                          'Qt pendente: informe a oferta disponível para verificar simultaneidade.',
+                        ),
+                      )
+                    else if (p.vazaoFaixaLs != null)
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          bottom: IrrigationSpacing.field,
+                        ),
+                        child: IrrigationAlertBanner(
+                          message: simultaneasPelaOferta == 0
+                              ? 'Oferta insuficiente: Qt=${_fmt(p.vazaoDisponivelLs)} L/s não atende sequer uma faixa (Qfaixa=${_fmt(p.vazaoFaixaLs)} L/s).'
+                              : 'Qt=${_fmt(p.vazaoDisponivelLs)} L/s permite no máximo $simultaneasPelaOferta faixa(s) simultânea(s) a Qfaixa=${_fmt(p.vazaoFaixaLs)} L/s. Defina NFP respeitando esse teto e confirme a divisão real da água.',
+                        ),
+                      ),
+                    const Text(
+                      'Registrar tipo de dique e orientação construtiva. A aula recomenda dois sulcos transversais no início e cerca de três adicionais, equidistantes, para declive >3%; o aplicativo não desenha nem dimensiona a construção. Bases ilustradas de diques não são alturas.',
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
         ),
       ),
-      _number(
-        'profundidadeRaizesCm',
-        'Profundidade efetiva das raízes',
-        p.agronomia?.profundidadeRaizesCm,
-        'cm',
-      ),
-      _number(
-        'fracaoDisponivel',
-        'Fração disponível da água no solo',
-        p.agronomia?.fracaoDisponivel,
-        '',
+    ],
+    3 => [
+      Card(
+        margin: EdgeInsets.zero,
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Informações da cultura para estimativa de demanda hídrica.',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 16),
+              _BorderInput(
+                label: 'Predefinição de cultura',
+                child: DropdownButtonFormField<_BorderCropPreset?>(
+                  key: ValueKey('crop-preset-$_cropPresetRevision'),
+                  isExpanded: true,
+                  initialValue: _selectedBorderCropPreset(p),
+                  decoration: const InputDecoration(
+                    helperText: 'Selecione uma cultura para preencher os parâmetros; eles podem ser ajustados depois.',
+                  ),
+                  items: [
+                    const DropdownMenuItem<_BorderCropPreset?>(
+                      value: null,
+                      child: Text('Personalizada / sem predefinição'),
+                    ),
+                    ..._borderCropPresets.map(
+                      (preset) => DropdownMenuItem<_BorderCropPreset?>(
+                        value: preset,
+                        child: Text(preset.name),
+                      ),
+                    ),
+                  ],
+                  onChanged: (preset) {
+                    if (preset == null) return;
+                    final controller = ref.read(borderProjectProvider.notifier);
+                    controller.setCultura(preset.name);
+                    for (final value in {
+                      'kc': preset.kc,
+                      'espacamentoFileirasM': preset.rows,
+                      'espacamentoPlantasM': preset.plants,
+                      'profundidadeRaizesCm': preset.roots,
+                      'fracaoDisponivel': preset.fraction,
+                    }.entries) {
+                      controller.setNumero(value.key, value.value.toString());
+                    }
+                    setState(() {
+                      _cropPresetRevision++;
+                      _confirmedSteps.remove(_step);
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(height: 12),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final fieldWidth = constraints.maxWidth >= 650
+                      ? (constraints.maxWidth - 12) / 2
+                      : constraints.maxWidth;
+                  return Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      SizedBox(
+                        width: fieldWidth,
+                        child: _BorderInput(
+                          label: 'Nome da cultura',
+                          child: TextFormField(
+                            key: ValueKey('crop-name-$_cropPresetRevision'),
+                            initialValue: p.cultura ?? '',
+                            onChanged: (value) {
+                              ref
+                                  .read(borderProjectProvider.notifier)
+                                  .setCultura(value);
+                              setState(() => _confirmedSteps.remove(_step));
+                            },
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: fieldWidth,
+                        child: _number(
+                          'kc',
+                          'Coeficiente da cultura (Kc)',
+                          p.agronomia?.kc,
+                          '',
+                          resetKey: _cropPresetRevision,
+                        ),
+                      ),
+                      SizedBox(
+                        width: fieldWidth,
+                        child: _number(
+                          'espacamentoFileirasM',
+                          'Espaçamento entre fileiras',
+                          p.agronomia?.espacamentoFileirasM,
+                          'm',
+                          resetKey: _cropPresetRevision,
+                        ),
+                      ),
+                      SizedBox(
+                        width: fieldWidth,
+                        child: _number(
+                          'espacamentoPlantasM',
+                          'Espaçamento entre plantas',
+                          p.agronomia?.espacamentoPlantasM,
+                          'm',
+                          resetKey: _cropPresetRevision,
+                        ),
+                      ),
+                      SizedBox(
+                        width: fieldWidth,
+                        child: _number(
+                          'profundidadeRaizesCm',
+                          'Profundidade das raízes',
+                          p.agronomia?.profundidadeRaizesCm,
+                          'cm',
+                          resetKey: _cropPresetRevision,
+                        ),
+                      ),
+                      SizedBox(
+                        width: fieldWidth,
+                        child: _number(
+                          'fracaoDisponivel',
+                          'Fração de água disponível',
+                          p.agronomia?.fracaoDisponivel,
+                          '',
+                          resetKey: _cropPresetRevision,
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
       ),
     ],
     4 => [
@@ -808,10 +938,69 @@ class _BorderProjectScreenState extends ConsumerState<BorderProjectScreen> {
         p.vazaoUnitariaLsM,
         'L/s/m',
       ),
+      const IrrigationAlertBanner(
+        message: 'F02 está registrada como fórmula da fonte, mas permanece bloqueada: Vmax e suas unidades/convenção não estão suficientemente definidos no pacote; entradas abaixo são apenas dados de auditoria e não calculam qmax.',
+      ),
+      _number(
+        'rho1F02',
+        'ρ1 transcrito (F02, opcional)',
+        p.rho1F02,
+        '',
+        optional: true,
+      ),
+      _number(
+        'rho2F02',
+        'ρ2 transcrito (F02, opcional)',
+        p.rho2F02,
+        '',
+        optional: true,
+      ),
+      _number(
+        'vmaxF02',
+        'Vmax informado para auditoria (F02, opcional)',
+        p.vmaxF02,
+        '',
+        optional: true,
+      ),
+      _BorderInput(
+        label: 'Unidade declarada de Vmax (F02, não interpretada)',
+        child: TextFormField(
+          initialValue: p.unidadeVmaxF02,
+          decoration: const InputDecoration(
+            hintText: 'Unidade conforme a fonte consultada',
+          ),
+          onChanged: (value) {
+            ref.read(borderProjectProvider.notifier).setUnidadeVmaxF02(value);
+            setState(() => _confirmedSteps.remove(_step));
+          },
+        ),
+      ),
       _number('rInicial', 'Palpite inicial r', p.rInicial, '', optional: true),
       const Text(
         'O tempo de corte do dimensionamento é calculado. Para avaliar um ensaio medido, informe estacas; o corte abaixo só vale para esse ensaio.',
       ),
+      _BorderInput(
+        label: 'Referência de corte antecipado (condicional, p.21)',
+        child: DropdownButtonFormField<double?>(
+          initialValue: p.fracaoCortePlanejada,
+          items: const [
+            DropdownMenuItem<double?>(
+              value: null,
+              child: Text('Não selecionar'),
+            ),
+            DropdownMenuItem<double?>(value: 2 / 3, child: Text('2/3 de L')),
+            DropdownMenuItem<double?>(value: .75, child: Text('3/4 de L')),
+          ],
+          onChanged: (value) {
+            ref.read(borderProjectProvider.notifier).setFracaoCorte(value);
+            setState(() => _confirmedSteps.remove(_step));
+          },
+        ),
+      ),
+      if (p.fracaoCortePlanejada != null)
+        const IrrigationAlertBanner(
+          message: 'Este manejo antecipa o corte em relação ao avanço completo. O motor ainda não calcula o avanço com água remanescente; a simulação ficará bloqueada até haver modelo por regime.',
+        ),
       TextFormField(
         key: const ValueKey('estacas'),
         initialValue: p.estacas
@@ -823,7 +1012,7 @@ class _BorderProjectScreenState extends ConsumerState<BorderProjectScreen> {
         maxLines: 5,
         decoration: InputDecoration(
           labelText: 'Estacas medidas (opcional)',
-          helperText: 'Uma por linha: distância m; avanço min; recessão min (opcional). Inclua 0;0.',
+          helperText: 'Uma por linha: distância m; avanço min; recessão min (opcional). Inclua 0;0, estacas preferencialmente a cada 10–30 m e a última em L.',
           errorText: _erroEstacas,
         ),
         onChanged: (value) {
@@ -871,13 +1060,19 @@ class _BorderProjectScreenState extends ConsumerState<BorderProjectScreen> {
             ? null
             : () {
                 try {
-                  ref
-                      .read(borderTrialProvider.notifier)
-                      .state = const BorderFieldTrial().evaluate(
+                  final measured = const BorderFieldTrial().evaluate(
                     p,
                     p.estacas,
                     cutoffMin: p.corteEnsaioMin,
                   );
+                  ref.read(borderTrialProvider.notifier).state = measured;
+                  try {
+                    ref.read(borderTrialSimulationProvider.notifier).state =
+                        const BorderHydraulics().dimensionar(p);
+                  } on FormatException {
+                    ref.read(borderTrialSimulationProvider.notifier).state =
+                        null;
+                  }
                 } on FormatException catch (e) {
                   ScaffoldMessenger.of(context)
                       .showSnackBar(SnackBar(content: Text(e.message)));
@@ -887,6 +1082,10 @@ class _BorderProjectScreenState extends ConsumerState<BorderProjectScreen> {
         label: const Text('Avaliar ensaio medido'),
       ),
       if (ref.watch(borderTrialProvider) case final trial?) ...[
+        BorderTrialChart(
+          trial: trial,
+          simulated: ref.watch(borderTrialSimulationProvider),
+        ),
         Text(
           'Avanço medido ajustado: p=${_fmt(trial.advance.p)} m/minʳ, r=${_fmt(trial.advance.r)}, erro=${_fmt(trial.advance.rmseMin)} min',
         ),
@@ -900,7 +1099,13 @@ class _BorderProjectScreenState extends ConsumerState<BorderProjectScreen> {
         OutlinedButton.icon(
           onPressed: () async {
             await Clipboard.setData(
-              ClipboardData(text: borderTrialCsv(p, trial)),
+              ClipboardData(
+                text: borderTrialCsv(
+                  p,
+                  trial,
+                  simulacao: ref.read(borderTrialSimulationProvider),
+                ),
+              ),
             );
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -912,6 +1117,55 @@ class _BorderProjectScreenState extends ConsumerState<BorderProjectScreen> {
           label: const Text('Copiar CSV do ensaio'),
         ),
       ],
+      _BorderInput(
+        label: 'Data do ensaio (opcional)',
+        child: TextFormField(
+          initialValue: p.dataEnsaioIso,
+          decoration: const InputDecoration(
+            hintText: 'AAAA-MM-DD',
+            helperText: 'Data civil local registrada; não é inferida.',
+          ),
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) return null;
+            return DateTime.tryParse(value.trim()) == null
+                ? 'Use uma data ISO válida'
+                : null;
+          },
+          onChanged: (value) {
+            ref.read(borderProjectProvider.notifier).setDataEnsaio(value);
+            setState(() => _confirmedSteps.remove(_step));
+          },
+        ),
+      ),
+      _BorderInput(
+        label: 'Referência do relógio do ensaio (opcional)',
+        child: TextFormField(
+          initialValue: p.referenciaRelogioEnsaio,
+          decoration: const InputDecoration(
+            hintText: 'Ex.: instante inicial do cronômetro',
+          ),
+          onChanged: (value) {
+            ref
+                .read(borderProjectProvider.notifier)
+                .setReferenciaRelogioEnsaio(value);
+            setState(() => _confirmedSteps.remove(_step));
+          },
+        ),
+      ),
+      _BorderInput(
+        label: 'Observações de campo (opcional)',
+        child: TextFormField(
+          initialValue: p.observacoesEnsaio,
+          minLines: 2,
+          maxLines: 4,
+          onChanged: (value) {
+            ref
+                .read(borderProjectProvider.notifier)
+                .setObservacoesEnsaio(value);
+            setState(() => _confirmedSteps.remove(_step));
+          },
+        ),
+      ),
     ],
     6 => [
       _number(
@@ -1046,6 +1300,10 @@ class _BorderProjectScreenState extends ConsumerState<BorderProjectScreen> {
             'Cultura e raízes',
             '${p.cultura ?? 'Não informada'} · Pr ${_fmt(p.agronomia?.profundidadeRaizesCm)} cm · fração disponível ${_fmt(p.agronomia?.fracaoDisponivel)}',
           ),
+          _review(
+            'Parâmetros da cultura',
+            'Kc ${_fmt(p.agronomia?.kc)} · fileiras ${_fmt(p.agronomia?.espacamentoFileirasM)} m · plantas ${_fmt(p.agronomia?.espacamentoPlantasM)} m',
+          ),
         ],
       ),
       const SizedBox(height: 12),
@@ -1076,6 +1334,17 @@ class _BorderProjectScreenState extends ConsumerState<BorderProjectScreen> {
             'Dique / hn',
             '${_fmt(p.alturaDiqueM)} / ${_fmt(p.laminaSuperficialM)} m (não informados quando —)',
           ),
+          _review('Tipo do dique', p.tipoDique ?? 'Não informado'),
+          _review(
+            'Corte antecipado de referência',
+            p.fracaoCortePlanejada == null
+                ? 'Não selecionado'
+                : '${(p.fracaoCortePlanejada! * 100).toStringAsFixed(1)}% de L · bloqueado até haver modelo pós-corte',
+          ),
+          _review(
+            'F02 alternativo',
+            'Bloqueado · ρ1=${_fmt(p.rho1F02)} · ρ2=${_fmt(p.rho2F02)} · Vmax=${_fmt(p.vmaxF02)} ${p.unidadeVmaxF02 ?? ''}',
+          ),
           _review('Oferta de água', '${_fmt(p.vazaoDisponivelLs)} L/s'),
           _review(
             'PI · TDF · tmu · NFP · janela',
@@ -1096,10 +1365,11 @@ class _BorderProjectScreenState extends ConsumerState<BorderProjectScreen> {
     String unit, {
     bool optional = false,
     bool zero = false,
+    int? resetKey,
   }) => _BorderInput(
     label: label,
     child: TextFormField(
-      key: ValueKey(field),
+      key: ValueKey(resetKey == null ? field : '$field-$resetKey'),
       initialValue: value?.toString(),
       keyboardType: const TextInputType.numberWithOptions(
         decimal: true,

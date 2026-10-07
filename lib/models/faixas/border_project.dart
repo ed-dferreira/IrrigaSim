@@ -15,10 +15,26 @@ enum ManejoFaixa { vazaoConstante, vazaoReduzida, reuso }
 
 enum CenarioInfiltracaoFaixa { primeira, terceira, informado }
 
+class BorderInfiltrationScenario {
+  final double? k, a, vibMMin;
+  const BorderInfiltrationScenario({this.k, this.a, this.vibMMin});
+  Map<String, dynamic> toMap() => {'k': k, 'a': a, 'vibMMin': vibMMin};
+  factory BorderInfiltrationScenario.fromMap(Map<String, dynamic> map) =>
+      BorderInfiltrationScenario(
+        k: (map['k'] as num?)?.toDouble(),
+        a: (map['a'] as num?)?.toDouble(),
+        vibMMin: (map['vibMMin'] as num?)?.toDouble(),
+      );
+}
+
 class BorderAlternativeRecord {
   final double comprimentoM, vazaoLsM;
-  final double? eficienciaPercentual;
+  final double? eficienciaPercentual, erPercentual, ppPercentual, pePercentual;
+  final double? demandaLs;
+  final double? gradeMenorLsM, gradeMaiorLsM, gradePassoLsM;
+  final String? objetivo;
   final String? motivoRejeicao;
+  final bool selecionada;
 
   /// Código canônico da rejeição (null para candidata viável/antiga).
   final BorderStatus? status;
@@ -28,13 +44,46 @@ class BorderAlternativeRecord {
     this.eficienciaPercentual,
     this.motivoRejeicao, [
     this.status,
-  ]);
+  ]) : erPercentual = null,
+       ppPercentual = null,
+       pePercentual = null,
+       demandaLs = null,
+       gradeMenorLsM = null,
+       gradeMaiorLsM = null,
+       gradePassoLsM = null,
+       objetivo = null,
+       selecionada = false;
+  const BorderAlternativeRecord.withMetrics(
+    this.comprimentoM,
+    this.vazaoLsM,
+    this.eficienciaPercentual,
+    this.motivoRejeicao, {
+    this.status,
+    this.erPercentual,
+    this.ppPercentual,
+    this.pePercentual,
+    this.demandaLs,
+    this.gradeMenorLsM,
+    this.gradeMaiorLsM,
+    this.gradePassoLsM,
+    this.objetivo,
+    this.selecionada = false,
+  });
   Map<String, dynamic> toMap() => {
     'comprimentoM': comprimentoM,
     'vazaoLsM': vazaoLsM,
     'eficienciaPercentual': eficienciaPercentual,
     'motivoRejeicao': motivoRejeicao,
     'status': status?.codigo,
+    'erPercentual': erPercentual,
+    'ppPercentual': ppPercentual,
+    'pePercentual': pePercentual,
+    'demandaLs': demandaLs,
+    'gradeMenorLsM': gradeMenorLsM,
+    'gradeMaiorLsM': gradeMaiorLsM,
+    'gradePassoLsM': gradePassoLsM,
+    'objetivo': objetivo,
+    'selecionada': selecionada,
   };
   factory BorderAlternativeRecord.fromMap(Map<String, dynamic> data) =>
       BorderAlternativeRecord(
@@ -45,7 +94,44 @@ class BorderAlternativeRecord {
         data['status'] == null
             ? null
             : BorderStatus.deNome(data['status'] as String?),
+      ).copyWithMetrics(
+        erPercentual: (data['erPercentual'] as num?)?.toDouble(),
+        ppPercentual: (data['ppPercentual'] as num?)?.toDouble(),
+        pePercentual: (data['pePercentual'] as num?)?.toDouble(),
+        demandaLs: (data['demandaLs'] as num?)?.toDouble(),
+        gradeMenorLsM: (data['gradeMenorLsM'] as num?)?.toDouble(),
+        gradeMaiorLsM: (data['gradeMaiorLsM'] as num?)?.toDouble(),
+        gradePassoLsM: (data['gradePassoLsM'] as num?)?.toDouble(),
+        objetivo: data['objetivo'] as String?,
+        selecionada: data['selecionada'] == true,
       );
+
+  BorderAlternativeRecord copyWithMetrics({
+    double? erPercentual,
+    double? ppPercentual,
+    double? pePercentual,
+    double? demandaLs,
+    double? gradeMenorLsM,
+    double? gradeMaiorLsM,
+    double? gradePassoLsM,
+    String? objetivo,
+    bool? selecionada,
+  }) => BorderAlternativeRecord.withMetrics(
+    comprimentoM,
+    vazaoLsM,
+    eficienciaPercentual,
+    motivoRejeicao,
+    status: status,
+    erPercentual: erPercentual ?? this.erPercentual,
+    ppPercentual: ppPercentual ?? this.ppPercentual,
+    pePercentual: pePercentual ?? this.pePercentual,
+    demandaLs: demandaLs ?? this.demandaLs,
+    gradeMenorLsM: gradeMenorLsM ?? this.gradeMenorLsM,
+    gradeMaiorLsM: gradeMaiorLsM ?? this.gradeMaiorLsM,
+    gradePassoLsM: gradePassoLsM ?? this.gradePassoLsM,
+    objetivo: objetivo ?? this.objetivo,
+    selecionada: selecionada ?? this.selecionada,
+  );
 }
 
 /// Entradas de projeto; valores nulos representam dados ainda não informados.
@@ -65,23 +151,33 @@ class BorderProject {
   final CoberturaFaixa cobertura;
   final ManejoFaixa manejo;
   final CenarioInfiltracaoFaixa cenarioInfiltracao;
+  final BorderInfiltrationScenario? dadosPrimeira, dadosTerceira;
   final OrigemIrnFaixa origemIrn;
   final TexturaSolo? textura;
   final BorderAgronomy? agronomia;
   final List<BorderStake> estacas;
+  final List<BorderTerrainPoint> perfilLongitudinal;
+  final String? dataEnsaioIso, referenciaRelogioEnsaio, observacoesEnsaio;
   final double? corteEnsaioMin;
   final double? comprimentoAreaM, larguraAreaM, comprimentoM, larguraM;
   final double? desnivelLongitudinalM, baseLongitudinalM;
   final double? desnivelTransversalM, baseTransversalM;
   final double? alturaDiqueM, laminaSuperficialM;
+  final double? fracaoCortePlanejada;
   final double? k, a, vibMMin, rugosidadeN, vazaoUnitariaLsM, irnMm;
+  final double? rho1F02, rho2F02, vmaxF02;
+  final String? unidadeVmaxF02;
   final double? rInicial, vazaoDisponivelLs;
   final double? jornadaHoras, janelaFornecimentoHorasDia, mudancaMin;
   final double? inicioFornecimentoH;
   final int? periodoDias, faixasSimultaneas;
   final List<int> diasFornecimento;
   final List<BorderAlternativeRecord> alternativas;
+  final double? dispositivoDiametroCm, dispositivoCargaCm;
   final String? cultura;
+  final String? tipoDique;
+  final String? orientacaoArea;
+  final double? areaUtilM2;
 
   /// Apenas em registros rápidos antigos; nunca controla o corte dimensionado.
   final double? tempoAplicacaoLegadoMin;
@@ -94,10 +190,16 @@ class BorderProject {
     this.cobertura = CoberturaFaixa.soloExposto,
     this.manejo = ManejoFaixa.vazaoConstante,
     this.cenarioInfiltracao = CenarioInfiltracaoFaixa.informado,
+    this.dadosPrimeira,
+    this.dadosTerceira,
     this.origemIrn = OrigemIrnFaixa.informada,
     this.textura,
     this.agronomia,
     this.estacas = const [],
+    this.perfilLongitudinal = const [],
+    this.dataEnsaioIso,
+    this.referenciaRelogioEnsaio,
+    this.observacoesEnsaio,
     this.corteEnsaioMin,
     this.comprimentoAreaM,
     this.larguraAreaM,
@@ -109,10 +211,15 @@ class BorderProject {
     this.baseTransversalM,
     this.alturaDiqueM,
     this.laminaSuperficialM,
+    this.fracaoCortePlanejada,
     this.k,
     this.a,
     this.vibMMin,
     this.rugosidadeN,
+    this.rho1F02,
+    this.rho2F02,
+    this.vmaxF02,
+    this.unidadeVmaxF02,
     this.vazaoUnitariaLsM,
     this.irnMm,
     this.rInicial,
@@ -125,7 +232,12 @@ class BorderProject {
     this.faixasSimultaneas,
     this.diasFornecimento = const [],
     this.alternativas = const [],
+    this.dispositivoDiametroCm,
+    this.dispositivoCargaCm,
     this.cultura,
+    this.tipoDique,
+    this.orientacaoArea,
+    this.areaUtilM2,
     this.tempoAplicacaoLegadoMin,
   });
 
@@ -167,6 +279,133 @@ class BorderProject {
   /// Primeiro impedimento do modelo com código canônico §10.3 e, quando a
   /// fonte dita a exigência, a página correspondente.
   BorderNotice? get impedimento {
+    final optionalPositive = <(String, double?)>[
+      ('altura real do dique', alturaDiqueM),
+      ('hn superficial', laminaSuperficialM),
+      ('oferta de água Qt', vazaoDisponivelLs),
+      ('jornada TDF', jornadaHoras),
+      ('janela de fornecimento', janelaFornecimentoHorasDia),
+      ('período PI', periodoDias?.toDouble()),
+      ('número de faixas simultâneas NFP', faixasSimultaneas?.toDouble()),
+      ('comprimento da área', comprimentoAreaM),
+      ('largura da área', larguraAreaM),
+      ('área útil', areaUtilM2),
+      ('ρ1 da F02', rho1F02),
+      ('ρ2 da F02', rho2F02),
+      ('Vmax da F02', vmaxF02),
+    ];
+    for (final entry in optionalPositive) {
+      final value = entry.$2;
+      if (value != null && (!value.isFinite || value <= 0)) {
+        return BorderNotice(
+          BorderStatus.entradaInvalida,
+          '${entry.$1} deve ser finito e positivo quando informado.',
+        );
+      }
+    }
+    if (areaUtilM2 != null &&
+        comprimentoAreaM != null &&
+        larguraAreaM != null &&
+        areaUtilM2! > comprimentoAreaM! * larguraAreaM! + 1e-6) {
+      return const BorderNotice(
+        BorderStatus.entradaInvalida,
+        'Área útil não pode exceder a área bruta informada.',
+      );
+    }
+    if (rho2F02 == 2) {
+      return const BorderNotice(
+        BorderStatus.entradaInvalida,
+        'ρ2 da F02 não pode ser 2 na forma transcrita.',
+        pagina: 'p. 53',
+      );
+    }
+    if (mudancaMin != null && (!mudancaMin!.isFinite || mudancaMin! < 0)) {
+      return const BorderNotice(
+        BorderStatus.entradaInvalida,
+        'Tempo de mudança deve ser finito e não negativo.',
+      );
+    }
+    if (inicioFornecimentoH != null &&
+        (!inicioFornecimentoH!.isFinite ||
+            inicioFornecimentoH! < 0 ||
+            inicioFornecimentoH! >= 24)) {
+      return const BorderNotice(
+        BorderStatus.entradaInvalida,
+        'Início do fornecimento deve estar entre 0 e 24 h.',
+      );
+    }
+    if (inicioFornecimentoH != null &&
+        janelaFornecimentoHorasDia != null &&
+        inicioFornecimentoH! + janelaFornecimentoHorasDia! > 24) {
+      return const BorderNotice(
+        BorderStatus.entradaInvalida,
+        'A janela de fornecimento não pode ultrapassar o dia civil.',
+      );
+    }
+    if (diasFornecimento.toSet().length != diasFornecimento.length ||
+        diasFornecimento.any(
+          (day) => day < 1 || (periodoDias != null && day > periodoDias!),
+        )) {
+      return const BorderNotice(
+        BorderStatus.entradaInvalida,
+        'Dias de fornecimento devem ser distintos e estar dentro do PI.',
+      );
+    }
+    if (dataEnsaioIso != null && DateTime.tryParse(dataEnsaioIso!) == null) {
+      return const BorderNotice(
+        BorderStatus.entradaInvalida,
+        'Data do ensaio deve usar formato ISO (AAAA-MM-DD).',
+      );
+    }
+    if (perfilLongitudinal.isNotEmpty) {
+      if (declividadeLongitudinal == null ||
+          !declividadeLongitudinal!.isFinite ||
+          declividadeLongitudinal! <= 0) {
+        return const BorderNotice(
+          BorderStatus.entradaInvalida,
+          'Perfil topográfico longitudinal requer S0 médio positivo informado.',
+        );
+      }
+      if (comprimentoAreaM == null ||
+          perfilLongitudinal.length < 2 ||
+          perfilLongitudinal.first.xM != 0 ||
+          (perfilLongitudinal.last.xM - comprimentoAreaM!).abs() > 1e-6 ||
+          perfilLongitudinal.any(
+            (point) => !point.xM.isFinite || !point.cotaM.isFinite,
+          ) ||
+          List.generate(perfilLongitudinal.length - 1, (i) => i).any(
+            (i) => perfilLongitudinal[i + 1].xM <= perfilLongitudinal[i].xM,
+          )) {
+        return const BorderNotice(
+          BorderStatus.entradaInvalida,
+          'Perfil longitudinal requer estacas crescentes, iniciando em 0 e terminando no comprimento total da área.',
+        );
+      }
+      final directions = <int>{};
+      final segmentSlopes = <double>[];
+      for (var i = 0; i < perfilLongitudinal.length - 1; i++) {
+        final left = perfilLongitudinal[i], right = perfilLongitudinal[i + 1];
+        final delta = left.cotaM - right.cotaM;
+        directions.add(delta.sign.toInt());
+        segmentSlopes.add(delta.abs() / (right.xM - left.xM));
+      }
+      if (directions.length != 1 || directions.single == 0) {
+        return const BorderNotice(
+          BorderStatus.modeloNaoImplementado,
+          'Perfil com inversão de declive ou trecho plano não é representado pelo modelo de declive único.',
+          pagina: 'p. 12',
+        );
+      }
+      if (segmentSlopes.any(
+        (slope) => (slope - declividadeLongitudinal!).abs() > 1e-6,
+      )) {
+        return const BorderNotice(
+          BorderStatus.modeloNaoImplementado,
+          'Perfil longitudinal variável/terminal plano exige modelo por trechos; o motor usa S0 único.',
+          pagina: 'p. 12',
+        );
+      }
+    }
     if (origemIrn == OrigemIrnFaixa.calculada && agronomia?.irnMm == null) {
       return const BorderNotice(
         BorderStatus.entradaInvalida,
@@ -185,6 +424,22 @@ class BorderProject {
         BorderStatus.modeloNaoImplementado,
         'Redução de vazão e reuso ainda não são simuláveis.',
         pagina: '§2.1, pp. 2–11',
+      );
+    }
+    if (fracaoCortePlanejada != null) {
+      if (!fracaoCortePlanejada!.isFinite ||
+          fracaoCortePlanejada! < 2 / 3 ||
+          fracaoCortePlanejada! > .75) {
+        return const BorderNotice(
+          BorderStatus.entradaInvalida,
+          'A referência de corte precoce deve estar entre 2/3 e 3/4 de L.',
+          pagina: 'p. 21',
+        );
+      }
+      return const BorderNotice(
+        BorderStatus.modeloNaoImplementado,
+        'Corte antes do avanço completo requer modelar a água armazenada e o avanço restante; regra condicional não aplicada automaticamente.',
+        pagina: 'pp. 21, 28–29, 64',
       );
     }
     if (declividadeLongitudinal == null ||
@@ -259,10 +514,16 @@ class BorderProject {
     CoberturaFaixa? cobertura,
     ManejoFaixa? manejo,
     CenarioInfiltracaoFaixa? cenarioInfiltracao,
+    BorderInfiltrationScenario? dadosPrimeira,
+    BorderInfiltrationScenario? dadosTerceira,
     OrigemIrnFaixa? origemIrn,
     TexturaSolo? textura,
     BorderAgronomy? agronomia,
     List<BorderStake>? estacas,
+    List<BorderTerrainPoint>? perfilLongitudinal,
+    String? dataEnsaioIso,
+    String? referenciaRelogioEnsaio,
+    String? observacoesEnsaio,
     double? corteEnsaioMin,
     double? comprimentoAreaM,
     double? larguraAreaM,
@@ -274,10 +535,15 @@ class BorderProject {
     double? baseTransversalM,
     double? alturaDiqueM,
     double? laminaSuperficialM,
+    double? fracaoCortePlanejada,
     double? k,
     double? a,
     double? vibMMin,
     double? rugosidadeN,
+    double? rho1F02,
+    double? rho2F02,
+    double? vmaxF02,
+    String? unidadeVmaxF02,
     double? vazaoUnitariaLsM,
     double? irnMm,
     double? rInicial,
@@ -291,7 +557,12 @@ class BorderProject {
     BorderNumericConfig? numerico,
     List<int>? diasFornecimento,
     List<BorderAlternativeRecord>? alternativas,
+    double? dispositivoDiametroCm,
+    double? dispositivoCargaCm,
     String? cultura,
+    String? tipoDique,
+    String? orientacaoArea,
+    double? areaUtilM2,
   }) => BorderProject(
     versao: versao,
     numerico: numerico ?? this.numerico,
@@ -300,10 +571,17 @@ class BorderProject {
     cobertura: cobertura ?? this.cobertura,
     manejo: manejo ?? this.manejo,
     cenarioInfiltracao: cenarioInfiltracao ?? this.cenarioInfiltracao,
+    dadosPrimeira: dadosPrimeira ?? this.dadosPrimeira,
+    dadosTerceira: dadosTerceira ?? this.dadosTerceira,
     origemIrn: origemIrn ?? this.origemIrn,
     textura: textura ?? this.textura,
     agronomia: agronomia ?? this.agronomia,
     estacas: estacas ?? this.estacas,
+    perfilLongitudinal: perfilLongitudinal ?? this.perfilLongitudinal,
+    dataEnsaioIso: dataEnsaioIso ?? this.dataEnsaioIso,
+    referenciaRelogioEnsaio:
+        referenciaRelogioEnsaio ?? this.referenciaRelogioEnsaio,
+    observacoesEnsaio: observacoesEnsaio ?? this.observacoesEnsaio,
     corteEnsaioMin: corteEnsaioMin ?? this.corteEnsaioMin,
     comprimentoAreaM: comprimentoAreaM ?? this.comprimentoAreaM,
     larguraAreaM: larguraAreaM ?? this.larguraAreaM,
@@ -315,10 +593,15 @@ class BorderProject {
     baseTransversalM: baseTransversalM ?? this.baseTransversalM,
     alturaDiqueM: alturaDiqueM ?? this.alturaDiqueM,
     laminaSuperficialM: laminaSuperficialM ?? this.laminaSuperficialM,
+    fracaoCortePlanejada: fracaoCortePlanejada ?? this.fracaoCortePlanejada,
     k: k ?? this.k,
     a: a ?? this.a,
     vibMMin: vibMMin ?? this.vibMMin,
     rugosidadeN: rugosidadeN ?? this.rugosidadeN,
+    rho1F02: rho1F02 ?? this.rho1F02,
+    rho2F02: rho2F02 ?? this.rho2F02,
+    vmaxF02: vmaxF02 ?? this.vmaxF02,
+    unidadeVmaxF02: unidadeVmaxF02 ?? this.unidadeVmaxF02,
     vazaoUnitariaLsM: vazaoUnitariaLsM ?? this.vazaoUnitariaLsM,
     irnMm: irnMm ?? this.irnMm,
     rInicial: rInicial ?? this.rInicial,
@@ -332,7 +615,12 @@ class BorderProject {
     faixasSimultaneas: faixasSimultaneas ?? this.faixasSimultaneas,
     diasFornecimento: diasFornecimento ?? this.diasFornecimento,
     alternativas: alternativas ?? this.alternativas,
+    dispositivoDiametroCm: dispositivoDiametroCm ?? this.dispositivoDiametroCm,
+    dispositivoCargaCm: dispositivoCargaCm ?? this.dispositivoCargaCm,
     cultura: cultura ?? this.cultura,
+    tipoDique: tipoDique ?? this.tipoDique,
+    orientacaoArea: orientacaoArea ?? this.orientacaoArea,
+    areaUtilM2: areaUtilM2 ?? this.areaUtilM2,
     tempoAplicacaoLegadoMin: tempoAplicacaoLegadoMin,
   );
 
@@ -344,10 +632,16 @@ class BorderProject {
     'cobertura': cobertura.name,
     'manejo': manejo.name,
     'cenarioInfiltracao': cenarioInfiltracao.name,
+    'dadosPrimeira': dadosPrimeira?.toMap(),
+    'dadosTerceira': dadosTerceira?.toMap(),
     'origemIrn': origemIrn.name,
     'textura': textura?.name,
     'agronomia': agronomia?.toMap(),
     'estacas': estacas.map((s) => s.toMap()).toList(),
+    'perfilLongitudinal': perfilLongitudinal.map((p) => p.toMap()).toList(),
+    'dataEnsaioIso': dataEnsaioIso,
+    'referenciaRelogioEnsaio': referenciaRelogioEnsaio,
+    'observacoesEnsaio': observacoesEnsaio,
     'corteEnsaioMin': corteEnsaioMin,
     'comprimentoAreaM': comprimentoAreaM,
     'larguraAreaM': larguraAreaM,
@@ -359,10 +653,15 @@ class BorderProject {
     'baseTransversalM': baseTransversalM,
     'alturaDiqueM': alturaDiqueM,
     'laminaSuperficialM': laminaSuperficialM,
+    'fracaoCortePlanejada': fracaoCortePlanejada,
     'k': k,
     'a': a,
     'vibMMin': vibMMin,
     'rugosidadeN': rugosidadeN,
+    'rho1F02': rho1F02,
+    'rho2F02': rho2F02,
+    'vmaxF02': vmaxF02,
+    'unidadeVmaxF02': unidadeVmaxF02,
     'vazaoUnitariaLsM': vazaoUnitariaLsM,
     'irnMm': irnMm,
     'rInicial': rInicial,
@@ -375,7 +674,12 @@ class BorderProject {
     'faixasSimultaneas': faixasSimultaneas,
     'diasFornecimento': diasFornecimento,
     'alternativas': alternativas.map((a) => a.toMap()).toList(),
+    'dispositivoDiametroCm': dispositivoDiametroCm,
+    'dispositivoCargaCm': dispositivoCargaCm,
     'cultura': cultura,
+    'tipoDique': tipoDique,
+    'orientacaoArea': orientacaoArea,
+    'areaUtilM2': areaUtilM2,
     'tempoAplicacaoLegadoMin': tempoAplicacaoLegadoMin,
   };
 
@@ -416,6 +720,16 @@ class BorderProject {
         'cenarioInfiltracao',
         CenarioInfiltracaoFaixa.informado,
       ),
+      dadosPrimeira: map['dadosPrimeira'] is Map
+          ? BorderInfiltrationScenario.fromMap(
+              Map<String, dynamic>.from(map['dadosPrimeira'] as Map),
+            )
+          : null,
+      dadosTerceira: map['dadosTerceira'] is Map
+          ? BorderInfiltrationScenario.fromMap(
+              Map<String, dynamic>.from(map['dadosTerceira'] as Map),
+            )
+          : null,
       origemIrn: choice(
         OrigemIrnFaixa.values,
         'origemIrn',
@@ -436,6 +750,18 @@ class BorderProject {
               )
               .toList() ??
           const [],
+      perfilLongitudinal:
+          (map['perfilLongitudinal'] as List?)
+              ?.map(
+                (item) => BorderTerrainPoint.fromMap(
+                  Map<String, dynamic>.from(item as Map),
+                ),
+              )
+              .toList() ??
+          const [],
+      dataEnsaioIso: map['dataEnsaioIso'] as String?,
+      referenciaRelogioEnsaio: map['referenciaRelogioEnsaio'] as String?,
+      observacoesEnsaio: map['observacoesEnsaio'] as String?,
       corteEnsaioMin: n('corteEnsaioMin'),
       comprimentoAreaM: n('comprimentoAreaM'),
       larguraAreaM: n('larguraAreaM'),
@@ -447,10 +773,15 @@ class BorderProject {
       baseTransversalM: n('baseTransversalM'),
       alturaDiqueM: n('alturaDiqueM'),
       laminaSuperficialM: n('laminaSuperficialM'),
+      fracaoCortePlanejada: n('fracaoCortePlanejada'),
       k: n('k'),
       a: n('a'),
       vibMMin: n('vibMMin'),
       rugosidadeN: n('rugosidadeN'),
+      rho1F02: n('rho1F02'),
+      rho2F02: n('rho2F02'),
+      vmaxF02: n('vmaxF02'),
+      unidadeVmaxF02: map['unidadeVmaxF02'] as String?,
       vazaoUnitariaLsM: n('vazaoUnitariaLsM'),
       irnMm: n('irnMm'),
       rInicial: n('rInicial'),
@@ -475,7 +806,12 @@ class BorderProject {
               )
               .toList() ??
           const [],
+      dispositivoDiametroCm: n('dispositivoDiametroCm'),
+      dispositivoCargaCm: n('dispositivoCargaCm'),
       cultura: map['cultura'] as String?,
+      tipoDique: map['tipoDique'] as String?,
+      orientacaoArea: map['orientacaoArea'] as String?,
+      areaUtilM2: n('areaUtilM2'),
       tempoAplicacaoLegadoMin: n('tempoAplicacaoLegadoMin'),
     );
   }

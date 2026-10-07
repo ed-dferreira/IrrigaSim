@@ -29,6 +29,10 @@ class WaterBalanceResult {
     required this.deepPercolationPercent,
     required this.runoffPercent,
     required this.residualPercent,
+    required this.usefulDepthM,
+    required this.percolatedDepthM,
+    required this.runoffDepthM,
+    required this.deficitDepthM,
   });
 
   final double appliedDepthM;
@@ -39,6 +43,10 @@ class WaterBalanceResult {
   final double deepPercolationPercent;
   final double runoffPercent;
   final double residualPercent;
+  final double usefulDepthM;
+  final double percolatedDepthM;
+  final double runoffDepthM;
+  final double deficitDepthM;
 }
 
 class SurfaceIrrigationMath {
@@ -174,7 +182,12 @@ class SurfaceIrrigationMath {
     required double requiredDepthM,
     required double appliedDepthM,
   }) {
-    if (profileM.isEmpty || requiredDepthM <= 0 || appliedDepthM <= 0) {
+    if (profileM.length < 2 ||
+        !requiredDepthM.isFinite ||
+        requiredDepthM <= 0 ||
+        !appliedDepthM.isFinite ||
+        appliedDepthM <= 0 ||
+        profileM.any((depth) => !depth.isFinite || depth < 0)) {
       throw const FormatException(
         'Não há dados suficientes para fechar o balanço hídrico.',
       );
@@ -186,15 +199,28 @@ class SurfaceIrrigationMath {
     final percolated = trapezoidalMean(
       profileM.map((depth) => max(0.0, depth - requiredDepthM)).toList(),
     );
-    final runoff = max(0.0, appliedDepthM - infiltrated);
-    final deficit = max(0.0, infiltrated - appliedDepthM);
-    final residualPercent = deficit / appliedDepthM * 100;
-    if (residualPercent > 1) {
+    final deficit = trapezoidalMean(
+      profileM.map((depth) => max(0.0, requiredDepthM - depth)).toList(),
+    );
+    // Tolerância apenas de arredondamento em ponto flutuante, nunca 1%.
+    final tolerance = max(appliedDepthM, infiltrated) * 1e-10;
+    final remaining = appliedDepthM - infiltrated;
+    if (remaining < -tolerance) {
       throw FormatException(
-        'O perfil infiltrado exige ${residualPercent.toStringAsFixed(1)}% mais água que o volume aplicado. Revise vazão e tempos.',
+        'Balanço inconsistente: o perfil infiltrado exige ${(-remaining * 1000).toStringAsFixed(3)} mm mais água que a lâmina aplicada. Revise vazão e tempos.',
       );
     }
-    double percent(double depth) => (depth / appliedDepthM * 100).clamp(0, 100);
+    final runoff = remaining < 0 ? 0.0 : remaining;
+    final residualPercent =
+        (appliedDepthM - useful - percolated - runoff) / appliedDepthM * 100;
+    if ((infiltrated - useful - percolated).abs() > tolerance ||
+        (requiredDepthM - useful - deficit).abs() > tolerance ||
+        residualPercent.abs() > 1e-8) {
+      throw const FormatException(
+        'Balanço inconsistente: as lâminas não fecham.',
+      );
+    }
+    double percent(double depth) => depth / appliedDepthM * 100;
     return WaterBalanceResult(
       appliedDepthM: appliedDepthM,
       meanInfiltratedDepthM: infiltrated,
@@ -209,6 +235,10 @@ class SurfaceIrrigationMath {
       deepPercolationPercent: percent(percolated),
       runoffPercent: percent(runoff),
       residualPercent: residualPercent,
+      usefulDepthM: useful,
+      percolatedDepthM: percolated,
+      runoffDepthM: runoff,
+      deficitDepthM: deficit,
     );
   }
 }

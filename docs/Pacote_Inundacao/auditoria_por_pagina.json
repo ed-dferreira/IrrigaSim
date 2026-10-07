@@ -1,0 +1,590 @@
+[
+  {
+    "pagina": 1,
+    "conteudo_verificado": "Capa: instituição, curso, professora e tema.",
+    "revisao": "Mantido",
+    "evidencia": "evidencias/pagina_01.png",
+    "texto_extraido": "Ministério da Educação\n                   Universidade Federal do Pampa\n              Curso Bacharelado em Engenharia Agrícola\n\n\n\n\n       Irrigação por\n       INUNDAÇÃO\n\nProf.ª Chaiane Guerra da Conceição\n      Engenheira Agrícola, Dr.ª\n\n\n\n  1"
+  },
+  {
+    "pagina": 2,
+    "conteudo_verificado": "Definição: superfície do solo e energia potencial conduzem a água; bacias delimitadas por taipas.",
+    "revisao": "Mantido",
+    "evidencia": "evidencias/pagina_02.png",
+    "texto_extraido": "INUNDAÇÃO\n\n\n❑ Proporciona a APLICAÇÃO DE ÁGUA ÀS PLANTAS utilizando-se da superfície\n\n  do solo e da energia potencial como MEIO DE CONDUÇÃO E DISTRIBUIÇÃO\n\n  DA ÁGUA;\n\n\n\n❑ A aplicação de água é feita por meio de bacias ou tabuleiros, ou seja,\n\n  áreas quase planas, de tamanho variado, limitadas por diques ou taipas;\n\n\n\n❑ O sistema se caracteriza pela manutenção de uma lâmina de água sobre a\n\n  superfície do solo;\n\n\n  2"
+  },
+  {
+    "pagina": 3,
+    "conteudo_verificado": "Foto: identifica espelho d’água e dique/taipa; não há equação nem dado de projeto.",
+    "revisao": "Figura registrada",
+    "evidencia": "evidencias/pagina_03.png",
+    "texto_extraido": "INUNDAÇÃO\n\n\n\n\n3"
+  },
+  {
+    "pagina": 4,
+    "conteudo_verificado": "Foto de tabuleiros inundados; evidencia divisão da área e lâmina retida.",
+    "revisao": "Figura registrada",
+    "evidencia": "evidencias/pagina_04.png",
+    "texto_extraido": "INUNDAÇÃO\n\n\n\n\n4"
+  },
+  {
+    "pagina": 5,
+    "conteudo_verificado": "Fotos: inundação para verificar nivelamento e posterior acabamento; conjunto de tabuleiros prontos.",
+    "revisao": "Detalhe acrescentado",
+    "evidencia": "evidencias/pagina_05.png",
+    "texto_extraido": "INUNDAÇÃO\n\n\n\n\n          Figura 3 - Inundação para verificação do\n          nivelamento e posterior acabamento de\n          um tabuleiro.\n\n\n\n\n          Figura 4 - Conjunto de tabuleiros\n          acabados.\n\n\n\n\n5"
+  },
+  {
+    "pagina": 6,
+    "conteudo_verificado": "Exigências: textura média/fina, declividade uniforme <2%, tolerância ao excesso hídrico.",
+    "revisao": "Mantido",
+    "evidencia": "evidencias/pagina_06.png",
+    "texto_extraido": "INUNDAÇÃO\n\n\n    Exigências:\n\n\n         Solos de textura média a fina;\n\n\n         Terrenos com declividade uniforme inferior a 2%;\n\n\n         Culturas tolerantes ao excesso hídrico.\n\n\n\n\n6"
+  },
+  {
+    "pagina": 7,
+    "conteudo_verificado": "Seis vantagens; faltava citar explicitamente a eficiência dos herbicidas com entrada precoce da água.",
+    "revisao": "Complementado",
+    "evidencia": "evidencias/pagina_07.png",
+    "texto_extraido": "INUNDAÇÃO\n\n\nVantagens:\n\n    Economia de energia;\n\n    Controle de plantas daninhas;\n\n\n    Aproveitamento máximo da água da chuva;\n\n\n    Controle da temperatura do solo;\n\n\n    Geralmente apresentam o menor custo fixo e operacional;\n\n    Eficiência dos herbicidas quando a água entra cedo na lavoura.\n\n\n\n7"
+  },
+  {
+    "pagina": 8,
+    "conteudo_verificado": "Limitações: água, topografia, custo de sistematização, tolerância ao encharcamento e área ocupada por taipas/canais.",
+    "revisao": "Mantido",
+    "evidencia": "evidencias/pagina_08.png",
+    "texto_extraido": "INUNDAÇÃO\n\n\nLimitações:\n\n    X   Consumo elevado de água;\n\n    X   Terrenos com declividade uniforme menor de 2%,\n\n\n    X   Pode    haver   necessidade     de   sistematização    da       lavoura\n\n\n    X   (encarecimento);\n\n\n    X   Restrito para culturas resistentes ao encharcamento;\n\n\n    X   Perda de área de cultivo para construção das taipas e canais.\n\n\n\n8"
+  },
+  {
+    "pagina": 9,
+    "conteudo_verificado": "Intermitente: alcançar capacidade de campo (CC) na zona radicular, infiltrar/drenar e reaplicar no limite hídrico inferior.",
+    "revisao": "CC explicitada",
+    "evidencia": "evidencias/pagina_09.png",
+    "texto_extraido": "INUNDAÇÃO INTERMITENTE\n\n\n❑ Aplicação da água na lavoura por um\n\n     tempo    suficiente    para   o   solo   na\n\n     profundidade das raízes atingir a umidade\n\n     correspondente a CC;\n\n\n❑ A água é retida dentro do tabuleiro, até que ela seja infiltrada ou drenada.\n\n❑ A dose é aplicada novamente quando o solo atingir a umidade\n\n     correspondente ao limite hídrico inferior da cultura. Este tipo de manejo\n\n     também é chamado de “dar banho na cultura”.\n\n\n\n 9"
+  },
+  {
+    "pagina": 10,
+    "conteudo_verificado": "Fotos de inundação intermitente em frutíferas.",
+    "revisao": "Figura registrada",
+    "evidencia": "evidencias/pagina_10.png",
+    "texto_extraido": "INUNDAÇÃO INTERMITENTE\n\n     INUNDAÇÃO INTERMITENTE EM FRUTÍFERAS\n\n\n\n\n10"
+  },
+  {
+    "pagina": 11,
+    "conteudo_verificado": "Contínua: pequena vazão durante o ciclo; a aula restringe esse manejo ao arroz.",
+    "revisao": "Mantido",
+    "evidencia": "evidencias/pagina_11.png",
+    "texto_extraido": "INUNDAÇÃO CONTÍNUA\n\n\n\n❑ A água é aplicada à lavoura alguns dias depois da semeadura e é mantida\n\n  durante o desenvolvimento da cultura, por meio de uma vazão pequena e\n\n  contínua, até alguns dias antes da colheita.\n\n\n\n\n❑ Esse tipo de irrigação só é viável para a\n\n  cultura do arroz, que é uma cultura\n\n  tolerante ao encharcamento das raízes.\n\n\n\n\n  11"
+  },
+  {
+    "pagina": 12,
+    "conteudo_verificado": "Com circulação: entrada e saída permanentes; sem circulação: entrada controlada e retenção.",
+    "revisao": "Mantido",
+    "evidencia": "evidencias/pagina_12.png",
+    "texto_extraido": "INUNDAÇÃO CONTÍNUA\n\n\n\nCom circulação de água: há uma entrada de água permanente na lavoura\n\ncom o objetivo de manter a lâmina de irrigação dentro dos quadros, e há\n\n\ntambém uma saída de água permanente para o canal de drenagem.\n\n\n\n\nSem circulação de água: a entrada de água na lavoura é controlada para que\n\ntoda a água fique dentro dos quadros, não havendo saída da água.\n\n\n\n\n  12"
+  },
+  {
+    "pagina": 13,
+    "conteudo_verificado": "Componentes e figura: reservatório, motobomba, quadros, taipas, canais de irrigação/drenagem, sifões/comportas.",
+    "revisao": "Mantido",
+    "evidencia": "evidencias/pagina_13.png",
+    "texto_extraido": "COMPONENTES DO SISTEMA\n\n✓reservatório com motobomba;\n✓ quadros ou tabuleiros;\n✓ taipas;\n✓ canais de irrigação e drenagem;\n✓ sifões ou comportas para a entrada de água na lavoura.\n\n\n\n\n   13"
+  },
+  {
+    "pagina": 14,
+    "conteudo_verificado": "Áreas de 1 m² a >5 ha; tamanho depende de costume, solo, topografia e vazão.",
+    "revisao": "Mantido",
+    "evidencia": "evidencias/pagina_14.png",
+    "texto_extraido": "TAMANHO DO TABULEIRO\n\n❑ Pode variar desde 1 m², para irrigação de vegetais ou árvores frutíferas, até\n\n  áreas maiores do que cinco hectares, para irrigação de arroz, em solos\n\n  planos e argilosos.\n\n\n\n❑ Em geral, o tamanho do tabuleiro é determinado pelo:\n\n    • costume local;\n\n    • pelo tipo de solo;\n\n    • pelas condições topográficas da área;\n\n    • pela vazão disponível.\n\n\n\n  14"
+  },
+  {
+    "pagina": 15,
+    "conteudo_verificado": "Subsolo impermeável favorece quadros maiores; desnível <=2/3 Lm; área por vazão pode ser maior na contínua.",
+    "revisao": "Complementado",
+    "evidencia": "evidencias/pagina_15.png",
+    "texto_extraido": "TAMANHO DO TABULEIRO\n\n\nQuanto ao tipo de solo: quando mais impermeável for o subsolo, maiores poderão ser os\ntabuleiros.\n\n\nQuanto às condições topográficas: o tamanho deve ser tal que a diferença em\nelevação, nas duas direções, entre o ponto mais elevado e o mais baixo, não deve exceder a\n2/3 da altura da lâmina média que se deseja manter dentro do tabuleiro, no caso de\ninundação permanente ou contínua. Para inundação intermitente, o tamanho depende da\nvazão disponível e das dimensões da área.\n\n\nEm se tratando da inundação permanente, o tamanho do tabuleiro, por unidade de vazão,\n                    pode ser maior do que na irrigação intermitente.\n\n\n\n\n  15"
+  },
+  {
+    "pagina": 16,
+    "conteudo_verificado": "Tabela de guia: 0,01/0,02/0,03/0,04 ha por 10 L/s para arenoso/franco-arenoso/franco-argiloso/argiloso.",
+    "revisao": "Omissão corrigida",
+    "evidencia": "evidencias/pagina_16.png",
+    "texto_extraido": "TAMANHO DO TABULEIRO\n\n\nNa Tabela 1 estão algumas sugestões de tamanho, expressas em função da vazão\ndisponível e do tipo de solo, que podem ser usadas como guia de dimensionamento.\n\n\nTabela 1 - Sugestões de tamanho de tabuleiros, em função do tipo de solo e da\nvazão disponível\n\n\n\n\n  16"
+  },
+  {
+    "pagina": 17,
+    "conteudo_verificado": "Henderson (1965): A=100 Q/VIB, A em m², Q em m³/h e VIB em mm/h.",
+    "revisao": "Omissão corrigida",
+    "evidencia": "evidencias/pagina_17.png",
+    "texto_extraido": "TAMANHO DO TABULEIRO\n\n\n Henderson (1965) sugere a seguinte relação entre vazão disponível (Q), em\n\nm3/h, área dos tabuleiros (A), em m2, e velocidade de infiltração básica do solo\n\n(VIB), em mm/h.\n\n\n\n\n  17"
+  },
+  {
+    "pagina": 18,
+    "conteudo_verificado": "Retangulares, diques retilíneos; >2% aumenta movimentação de terra e reduz tamanho útil dos tabuleiros.",
+    "revisao": "Complementado",
+    "evidencia": "evidencias/pagina_18.png",
+    "texto_extraido": "FORMA DOS TABULEIRO\n\n❑        Os tabuleiros são, basicamente, tabuleiros retangulares e tabuleiros\n\n    em contorno.\n\n\nTabuleiros Retangulares\n•   São      constituídos    de   áreas   planas,   limitadas   por   diques   retilíneos,\n    formando tabuleiros retangulares.\n•   Em geral, exigem terrenos sistematizados, com pequena declividade.\n         ▪ declividade natural inferior a 2% não exigem muita movimentação\n           de terra durante a sistematização\n         ▪ com declividade acima de 2% os tamanhos dos tabuleiros tornam-se\n           muito pequenos, havendo exigência de muita movimentação de terra na\n           sistematização.\n\n\n    18"
+  },
+  {
+    "pagina": 19,
+    "conteudo_verificado": "Foto de tabuleiros retangulares, canal e diques.",
+    "revisao": "Figura registrada",
+    "evidencia": "evidencias/pagina_19.png",
+    "texto_extraido": "FORMA DOS TABULEIRO\n\n\nTabuleiros Retangulares\n\n\n\n\n  19"
+  },
+  {
+    "pagina": 20,
+    "conteudo_verificado": "Exercício: 15 cm permite 10 cm de desnível; 40 m e 200 m são limites isolados, com ressalva de desnível combinado.",
+    "revisao": "Mantido com ressalva",
+    "evidencia": "evidencias/pagina_20.png",
+    "texto_extraido": "FORMA DOS TABULEIRO\n\n\nExemplo:\n\n\nSe a lâmina média a ser mantida na irrigação por inundação for de 15 cm,\npode-se permitir uma variação na elevação entre a parte mais baixa e a mais\nelevada, de?\n\n\nSe o terreno, após sistematizado, ficar com uma declividade de 0,25% em uma\ndireção e 0,05% em outra, o tabuleiro poderá ter as dimensões de?\n\n\n\n\n  20"
+  },
+  {
+    "pagina": 21,
+    "conteudo_verificado": "Alimentação individual em terrenos planos admite contínua/intermitente; circulação em maior declive só contínua, segundo a aula.",
+    "revisao": "Complementado",
+    "evidencia": "evidencias/pagina_21.png",
+    "texto_extraido": "FORMA DOS TABULEIRO\n\nO manejo da água na irrigação dos tabuleiros retangulares pode ser com:\n•     derivação de água e drenagem individual por tabuleiro,\n\n\n\n\n        geralmente os\n          tabuleiros                         NO CASO DE:\n    são maiores do que no       ▪   terrenos planos ou com pouca\n           segundo.                 declividade;\n                                ▪   com inundação contínua ou\n                                    intermitente\n\n\n\n\n•    circulação de água, passando de uma tabuleiro para outro, em terrenos\n     com maior declividade, e somente para inundação contínua.\n\n     21"
+  },
+  {
+    "pagina": 22,
+    "conteudo_verificado": "Esquema de alimentação/drenagem individual: canal principal, canais secundários C e drenos D; áreas ilustrativas 0,75/0,80 ha.",
+    "revisao": "Figura detalhada",
+    "evidencia": "evidencias/pagina_22.png",
+    "texto_extraido": "FORMA DOS TABULEIRO\n\nO manejo da água na irrigação dos tabuleiros retangulares pode ser com:\n•    derivação de água e drenagem individual por tabuleiro.\n\n\n\n\n             Figura - Tabuleiros retangulares com derivação de água e drenagem individual.\n\n\n\n    22"
+  },
+  {
+    "pagina": 23,
+    "conteudo_verificado": "Esquema de contorno com alimentação individual pelo canal lateral.",
+    "revisao": "Figura detalhada",
+    "evidencia": "evidencias/pagina_23.png",
+    "texto_extraido": "FORMA DOS TABULEIRO\n\nO manejo da água na irrigação dos tabuleiros retangulares pode ser com:\n•    derivação de água e drenagem individual por tabuleiro.\n\n\n\n\n                  Figura - Tabuleiros em contorno irrigados individualmente.\n\n\n\n    23"
+  },
+  {
+    "pagina": 24,
+    "conteudo_verificado": "Esquema de retangulares com alimentação individual, canais secundários e diques em frutíferas.",
+    "revisao": "Figura detalhada",
+    "evidencia": "evidencias/pagina_24.png",
+    "texto_extraido": "FORMA DOS TABULEIRO\n\nO manejo da água na irrigação dos tabuleiros retangulares pode ser com:\n•    derivação de água e drenagem individual por tabuleiro.\n\n\n\n\n                  Figura - Tabuleiros retangulares irrigados individualmente.\n\n\n\n    24"
+  },
+  {
+    "pagina": 25,
+    "conteudo_verificado": "Esquema de retangulares em sequência; áreas ilustrativas de 0,32 ha e dreno ao final.",
+    "revisao": "Figura detalhada",
+    "evidencia": "evidencias/pagina_25.png",
+    "texto_extraido": "FORMA DOS TABULEIRO\n\nO manejo da água na irrigação dos tabuleiros retangulares pode ser com:\n• circulação de água, passando de uma tabuleiro para outro.\n\n\n\n\n                  Figura - Tabuleiros retangulares, com circulação de água.\n\n\n\n  25"
+  },
+  {
+    "pagina": 26,
+    "conteudo_verificado": "Esquema de contorno com circulação do primeiro ao terceiro tabuleiro e diferenças de nível.",
+    "revisao": "Figura detalhada",
+    "evidencia": "evidencias/pagina_26.png",
+    "texto_extraido": "FORMA DOS TABULEIRO\n\nO manejo da água na irrigação dos tabuleiros retangulares pode ser com:\n• circulação de água, passando de uma tabuleiro para outro.\n\n\n\n\n                  Figura - Tabuleiros em contorno com circulação de água.\n\n\n\n\n  26"
+  },
+  {
+    "pagina": 27,
+    "conteudo_verificado": "Esquema de retangulares com circulação; cotas ilustrativas 100,60 e 100,90 e canais de irrigação/drenagem.",
+    "revisao": "Figura detalhada",
+    "evidencia": "evidencias/pagina_27.png",
+    "texto_extraido": "FORMA DOS TABULEIRO\n\nO manejo da água na irrigação dos tabuleiros retangulares pode ser com:\n• circulação de água, passando de uma tabuleiro para outro.\n\n\n\n\n                  Figura - Tabuleiros retangulares com circulação de agua.\n\n\n\n  27"
+  },
+  {
+    "pagina": 28,
+    "conteudo_verificado": "Contorno: diques curvos em nível e diques transversais retilíneos.",
+    "revisao": "Complementado",
+    "evidencia": "evidencias/pagina_28.png",
+    "texto_extraido": "FORMA DOS TABULEIRO\n\nTabuleiros em contorno\n•   São formados por um sistema de diques em curvas de nível e diques\n    retilíneos, em direção transversal às curvas de nível.\n\n\n\n\n                               Figura - Tabuleiros em contorno.\n\n\n\n    28"
+  },
+  {
+    "pagina": 29,
+    "conteudo_verificado": "Contorno geralmente maior e menos movimentação de terra; dois tipos de disposição dos diques.",
+    "revisao": "Mantido",
+    "evidencia": "evidencias/pagina_29.png",
+    "texto_extraido": "FORMA DOS TABULEIRO\n\n\nTabuleiros em contorno\n•   Em geral, os tabuleiros em curva de nível são maiores do que os\n    retangulares; e\n•   Exigem menor movimentação de terra na sistematização do terreno, pois ela\n    apenas elimina algumas saliências e depressões mais pronunciadas.\n\n\n\n\n          Há basicamente dois tipos de tabuleiros em contorno:\n\n\n     • Os diques em contorno são paralelos entre si;\n     • Cada dique segue exatamente uma curva de nível.\n\n\n\n    29"
+  },
+  {
+    "pagina": 30,
+    "conteudo_verificado": "Diques paralelos exigem boa sistematização e facilitam cultivo/colheita mecanizados.",
+    "revisao": "Complementado",
+    "evidencia": "evidencias/pagina_30.png",
+    "texto_extraido": "FORMA DOS TABULEIRO\n\n❑ Para a construção dos tabuleiros, os DIQUES EM CONTORNO PARALELOS\n  ENTRE SI, o terreno tem de ser bem sistematizado, mas as operações de\n  cultivo e colheita mecanizadas serão mais facilitadas.\n\n\n\n\n                          Figura - Tabuleiros em curva de nível.\n\n\n  30"
+  },
+  {
+    "pagina": 31,
+    "conteudo_verificado": "Diques seguindo exatamente curvas de nível produzem largura variável ao longo do tabuleiro.",
+    "revisao": "Complementado",
+    "evidencia": "evidencias/pagina_31.png",
+    "texto_extraido": "FORMA DOS TABULEIRO\n\n❑ Os tabuleiros quando CADA DIQUE SEGUE EXATAMENTE UMA CURVA DE\n  NÍVEL, tem sua largura            variando         ao     seu longo,          em      função   da\n  declividade do terreno, em cada ponto\n\n\n\n\n         Figura - Vista parcial de um sistema de irrigação, com diques em curva de nível.\n\n\n\n\n  31"
+  },
+  {
+    "pagina": 32,
+    "conteudo_verificado": "Uso no arroz do Sul; pranchão destorroador, pouca declividade e distância entre diques ligada ao relevo; desnível <=2/3 Lm.",
+    "revisao": "Complementado",
+    "evidencia": "evidencias/pagina_32.png",
+    "texto_extraido": "FORMA DOS TABULEIRO\n\nTabuleiros com CADA DIQUE SEGUE EXATAMENTE UMA CURVA DE NÍVEL,\n\n•    Não exige propriamente uma sistematização, e sim, simplesmente a\n     passagem de um pranchão destorroador, para tornar a superfície do\n     solo mais uniforme.\n•    É muito usado em regiões planas, como é o caso das áreas tradicionais de\n     cultivo de arroz, no Sul do Brasil.\n           o Em tais regiões, em virtude da pouca declividade do terreno, eles são\n           bastante largos, não dificultando muito o uso do cultivo mecanizado,\n           pois a largura dos tabuleiros, ou seja, a distância entre os diques\n           adjacentes, dependerá da declividade do terreno.\n\n\n    observando-se que a diferença em elevação, dentro de cada tabuleiro, não deve exceder a\n               2/3 da altura da lâmina média que se deseja manter no tabuleiro.\n\n\n      32"
+  },
+  {
+    "pagina": 33,
+    "conteudo_verificado": "Variante: canais em contorno transbordam; substituem os diques nesse arranjo.",
+    "revisao": "Omissão corrigida",
+    "evidencia": "evidencias/pagina_33.png",
+    "texto_extraido": "FORMA DOS TABULEIRO\n\nUma variante da irrigação por inundação, com tabuleiros em contorno, é a inundação\n por transbordamento de canais em contorno. Neste caso, em lugar dos diques, são\n          construídos canais em contorno, dos quais a água transbordará.\n\n\n\n\n            Figura - Irrigação por transbordamento de canais em contorno.\n\n\n33"
+  },
+  {
+    "pagina": 34,
+    "conteudo_verificado": "Sistematização por cortes/aterros ou nivelamento com lâmina de água e pranchão.",
+    "revisao": "Complementado",
+    "evidencia": "evidencias/pagina_34.png",
+    "texto_extraido": "CONSTRUÇÃO DOS TABULEIROS\n\n\n❑ Normalmente, exige sistematização do terreno, a fim de obter maior\n\n  uniformidade na irrigação e tabuleiros com áreas maiores.\n\n\n\n   • esta    sistematização   pode    ser   normal,   com   cortes   e   aterros\n\n       realizados por máquinas, ou,\n\n\n\n   • em áreas com menor declividade, um simples nivelamento com\n\n       tabuleiro coberto com uma lâmina de água, por meio de um pranchão.\n\n\n\n\n  34"
+  },
+  {
+    "pagina": 35,
+    "conteudo_verificado": "Margem 5–20 cm; base 60–180 cm (média 120); altura 60–80 cm; Lm=(Li+Lf)/2; distribuição por comporta/sifão/tubo/válvula.",
+    "revisao": "Fórmula e detalhes acrescentados",
+    "evidencia": "evidencias/pagina_35.png",
+    "texto_extraido": "CONSTRUÇÃO DOS TABULEIROS\n\nOs diques devem ter margem livre de 5 a 20 cm acima do nível da água.\n\n\n      •   Base da taipa: 60 a 180cm de largura (média de 120cm);\n      •   Altura da taipa: 60 a 80cm.\n\n\n\n\nA distribuição de água para os tabuleiros, normalmente, é feita por meio\n                    de comportas, sifões, tubos ou válvulas.\n\n 35"
+  },
+  {
+    "pagina": 36,
+    "conteudo_verificado": "Diagrama: irrigação, armazenamento na lâmina/solo, evapotranspiração, fluxo horizontal/vertical, camada impermeável e seta Es.",
+    "revisao": "Omissão corrigida",
+    "evidencia": "evidencias/pagina_36.png",
+    "texto_extraido": "BALANÇO DE ÁGUA\n\n\n\n\n36"
+  },
+  {
+    "pagina": 37,
+    "conteudo_verificado": "Fotos de implementos para construção/acabamento das taipas e movimentação de terra.",
+    "revisao": "Figura registrada",
+    "evidencia": "evidencias/pagina_37.png",
+    "texto_extraido": "CONSTRUÇÃO DOS TABULEIROS\n\n\n\n\n37"
+  },
+  {
+    "pagina": 38,
+    "conteudo_verificado": "Tabela Booher: sete diâmetros e sete cargas, total de 49 vazões em L/s; duas células suspeitas preservadas e sinalizadas.",
+    "revisao": "Omissão corrigida",
+    "evidencia": "evidencias/pagina_38.png",
+    "texto_extraido": "CONSTRUÇÃO DOS TABULEIROS\n\nTabela - Vazão em litros por segundo, de sifões ou tubos usados para derivar\nágua, em irrigação por faixa, segundo Booher.\n\n\n\n\n 38"
+  },
+  {
+    "pagina": 39,
+    "conteudo_verificado": "Preparo convencional: aração > semeadura > aplicação de água.",
+    "revisao": "Sequência explicitada",
+    "evidencia": "evidencias/pagina_39.png",
+    "texto_extraido": "PREPARO DO SOLO\n\nPreparo convencional – Aração > Semeadura > aplicação de água.\n\n\n\n\n  39"
+  },
+  {
+    "pagina": 40,
+    "conteudo_verificado": "Plantio direto: dessecação > semeadura > aplicação de água.",
+    "revisao": "Sequência explicitada",
+    "evidencia": "evidencias/pagina_40.png",
+    "texto_extraido": "PREPARO DO SOLO\n\nPlantio direto – Desseca > Semeadura > aplicação de água.\n\n\n\n\n  40"
+  },
+  {
+    "pagina": 41,
+    "conteudo_verificado": "Pré-germinado: plantio no lodo; preferencialmente drenar 2–3 dias após preparo; retomar irrigação alguns dias depois.",
+    "revisao": "Prazo acrescentado",
+    "evidencia": "evidencias/pagina_41.png",
+    "texto_extraido": "PREPARO DO SOLO\n\nPré-germinado - preparo de solo > plantio é feito dentro dos quadros (lodo),\ncom sementes pré-germinadas. A água deve ser drenada de preferência de 2 a\n3 dias após o preparo de solo e depois de alguns dias a irrigação é iniciada.\n\n\n\n\n   41"
+  },
+  {
+    "pagina": 42,
+    "conteudo_verificado": "Divisória: dimensionamento intermitente.",
+    "revisao": "Sem conteúdo técnico novo",
+    "evidencia": "evidencias/pagina_42.png",
+    "texto_extraido": "Dimensionamento de Irrigação por\n          Inundação Intermitente\n\n\n\n\n42"
+  },
+  {
+    "pagina": 43,
+    "conteudo_verificado": "Sem saída ao final; solo quase nivelado; depleção importante, recessão quase ausente; avanço pela declividade da água.",
+    "revisao": "Complementado",
+    "evidencia": "evidencias/pagina_43.png",
+    "texto_extraido": "❑ O dimensionamento da irrigação por inundação intermitente é mais\n  simples que o das irrigações por sulco e faixa, pois no primeiro caso não\n  há escoamento no final da área.\n\n\n❑ A declividade da superfície do solo é muito pequena ou nula, de forma que a\n  fase de RECESSÃO PRATICAMENTE NÃO EXISTE, mas a de DEPLEÇÃO É\n  MUITO IMPORTANTE.\n\n\n❑ O escoamento ocorre devido à declividade da superfície de água, pois\n  as    declividades   do   solo,   tanto   longitudinal   quanto transversal, são\n  praticamente nulas.\n\n\nConseqüentemente, a uniformidade da superfície do solo é muito importante.\n\n   43"
+  },
+  {
+    "pagina": 44,
+    "conteudo_verificado": "Três hipóteses do modelo de bacias regulares e avanço unidirecional.",
+    "revisao": "Mantido",
+    "evidencia": "evidencias/pagina_44.png",
+    "texto_extraido": "❑ Será considerado aqui somente o DIMENSIONAMENTO DE BACIAS OU\n  TABULEIROS COM FORMAS GEOMÉTRICAS REGULARES, com escoamento\n  ocorrendo numa única direção.\n\nSerão feitas três suposições:\n\n1º) a declividade da superfície líquida durante a fase de avanço pode ser\n\naproximada;\n\n2º) quando a vazão na entrada é cortada, a superfície líquida é horizontal e a\n\nlâmina de água na superfície do solo infiltra verticalmente;\n\n3º) assume-se que o dimensionamento é feito para aplicar a irrigação      real\n\nnecessária no final da bacia onde se tem menor lâmina aplicada.\n\n\n   44"
+  },
+  {
+    "pagina": 45,
+    "conteudo_verificado": "Eq. 1: S0=Sf=y0/X; trata da declividade da superfície líquida, não de atribuir declive ao terreno nivelado.",
+    "revisao": "Omissão corrigida",
+    "evidencia": "evidencias/pagina_45.png",
+    "texto_extraido": "PRIMEIRO, a declividade da superfície líquida durante a fase de avanço pode ser\naproximada por:\n\n\n\n\n                                                                 (1)\n\n\n\n em que:\n y0 - profundidade no início da bacia, m;\n X - distância do início da bacia até a frente de avanço, m;\n Sf - declividade da superfície líquida, m/m.\n\n\n\n\n  45"
+  },
+  {
+    "pagina": 46,
+    "conteudo_verificado": "Eq. 2: y0=(Q0² n² X/3600)^0,23; unidades e segunda hipótese.",
+    "revisao": "Arredondamento preservado na transcrição",
+    "evidencia": "evidencias/pagina_46.png",
+    "texto_extraido": "Substituindo a equação 1 na equação de Manning, tem-se:\n\n\n\n\n                                                          (2)\n\n\n\nem que:\n\n\nQo - vazão na entrada da área, em m3/min/m.\n\n\nA SEGUNDA suposição é de que, quando a vazão na entrada é cortada, a\nsuperfície líquida é horizontal e a lâmina de água na superfície do solo\ninfiltra verticalmente.\n\n   46"
+  },
+  {
+    "pagina": 47,
+    "conteudo_verificado": "Eq. 3: I0=k ta^a+VIB ta+0,80 y0+Q0(ti-ta)/L.",
+    "revisao": "Fórmula integral acrescentada",
+    "evidencia": "evidencias/pagina_47.png",
+    "texto_extraido": "Isso significa que a lâmina infiltrada ao longo da bacia é igual à infiltrada\ndurante a fase de avanço mais a lâmina aplicada na bacia após a fase de\navanço.\n\n\n\n\n        A infiltração acumulada no início da área (Io) pode ser estimada por:\n\n\n\n                                                                                (3)\n\n\n\n\n   47"
+  },
+  {
+    "pagina": 48,
+    "conteudo_verificado": "Dois primeiros termos de I0: infiltração durante o avanço.",
+    "revisao": "Explicação acrescentada",
+    "evidencia": "evidencias/pagina_48.png",
+    "texto_extraido": "Isso significa que a lâmina infiltrada ao longo da bacia é igual à infiltrada\ndurante a fase de avanço mais a lâmina aplicada na bacia após a fase de\navanço. A infiltração acumulada no início da área (Io) pode ser estimada por:\n\n\n                                                                         (3)\n\n\n\n\n  Os dois primeiros termos\n correspondem à infiltração\n       ocorrida durante a\n        fase de avanço\n\n\n\n\n  48"
+  },
+  {
+    "pagina": 49,
+    "conteudo_verificado": "Terceiro termo de I0: profundidade média superficial durante o avanço.",
+    "revisao": "Explicação acrescentada",
+    "evidencia": "evidencias/pagina_49.png",
+    "texto_extraido": "Isso significa que a lâmina infiltrada ao longo da bacia é igual à infiltrada\ndurante a fase de avanço mais a lâmina aplicada na bacia após a fase de\navanço. A infiltração acumulada no início da área (Io) pode ser estimada por:\n\n\n                                                                         (3)\n\n\n\n\n  Os dois primeiros termos\n correspondem à infiltração\n       ocorrida durante a\n        fase de avanço             O terceiro termo é a\n                                profundidade média da água\n                                durante o tempo de avanço\n\n\n\n\n  49"
+  },
+  {
+    "pagina": 50,
+    "conteudo_verificado": "Quarto termo de I0: lâmina média aplicada após avanço.",
+    "revisao": "Explicação acrescentada",
+    "evidencia": "evidencias/pagina_50.png",
+    "texto_extraido": "Isso significa que a lâmina infiltrada ao longo da bacia é igual à infiltrada\ndurante a fase de avanço mais a lâmina aplicada na bacia após a fase de\navanço. A infiltração acumulada no início da área (Io) pode ser estimada por:\n\n\n                                                                                (3)\n\n\n\n                                                             O último termo é a lâmina\n  Os dois primeiros termos                                   média de água aplicada na\n correspondem à infiltração                                     bacia após a fase de\n       ocorrida durante a                                             avanço.\n        fase de avanço             O terceiro termo é a\n                                profundidade média da água\n                                durante o tempo de avanço\n\n\n\n\n  50"
+  },
+  {
+    "pagina": 51,
+    "conteudo_verificado": "Eq. 4 de ti; mínimo necessário no final. Há autorreferência à equação 4 no texto do próprio slide.",
+    "revisao": "Mantido; referência interna sinalizada",
+    "evidencia": "evidencias/pagina_51.png",
+    "texto_extraido": "TERCEIRO, assume-se que o dimensionamento é feito para aplicar a\nirrigação real necessária no final da bacia onde se tem menor lâmina\naplicada.\n\n\n        A equação 4 pode ser aplicada no final da área, fazendo Io = IRN e\nresolvendo para ti , o que leva a:\n\n\n\n                                                                  (4)\n\n\n\n\n   51"
+  },
+  {
+    "pagina": 52,
+    "conteudo_verificado": "Divisória do procedimento intermitente.",
+    "revisao": "Sem conteúdo técnico novo",
+    "evidencia": "evidencias/pagina_52.png",
+    "texto_extraido": "Procedimento para o dimensionamento\n\n          da irrigação por inundação\n\n               INTERMITENTE\n\n\n\n\n52"
+  },
+  {
+    "pagina": 53,
+    "conteudo_verificado": "Entradas: testes da primeira/terceira irrigação, dimensões, declives, rugosidade, solo/clima/planta, IRN e vazão total.",
+    "revisao": "Mantido",
+    "evidencia": "evidencias/pagina_53.png",
+    "texto_extraido": "a) Identifique os dados de entrada:\n\n\n\n       i) testes de infiltração para condição de primeira e terceira irrigações;\n\n\n       ii) tamanho da área; declividade nas duas direções; coeficiente de\n\n\n       rugosidade;\n\n\n       iii) dados de solo; clima e planta; cálculo da irrigação real necessária;\n\n\n       iv) vazão total disponível.\n\n\n\n\n  53"
+  },
+  {
+    "pagina": 54,
+    "conteudo_verificado": "Eq. 5 de Q0max; verificar y0 com X=L contra altura dos diques e calcular avanço.",
+    "revisao": "Verificação adicionada ao código",
+    "evidencia": "evidencias/pagina_54.png",
+    "texto_extraido": "b) Selecione a vazão Qo (m3/m/min), próxima da vazão máxima não-erosiva,\n utilizando a equação 5. Verificar se a profundidade da água não excede a\n altura dos diques, usando a equação 2, fazendo X igual a L.\n\n\n\n\n                                                                     (5)\n\n\n\n\nc) Determine o tempo de avanço (ta ), conforme feito na irrigação por sulco.\n\n\n\n  54"
+  },
+  {
+    "pagina": 55,
+    "conteudo_verificado": "Eqs. 6–8: balanço volumétrico, sigmaZ e relação logarítmica de r.",
+    "revisao": "Mantido",
+    "evidencia": "evidencias/pagina_55.png",
+    "texto_extraido": "Simulação do tempo de avanço\n\n\nO método utilizado será o do balanço volumétrico. Reescrevendo a equação do\nbalanço volumétrico para a distância X igual a L e Q0 igual a vazão máxima não\nerosiva, tem-se:\n\n\n\n\nem que σz é definido na equação 7 e r, na equação 8.\n\n\n\n\n  55"
+  },
+  {
+    "pagina": 56,
+    "conteudo_verificado": "Inicialização r entre 0,5 e 0,9, exemplo 0,7; recálculo de sigmaZ.",
+    "revisao": "Faixa inicial explicitada",
+    "evidencia": "evidencias/pagina_56.png",
+    "texto_extraido": "Simulação do tempo de avanço\n\n\nA equação 6 possui duas variáveis desconhecidas, tx e r, portanto, será resolvida\nnumericamente, através do método de Newton, conforme o seguinte\nprocedimento:\n\n\n\n\n  56"
+  },
+  {
+    "pagina": 57,
+    "conteudo_verificado": "Eqs. 9–11: inicialização de tempo e Newton-Raphson; aviso sobre vazão insuficiente.",
+    "revisao": "Newton acrescentado como alternativa",
+    "evidencia": "evidencias/pagina_57.png",
+    "texto_extraido": "57"
+  },
+  {
+    "pagina": 58,
+    "conteudo_verificado": "Eq. 12: recalcular A0 em X=L/2 no solo nivelado; expoente 3/13.",
+    "revisao": "Mantido; referências internas imprecisas sinalizadas",
+    "evidencia": "evidencias/pagina_58.png",
+    "texto_extraido": "58"
+  },
+  {
+    "pagina": 59,
+    "conteudo_verificado": "Eq. 13: revisar r por ln(2)/(ln tx-ln txmed), repetir até convergir.",
+    "revisao": "Mantido",
+    "evidencia": "evidencias/pagina_59.png",
+    "texto_extraido": "59"
+  },
+  {
+    "pagina": 60,
+    "conteudo_verificado": "Eq. 14 de Ea; impor ti>=ta; repetir com outras vazões buscando eficiência máxima; depois dimensionar largura/vazão total.",
+    "revisao": "Procedimento documentado; seleção de candidatos acrescentada",
+    "evidencia": "evidencias/pagina_60.png",
+    "texto_extraido": "d) Determine o tempo de irrigação (ti) utilizando a equação 4.\nSe ti < ta, faça ti = ta.\n\n\ne) Calcule a eficiência de aplicação (equação 14).\n\n\n\n                                                               (14)\n\n\n\nf) Repita os passos b) a e) até obter a máxima eficiência de aplicação.\n\n\ng) A largura do tabuleiro (Wo) e a vazão total necessária no projeto é\ndeterminada utilizando o mesmo procedimento para irrigação por faixa.\n\n\n\n   60"
+  },
+  {
+    "pagina": 61,
+    "conteudo_verificado": "Eqs. 15–17: W0, NTT e Q; legenda L=largura diverge do uso anterior como comprimento.",
+    "revisao": "Omissão de fórmulas corrigida; notação sinalizada",
+    "evidencia": "evidencias/pagina_61.png",
+    "texto_extraido": "A relação entre o número de tabuleiros por parcela (NTP) e a\n                      (Wo) é:\n\n\n                                                           (15)\n\n                      Sendo: NTP = número de tabuleiros por parcela; L = largura\n\n\n\nNúmero total de tabuleiros\n\n\n                                                           (16)\n\nVazão total necessária (Q)\n\n                                                           (17)\n\n\n  61"
+  },
+  {
+    "pagina": 62,
+    "conteudo_verificado": "Eqs. 18–20: TPP, NPD, APP; PI reaparece sem definição local suficiente; texto menciona um dia.",
+    "revisao": "Omissão corrigida; interpretação operacional explícita",
+    "evidencia": "evidencias/pagina_62.png",
+    "texto_extraido": "Tempo de irrigação por parcela\n\n\n                                                            (18)\n\n\n\n Número de parcelas irrigadas por dia (NPD)\ntempo de funcionamento por dia (TDF)\n\n\n                                                           (19)\n\n\nÁrea por parcela\nComo o período de irrigação é de um dia, a área mínima por parcela será:\n\n\n                                                            (20)\n                                                               (20)\n  62"
+  },
+  {
+    "pagina": 63,
+    "conteudo_verificado": "Exemplo intermitente completo; unidade de I incompatível com sua função nas equações; rho1/rho2 preservados.",
+    "revisao": "Mantido e validado",
+    "evidencia": "evidencias/pagina_63.png",
+    "texto_extraido": "Projeto de Irrigação por Inundação INTERMITENTE\nDados de entrada:\n•    Os testes de infiltração propiciaram as seguintes equações para condição de primeira e\n     terceira irrigações ,respectivamente:\n\n      I (m3/min) = 0,0035 to(min)0,47 + 0,00011 to (min)\n\n      I (m3/min)= 0,0034 to(min)0,45 + 0,00010 to (min)\n\n•    A área é sistematizada em planos de 200 X 400m, logo, o comprimento é de 200m;\n•    A declividade é zero;\n•    O coeficiente de rugosidade estimado de 0,040; ρ1 = 1; ρ2 = 3,33.\n•    Os dados de solo, clima e planta propiciaram uma irrigação real necessária de 56mm e\n     uma evapotranspiração máxima de 8,0mm/dia.\n                                                                               PLANILHA\n•    A velocidade de escoamento máxima de 8,0m/min\n                                                                                    EXCEL!\n•    Vazão total disponível (Qt) é de 400L/s, disponível a cada sete dias.\n                                                                             (20)\n     63"
+  },
+  {
+    "pagina": 64,
+    "conteudo_verificado": "Divisória: dimensionamento contínuo.",
+    "revisao": "Sem conteúdo técnico novo",
+    "evidencia": "evidencias/pagina_64.png",
+    "texto_extraido": "Dimensionamento de Irrigação por\n           Inundação Contínua\n\n\n\n\n64"
+  },
+  {
+    "pagina": 65,
+    "conteudo_verificado": "Enchimento: saturação + lâmina; texto menciona prazo do turno se intermitente dentro da seção contínua.",
+    "revisao": "Mantido com observação de redação",
+    "evidencia": "evidencias/pagina_65.png",
+    "texto_extraido": "❑ O dimensionamento da irrigação por inundação permanente é bem mais\n\n  simples que o dos demais tipos de irrigação por superfície.\n\n\n\n       Uma vez sistematizada a área, o dimensionamento consiste em\n\n       determinar a quantidade de água necessária para saturar o solo, e\n\n  estabelecer a lâmina de água desejada na sua superfície solo, no\n\n tempo máximo igual ao turno de rega, caso a irrigação seja intermitente.\n\n\n\n\n  65"
+  },
+  {
+    "pagina": 66,
+    "conteudo_verificado": "ET/percolação já ocorrem no enchimento; perfil de solo e condutividade hidráulica são indispensáveis.",
+    "revisao": "Complementado",
+    "evidencia": "evidencias/pagina_66.png",
+    "texto_extraido": "Deve-se lembrar que durante o tempo de enchimento do tabuleiro estão\n\nocorrendo evapotranspiração e perda por percolação.\n\n\n\n        • A perda por percolação é limitada pela condutividade hidráulica\n\n        saturada do solo ou por uma camada impermeável que geralmente\n\n        existe, a uma dada profundidade, em solos de várzeas.\n\n\n\n        •Portanto, o levantamento do perfil do solo e a    determinação da\n\n        condutividade hidráulica, são indispensáveis no dimensionamento do\n\n        projeto.\n\n\n  66"
+  },
+  {
+    "pagina": 67,
+    "conteudo_verificado": "Qe e TR; Z em mm na vazão e em cm quando DTA está em mm/cm.",
+    "revisao": "Mantido e função de TR acrescentada",
+    "evidencia": "evidencias/pagina_67.png",
+    "texto_extraido": "1) Vazão necessária para o enchimento dos tabuleiros\n\n\n                                                                 (1)\n\n\n\n  em que:\n\n\n  Qe = vazão necessária para o enchimento dos tabuleiros, l/s;\n  ø = porosidade do solo, decimal;\n  Z = profundidade do solo, mm;\n  Lm = lâmina média na superfície do solo, mm;\n  ETpc = evapotranspiração potencial da cultura, mm/dia;\n  TR = turno de rega, dias;\n  K0 = condutividade hidráulica do solo saturado, mm/dia; e\n  A = área irrigada, ha.\n\n\n    67"
+  },
+  {
+    "pagina": 68,
+    "conteudo_verificado": "Qm repõe ET e percolação.",
+    "revisao": "Mantido",
+    "evidencia": "evidencias/pagina_68.png",
+    "texto_extraido": "Após o enchimento do tabuleiro, a vazão necessária, denominada vazão de\nmanutenção (Qm), corresponde:\n\n\n      • às perdas por percolação MAIS a evapotranspiração, e pode ser\n        determinada utilizando-se a equação 2.\n\n\n\n\n                                                               (2)\n\n\n\n\n 68"
+  },
+  {
+    "pagina": 69,
+    "conteudo_verificado": "Distingue eficiência de condução e de aplicação.",
+    "revisao": "Mantido",
+    "evidencia": "evidencias/pagina_69.png",
+    "texto_extraido": "2) Eficiência de irrigação por inundação permanente\n\n\n Os principais parâmetros usados para determinar a eficiência de irrigação\n por inundação são:\n\n\n        • Eficiência de Condução (Ec);\n\n\n        • Eficiência de Aplicação (Ea).\n\n\n\n\n  69"
+  },
+  {
+    "pagina": 70,
+    "conteudo_verificado": "Ec=100 Qm/Qd e definição das vazões em L/s.",
+    "revisao": "Função acrescentada",
+    "evidencia": "evidencias/pagina_70.png",
+    "texto_extraido": "Eficiência de Condução (Ec)\n\n\nA eficiência de condução reflete a perda de água entre a captação e a parcela de\nirrigação, podendo ser determinada pela seguinte equação:\n\n\n\n                                                                         (3)\n\n\n\nem que:\nEc = eficiência de condução, %;\nQm = vazão de manutenção, L/s;\nQd = vazão derivada da fonte de água, L/s.\n\n\n\n\n   70"
+  },
+  {
+    "pagina": 71,
+    "conteudo_verificado": "Ec relevante para bombeamento, escassez e longas distâncias entre captação e área.",
+    "revisao": "Complementado",
+    "evidencia": "evidencias/pagina_71.png",
+    "texto_extraido": "A eficiência de condução é um parâmetro de grande importância:\n\n\n\n     • nos projetos que exigem bombeamento na fonte de captação;\n\n     • nas regiões onde a água é fator limitante, e\n\n     • nos projetos com grande distância entre a fonte de captação e a\n\n     área de irrigação.\n\n\n\n\n71"
+  },
+  {
+    "pagina": 72,
+    "conteudo_verificado": "Ea=100 Les/Las, Les estimada com tanque Classe A; Las=3600 Qm ti/A.",
+    "revisao": "Funções e período comum explicitados",
+    "evidencia": "evidencias/pagina_72.png",
+    "texto_extraido": "Eficiência de Aplicação (Ea)\n\nA eficiência de aplicação pode ser estimada utilizando a equação:\n\n                                                                   (4)\n\n\nem que: Ea = eficiência de aplicação, %; Les = lâmina evapotranspirada por semana, mm; e Las =\nlâmina aplicada por semana, mm.\n\n\nA lâmina evapotranspirada por semana (Les) pode ser estimada por meio de um\n“tanque Classe A”, instalado ao lado do tabuleiro, e a lâmina aplicada, por meio da\nseguinte equação:\n\n                                                                   (5)\n\n\nem que: Qm = vazão de manutenção, L/s; A = área do projeto, m2 ; e ti = tempo de irrigação, h.\n\n\n    72"
+  },
+  {
+    "pagina": 73,
+    "conteudo_verificado": "Exemplo contínuo: 20 ha, DTA 2, porosidade 0,50, Z 50 cm, K0 7, ET 7,2, Lm 150 e f 0,5.",
+    "revisao": "Mantido e resultados conferidos",
+    "evidencia": "evidencias/pagina_73.png",
+    "texto_extraido": "Projeto de Irrigação por Inundação Permanente\nDeseja-se elaborar um projeto de irrigação para uma área de 20 ha, cujos dados são\napresentados a seguir. Na análise do perfil do solo verificou-se que existe uma\ncamada impermeável com profundidade (Z) de 50 cm.\n•   Solo:\nDTA = 2,0 mm/cm;\nø = 0,50 mm3/mm3;\nZ = 50 cm;\nK0 = 7,0 mm/dia\n•   Irrigação:\nET = 7,2 mm/dia;\nLm = 150 mm;\n                                                                   PLANILHA\nf = 0,5\n                                                                     EXCEL!\n\n\n    73"
+  },
+  {
+    "pagina": 74,
+    "conteudo_verificado": "Diagrama do balanço do arroz, repetindo p. 36.",
+    "revisao": "Repetição registrada",
+    "evidencia": "evidencias/pagina_74.png",
+    "texto_extraido": "Irrigação por Inundação Permanente – Arroz\n                   VOLUME DE ÁGUA\n\n\n\n\n74"
+  },
+  {
+    "pagina": 75,
+    "conteudo_verificado": "Cinco componentes do volume necessário.",
+    "revisao": "Mantido",
+    "evidencia": "evidencias/pagina_75.png",
+    "texto_extraido": "1) Volume de água necessário para saturação do solo;\n\n2) Volume de água necessário para formação da lâmina;\n\n3) Volume de água necessário para compensar as perdas por\n\nevaporação;\n\n4) Volume de água necessário para compensar as perdas por\n\ninfiltração;\n\n5) Volume de água necessário para atender a transpiração ou\n\nformação de MS.\n\n  75"
+  },
+  {
+    "pagina": 76,
+    "conteudo_verificado": "V1, Us=PT/Ds e PT=1-Ds/Dp; figura tem umidades volumétricas ilustrativas 0,50/0,35/0,25/0,15.",
+    "revisao": "Figura e ambiguidade de unidade acrescentadas",
+    "evidencia": "evidencias/pagina_76.png",
+    "texto_extraido": "Volume de água necessário para saturação do solo (V1)\n\n\n\n\nInício da irrigação                                        Solo saturado\n\n\n\n\nV1 = Volume de saturação (m³/ha);\nUs = Umidade no ponto de saturação (decimal);\nUa = Umidade atual ou inicial do solo (decimal);\nPCI = profundidade da camada impermeável (m);      Us = PT/Ds\nDs = densidade do solo (g/cm³).                    PT = 1-(Ds/Dp)\n\n\n\n    76"
+  },
+  {
+    "pagina": 77,
+    "conteudo_verificado": "V2=h1·10000, m³/ha.",
+    "revisao": "Mantido",
+    "evidencia": "evidencias/pagina_77.png",
+    "texto_extraido": "Volume de água necessário para formação da lâmina (V2)\n\n\n\n\nSolo saturado                                  Formação da lâmina\n\n\n\n\n                                                             h1\n\n\n\n\nV2 = Volume para formação da lâmina (m³/ha);\nh1 = altura da lâmina de água desejada (m).\n\n\n\n\n    77"
+  },
+  {
+    "pagina": 78,
+    "conteudo_verificado": "V3=h2·PI·10000; h2 em m/dia, PI normalmente 100 dias.",
+    "revisao": "Mantido",
+    "evidencia": "evidencias/pagina_78.png",
+    "texto_extraido": "Volume de água necessário para compensar a evaporação (V3)\n\n\n\n\nFormação da lâmina                                           Compensar a evaporação\n\n                                                                                      h2\n\n                   h1\n\n\n\n\n V3 = Volume para compensar as perdas por evaporação (m³/ha);\n h2 = altura da lâmina evaporada (m/dia);\n PI = período de irrigação (dias), (normalmente 100 dias).\n\n\n\n\n     78"
+  },
+  {
+    "pagina": 79,
+    "conteudo_verificado": "V4=Ksat[(h1+PCI)/PCI]PI·10000; legenda omite unidade de Ksat, inferida pela equação como m/dia.",
+    "revisao": "Mantido e unidade explicitada",
+    "evidencia": "evidencias/pagina_79.png",
+    "texto_extraido": "Volume de água necessário para compensar a infiltração (V4)\n\n\n\n\nCompensar a evaporação                                          Compensar os fluxos\n\n                                       h2\n\n\n\n\nV4 = Volume para compensar as perdas por infiltração (m³/ha);\nh1 = altura da lâmina de água (m);\nPCI = profundidade da camada impermeável (m);\nPI = período de irrigação (dias), (normalmente 100 dias).\n\n\n\n\n     79"
+  },
+  {
+    "pagina": 80,
+    "conteudo_verificado": "V5=0,4 MStotal; MStotal inclui parte aérea e grãos, em kg/ha.",
+    "revisao": "Mantido",
+    "evidencia": "evidencias/pagina_80.png",
+    "texto_extraido": "Volume de água necessário para atender a transpiração ou formação da MS (V5)\n\n\n\n\nCompensar os fluxos                                                   Formar MS\n\n\n\n\n V5 = Volume para atender a transpiração ou formação de MS (m³/ha);\n MStotal = matéria seca total da parte aérea + grãos (kg/ha).\n\n\n\n\n      80"
+  },
+  {
+    "pagina": 81,
+    "conteudo_verificado": "VT=V1+V2+V3+V4+V5.",
+    "revisao": "Mantido",
+    "evidencia": "evidencias/pagina_81.png",
+    "texto_extraido": "VOLUME TOTAL (VT)\n\n\n\n\n81"
+  },
+  {
+    "pagina": 82,
+    "conteudo_verificado": "Q1=(V1+V2)A/(Td·86400); resultado dimensional em m³/s.",
+    "revisao": "Mantido",
+    "evidencia": "evidencias/pagina_82.png",
+    "texto_extraido": "Vazão necessária a formação da lâmina (Q1)\n\n\n\n\nV1 = Volume de saturação (m³/ha);\nV2 = Volume para formação da lâmina (m³/ha);\nTd = tempo disponível (dias);\nA = área (ha).\n\n\n\n\n  82"
+  },
+  {
+    "pagina": 83,
+    "conteudo_verificado": "Q2=(V3+V4+V5)A/(Tr·86400); Tr é tempo restante, não necessariamente o turno de rega TR.",
+    "revisao": "Notação diferenciada",
+    "evidencia": "evidencias/pagina_83.png",
+    "texto_extraido": "Vazão necessária à manutenção da lâmina (Q2)\n\n\n\n\nV3 = Volume para compensar as perdas por evaporação (m³/ha);\nV4 = Volume para compensar as perdas por infiltração (m³/ha);\nV5 = Volume para atender a transpiração ou formação de MS (m³/ha);\nTr = tempo restante disponível (dias);\nA = área (ha).\n\n\n\n\n  83"
+  },
+  {
+    "pagina": 84,
+    "conteudo_verificado": "Exercício do arroz: dados preservados; V2/V3/V4 e expressões parciais acrescentados; Ua, saco, área e tempos não fixados.",
+    "revisao": "Solução parcial acrescentada",
+    "evidencia": "evidencias/pagina_84.png",
+    "texto_extraido": "Dimensionamento\nDados os seguintes dados para a estimativa do volume de água a ser fornecida para uma lavoura de arroz:\n\nDensidade do solo = 1,25 g/cm³\n\nDensidade de partículas = 2,65 g/cm³\n\nProfundidade da camada impermeável = 60cm\n\nAltura de lâmina de água na lavoura (H) = 7cm\n\nCondutividade hidráulica do solo saturado (Ksat) = 0,0006 m/dia\n\nEvaporação média medida no tanque Classe “A” = 8mm/dia\n\nPeríodo de Irrigação = 100 dias\n\nProdutividade Estimada = 435,6 sacos/ha (13% de umidade)\n\nÍndice de Colheita = 40% (do total da parte aérea da planta, 40% equivale a grãos)\n\n  Calcule:\n\n  1.     O volume de água necessário para saturar o solo.\n\n  2.     O volume de água necessário para formar a lâmina.\n\n  3.     O volume de água necessário para suprir as perdas por evaporação.\n\n  4.     O volume de água necessário para compensar as perdas por infiltração.\n\n  5.     O volume de água necessário para atender a transpiração.\n                                                                                             PLANILHA\n  6.     Vazão necessária à formação da lâmina (Q1)                                             EXCEL!\n  7.     Vazão necessária à manutenção da lâmina (Q2)\n\n\n    84"
+  }
+]

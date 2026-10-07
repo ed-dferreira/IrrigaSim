@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:irrigasim/app/theme/app_colors.dart';
 import 'package:irrigasim/app/theme/app_text_styles.dart';
 import 'package:irrigasim/models/sulcos/tipo_sulco_info.dart';
+import 'package:irrigasim/models/sulcos/tabela_corrugados.dart';
 import 'package:irrigasim/viewmodels/parameters_controller.dart';
 
 class TipoSulcoScreen extends ConsumerWidget {
@@ -11,6 +12,8 @@ class TipoSulcoScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final tipoSelecionado = ref.watch(parametersProvider).tipoSulco;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Tipo de Sulco')),
       body: Padding(
@@ -27,6 +30,13 @@ class TipoSulcoScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 16),
+            if (tipoSelecionado == TipoSulco.sulcos_corrugados) ...[
+              OutlinedButton(
+                onPressed: () => _consultarCorrugados(context),
+                child: const Text('Consultar tabela de corrugados (p.9)'),
+              ),
+              const SizedBox(height: 8),
+            ],
             Expanded(
               child: ListView.separated(
                 itemCount: TipoSulco.values.length,
@@ -50,13 +60,113 @@ class TipoSulcoScreen extends ConsumerWidget {
     ref.read(parametersProvider.notifier).setTipoSulco(tipo);
     context.push('/home/irrigation/project');
   }
+
+  void _consultarCorrugados(BuildContext context) {
+    var raiz = RaizCorrugado.profunda;
+    var textura = TexturaCorrugado.fina;
+    var declive = 2;
+    showDialog<void>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          final dimensao = TabelaCorrugados.consultar(
+            raiz: raiz,
+            declivePercent: declive,
+            textura: textura,
+          );
+          return AlertDialog(
+            title: const Text('Corrugados · tabela p.9'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DropdownButtonFormField<RaizCorrugado>(
+                    initialValue: raiz,
+                    decoration: const InputDecoration(labelText: 'Raízes'),
+                    items: RaizCorrugado.values
+                        .map(
+                          (value) => DropdownMenuItem(
+                            value: value,
+                            child: Text(
+                              value == RaizCorrugado.profunda
+                                  ? 'Profundas'
+                                  : 'Rasas',
+                            ),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      if (value != null) setState(() => raiz = value);
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<int>(
+                    initialValue: declive,
+                    decoration: const InputDecoration(labelText: 'Declive (%)'),
+                    items: [2, 4, 6, 8, 10, 12]
+                        .map(
+                          (value) => DropdownMenuItem(
+                            value: value,
+                            child: Text('$value%'),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      if (value != null) setState(() => declive = value);
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<TexturaCorrugado>(
+                    initialValue: textura,
+                    decoration: const InputDecoration(labelText: 'Textura'),
+                    items: TexturaCorrugado.values
+                        .map(
+                          (value) => DropdownMenuItem(
+                            value: value,
+                            child: Text(switch (value) {
+                              TexturaCorrugado.fina => 'Fina',
+                              TexturaCorrugado.media => 'Média',
+                              TexturaCorrugado.grossa => 'Grossa',
+                            }),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      if (value != null) setState(() => textura = value);
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    dimensao == null
+                        ? 'Célula não informada na aula.'
+                        : 'Comprimento: ${dimensao.comprimentoM.toStringAsFixed(0)} m · '
+                              'Espaçamento: ${dimensao.espacamentoM.toStringAsFixed(2)} m',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Consulta literal para 2–12%; sem interpolação até 15%.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Fechar'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
 }
 
 class _TipoSulcoCard extends StatelessWidget {
-  const _TipoSulcoCard({
-    required this.tipo,
-    required this.onTap,
-  });
+  const _TipoSulcoCard({required this.tipo, required this.onTap});
 
   final TipoSulco tipo;
   final VoidCallback onTap;
@@ -148,10 +258,7 @@ class _TipoSulcoCard extends StatelessWidget {
 }
 
 class _InfoChip extends StatelessWidget {
-  const _InfoChip({
-    required this.label,
-    required this.value,
-  });
+  const _InfoChip({required this.label, required this.value});
 
   final String label;
   final String value;

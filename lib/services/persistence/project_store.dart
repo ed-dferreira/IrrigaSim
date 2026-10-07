@@ -1,4 +1,5 @@
 import 'package:irrigasim/models/irrigation_parameters.dart';
+import 'package:irrigasim/models/comum/adaptadores_superficie.dart';
 import 'package:irrigasim/models/cenarios/cenario_salvo.dart';
 import 'package:irrigasim/models/simulation_result_model.dart';
 import 'package:irrigasim/models/sulcos/tipo_sulco_info.dart';
@@ -20,8 +21,11 @@ class ProjectStore {
     final p = cenario.parametros;
     final r = cenario.resultado;
     return {
-      'tipo_calculo': 'irrigacao_sulcos',
+      'tipo_calculo': 'irrigacao_${cenario.metodo.name}',
       'metodo': cenario.metodo.name,
+      'base_comum': p.baseComumPara(cenario.metodo).toMap(),
+      if (cenario.metodo == MetodoIrrigacao.sulco)
+        'entradas_projeto_sulco': p.entradasProjetoSulco?.toMap(),
       'unidades': {
         'comprimento': 'm',
         'largura_ou_espacamento': 'm',
@@ -57,6 +61,9 @@ class ProjectStore {
         'expoente_avanco_b': p.expoenteAvancoB,
         'distancia_referencia_avanco_m': p.distanciaReferenciaAvancoM,
         'usar_ensaio_avanco': p.usarEnsaioAvanco,
+        'vazao_ensaio_avanco_l_s': p.vazaoEnsaioAvancoLs,
+        'condicoes_ensaio_avanco': p.condicoesEnsaioAvanco,
+        'ensaio_erosao': p.ensaioErosao?.toMap(),
         'metodo_curva_avanco': p.metodoCurvaAvanco.name,
         'medicoes_avanco': p.medicoesAvanco
             .map((point) => point.toMap())
@@ -73,6 +80,8 @@ class ProjectStore {
             .toList(),
         'manejo_sulco': p.manejoSulco.name,
         'vazao_reduzida_l_s': p.vazaoReduzidaLs,
+        'origem_vazao_reduzida': p.origemVazaoReduzida.name,
+        'fator_1_1_vib': p.fator11Vib,
         'tempo_mudanca_min': p.tempoMudancaMin,
         'tempo_mudanca_parcela_min': p.tempoMudancaParcelaMin,
         'periodo_irrigacao_dias': p.periodoIrrigacaoDias,
@@ -99,6 +108,8 @@ class ProjectStore {
         'perda_escoamento': r.perdaEscoamento,
         'metricas': r.metricas,
         'unidades_metricas': r.unidadesMetricas,
+        if (r.balancoSulco != null)
+          'indicadores_balanco_sulco': r.balancoSulco!.toMap(),
         'alerta_vazao_excedida': r.alertaVazaoExcedida,
         'planejamento_operacional': r.planejamentoOperacional?.toMap(),
         'resultado_completo': SimulationResultModel.toMap(r),
@@ -142,9 +153,40 @@ class ProjectStore {
       'Tempo entre parcelas: ${p.tempoMudancaParcelaMin.toStringAsFixed(0)} min',
     );
     buffer.writeln('Manejo: ${p.manejoSulco.displayName}');
+    if (cenario.metodo == MetodoIrrigacao.sulco) {
+      final entradas = p.entradasProjetoSulco;
+      buffer.writeln(entradas == null
+          ? 'Projeto legado: UCC, UPMP, Ds, raízes, f, ETo e origem da chuva ausentes.'
+          : 'Entradas do projeto de sulcos v${entradas.versao}: '
+            'UCC=${entradas.uccPercentual ?? 'ausente'}%; '
+            'UPMP=${entradas.upmpPercentual ?? 'ausente'}%; '
+            'Ds=${entradas.densidadeAparenteGcm3 ?? 'ausente'} g/cm³; '
+            'raízes=${entradas.profundidadeRadicularCm ?? 'ausente'} cm; '
+            'f=${entradas.fracaoDisponivel ?? 'ausente'}; '
+            'ETc adotada=${entradas.etcAdotadaMmDia ?? 'ausente'} mm/dia; '
+            'ETo=${entradas.etoMmDia ?? 'ausente'} mm/dia; '
+            'chuva ${entradas.origemChuva.name}=${entradas.precipitacaoMmDia ?? 'ausente'} mm/dia.');
+      if (entradas?.curvaInfiltracao case final curva?) {
+        buffer.writeln('Curva ${curva.tipo.name} (${curva.base.name}): '
+            'K=${curva.coeficiente} ${curva.unidadeCoeficiente}; '
+            'expoente=${curva.expoente}; E=${curva.espacamentoConversaoM ?? 'não aplicável'} m; '
+            'VIB=${curva.vibMmHora ?? 'ausente'} mm/h; '
+            'calibração=${curva.tempoMinCalibrado ?? 'ausente'}–'
+            '${curva.tempoMaxCalibrado ?? 'ausente'} min.');
+      }
+    }
     if (p.manejoSulco == ManejoSulco.reduzida) {
       buffer.writeln(
-        'Vazão reduzida: ${p.vazaoReduzidaLs.toStringAsFixed(2)} L/s',
+        'Vazão reduzida (${p.origemVazaoReduzida.name}): '
+        '${r.metricas['Vazão reduzida']?.toStringAsFixed(3) ?? 'não calculada'} L/s',
+      );
+      if (p.origemVazaoReduzida == OrigemVazaoReduzida.vib) {
+        buffer.writeln(
+          'VIB para F23: ${p.vib} m/min; fator ${p.fator11Vib ? 1.1 : 1.0}.',
+        );
+      }
+      buffer.writeln(
+        'Perfil condicionado à manutenção da cobertura após a redução; não prevê novo avanço ou escoamento hidráulico.',
       );
       buffer.writeln(
         'Atraso de redução após o avanço: ${p.tempoMudancaMin.toStringAsFixed(0)} min',
@@ -163,14 +205,42 @@ class ProjectStore {
       'Origem do avanço: ${p.usarEnsaioAvanco ? 'ensaio' : 'estimativa'}',
     );
     buffer.writeln('Método de avanço: ${p.metodoCurvaAvanco.name}');
+    if (p.usarEnsaioAvanco) {
+      buffer.writeln('Vazão do ensaio de avanço: ${p.vazaoEnsaioAvancoLs} L/s');
+      buffer.writeln(
+        'Condições do ensaio: ${p.condicoesEnsaioAvanco ?? 'não informadas'}',
+      );
+    }
+    if (p.ensaioErosao case final ensaio?) {
+      buffer.writeln(
+        'Ensaio de erosão: ${ensaio.vazaoLs} L/s; '
+        '${ensaio.erosaoObservada ? 'erosão observada' : 'erosão não observada'}; '
+        '${ensaio.condicoes}.',
+      );
+    }
     buffer.writeln('Origem da infiltração: ${p.origemCurvaInfiltracao.name}');
     buffer.writeln('Hipótese de recessão: ${p.hipoteseRecessao.name}');
     buffer.writeln('');
     buffer.writeln('RESULTADOS');
     buffer.writeln('-' * 30);
-    buffer.writeln(
-      'Eficiência de aplicação (Ea): ${r.eficiencia.toStringAsFixed(2)}%',
-    );
+    if (r.balancoSulco case final balance?) {
+      buffer.writeln(
+        'Ea do slide (Lf/Lm): ${balance.eaSlide.toStringAsFixed(2)}%',
+      );
+      buffer.writeln(
+        'Ea integral (Lútil/Lm, domínio 0–L): '
+        '${balance.eaIntegral.toStringAsFixed(2)}%',
+      );
+      buffer.writeln(
+        'Balanço integral: Pp=${balance.ppIntegral.toStringAsFixed(2)}%; '
+        'Pe=${balance.peIntegral.toStringAsFixed(2)}%; '
+        'déficit=${balance.deficitMm.toStringAsFixed(2)} mm.',
+      );
+    } else {
+      buffer.writeln(
+        'Eficiência de aplicação (Ea): ${r.eficiencia.toStringAsFixed(2)}%',
+      );
+    }
     buffer.writeln('Uniformidade CUC: ${r.cuc.toStringAsFixed(2)}%');
     buffer.writeln('Distribuição DU: ${r.du.toStringAsFixed(2)}%');
     buffer.writeln(

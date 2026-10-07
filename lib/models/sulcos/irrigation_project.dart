@@ -227,9 +227,13 @@ class GeometriaSulco {
     return area / perimetro;
   }
 
-  bool get espacamentoValido {
-    if (profundidadeM == null || profundidadeM == 0) return false;
-    return espacamentoM <= 2 * profundidadeM!;
+  /// Regra E ≤ 2z (p.52): z é profundidade das raízes, não do canal.
+  bool espacamentoValido(double profundidadeRadicularM) {
+    return profundidadeRadicularM.isFinite &&
+        profundidadeRadicularM > 0 &&
+        espacamentoM.isFinite &&
+        espacamentoM > 0 &&
+        espacamentoM <= 2 * profundidadeRadicularM;
   }
 
   Map<String, dynamic> toMap() {

@@ -73,7 +73,8 @@ class BorderNotice {
 
   /// Aceita mapa novo e texto de aviso legado (que vira aviso orientativo).
   factory BorderNotice.fromMap(Object? data) {
-    if (data is String) return BorderNotice(BorderStatus.avisoOrientativo, data);
+    if (data is String)
+      return BorderNotice(BorderStatus.avisoOrientativo, data);
     if (data is! Map) {
       throw const FormatException('Aviso de faixa em formato desconhecido.');
     }
@@ -134,13 +135,53 @@ class BorderProfilePoint {
   );
 }
 
+class BorderConvergenceHistory {
+  final List<double> opportunityMin, advanceExponent, recessionEndMin;
+  const BorderConvergenceHistory({
+    this.opportunityMin = const [],
+    this.advanceExponent = const [],
+    this.recessionEndMin = const [],
+  });
+  Map<String, dynamic> toMap() => {
+    'opportunityMin': opportunityMin,
+    'advanceExponent': advanceExponent,
+    'recessionEndMin': recessionEndMin,
+  };
+  factory BorderConvergenceHistory.fromMap(Map<String, dynamic> map) =>
+      BorderConvergenceHistory(
+        opportunityMin:
+            (map['opportunityMin'] as List?)
+                ?.map((value) => (value as num).toDouble())
+                .toList() ??
+            const [],
+        advanceExponent:
+            (map['advanceExponent'] as List?)
+                ?.map((value) => (value as num).toDouble())
+                .toList() ??
+            const [],
+        recessionEndMin:
+            (map['recessionEndMin'] as List?)
+                ?.map((value) => (value as num).toDouble())
+                .toList() ??
+            const [],
+      );
+}
+
 /// Divisão do volume infiltrado (por metro de largura) em relação à IRN.
 class BorderVolumes {
   final double utilM3M, percoladoM3M, deficitM3M;
+  final double infiltradoAdequadoM3M, infiltradoDeficitarioM3M;
+
   /// Comprimento total (inclusive blocos não contíguos) com infiltração ≥ IRN.
   final double comprimentoAdequadoM;
-  const BorderVolumes(this.utilM3M, this.percoladoM3M, this.deficitM3M,
-      [this.comprimentoAdequadoM = 0]);
+  const BorderVolumes(
+    this.utilM3M,
+    this.percoladoM3M,
+    this.deficitM3M, [
+    this.comprimentoAdequadoM = 0,
+    this.infiltradoAdequadoM3M = 0,
+    this.infiltradoDeficitarioM3M = 0,
+  ]);
 }
 
 /// Resultado hidráulico por metro de largura; volumes totais multiplicam W uma vez.
@@ -363,6 +404,37 @@ class BorderResult {
     ),
   ];
 
+  /// Fórmulas efetivamente executadas por uma simulação hidráulica padrão.
+  /// Ensaio medido, busca e cronograma são etapas independentes.
+  static List<BorderFormulaFonte> get provenienciaHidraulicaExecutada =>
+      proveniencia
+          .where(
+            (fonte) => {
+              'F01',
+              'F03',
+              'F05',
+              'F06',
+              'F07',
+              'F09',
+              'F10',
+              'F11',
+              'F12',
+              'F14',
+              'F15',
+              'F16',
+              'F17',
+              'F18',
+              'F19',
+              'F20',
+              'F22',
+              'F23',
+              'F24',
+              'F25',
+              'Geometria',
+            }.contains(fonte.id),
+          )
+          .toList();
+
   final double t0Min, taMetadeMin, taFinalMin, tiMin, tdMin, trFinalMin;
   final double y0M, r, sigmaZ, qfM3MinM, residualOportunidadeM;
   final double residualAvancoM3M, residualRecessaoMin;
@@ -378,6 +450,7 @@ class BorderResult {
 
   /// Grupo numérico efetivamente usado nesta execução.
   final BorderNumericConfig numerico;
+  final BorderConvergenceHistory convergencia;
 
   const BorderResult({
     required this.t0Min,
@@ -411,6 +484,7 @@ class BorderResult {
     required this.status,
     required this.avisos,
     this.numerico = BorderNumericConfig.padrao,
+    this.convergencia = const BorderConvergenceHistory(),
   });
 
   double get volumeEntradaTotalM3 => volumeEntradaM3M * larguraM;
@@ -450,6 +524,7 @@ class BorderResult {
     'infiltracaoFinalM': infiltracaoFinalM,
     'larguraM': larguraM,
     'numerico': numerico.toMap(),
+    'convergencia': convergencia.toMap(),
     'avisos': avisos.map((notice) => notice.toMap()).toList(),
     'perfil': perfil
         .map(
@@ -489,9 +564,11 @@ class BorderResult {
       er: n('er'),
       pp: n('pp'),
       pe: n('pe'),
-      comprimentoAdequadoM: (map['comprimentoAdequadoM'] as num?)?.toDouble() ?? 0,
+      comprimentoAdequadoM:
+          (map['comprimentoAdequadoM'] as num?)?.toDouble() ?? 0,
       volumeAdequadoM3M: (map['volumeAdequadoM3M'] as num?)?.toDouble() ?? 0,
-      volumeDeficitarioM3M: (map['volumeDeficitarioM3M'] as num?)?.toDouble() ?? 0,
+      volumeDeficitarioM3M:
+          (map['volumeDeficitarioM3M'] as num?)?.toDouble() ?? 0,
       infiltracaoFinalM: (map['infiltracaoFinalM'] as num?)?.toDouble() ?? 0,
       larguraM: n('larguraM'),
       status: BorderStatus.deNome(map['status'] as String?),
@@ -500,9 +577,13 @@ class BorderResult {
               Map<String, dynamic>.from(map['numerico'] as Map),
             )
           : BorderNumericConfig.padrao,
-      avisos: (map['avisos'] as List?)
-              ?.map(BorderNotice.fromMap)
-              .toList() ??
+      convergencia: map['convergencia'] is Map
+          ? BorderConvergenceHistory.fromMap(
+              Map<String, dynamic>.from(map['convergencia'] as Map),
+            )
+          : const BorderConvergenceHistory(),
+      avisos:
+          (map['avisos'] as List?)?.map(BorderNotice.fromMap).toList() ??
           const [],
       perfil: (map['perfil'] as List).map((item) {
         final p = Map<String, dynamic>.from(item as Map);

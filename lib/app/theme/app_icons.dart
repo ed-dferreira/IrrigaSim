@@ -52,6 +52,7 @@ class AppIcons {
   static const projetoSolo = Icons.layers_rounded;
   static const projetoCultura = Icons.eco_rounded;
   static const projetoClima = Icons.cloud_rounded;
+  static const climaSolar = Icons.wb_sunny_outlined;
   static const projetoEnsaio = Icons.science_rounded;
   static const projetoOperacao = Icons.tune_rounded;
   static const projetoRevisao = Icons.fact_check_rounded;

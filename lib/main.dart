@@ -8,7 +8,8 @@ import 'package:irrigasim/services/perfil/preferencias_app.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Future.wait([
-    Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
+    if (Firebase.apps.isEmpty)
+      Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
     PreferenciasApp.init(),
   ]);
   runApp(const ProviderScope(child: App()));

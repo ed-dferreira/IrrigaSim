@@ -26,6 +26,10 @@ void main() {
 
       final parameters = ParametersController();
       parameters.setOrigemAvanco(OrigemAvanco.ensaio);
+      parameters.updateField(campo: 'vazaoEnsaioAvancoLs', valor: '1');
+      parameters.setCondicoesEnsaioAvanco(
+        'Solo médio, seção em V e orientação ensaiada',
+      );
       parameters.setMetodoCurvaAvanco(MetodoCurvaAvanco.minimosQuadrados);
       parameters.setPontosEnsaioAvanco(const [
         PontoEnsaio(distanciaM: 0, tempoMin: 0),
@@ -113,7 +117,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    for (var step = 0; step < 5; step++) {
+    for (var step = 0; step < 4; step++) {
       await tester.tap(find.text('Próximo'));
       await tester.pumpAndSettle();
     }

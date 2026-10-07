@@ -33,7 +33,7 @@ class InfiltrationChart extends StatelessWidget {
 
     return Semantics(
       label:
-          'Perfil longitudinal da lâmina infiltrada. Uniformidade CUC de ${resultado.cuc.toStringAsFixed(1)} por cento, DU de ${resultado.du.toStringAsFixed(1)} por cento e lâmina requerida de ${requiredDepth.toStringAsFixed(1)} milímetros.',
+          'Perfil longitudinal da lâmina infiltrada em milímetros, comparado à lâmina requerida de ${requiredDepth.toStringAsFixed(1)} milímetros. CUC ${resultado.cuc.toStringAsFixed(1)} por cento; DU ${resultado.du.toStringAsFixed(1)} por cento.',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -160,7 +160,9 @@ class InfiltrationChart extends StatelessWidget {
                     ),
                   ],
                 ),
-                duration: const Duration(milliseconds: 350),
+                duration: MediaQuery.disableAnimationsOf(context)
+                    ? Duration.zero
+                    : const Duration(milliseconds: 350),
               ),
             ),
           ),

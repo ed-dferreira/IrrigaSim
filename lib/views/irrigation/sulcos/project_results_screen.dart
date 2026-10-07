@@ -264,31 +264,45 @@ class _AuditResultsBody extends StatelessWidget {
                   title: 'Medidas de segurança',
                   icon: Icons.shield_rounded,
                   children: [
+                    if (result.alertaInfiltracao case final aviso?)
+                      _AuditRow(
+                        'Domínio da infiltração',
+                        aviso,
+                        isWarning: true,
+                      ),
                     _AuditRow(
-                      'Percolação',
+                      'Percolação integral',
                       '${result.perdaPercolacao.toStringAsFixed(1)}%',
                       detail: result.perdaPercolacao > 15
-                          ? 'Limite excedido (>15%)'
-                          : 'Dentro do limite',
+                          ? 'Acima da referência indicativa (>15%)'
+                          : 'Abaixo da referência indicativa',
                       isWarning: result.perdaPercolacao > 15,
                     ),
                     _AuditRow(
-                      'Escoamento',
+                      'Escoamento integral',
                       '${result.perdaEscoamento.toStringAsFixed(1)}%',
                       detail: result.perdaEscoamento > 10
-                          ? 'Limite excedido (>10%)'
-                          : 'Dentro do limite',
+                          ? 'Acima da referência indicativa (>10%)'
+                          : 'Abaixo da referência indicativa',
                       isWarning: result.perdaEscoamento > 10,
                     ),
                     _AuditRow(
-                      'Eficiência',
-                      '${result.eficiencia.toStringAsFixed(1)}%',
-                      detail: result.eficiencia < 60
-                          ? 'Abaixo do mínimo (60%)'
-                          : result.eficiencia >= 75
-                          ? 'Ideal (≥75%)'
-                          : 'Aceitável',
-                      isWarning: result.eficiencia < 60,
+                      'Eficiência para avaliação (${result.balancoSulco == null ? 'Ea' : 'Ea integral'})',
+                      '${(result.balancoSulco?.eaIntegral ?? result.eficiencia).toStringAsFixed(1)}%',
+                      detail:
+                          (result.balancoSulco?.eaIntegral ??
+                                  result.eficiencia) <
+                              60
+                          ? 'Abaixo do critério indicativo (60%)'
+                          : (result.balancoSulco?.eaIntegral ??
+                                    result.eficiencia) >=
+                                75
+                          ? 'Acima da referência de 75%'
+                          : 'Atende ao critério indicativo',
+                      isWarning:
+                          (result.balancoSulco?.eaIntegral ??
+                              result.eficiencia) <
+                          60,
                     ),
                   ],
                 ),
@@ -434,11 +448,11 @@ class _AuditResultsBody extends StatelessWidget {
                             'k = ${advanceK.toStringAsPrecision(6)}; '
                                 'b = ${(result.metricas['Expoente da curva de avanço'] ?? 0).toStringAsPrecision(5)}',
                           ),
-                        if (result.metricas['R² da curva de avanço']
+                        if (result.metricas['R² log da curva de avanço']
                             case final advanceR2?)
                           _AuditRow(
                             'Ajuste da regressão de avanço',
-                            'R² = ${advanceR2.toStringAsFixed(5)}',
+                            'R² log = ${advanceR2.toStringAsFixed(5)}',
                           ),
                         _AuditRow(
                           'Origem da infiltração',
@@ -486,10 +500,31 @@ class _AuditResultsBody extends StatelessWidget {
                   icon: AppIcons.waterDrop,
                   children: [
                     _AuditRow(
-                      'Eficiência de aplicação (Ea)',
+                      result.balancoSulco == null
+                          ? 'Eficiência de aplicação (Ea)'
+                          : 'Ea slide (Lf/Lm; não fecha balanço)',
                       '${result.eficiencia.toStringAsFixed(2)}%',
                       detail: result.classificacaoEa,
                     ),
+                    if (result.balancoSulco case final balanco?) ...[
+                      _AuditRow(
+                        'Ea integral (Lútil/Lm)',
+                        '${balanco.eaIntegral.toStringAsFixed(2)}%',
+                        detail:
+                            'Usada nos critérios de avaliação; perfil de 0 a L',
+                      ),
+                      _AuditRow(
+                        'Pp slide (Lmi−IRN)/Lm',
+                        balanco.ppSlide == null
+                            ? 'Não aplicável sob déficit'
+                            : '${balanco.ppSlide!.toStringAsFixed(2)}%',
+                      ),
+                      _AuditRow(
+                        'Déficit espacial',
+                        '${balanco.deficitMm.toStringAsFixed(2)} mm',
+                        detail: 'IRN = lâmina útil + déficit',
+                      ),
+                    ],
                     _AuditRow(
                       'Uniformidade de Christiansen (CUC)',
                       '${result.cuc.toStringAsFixed(2)}%',
@@ -521,14 +556,24 @@ class _AuditResultsBody extends StatelessWidget {
                       '${result.tempoAvanco.toStringAsFixed(2)} min',
                     ),
                     _AuditRow(
-                      'Perda por percolação',
+                      result.balancoSulco == null
+                          ? 'Perda por percolação'
+                          : 'Percolação integral',
                       '${result.perdaPercolacao.toStringAsFixed(2)}%',
                     ),
                     _AuditRow(
-                      'Perda por escoamento',
+                      result.balancoSulco == null
+                          ? 'Perda por escoamento'
+                          : state.manejoSulco == ManejoSulco.reduzida &&
+                                state.metodo == MetodoIrrigacao.sulco
+                          ? 'Escoamento residual (cenário condicionado)'
+                          : 'Escoamento integral',
                       '${result.perdaEscoamento.toStringAsFixed(2)}%',
                       detail:
-                          'Pe = (Lm − Lmi) / Lm × 100; sem déficit negativo',
+                          state.metodo == MetodoIrrigacao.sulco &&
+                              state.manejoSulco == ManejoSulco.reduzida
+                          ? 'Pe = (Lm − Lmi) / Lm × 100; resíduo do balanço sob a hipótese de cobertura, não previsão hidráulica.'
+                          : 'Pe integral = (Lm − Lmi) / Lm × 100; balanço válido',
                     ),
                     if (state.metodo == MetodoIrrigacao.sulco &&
                         state.manejoSulco == ManejoSulco.reduzida) ...[
@@ -590,8 +635,12 @@ class _AuditResultsBody extends StatelessWidget {
                   icon: Icons.functions_rounded,
                   children: [
                     _FormulaCard(
-                      formula: 'Ea = (Lf / Lm) × 100',
-                      description: 'Eficiência de aplicação: lâmina infiltrada no final (Lf) sobre lâmina média aplicada (Lm).',
+                      formula: result.balancoSulco == null
+                          ? 'Ea = (Lf / Lm) × 100'
+                          : 'Ea slide = (Lf / Lm) × 100',
+                      description: result.balancoSulco == null
+                          ? 'Eficiência de aplicação: lâmina infiltrada no final (Lf) sobre lâmina média aplicada (Lm).'
+                          : 'Indicador didático pelo final do sulco; não representa o fechamento volumétrico.',
                     ),
                     if (state.metodo == MetodoIrrigacao.sulco) ...[
                       const _FormulaCard(
@@ -617,8 +666,8 @@ class _AuditResultsBody extends StatelessWidget {
                         description: 'Adequação limitada a 100%; o excesso fica contabilizado como percolação.',
                       ),
                       const _FormulaCard(
-                        formula: 'Pp = max(Lmi − IRN, 0) / Lm × 100; Pe = max(Lm − Lmi, 0) / Lm × 100',
-                        description: 'Déficit de infiltração não é convertido em perda negativa; balanço baseado na média espacial do perfil.',
+                        formula: 'Ea integral = Lútil/Lm; Pp integral = Lpercolada/Lm; Pe integral = (Lm−Lmi)/Lm',
+                        description: 'Médias espaciais por trapézios de 0 a L: Lmi = Lútil + Lpercolada; IRN = Lútil + déficit. Balanço inconsistente impede o resultado.',
                       ),
                       _FormulaCard(
                         formula: state.manejoSulco == ManejoSulco.reduzida
@@ -693,7 +742,7 @@ class _RecommendationBanner extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     final good =
         result.alertaVazaoExcedida == null &&
-        result.eficiencia >= 85 &&
+        (result.balancoSulco?.eaIntegral ?? result.eficiencia) >= 85 &&
         result.cuc >= 80 &&
         result.du >= 65;
 
@@ -740,7 +789,7 @@ class _RecommendationBanner extends StatelessWidget {
                 Text(
                   '${state.metodo.displayName}: L = ${state.comprimento.toStringAsFixed(0)} m, '
                   'Q = ${state.vazao.toStringAsFixed(2)} L/s por ${(result.tempoFornecimentoMin ?? state.tempoAplicacao).toStringAsFixed(0)} min. '
-                  'Ea = ${result.eficiencia.toStringAsFixed(1)}%, CUC = ${result.cuc.toStringAsFixed(1)}%.\n$message',
+                  '${result.balancoSulco == null ? 'Ea' : 'Ea integral'} = ${(result.balancoSulco?.eaIntegral ?? result.eficiencia).toStringAsFixed(1)}%, CUC = ${result.cuc.toStringAsFixed(1)}%.\n$message',
                   style: Theme.of(context).textTheme.bodyMedium
                       ?.copyWith(color: foreground),
                 ),
@@ -763,9 +812,9 @@ class _KpiGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = [
       (
-        'Eficiência Ea',
-        '${result.eficiencia.toStringAsFixed(1)}%',
-        result.classificacaoEa,
+        result.balancoSulco == null ? 'Eficiência Ea' : 'Ea integral',
+        '${(result.balancoSulco?.eaIntegral ?? result.eficiencia).toStringAsFixed(1)}%',
+        result.classificacaoEaIntegral,
       ),
       (
         'Uniformidade CUC',
@@ -1065,6 +1114,7 @@ class _OperationalPlanningSection extends StatelessWidget {
         _AuditRow(
           'Sulcos por dia (NSD)',
           '${p.nsdOperacional} (teórico ${p.nsdTeorico.toStringAsFixed(2)})',
+          detail: 'Sulcos a irrigar por dia para cumprir o turno de rega.',
         ),
         _AuditRow(
           'Tempo por parcela (TIP)',
@@ -1076,6 +1126,7 @@ class _OperationalPlanningSection extends StatelessWidget {
           p.npdOperacional == 0
               ? 'Nenhuma'
               : '${p.npdOperacional} (teórico ${p.npdTeorico.toStringAsFixed(2)})',
+          detail: 'Grupos operacionais na jornada, não frequência agronômica.',
         ),
         _AuditRow(
           'Sulcos simultâneos (NSP)',
@@ -1155,14 +1206,40 @@ class _FurrowDetailsSection extends StatelessWidget {
                 if (state.manejoSulco == ManejoSulco.reduzida) ...[
                   _AuditRow(
                     'Vazão reduzida',
-                    state.vazaoReduzidaLs > 0
-                        ? '${state.vazaoReduzidaLs.toStringAsFixed(2)} L/s'
-                        : '${(result.metricas['Vazão reduzida estimada pela curva'] ?? 0).toStringAsFixed(3)} L/s',
-                    detail: state.vazaoReduzidaLs > 0 ? 'Valor informado' : 'Estimativa pela derivada da curva acumulada no fim da oportunidade',
+                    '${result.metricas['Vazão reduzida']?.toStringAsFixed(3) ?? 'Não calculada'} L/s',
+                    detail: switch (state.origemVazaoReduzida) {
+                      OrigemVazaoReduzida.informada => 'Valor informado',
+                      OrigemVazaoReduzida.taxaFinalDaCurva =>
+                        state.vazaoReduzidaLs > 0
+                            ? 'Valor informado (cenário legado)'
+                            : 'Estimativa pela derivada no fim da oportunidade',
+                      OrigemVazaoReduzida.vib =>
+                        'F23 · VIB em mm/h${state.fator11Vib ? ' × 1,1' : ' sem fator 1,1'}',
+                      OrigemVazaoReduzida.somatorioEspacial =>
+                        'F24 · somatório espacial das estacas medidas (p.96)',
+                    },
                   ),
+                  if (state.origemVazaoReduzida == OrigemVazaoReduzida.vib)
+                    _AuditRow(
+                      'VIB usada em F23',
+                      '${result.metricas['VIB usada na redução']?.toStringAsFixed(2) ?? '—'} mm/h',
+                    ),
+                  if (result.metricas['Demanda espacial no instante da troca']
+                      case final demanda?)
+                    _AuditRow(
+                      'Demanda espacial na troca',
+                      '${demanda.toStringAsFixed(3)} L/s',
+                      detail:
+                          'F24 (p.96), taxas integradas nas estacas do ensaio.',
+                    ),
                   _AuditRow(
                     'Atraso após avanço',
                     '${state.tempoMudancaMin.toStringAsFixed(0)} min',
+                  ),
+                  const _AuditRow(
+                    'Hipótese hidráulica',
+                    'Perfil condicionado à cobertura após a redução',
+                    detail: 'Sem nova curva medida, a redução não prevê o avanço nem o escoamento hidráulico (§6.7).',
                   ),
                 ],
                 if (state.manejoSulco == ManejoSulco.surtir) ...[
@@ -1202,6 +1279,15 @@ class _FurrowDetailsSection extends StatelessWidget {
                       : 'Erosiva (excede qmax)',
                   isWarning: state.vazao > (qmaxMetric ?? double.infinity),
                 ),
+                if (state.ensaioErosao case final ensaio?)
+                  _AuditRow(
+                    'Ensaio de erosão (${ensaio.vazaoLs.toStringAsFixed(2)} L/s)',
+                    ensaio.erosaoObservada
+                        ? 'Erosão observada'
+                        : 'Erosão não observada',
+                    detail: ensaio.condicoes,
+                    isWarning: ensaio.erosaoObservada,
+                  ),
               ],
             ),
             const SizedBox(height: 12),
@@ -1235,8 +1321,8 @@ class _FurrowDetailsSection extends StatelessWidget {
                   to > 0 ? (ta / to).toStringAsFixed(2) : '—',
                   detail: to > 0
                       ? (ta / to <= 0.25
-                            ? 'Ideal (≤ 0,25 — Criddle)'
-                            : 'Acima do recomendado')
+                            ? 'Atende à regra orientativa de Criddle (≤ 0,25)'
+                            : 'Acima da regra orientativa de Criddle')
                       : null,
                 ),
               ],
@@ -1454,7 +1540,13 @@ String _buildCsv(ParametersState state, SimulationResult result) {
     'entrada;tipo de sulco;${state.tipoSulco?.name ?? 'não aplicável'};',
     'entrada;manejo de sulco;${state.manejoSulco.name};',
     if (state.manejoSulco == ManejoSulco.reduzida) ...[
-      'entrada;vazão reduzida informada;${state.vazaoReduzidaLs};L/s',
+      'entrada;origem da vazão reduzida;${state.origemVazaoReduzida.name};',
+      if (state.origemVazaoReduzida == OrigemVazaoReduzida.informada)
+        'entrada;vazão reduzida informada;${state.vazaoReduzidaLs};L/s',
+      if (state.origemVazaoReduzida == OrigemVazaoReduzida.vib) ...[
+        'entrada;VIB para F23;${state.vib};m/min',
+        'entrada;fator F23;${state.fator11Vib ? 1.1 : 1.0};',
+      ],
       'entrada;atraso da redução após Ta;${state.tempoMudancaMin};min',
     ],
     if (state.manejoSulco == ManejoSulco.surtir) ...[
@@ -1472,6 +1564,15 @@ String _buildCsv(ParametersState state, SimulationResult result) {
     'entrada;Manning n;${state.manningN};',
     'entrada;sigma Z;${state.sigmaZ};',
     'entrada;origem avanço;${state.origemAvanco.name};',
+    if (state.origemAvanco == OrigemAvanco.ensaio) ...[
+      'ensaio avanço;vazão medida;${state.vazaoEnsaioAvancoLs ?? 'não informada'};L/s',
+      'ensaio avanço;condições;${(state.condicoesEnsaioAvanco ?? '').replaceAll(';', ',').replaceAll('\n', ' ')};',
+    ],
+    if (state.ensaioErosao case final ensaio?) ...[
+      'ensaio erosão;vazão medida;${ensaio.vazaoLs};L/s',
+      'ensaio erosão;condições;${ensaio.condicoes.replaceAll(';', ',').replaceAll('\n', ' ')};',
+      'ensaio erosão;erosão observada;${ensaio.erosaoObservada};',
+    ],
     'entrada;método curva avanço;${state.metodoCurvaAvanco.name};',
     'entrada;origem infiltração;${state.origemCurvaInfiltracao.name};',
     if (state.origemCurvaInfiltracao ==
@@ -1480,7 +1581,15 @@ String _buildCsv(ParametersState state, SimulationResult result) {
       'entrada;espaçamento do ensaio de infiltração;${state.espacamentoEnsaioInfiltracaoM};m',
     ],
     'entrada;hipótese recessão;${state.hipoteseRecessao.name};',
-    'resultado;eficiência de aplicação;${result.eficiencia};%',
+    'resultado;${result.balancoSulco == null ? 'eficiência de aplicação' : 'Ea slide (Lf/Lm)'};${result.eficiencia};%',
+    if (result.balancoSulco case final balanco?) ...[
+      'resultado;Ea integral (Lútil/Lm);${balanco.eaIntegral};%',
+      'resultado;Pp slide (Lmi−IRN)/Lm;${balanco.ppSlide?.toString() ?? 'não aplicável'};%',
+      'resultado;Pp integral;${balanco.ppIntegral};%',
+      'resultado;Pe integral;${balanco.peIntegral};%',
+      'resultado;déficit espacial;${balanco.deficitMm};mm',
+      'resultado;domínio do perfil;0 a ${state.comprimento} m (trapézios igualmente espaçados);',
+    ],
     'resultado;CUC;${result.cuc};%',
     'resultado;DU;${result.du};%',
     'resultado;eficiência requerimento;${result.eficienciaRequerimento};%',

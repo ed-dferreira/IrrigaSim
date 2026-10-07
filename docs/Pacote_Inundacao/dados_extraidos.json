@@ -1,0 +1,188 @@
+{
+  "fonte": "Aula 8 - Irrigação por Inundação(2).pdf",
+  "paginas": 84,
+  "intermitente": {
+    "pagina": 63,
+    "primeira": {
+      "k": 0.0035,
+      "a": 0.47,
+      "vib_m_min": 0.00011
+    },
+    "terceira": {
+      "k": 0.0034,
+      "a": 0.45,
+      "vib_m_min": 0.0001
+    },
+    "comprimento_m": 200,
+    "largura_area_m": 400,
+    "declividade": 0,
+    "manning_n": 0.04,
+    "rho1": 1,
+    "rho2": 3.33,
+    "irn_mm": 56,
+    "et_mm_dia": 8,
+    "vmax_m_min": 8,
+    "qt_l_s": 400,
+    "intervalo_disponibilidade_dias": 7
+  },
+  "continua": {
+    "pagina": 73,
+    "area_ha": 20,
+    "dta_mm_cm": 2,
+    "porosidade": 0.5,
+    "z_cm": 50,
+    "k0_mm_dia": 7,
+    "et_mm_dia": 7.2,
+    "lamina_mm": 150,
+    "f": 0.5
+  },
+  "arroz": {
+    "pagina": 84,
+    "ds_g_cm3": 1.25,
+    "dp_g_cm3": 2.65,
+    "pci_cm": 60,
+    "h_cm": 7,
+    "ksat_m_dia": 0.0006,
+    "evaporacao_tanque_mm_dia": 8,
+    "periodo_dias": 100,
+    "produtividade_sacos_ha": 435.6,
+    "umidade_graos": 0.13,
+    "indice_colheita": 0.4,
+    "ua": null,
+    "massa_saco_kg": null,
+    "area_ha": null,
+    "td_dias": null,
+    "tr_dias": null
+  },
+  "observacoes": [
+    "Slide 63 rotula I como m³/min, mas o uso nas equações exige lâmina em m.",
+    "Dados faltantes preservados como null.",
+    "Evaporação do tanque não recebe coeficiente de ajuste, pois a aula não fornece um.",
+    "Página 61 chama L de largura; o código usa comprimento coerentemente com área = largura × comprimento.",
+    "Página 62 não define PI com clareza; rotina exige dias de atendimento explicitamente.",
+    "Página 76 mistura ilustração volumétrica com fórmula gravimétrica; conversão precisa ser explícita.",
+    "Tr (tempo restante, p.83) não é automaticamente TR (turno de rega, p.67)."
+  ],
+  "tabela_pagina_16": {
+    "vazao_base_l_s": 10,
+    "area_ha": {
+      "arenoso": 0.01,
+      "franco_arenoso": 0.02,
+      "franco_argiloso": 0.03,
+      "argiloso": 0.04
+    }
+  },
+  "henderson_pagina_17": {
+    "formula": "A = 100 Q / VIB",
+    "A": "m²",
+    "Q": "m³/h",
+    "VIB": "mm/h",
+    "natureza": "relação empírica transcrita; fator 100 preservado"
+  },
+  "tabela_booher_pagina_38": {
+    "diametro_cm": [
+      10,
+      12.5,
+      15,
+      20,
+      25,
+      30,
+      35
+    ],
+    "carga_cm": [
+      5,
+      7.5,
+      10,
+      12.5,
+      15,
+      20,
+      25
+    ],
+    "vazao_l_s": [
+      [
+        4.7,
+        5.7,
+        6.6,
+        7.4,
+        8.1,
+        9.3,
+        10.4
+      ],
+      [
+        7.3,
+        8.9,
+        10.3,
+        11.5,
+        12.6,
+        14.6,
+        16.3
+      ],
+      [
+        10.5,
+        12.9,
+        14.9,
+        16.6,
+        18.2,
+        21,
+        23.5
+      ],
+      [
+        18.7,
+        22.9,
+        26.4,
+        29.5,
+        32.3,
+        37.3,
+        41.8
+      ],
+      [
+        29.2,
+        35.7,
+        41.3,
+        46.1,
+        50.5,
+        58.4,
+        65.2
+      ],
+      [
+        42,
+        31.5,
+        39.4,
+        66.4,
+        72.8,
+        84,
+        94
+      ],
+      [
+        57.2,
+        70,
+        80.9,
+        90.4,
+        99.1,
+        114.4,
+        127.9
+      ]
+    ],
+    "celulas_suspeitas": [
+      {
+        "diametro_cm": 30,
+        "carga_cm": 7.5,
+        "valor_original": 31.5
+      },
+      {
+        "diametro_cm": 30,
+        "carga_cm": 10,
+        "valor_original": 39.4
+      }
+    ],
+    "observacao": "Valores literais do PDF. Linha de 30 cm não cresce monotonicamente com carga; não usar células suspeitas sem confirmação. A legenda menciona irrigação por faixa."
+  },
+  "figura_pagina_76": {
+    "natureza": "ilustração; não atribuída automaticamente ao exercício 84",
+    "saturacao_volumetrica": 0.5,
+    "capacidade_campo_volumetrica": 0.35,
+    "umidade_atual_volumetrica": 0.25,
+    "ponto_murcha_volumetrico": 0.15,
+    "conversao": "Ua_gravimetrica = theta_volumetrica / Ds, com densidade da água aproximada de 1 g/cm³"
+  }
+}

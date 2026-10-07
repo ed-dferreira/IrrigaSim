@@ -11,58 +11,56 @@ import 'package:irrigasim/services/simulation/sulcos/run_furrow_simulation.dart'
 
 /// Valores de referência do §56 do documento.
 ///
-/// Área: 540 m × 200 m
-/// Cultura: milho
-/// Espaçamento: 0,90 m
-/// Declividade: 0,5%
-/// k = 2,83 mm/min^n, n = 0,554
+/// Projeto resolvido: milho, UCC=30,5%, UPMP=18%, Ds=1,12 g/cm³,
+/// raízes=50 cm, f=0,6, ETc=7 e Pef=3 mm/dia.
+/// Curva de infiltração: k = 2,83 mm/min^n, n = 0,554.
 /// Vazão = 1,5 L/s por sulco (reprovada por erosão)
 /// Vazão reduzida = 0,75 L/s
 void main() {
-  group('ISSUE-016 — Caso milho §56: lâmina requerida e turno de rega', () {
+  group('Projeto resolvido de milho — lâmina requerida e turno de rega', () {
     test('IRN = 42 mm (§56.1)', () {
       final resultado = LaminaRequeridaCalculator.calcular(
-        uccPercentual: 30,
-        upmpPercentual: 15,
-        densidadeGcm3: 1.4,
-        profundidadeRaizesCm: 40,
-        fracaoAguaDisponivel: 0.5,
-        demandaLiquidaMmDia: 4,
+        uccPercentual: 30.5,
+        upmpPercentual: 18,
+        densidadeGcm3: 1.12,
+        profundidadeRaizesCm: 50,
+        fracaoAguaDisponivel: 0.6,
+        demandaLiquidaMmDia: 7 - 3,
       );
 
-      // IRN = (0.30-0.15) * 10 * 1.4 * 40 * 0.5 = 42 mm
+      // IRN = (0.305-0.18) * 10 * 1.12 * 50 * 0.6 = 42 mm
       expect(resultado.irnMm, closeTo(42, 0.001));
     });
 
     test('TR calculado = 10,5 dias (§56.2)', () {
       final resultado = LaminaRequeridaCalculator.calcular(
-        uccPercentual: 30,
-        upmpPercentual: 15,
-        densidadeGcm3: 1.4,
-        profundidadeRaizesCm: 40,
-        fracaoAguaDisponivel: 0.5,
-        demandaLiquidaMmDia: 4,
+        uccPercentual: 30.5,
+        upmpPercentual: 18,
+        densidadeGcm3: 1.12,
+        profundidadeRaizesCm: 50,
+        fracaoAguaDisponivel: 0.6,
+        demandaLiquidaMmDia: 7 - 3,
       );
 
-      // TR = 42 / 4 = 10.5 dias
+      // TR = 42 / (ETc 7 - Pef 3) = 10.5 dias
       expect(resultado.turnoCalculadoDias, closeTo(10.5, 0.001));
     });
 
     test('valores intermediários do cálculo de IRN', () {
       final resultado = LaminaRequeridaCalculator.calcular(
-        uccPercentual: 30,
-        upmpPercentual: 15,
-        densidadeGcm3: 1.4,
-        profundidadeRaizesCm: 40,
-        fracaoAguaDisponivel: 0.5,
-        demandaLiquidaMmDia: 4,
+        uccPercentual: 30.5,
+        upmpPercentual: 18,
+        densidadeGcm3: 1.12,
+        profundidadeRaizesCm: 50,
+        fracaoAguaDisponivel: 0.6,
+        demandaLiquidaMmDia: 7 - 3,
       );
 
-      expect(resultado.uccDecimal, closeTo(0.30, 0.001));
-      expect(resultado.upmpDecimal, closeTo(0.15, 0.001));
-      expect(resultado.faad, closeTo(0.15, 0.001));
-      expect(resultado.profundidadeCm, closeTo(40, 0.001));
-      expect(resultado.fatorCultura, closeTo(0.5, 0.001));
+      expect(resultado.uccDecimal, closeTo(0.305, 1e-12));
+      expect(resultado.upmpDecimal, closeTo(0.18, 1e-12));
+      expect(resultado.faad, closeTo(0.125, 1e-12));
+      expect(resultado.profundidadeCm, closeTo(50, 1e-12));
+      expect(resultado.fatorCultura, closeTo(0.6, 1e-12));
     });
   });
 
@@ -164,22 +162,25 @@ void main() {
       );
     });
 
-    test('lâmina aplicada ≈ 73 mm (§56.9)', () {
+    test('lâmina aplicada recalculada = 73,333 mm (§56.9)', () {
       // Lâmina aplicada já está em mm no metricas
       final laminaMm = resultado.metricas['Lâmina aplicada'] as num;
-      expect(laminaMm.toDouble(), closeTo(73, 10));
+      expect(laminaMm.toDouble(), closeTo(73.33333333333333, 1e-9));
     });
 
-    test('Ea ≈ 57% (§56.9) — 200m com vazão constante', () {
-      expect(resultado.eficiencia, closeTo(57, 10));
+    test('Ea integral recalculada do perfil de 0 a L', () {
+      expect(
+        resultado.balancoSulco!.eaIntegral,
+        closeTo(57.272687212695466, 0.002),
+      );
     });
 
-    test('balanço físico: Ea + Pp + Pe ≈ 100%', () {
+    test('balanço físico: Ea integral + Pp integral + Pe integral = 100%', () {
       final soma =
-          resultado.eficiencia +
+          resultado.balancoSulco!.eaIntegral +
           resultado.perdaPercolacao +
           resultado.perdaEscoamento;
-      expect(soma, closeTo(100, 1));
+      expect(soma, closeTo(100, 1e-8));
     });
 
     test('perfil longitudinal tem dados válidos', () {

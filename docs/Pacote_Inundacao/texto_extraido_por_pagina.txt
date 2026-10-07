@@ -1,0 +1,1587 @@
+=== PÁGINA 1 ===
+                       Ministério da Educação
+                   Universidade Federal do Pampa
+              Curso Bacharelado em Engenharia Agrícola
+
+
+
+
+       Irrigação por
+       INUNDAÇÃO
+
+Prof.ª Chaiane Guerra da Conceição
+      Engenheira Agrícola, Dr.ª
+
+
+
+  1
+
+
+=== PÁGINA 2 ===
+                               INUNDAÇÃO
+
+
+❑ Proporciona a APLICAÇÃO DE ÁGUA ÀS PLANTAS utilizando-se da superfície
+
+  do solo e da energia potencial como MEIO DE CONDUÇÃO E DISTRIBUIÇÃO
+
+  DA ÁGUA;
+
+
+
+❑ A aplicação de água é feita por meio de bacias ou tabuleiros, ou seja,
+
+  áreas quase planas, de tamanho variado, limitadas por diques ou taipas;
+
+
+
+❑ O sistema se caracteriza pela manutenção de uma lâmina de água sobre a
+
+  superfície do solo;
+
+
+  2
+
+
+=== PÁGINA 3 ===
+    INUNDAÇÃO
+
+
+
+
+3
+
+
+=== PÁGINA 4 ===
+    INUNDAÇÃO
+
+
+
+
+4
+
+
+=== PÁGINA 5 ===
+    INUNDAÇÃO
+
+
+
+
+          Figura 3 - Inundação para verificação do
+          nivelamento e posterior acabamento de
+          um tabuleiro.
+
+
+
+
+          Figura 4 - Conjunto de tabuleiros
+          acabados.
+
+
+
+
+5
+
+
+=== PÁGINA 6 ===
+                             INUNDAÇÃO
+
+
+    Exigências:
+
+
+         Solos de textura média a fina;
+
+
+         Terrenos com declividade uniforme inferior a 2%;
+
+
+         Culturas tolerantes ao excesso hídrico.
+
+
+
+
+6
+
+
+=== PÁGINA 7 ===
+                        INUNDAÇÃO
+
+
+Vantagens:
+
+    Economia de energia;
+
+    Controle de plantas daninhas;
+
+
+    Aproveitamento máximo da água da chuva;
+
+
+    Controle da temperatura do solo;
+
+
+    Geralmente apresentam o menor custo fixo e operacional;
+
+    Eficiência dos herbicidas quando a água entra cedo na lavoura.
+
+
+
+7
+
+
+=== PÁGINA 8 ===
+                            INUNDAÇÃO
+
+
+Limitações:
+
+    X   Consumo elevado de água;
+
+    X   Terrenos com declividade uniforme menor de 2%,
+
+
+    X   Pode    haver   necessidade     de   sistematização    da       lavoura
+
+
+    X   (encarecimento);
+
+
+    X   Restrito para culturas resistentes ao encharcamento;
+
+
+    X   Perda de área de cultivo para construção das taipas e canais.
+
+
+
+8
+
+
+=== PÁGINA 9 ===
+                           INUNDAÇÃO INTERMITENTE
+
+
+❑ Aplicação da água na lavoura por um
+
+     tempo    suficiente    para   o   solo   na
+
+     profundidade das raízes atingir a umidade
+
+     correspondente a CC;
+
+
+❑ A água é retida dentro do tabuleiro, até que ela seja infiltrada ou drenada.
+
+❑ A dose é aplicada novamente quando o solo atingir a umidade
+
+     correspondente ao limite hídrico inferior da cultura. Este tipo de manejo
+
+     também é chamado de “dar banho na cultura”.
+
+
+
+ 9
+
+
+=== PÁGINA 10 ===
+         INUNDAÇÃO INTERMITENTE
+
+     INUNDAÇÃO INTERMITENTE EM FRUTÍFERAS
+
+
+
+
+10
+
+
+=== PÁGINA 11 ===
+                         INUNDAÇÃO CONTÍNUA
+
+
+
+❑ A água é aplicada à lavoura alguns dias depois da semeadura e é mantida
+
+  durante o desenvolvimento da cultura, por meio de uma vazão pequena e
+
+  contínua, até alguns dias antes da colheita.
+
+
+
+
+❑ Esse tipo de irrigação só é viável para a
+
+  cultura do arroz, que é uma cultura
+
+  tolerante ao encharcamento das raízes.
+
+
+
+
+  11
+
+
+=== PÁGINA 12 ===
+                        INUNDAÇÃO CONTÍNUA
+
+
+
+Com circulação de água: há uma entrada de água permanente na lavoura
+
+com o objetivo de manter a lâmina de irrigação dentro dos quadros, e há
+
+
+também uma saída de água permanente para o canal de drenagem.
+
+
+
+
+Sem circulação de água: a entrada de água na lavoura é controlada para que
+
+toda a água fique dentro dos quadros, não havendo saída da água.
+
+
+
+
+  12
+
+
+=== PÁGINA 13 ===
+                      COMPONENTES DO SISTEMA
+
+✓reservatório com motobomba;
+✓ quadros ou tabuleiros;
+✓ taipas;
+✓ canais de irrigação e drenagem;
+✓ sifões ou comportas para a entrada de água na lavoura.
+
+
+
+
+   13
+
+
+=== PÁGINA 14 ===
+                           TAMANHO DO TABULEIRO
+
+❑ Pode variar desde 1 m², para irrigação de vegetais ou árvores frutíferas, até
+
+  áreas maiores do que cinco hectares, para irrigação de arroz, em solos
+
+  planos e argilosos.
+
+
+
+❑ Em geral, o tamanho do tabuleiro é determinado pelo:
+
+    • costume local;
+
+    • pelo tipo de solo;
+
+    • pelas condições topográficas da área;
+
+    • pela vazão disponível.
+
+
+
+  14
+
+
+=== PÁGINA 15 ===
+                          TAMANHO DO TABULEIRO
+
+
+Quanto ao tipo de solo: quando mais impermeável for o subsolo, maiores poderão ser os
+tabuleiros.
+
+
+Quanto às condições topográficas: o tamanho deve ser tal que a diferença em
+elevação, nas duas direções, entre o ponto mais elevado e o mais baixo, não deve exceder a
+2/3 da altura da lâmina média que se deseja manter dentro do tabuleiro, no caso de
+inundação permanente ou contínua. Para inundação intermitente, o tamanho depende da
+vazão disponível e das dimensões da área.
+
+
+Em se tratando da inundação permanente, o tamanho do tabuleiro, por unidade de vazão,
+                    pode ser maior do que na irrigação intermitente.
+
+
+
+
+  15
+
+
+=== PÁGINA 16 ===
+                         TAMANHO DO TABULEIRO
+
+
+Na Tabela 1 estão algumas sugestões de tamanho, expressas em função da vazão
+disponível e do tipo de solo, que podem ser usadas como guia de dimensionamento.
+
+
+Tabela 1 - Sugestões de tamanho de tabuleiros, em função do tipo de solo e da
+vazão disponível
+
+
+
+
+  16
+
+
+=== PÁGINA 17 ===
+                        TAMANHO DO TABULEIRO
+
+
+ Henderson (1965) sugere a seguinte relação entre vazão disponível (Q), em
+
+m3/h, área dos tabuleiros (A), em m2, e velocidade de infiltração básica do solo
+
+(VIB), em mm/h.
+
+
+
+
+  17
+
+
+=== PÁGINA 18 ===
+                              FORMA DOS TABULEIRO
+
+❑        Os tabuleiros são, basicamente, tabuleiros retangulares e tabuleiros
+
+    em contorno.
+
+
+Tabuleiros Retangulares
+•   São      constituídos    de   áreas   planas,   limitadas   por   diques   retilíneos,
+    formando tabuleiros retangulares.
+•   Em geral, exigem terrenos sistematizados, com pequena declividade.
+         ▪ declividade natural inferior a 2% não exigem muita movimentação
+           de terra durante a sistematização
+         ▪ com declividade acima de 2% os tamanhos dos tabuleiros tornam-se
+           muito pequenos, havendo exigência de muita movimentação de terra na
+           sistematização.
+
+
+    18
+
+
+=== PÁGINA 19 ===
+                          FORMA DOS TABULEIRO
+
+
+Tabuleiros Retangulares
+
+
+
+
+  19
+
+
+=== PÁGINA 20 ===
+                         FORMA DOS TABULEIRO
+
+
+Exemplo:
+
+
+Se a lâmina média a ser mantida na irrigação por inundação for de 15 cm,
+pode-se permitir uma variação na elevação entre a parte mais baixa e a mais
+elevada, de?
+
+
+Se o terreno, após sistematizado, ficar com uma declividade de 0,25% em uma
+direção e 0,05% em outra, o tabuleiro poderá ter as dimensões de?
+
+
+
+
+  20
+
+
+=== PÁGINA 21 ===
+                            FORMA DOS TABULEIRO
+
+O manejo da água na irrigação dos tabuleiros retangulares pode ser com:
+•     derivação de água e drenagem individual por tabuleiro,
+
+
+
+
+        geralmente os
+          tabuleiros                         NO CASO DE:
+    são maiores do que no       ▪   terrenos planos ou com pouca
+           segundo.                 declividade;
+                                ▪   com inundação contínua ou
+                                    intermitente
+
+
+
+
+•    circulação de água, passando de uma tabuleiro para outro, em terrenos
+     com maior declividade, e somente para inundação contínua.
+
+     21
+
+
+=== PÁGINA 22 ===
+                            FORMA DOS TABULEIRO
+
+O manejo da água na irrigação dos tabuleiros retangulares pode ser com:
+•    derivação de água e drenagem individual por tabuleiro.
+
+
+
+
+             Figura - Tabuleiros retangulares com derivação de água e drenagem individual.
+
+
+
+    22
+
+
+=== PÁGINA 23 ===
+                          FORMA DOS TABULEIRO
+
+O manejo da água na irrigação dos tabuleiros retangulares pode ser com:
+•    derivação de água e drenagem individual por tabuleiro.
+
+
+
+
+                  Figura - Tabuleiros em contorno irrigados individualmente.
+
+
+
+    23
+
+
+=== PÁGINA 24 ===
+                          FORMA DOS TABULEIRO
+
+O manejo da água na irrigação dos tabuleiros retangulares pode ser com:
+•    derivação de água e drenagem individual por tabuleiro.
+
+
+
+
+                  Figura - Tabuleiros retangulares irrigados individualmente.
+
+
+
+    24
+
+
+=== PÁGINA 25 ===
+                         FORMA DOS TABULEIRO
+
+O manejo da água na irrigação dos tabuleiros retangulares pode ser com:
+• circulação de água, passando de uma tabuleiro para outro.
+
+
+
+
+                  Figura - Tabuleiros retangulares, com circulação de água.
+
+
+
+  25
+
+
+=== PÁGINA 26 ===
+                         FORMA DOS TABULEIRO
+
+O manejo da água na irrigação dos tabuleiros retangulares pode ser com:
+• circulação de água, passando de uma tabuleiro para outro.
+
+
+
+
+                  Figura - Tabuleiros em contorno com circulação de água.
+
+
+
+
+  26
+
+
+=== PÁGINA 27 ===
+                         FORMA DOS TABULEIRO
+
+O manejo da água na irrigação dos tabuleiros retangulares pode ser com:
+• circulação de água, passando de uma tabuleiro para outro.
+
+
+
+
+                  Figura - Tabuleiros retangulares com circulação de agua.
+
+
+
+  27
+
+
+=== PÁGINA 28 ===
+                           FORMA DOS TABULEIRO
+
+Tabuleiros em contorno
+•   São formados por um sistema de diques em curvas de nível e diques
+    retilíneos, em direção transversal às curvas de nível.
+
+
+
+
+                               Figura - Tabuleiros em contorno.
+
+
+
+    28
+
+
+=== PÁGINA 29 ===
+                         FORMA DOS TABULEIRO
+
+
+Tabuleiros em contorno
+•   Em geral, os tabuleiros em curva de nível são maiores do que os
+    retangulares; e
+•   Exigem menor movimentação de terra na sistematização do terreno, pois ela
+    apenas elimina algumas saliências e depressões mais pronunciadas.
+
+
+
+
+          Há basicamente dois tipos de tabuleiros em contorno:
+
+
+     • Os diques em contorno são paralelos entre si;
+     • Cada dique segue exatamente uma curva de nível.
+
+
+
+    29
+
+
+=== PÁGINA 30 ===
+                       FORMA DOS TABULEIRO
+
+❑ Para a construção dos tabuleiros, os DIQUES EM CONTORNO PARALELOS
+  ENTRE SI, o terreno tem de ser bem sistematizado, mas as operações de
+  cultivo e colheita mecanizadas serão mais facilitadas.
+
+
+
+
+                          Figura - Tabuleiros em curva de nível.
+
+
+  30
+
+
+=== PÁGINA 31 ===
+                            FORMA DOS TABULEIRO
+
+❑ Os tabuleiros quando CADA DIQUE SEGUE EXATAMENTE UMA CURVA DE
+  NÍVEL, tem sua largura            variando         ao     seu longo,          em      função   da
+  declividade do terreno, em cada ponto
+
+
+
+
+         Figura - Vista parcial de um sistema de irrigação, com diques em curva de nível.
+
+
+
+
+  31
+
+
+=== PÁGINA 32 ===
+                               FORMA DOS TABULEIRO
+
+Tabuleiros com CADA DIQUE SEGUE EXATAMENTE UMA CURVA DE NÍVEL,
+
+•    Não exige propriamente uma sistematização, e sim, simplesmente a
+     passagem de um pranchão destorroador, para tornar a superfície do
+     solo mais uniforme.
+•    É muito usado em regiões planas, como é o caso das áreas tradicionais de
+     cultivo de arroz, no Sul do Brasil.
+           o Em tais regiões, em virtude da pouca declividade do terreno, eles são
+           bastante largos, não dificultando muito o uso do cultivo mecanizado,
+           pois a largura dos tabuleiros, ou seja, a distância entre os diques
+           adjacentes, dependerá da declividade do terreno.
+
+
+    observando-se que a diferença em elevação, dentro de cada tabuleiro, não deve exceder a
+               2/3 da altura da lâmina média que se deseja manter no tabuleiro.
+
+
+      32
+
+
+=== PÁGINA 33 ===
+                         FORMA DOS TABULEIRO
+
+Uma variante da irrigação por inundação, com tabuleiros em contorno, é a inundação
+ por transbordamento de canais em contorno. Neste caso, em lugar dos diques, são
+          construídos canais em contorno, dos quais a água transbordará.
+
+
+
+
+            Figura - Irrigação por transbordamento de canais em contorno.
+
+
+33
+
+
+=== PÁGINA 34 ===
+                    CONSTRUÇÃO DOS TABULEIROS
+
+
+❑ Normalmente, exige sistematização do terreno, a fim de obter maior
+
+  uniformidade na irrigação e tabuleiros com áreas maiores.
+
+
+
+   • esta    sistematização   pode    ser   normal,   com   cortes   e   aterros
+
+       realizados por máquinas, ou,
+
+
+
+   • em áreas com menor declividade, um simples nivelamento com
+
+       tabuleiro coberto com uma lâmina de água, por meio de um pranchão.
+
+
+
+
+  34
+
+
+=== PÁGINA 35 ===
+                      CONSTRUÇÃO DOS TABULEIROS
+
+Os diques devem ter margem livre de 5 a 20 cm acima do nível da água.
+
+
+      •   Base da taipa: 60 a 180cm de largura (média de 120cm);
+      •   Altura da taipa: 60 a 80cm.
+
+
+
+
+A distribuição de água para os tabuleiros, normalmente, é feita por meio
+                    de comportas, sifões, tubos ou válvulas.
+
+ 35
+
+
+=== PÁGINA 36 ===
+     BALANÇO DE ÁGUA
+
+
+
+
+36
+
+
+=== PÁGINA 37 ===
+     CONSTRUÇÃO DOS TABULEIROS
+
+
+
+
+37
+
+
+=== PÁGINA 38 ===
+                   CONSTRUÇÃO DOS TABULEIROS
+
+Tabela - Vazão em litros por segundo, de sifões ou tubos usados para derivar
+água, em irrigação por faixa, segundo Booher.
+
+
+
+
+ 38
+
+
+=== PÁGINA 39 ===
+                          PREPARO DO SOLO
+
+Preparo convencional – Aração > Semeadura > aplicação de água.
+
+
+
+
+  39
+
+
+=== PÁGINA 40 ===
+                           PREPARO DO SOLO
+
+Plantio direto – Desseca > Semeadura > aplicação de água.
+
+
+
+
+  40
+
+
+=== PÁGINA 41 ===
+                             PREPARO DO SOLO
+
+Pré-germinado - preparo de solo > plantio é feito dentro dos quadros (lodo),
+com sementes pré-germinadas. A água deve ser drenada de preferência de 2 a
+3 dias após o preparo de solo e depois de alguns dias a irrigação é iniciada.
+
+
+
+
+   41
+
+
+=== PÁGINA 42 ===
+     Dimensionamento de Irrigação por
+          Inundação Intermitente
+
+
+
+
+42
+
+
+=== PÁGINA 43 ===
+❑ O dimensionamento da irrigação por inundação intermitente é mais
+  simples que o das irrigações por sulco e faixa, pois no primeiro caso não
+  há escoamento no final da área.
+
+
+❑ A declividade da superfície do solo é muito pequena ou nula, de forma que a
+  fase de RECESSÃO PRATICAMENTE NÃO EXISTE, mas a de DEPLEÇÃO É
+  MUITO IMPORTANTE.
+
+
+❑ O escoamento ocorre devido à declividade da superfície de água, pois
+  as    declividades   do   solo,   tanto   longitudinal   quanto transversal, são
+  praticamente nulas.
+
+
+Conseqüentemente, a uniformidade da superfície do solo é muito importante.
+
+   43
+
+
+=== PÁGINA 44 ===
+❑ Será considerado aqui somente o DIMENSIONAMENTO DE BACIAS OU
+  TABULEIROS COM FORMAS GEOMÉTRICAS REGULARES, com escoamento
+  ocorrendo numa única direção.
+
+Serão feitas três suposições:
+
+1º) a declividade da superfície líquida durante a fase de avanço pode ser
+
+aproximada;
+
+2º) quando a vazão na entrada é cortada, a superfície líquida é horizontal e a
+
+lâmina de água na superfície do solo infiltra verticalmente;
+
+3º) assume-se que o dimensionamento é feito para aplicar a irrigação      real
+
+necessária no final da bacia onde se tem menor lâmina aplicada.
+
+
+   44
+
+
+=== PÁGINA 45 ===
+PRIMEIRO, a declividade da superfície líquida durante a fase de avanço pode ser
+aproximada por:
+
+
+
+
+                                                                 (1)
+
+
+
+ em que:
+ y0 - profundidade no início da bacia, m;
+ X - distância do início da bacia até a frente de avanço, m;
+ Sf - declividade da superfície líquida, m/m.
+
+
+
+
+  45
+
+
+=== PÁGINA 46 ===
+Substituindo a equação 1 na equação de Manning, tem-se:
+
+
+
+
+                                                          (2)
+
+
+
+em que:
+
+
+Qo - vazão na entrada da área, em m3/min/m.
+
+
+A SEGUNDA suposição é de que, quando a vazão na entrada é cortada, a
+superfície líquida é horizontal e a lâmina de água na superfície do solo
+infiltra verticalmente.
+
+   46
+
+
+=== PÁGINA 47 ===
+Isso significa que a lâmina infiltrada ao longo da bacia é igual à infiltrada
+durante a fase de avanço mais a lâmina aplicada na bacia após a fase de
+avanço.
+
+
+
+
+        A infiltração acumulada no início da área (Io) pode ser estimada por:
+
+
+
+                                                                                (3)
+
+
+
+
+   47
+
+
+=== PÁGINA 48 ===
+Isso significa que a lâmina infiltrada ao longo da bacia é igual à infiltrada
+durante a fase de avanço mais a lâmina aplicada na bacia após a fase de
+avanço. A infiltração acumulada no início da área (Io) pode ser estimada por:
+
+
+                                                                         (3)
+
+
+
+
+  Os dois primeiros termos
+ correspondem à infiltração
+       ocorrida durante a
+        fase de avanço
+
+
+
+
+  48
+
+
+=== PÁGINA 49 ===
+Isso significa que a lâmina infiltrada ao longo da bacia é igual à infiltrada
+durante a fase de avanço mais a lâmina aplicada na bacia após a fase de
+avanço. A infiltração acumulada no início da área (Io) pode ser estimada por:
+
+
+                                                                         (3)
+
+
+
+
+  Os dois primeiros termos
+ correspondem à infiltração
+       ocorrida durante a
+        fase de avanço             O terceiro termo é a
+                                profundidade média da água
+                                durante o tempo de avanço
+
+
+
+
+  49
+
+
+=== PÁGINA 50 ===
+Isso significa que a lâmina infiltrada ao longo da bacia é igual à infiltrada
+durante a fase de avanço mais a lâmina aplicada na bacia após a fase de
+avanço. A infiltração acumulada no início da área (Io) pode ser estimada por:
+
+
+                                                                                (3)
+
+
+
+                                                             O último termo é a lâmina
+  Os dois primeiros termos                                   média de água aplicada na
+ correspondem à infiltração                                     bacia após a fase de
+       ocorrida durante a                                             avanço.
+        fase de avanço             O terceiro termo é a
+                                profundidade média da água
+                                durante o tempo de avanço
+
+
+
+
+  50
+
+
+=== PÁGINA 51 ===
+TERCEIRO, assume-se que o dimensionamento é feito para aplicar a
+irrigação real necessária no final da bacia onde se tem menor lâmina
+aplicada.
+
+
+        A equação 4 pode ser aplicada no final da área, fazendo Io = IRN e
+resolvendo para ti , o que leva a:
+
+
+
+                                                                  (4)
+
+
+
+
+   51
+
+
+=== PÁGINA 52 ===
+     Procedimento para o dimensionamento
+
+          da irrigação por inundação
+
+               INTERMITENTE
+
+
+
+
+52
+
+
+=== PÁGINA 53 ===
+a) Identifique os dados de entrada:
+
+
+
+       i) testes de infiltração para condição de primeira e terceira irrigações;
+
+
+       ii) tamanho da área; declividade nas duas direções; coeficiente de
+
+
+       rugosidade;
+
+
+       iii) dados de solo; clima e planta; cálculo da irrigação real necessária;
+
+
+       iv) vazão total disponível.
+
+
+
+
+  53
+
+
+=== PÁGINA 54 ===
+ b) Selecione a vazão Qo (m3/m/min), próxima da vazão máxima não-erosiva,
+ utilizando a equação 5. Verificar se a profundidade da água não excede a
+ altura dos diques, usando a equação 2, fazendo X igual a L.
+
+
+
+
+                                                                     (5)
+
+
+
+
+c) Determine o tempo de avanço (ta ), conforme feito na irrigação por sulco.
+
+
+
+  54
+
+
+=== PÁGINA 55 ===
+                   Simulação do tempo de avanço
+
+
+O método utilizado será o do balanço volumétrico. Reescrevendo a equação do
+balanço volumétrico para a distância X igual a L e Q0 igual a vazão máxima não
+erosiva, tem-se:
+
+
+
+
+em que σz é definido na equação 7 e r, na equação 8.
+
+
+
+
+  55
+
+
+=== PÁGINA 56 ===
+                    Simulação do tempo de avanço
+
+
+A equação 6 possui duas variáveis desconhecidas, tx e r, portanto, será resolvida
+numericamente, através do método de Newton, conforme o seguinte
+procedimento:
+
+
+
+
+  56
+
+
+=== PÁGINA 57 ===
+57
+
+
+=== PÁGINA 58 ===
+58
+
+
+=== PÁGINA 59 ===
+59
+
+
+=== PÁGINA 60 ===
+d) Determine o tempo de irrigação (ti) utilizando a equação 4.
+Se ti < ta, faça ti = ta.
+
+
+e) Calcule a eficiência de aplicação (equação 14).
+
+
+
+                                                               (14)
+
+
+
+f) Repita os passos b) a e) até obter a máxima eficiência de aplicação.
+
+
+g) A largura do tabuleiro (Wo) e a vazão total necessária no projeto é
+determinada utilizando o mesmo procedimento para irrigação por faixa.
+
+
+
+   60
+
+
+=== PÁGINA 61 ===
+                      A relação entre o número de tabuleiros por parcela (NTP) e a
+                      (Wo) é:
+
+
+                                                           (15)
+
+                      Sendo: NTP = número de tabuleiros por parcela; L = largura
+
+
+
+Número total de tabuleiros
+
+
+                                                           (16)
+
+Vazão total necessária (Q)
+
+                                                           (17)
+
+
+  61
+
+
+=== PÁGINA 62 ===
+Tempo de irrigação por parcela
+
+
+                                                            (18)
+
+
+
+ Número de parcelas irrigadas por dia (NPD)
+tempo de funcionamento por dia (TDF)
+
+
+                                                           (19)
+
+
+Área por parcela
+Como o período de irrigação é de um dia, a área mínima por parcela será:
+
+
+                                                            (20)
+                                                               (20)
+  62
+
+
+=== PÁGINA 63 ===
+    Projeto de Irrigação por Inundação INTERMITENTE
+Dados de entrada:
+•    Os testes de infiltração propiciaram as seguintes equações para condição de primeira e
+     terceira irrigações ,respectivamente:
+
+      I (m3/min) = 0,0035 to(min)0,47 + 0,00011 to (min)
+
+      I (m3/min)= 0,0034 to(min)0,45 + 0,00010 to (min)
+
+•    A área é sistematizada em planos de 200 X 400m, logo, o comprimento é de 200m;
+•    A declividade é zero;
+•    O coeficiente de rugosidade estimado de 0,040; ρ1 = 1; ρ2 = 3,33.
+•    Os dados de solo, clima e planta propiciaram uma irrigação real necessária de 56mm e
+     uma evapotranspiração máxima de 8,0mm/dia.
+                                                                               PLANILHA
+•    A velocidade de escoamento máxima de 8,0m/min
+                                                                                    EXCEL!
+•    Vazão total disponível (Qt) é de 400L/s, disponível a cada sete dias.
+                                                                             (20)
+     63
+
+
+=== PÁGINA 64 ===
+     Dimensionamento de Irrigação por
+           Inundação Contínua
+
+
+
+
+64
+
+
+=== PÁGINA 65 ===
+❑ O dimensionamento da irrigação por inundação permanente é bem mais
+
+  simples que o dos demais tipos de irrigação por superfície.
+
+
+
+       Uma vez sistematizada a área, o dimensionamento consiste em
+
+       determinar a quantidade de água necessária para saturar o solo, e
+
+  estabelecer a lâmina de água desejada na sua superfície solo, no
+
+ tempo máximo igual ao turno de rega, caso a irrigação seja intermitente.
+
+
+
+
+  65
+
+
+=== PÁGINA 66 ===
+Deve-se lembrar que durante o tempo de enchimento do tabuleiro estão
+
+ocorrendo evapotranspiração e perda por percolação.
+
+
+
+        • A perda por percolação é limitada pela condutividade hidráulica
+
+        saturada do solo ou por uma camada impermeável que geralmente
+
+        existe, a uma dada profundidade, em solos de várzeas.
+
+
+
+        •Portanto, o levantamento do perfil do solo e a    determinação da
+
+        condutividade hidráulica, são indispensáveis no dimensionamento do
+
+        projeto.
+
+
+  66
+
+
+=== PÁGINA 67 ===
+1) Vazão necessária para o enchimento dos tabuleiros
+
+
+                                                                 (1)
+
+
+
+  em que:
+
+
+  Qe = vazão necessária para o enchimento dos tabuleiros, l/s;
+  ø = porosidade do solo, decimal;
+  Z = profundidade do solo, mm;
+  Lm = lâmina média na superfície do solo, mm;
+  ETpc = evapotranspiração potencial da cultura, mm/dia;
+  TR = turno de rega, dias;
+  K0 = condutividade hidráulica do solo saturado, mm/dia; e
+  A = área irrigada, ha.
+
+
+    67
+
+
+=== PÁGINA 68 ===
+Após o enchimento do tabuleiro, a vazão necessária, denominada vazão de
+manutenção (Qm), corresponde:
+
+
+      • às perdas por percolação MAIS a evapotranspiração, e pode ser
+        determinada utilizando-se a equação 2.
+
+
+
+
+                                                               (2)
+
+
+
+
+ 68
+
+
+=== PÁGINA 69 ===
+2) Eficiência de irrigação por inundação permanente
+
+
+ Os principais parâmetros usados para determinar a eficiência de irrigação
+ por inundação são:
+
+
+        • Eficiência de Condução (Ec);
+
+
+        • Eficiência de Aplicação (Ea).
+
+
+
+
+  69
+
+
+=== PÁGINA 70 ===
+Eficiência de Condução (Ec)
+
+
+A eficiência de condução reflete a perda de água entre a captação e a parcela de
+irrigação, podendo ser determinada pela seguinte equação:
+
+
+
+                                                                         (3)
+
+
+
+em que:
+Ec = eficiência de condução, %;
+Qm = vazão de manutenção, L/s;
+Qd = vazão derivada da fonte de água, L/s.
+
+
+
+
+   70
+
+
+=== PÁGINA 71 ===
+      A eficiência de condução é um parâmetro de grande importância:
+
+
+
+     • nos projetos que exigem bombeamento na fonte de captação;
+
+     • nas regiões onde a água é fator limitante, e
+
+     • nos projetos com grande distância entre a fonte de captação e a
+
+     área de irrigação.
+
+
+
+
+71
+
+
+=== PÁGINA 72 ===
+Eficiência de Aplicação (Ea)
+
+A eficiência de aplicação pode ser estimada utilizando a equação:
+
+                                                                   (4)
+
+
+em que: Ea = eficiência de aplicação, %; Les = lâmina evapotranspirada por semana, mm; e Las =
+lâmina aplicada por semana, mm.
+
+
+A lâmina evapotranspirada por semana (Les) pode ser estimada por meio de um
+“tanque Classe A”, instalado ao lado do tabuleiro, e a lâmina aplicada, por meio da
+seguinte equação:
+
+                                                                   (5)
+
+
+em que: Qm = vazão de manutenção, L/s; A = área do projeto, m2 ; e ti = tempo de irrigação, h.
+
+
+    72
+
+
+=== PÁGINA 73 ===
+          Projeto de Irrigação por Inundação Permanente
+Deseja-se elaborar um projeto de irrigação para uma área de 20 ha, cujos dados são
+apresentados a seguir. Na análise do perfil do solo verificou-se que existe uma
+camada impermeável com profundidade (Z) de 50 cm.
+•   Solo:
+DTA = 2,0 mm/cm;
+ø = 0,50 mm3/mm3;
+Z = 50 cm;
+K0 = 7,0 mm/dia
+•   Irrigação:
+ET = 7,2 mm/dia;
+Lm = 150 mm;
+                                                                   PLANILHA
+f = 0,5
+                                                                     EXCEL!
+
+
+    73
+
+
+=== PÁGINA 74 ===
+     Irrigação por Inundação Permanente – Arroz
+                   VOLUME DE ÁGUA
+
+
+
+
+74
+
+
+=== PÁGINA 75 ===
+1) Volume de água necessário para saturação do solo;
+
+2) Volume de água necessário para formação da lâmina;
+
+3) Volume de água necessário para compensar as perdas por
+
+evaporação;
+
+4) Volume de água necessário para compensar as perdas por
+
+infiltração;
+
+5) Volume de água necessário para atender a transpiração ou
+
+formação de MS.
+
+  75
+
+
+=== PÁGINA 76 ===
+         Volume de água necessário para saturação do solo (V1)
+
+
+
+
+Início da irrigação                                        Solo saturado
+
+
+
+
+V1 = Volume de saturação (m³/ha);
+Us = Umidade no ponto de saturação (decimal);
+Ua = Umidade atual ou inicial do solo (decimal);
+PCI = profundidade da camada impermeável (m);      Us = PT/Ds
+Ds = densidade do solo (g/cm³).                    PT = 1-(Ds/Dp)
+
+
+
+    76
+
+
+=== PÁGINA 77 ===
+     Volume de água necessário para formação da lâmina (V2)
+
+
+
+
+Solo saturado                                  Formação da lâmina
+
+
+
+
+                                                             h1
+
+
+
+
+V2 = Volume para formação da lâmina (m³/ha);
+h1 = altura da lâmina de água desejada (m).
+
+
+
+
+    77
+
+
+=== PÁGINA 78 ===
+ Volume de água necessário para compensar a evaporação (V3)
+
+
+
+
+Formação da lâmina                                           Compensar a evaporação
+
+                                                                                      h2
+
+                   h1
+
+
+
+
+ V3 = Volume para compensar as perdas por evaporação (m³/ha);
+ h2 = altura da lâmina evaporada (m/dia);
+ PI = período de irrigação (dias), (normalmente 100 dias).
+
+
+
+
+     78
+
+
+=== PÁGINA 79 ===
+  Volume de água necessário para compensar a infiltração (V4)
+
+
+
+
+Compensar a evaporação                                          Compensar os fluxos
+
+                                       h2
+
+
+
+
+V4 = Volume para compensar as perdas por infiltração (m³/ha);
+h1 = altura da lâmina de água (m);
+PCI = profundidade da camada impermeável (m);
+PI = período de irrigação (dias), (normalmente 100 dias).
+
+
+
+
+     79
+
+
+=== PÁGINA 80 ===
+  Volume de água necessário para atender a transpiração ou formação da MS (V5)
+
+
+
+
+Compensar os fluxos                                                   Formar MS
+
+
+
+
+ V5 = Volume para atender a transpiração ou formação de MS (m³/ha);
+ MStotal = matéria seca total da parte aérea + grãos (kg/ha).
+
+
+
+
+      80
+
+
+=== PÁGINA 81 ===
+     VOLUME TOTAL (VT)
+
+
+
+
+81
+
+
+=== PÁGINA 82 ===
+           Vazão necessária a formação da lâmina (Q1)
+
+
+
+
+V1 = Volume de saturação (m³/ha);
+V2 = Volume para formação da lâmina (m³/ha);
+Td = tempo disponível (dias);
+A = área (ha).
+
+
+
+
+  82
+
+
+=== PÁGINA 83 ===
+       Vazão necessária à manutenção da lâmina (Q2)
+
+
+
+
+V3 = Volume para compensar as perdas por evaporação (m³/ha);
+V4 = Volume para compensar as perdas por infiltração (m³/ha);
+V5 = Volume para atender a transpiração ou formação de MS (m³/ha);
+Tr = tempo restante disponível (dias);
+A = área (ha).
+
+
+
+
+  83
+
+
+=== PÁGINA 84 ===
+                                         Dimensionamento
+Dados os seguintes dados para a estimativa do volume de água a ser fornecida para uma lavoura de arroz:
+
+Densidade do solo = 1,25 g/cm³
+
+Densidade de partículas = 2,65 g/cm³
+
+Profundidade da camada impermeável = 60cm
+
+Altura de lâmina de água na lavoura (H) = 7cm
+
+Condutividade hidráulica do solo saturado (Ksat) = 0,0006 m/dia
+
+Evaporação média medida no tanque Classe “A” = 8mm/dia
+
+Período de Irrigação = 100 dias
+
+Produtividade Estimada = 435,6 sacos/ha (13% de umidade)
+
+Índice de Colheita = 40% (do total da parte aérea da planta, 40% equivale a grãos)
+
+  Calcule:
+
+  1.     O volume de água necessário para saturar o solo.
+
+  2.     O volume de água necessário para formar a lâmina.
+
+  3.     O volume de água necessário para suprir as perdas por evaporação.
+
+  4.     O volume de água necessário para compensar as perdas por infiltração.
+
+  5.     O volume de água necessário para atender a transpiração.
+                                                                                             PLANILHA
+  6.     Vazão necessária à formação da lâmina (Q1)                                             EXCEL!
+  7.     Vazão necessária à manutenção da lâmina (Q2)
+
+
+    84

@@ -3,6 +3,7 @@ import 'package:irrigasim/services/simulation/lamina_requerida.dart';
 class BorderAgronomy {
   final double? uccPercentual, upmpPercentual, densidadeGcm3;
   final double? profundidadeRaizesCm, fracaoDisponivel;
+  final double? kc, espacamentoFileirasM, espacamentoPlantasM;
   final double? evapotranspiracaoMmDia, precipitacaoEfetivaMmDia;
 
   const BorderAgronomy({
@@ -11,6 +12,9 @@ class BorderAgronomy {
     this.densidadeGcm3,
     this.profundidadeRaizesCm,
     this.fracaoDisponivel,
+    this.kc,
+    this.espacamentoFileirasM,
+    this.espacamentoPlantasM,
     this.evapotranspiracaoMmDia,
     this.precipitacaoEfetivaMmDia,
   });
@@ -50,6 +54,13 @@ class BorderAgronomy {
         ? value
         : profundidadeRaizesCm,
     fracaoDisponivel: field == 'fracaoDisponivel' ? value : fracaoDisponivel,
+    kc: field == 'kc' ? value : kc,
+    espacamentoFileirasM: field == 'espacamentoFileirasM'
+        ? value
+        : espacamentoFileirasM,
+    espacamentoPlantasM: field == 'espacamentoPlantasM'
+        ? value
+        : espacamentoPlantasM,
     evapotranspiracaoMmDia: field == 'evapotranspiracaoMmDia'
         ? value
         : evapotranspiracaoMmDia,
@@ -64,6 +75,9 @@ class BorderAgronomy {
     'densidadeGcm3': densidadeGcm3,
     'profundidadeRaizesCm': profundidadeRaizesCm,
     'fracaoDisponivel': fracaoDisponivel,
+    'kc': kc,
+    'espacamentoFileirasM': espacamentoFileirasM,
+    'espacamentoPlantasM': espacamentoPlantasM,
     'evapotranspiracaoMmDia': evapotranspiracaoMmDia,
     'precipitacaoEfetivaMmDia': precipitacaoEfetivaMmDia,
   };
@@ -76,6 +90,9 @@ class BorderAgronomy {
       densidadeGcm3: n('densidadeGcm3'),
       profundidadeRaizesCm: n('profundidadeRaizesCm'),
       fracaoDisponivel: n('fracaoDisponivel'),
+      kc: n('kc'),
+      espacamentoFileirasM: n('espacamentoFileirasM'),
+      espacamentoPlantasM: n('espacamentoPlantasM'),
       evapotranspiracaoMmDia: n('evapotranspiracaoMmDia'),
       precipitacaoEfetivaMmDia: n('precipitacaoEfetivaMmDia'),
     );

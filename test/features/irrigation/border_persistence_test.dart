@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/models/cenarios/cenario_salvo.dart';
 import 'package:irrigasim/models/faixas/border_numeric.dart';
+import 'package:irrigasim/models/faixas/border_agronomy.dart';
 import 'package:irrigasim/models/faixas/border_project.dart';
 import 'package:irrigasim/models/faixas/border_result.dart';
 import 'package:irrigasim/models/irrigation_parameters.dart';
@@ -33,6 +34,26 @@ void main() {
       loaded.resultado.borderResult!.volumeEntradaTotalM3,
       closeTo(result.borderResult!.volumeEntradaTotalM3, 1e-7),
     );
+  });
+
+  test('dados adicionais da cultura de faixa persistem no projeto', () {
+    final projectWithCrop = project.copyWith(
+      cultura: 'Milho',
+      agronomia: const BorderAgronomy(
+        kc: 1.2,
+        espacamentoFileirasM: .8,
+        espacamentoPlantasM: .2,
+        profundidadeRaizesCm: 100,
+        fracaoDisponivel: .55,
+      ),
+    );
+    final loaded = BorderProject.fromMap(projectWithCrop.toMap());
+    expect(loaded.cultura, 'Milho');
+    expect(loaded.agronomia?.kc, 1.2);
+    expect(loaded.agronomia?.espacamentoFileirasM, .8);
+    expect(loaded.agronomia?.espacamentoPlantasM, .2);
+    expect(loaded.agronomia?.profundidadeRaizesCm, 100);
+    expect(loaded.agronomia?.fracaoDisponivel, .55);
   });
 
   test(
@@ -106,9 +127,7 @@ void main() {
     final projeto = Map<String, dynamic>.from(
       parametros['projetoFaixa'] as Map,
     );
-    final numericoSalvo = Map<String, dynamic>.from(
-      projeto['numerico'] as Map,
-    );
+    final numericoSalvo = Map<String, dynamic>.from(projeto['numerico'] as Map);
     expect(numericoSalvo['nSegmentos'], BorderProject.nSegmentosPadrao);
     expect(numericoSalvo['versaoExpoentesRecessao'], 'p43');
     // Registro legado sem o grupo lê os defaults explícitos.
@@ -118,38 +137,45 @@ void main() {
     expect(legado.nSegmentos, BorderProject.nSegmentosPadrao);
     expect(legado.numerico.maxIteracoes, 250);
     // Chave plana antiga (nSegmentos na raiz) continua sendo aceita.
-    expect(
-      BorderProject.fromMap(const {'nSegmentos': 1000}).nSegmentos,
-      1000,
-    );
+    expect(BorderProject.fromMap(const {'nSegmentos': 1000}).nSegmentos, 1000);
   });
 
-  test('resultado legado (status de enum e avisos em texto) abre com defaults', () {
-    final atual = BorderResult.fromMap(result.borderResult!.toMap());
-    expect(atual.status.codigo, result.borderResult!.status.codigo);
-    expect(atual.numerico.nSegmentos, BorderProject.nSegmentosPadrao);
-    expect(atual.avisos.first.codigo, result.borderResult!.avisos.first.codigo);
+  test(
+    'resultado legado (status de enum e avisos em texto) abre com defaults',
+    () {
+      final atual = BorderResult.fromMap(result.borderResult!.toMap());
+      expect(atual.status.codigo, result.borderResult!.status.codigo);
+      expect(atual.numerico.nSegmentos, BorderProject.nSegmentosPadrao);
+      expect(
+        atual.avisos.first.codigo,
+        result.borderResult!.avisos.first.codigo,
+      );
 
-    // Formato antigo: status em camelCase e avisos como lista de strings.
-    final legado = BorderResult.fromMap({
-      ...result.borderResult!.toMap(),
-      'status': 'geometriaIncompativel',
-      'avisos': ['Profundidade na entrada excede a altura do dique.'],
-    }..remove('numerico'));
-    expect(legado.status, BorderStatus.foraDoDominio);
-    expect(legado.avisos.single.status, BorderStatus.avisoOrientativo);
-    expect(legado.avisos.single.mensagem, contains('excede'));
-    expect(legado.numerico.toleranciaPasso, 1e-10);
-    expect(legado.numerico.maxIteracoes, 250);
+      // Formato antigo: status em camelCase e avisos como lista de strings.
+      final legado = BorderResult.fromMap(
+        {
+          ...result.borderResult!.toMap(),
+          'status': 'geometriaIncompativel',
+          'avisos': ['Profundidade na entrada excede a altura do dique.'],
+        }..remove('numerico'),
+      );
+      expect(legado.status, BorderStatus.foraDoDominio);
+      expect(legado.avisos.single.status, BorderStatus.avisoOrientativo);
+      expect(legado.avisos.single.mensagem, contains('excede'));
+      expect(legado.numerico.toleranciaPasso, 1e-10);
+      expect(legado.numerico.maxIteracoes, 250);
 
-    final pendente = BorderResult.fromMap({
-      ...result.borderResult!.toMap(),
-      'status': 'geometriaPendente',
-      'avisos': ['Altura real do dique não informada.'],
-    }..remove('numerico'));
-    expect(pendente.status, BorderStatus.entradaInvalida);
-    expect(result.borderResult!.status, BorderStatus.entradaInvalida);
-  });
+      final pendente = BorderResult.fromMap(
+        {
+          ...result.borderResult!.toMap(),
+          'status': 'geometriaPendente',
+          'avisos': ['Altura real do dique não informada.'],
+        }..remove('numerico'),
+      );
+      expect(pendente.status, BorderStatus.entradaInvalida);
+      expect(result.borderResult!.status, BorderStatus.entradaInvalida);
+    },
+  );
 
   test('alternativa rejeitada preserva texto e código no cenário', () {
     const record = BorderAlternativeRecord(
@@ -162,23 +188,23 @@ void main() {
     final loaded = BorderProject.fromMap(
       BorderProject.ilustrativo.copyWith(alternativas: const [record]).toMap(),
     );
-    expect(loaded.alternativas.single.motivoRejeicao,
-        'Oferta de água insuficiente');
+    expect(
+      loaded.alternativas.single.motivoRejeicao,
+      'Oferta de água insuficiente',
+    );
     expect(loaded.alternativas.single.status, BorderStatus.foraDoDominio);
     expect(loaded.alternativas.single.status!.codigo, 'fora_do_dominio');
     // Registro antigo sem código continua legível.
-    final antigo = BorderProject.fromMap(
-      const {
-        'alternativas': [
-          {
-            'comprimentoM': 400.0,
-            'vazaoLsM': 2.5,
-            'eficienciaPercentual': null,
-            'motivoRejeicao': 'antigo',
-          },
-        ],
-      },
-    );
+    final antigo = BorderProject.fromMap(const {
+      'alternativas': [
+        {
+          'comprimentoM': 400.0,
+          'vazaoLsM': 2.5,
+          'eficienciaPercentual': null,
+          'motivoRejeicao': 'antigo',
+        },
+      ],
+    });
     expect(antigo.alternativas.single.status, isNull);
   });
 }

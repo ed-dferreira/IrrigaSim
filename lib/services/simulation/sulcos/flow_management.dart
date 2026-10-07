@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:irrigasim/models/irrigation_parameters.dart';
+import 'package:irrigasim/models/sulcos/field_measurements.dart';
 
 /// Parâmetros da fórmula qmax = C / S0^a por textura do solo.
 class ParametrosErosao {
@@ -86,7 +87,7 @@ class FlowManagement {
     required double declividadePercent,
     required TexturaSolo textura,
   }) {
-    if (declividadePercent <= 0) {
+    if (!declividadePercent.isFinite || declividadePercent <= 0) {
       throw ArgumentError('Declividade deve ser maior que zero');
     }
 
@@ -98,6 +99,11 @@ class FlowManagement {
 
     // Fórmula simplificada: qmax = 0.631 / S0
     final qmaxSimplificada = 0.631 / declividadePercent;
+    if (!qmax.isFinite || !qmaxSimplificada.isFinite) {
+      throw ArgumentError(
+        'Declividade fora do domínio numérico da vazão não erosiva.',
+      );
+    }
 
     return VazaoNaoErosivaResultado(
       qmaxLs: qmax,
@@ -123,21 +129,24 @@ class FlowManagement {
     required double espacamentoM,
     double fator11 = 1.0,
   }) {
-    if (f0MmH < 0) {
+    if (!f0MmH.isFinite || f0MmH < 0) {
       throw ArgumentError('Taxa de infiltração básica não pode ser negativa');
     }
-    if (comprimentoM <= 0) {
+    if (!comprimentoM.isFinite || comprimentoM <= 0) {
       throw ArgumentError('Comprimento deve ser positivo');
     }
-    if (espacamentoM <= 0) {
+    if (!espacamentoM.isFinite || espacamentoM <= 0) {
       throw ArgumentError('Espaçamento deve ser positivo');
     }
-    if (fator11 < 1.0 || fator11 > 1.1) {
+    if (!fator11.isFinite || fator11 < 1.0 || fator11 > 1.1) {
       throw ArgumentError('Fator deve estar entre 1.0 e 1.1');
     }
 
     // O fator configurável pertence somente à estimativa de Qr (§43).
     final qReduzida = (f0MmH * comprimentoM * espacamentoM * fator11) / 3600;
+    if (!qReduzida.isFinite) {
+      throw ArgumentError('Vazão reduzida fora do domínio numérico.');
+    }
 
     return VazaoReduzidaResultado(
       vazaoReduzidaLs: qReduzida,
@@ -158,12 +167,21 @@ class FlowManagement {
     required double espacamentoM,
     double fator = 1.0,
   }) {
-    if (coeficienteAcumuladoMmMinA <= 0 || expoenteAcumulado <= 0 ||
+    if (!coeficienteAcumuladoMmMinA.isFinite ||
+        !expoenteAcumulado.isFinite ||
+        !oportunidadeFinalMin.isFinite ||
+        coeficienteAcumuladoMmMinA <= 0 ||
+        expoenteAcumulado <= 0 ||
         oportunidadeFinalMin <= 0) {
-      throw ArgumentError('Curva de infiltração e oportunidade devem ser positivas');
+      throw ArgumentError(
+        'Curva de infiltração e oportunidade devem ser positivas',
+      );
     }
-    final taxaFinalMmH = 60 * coeficienteAcumuladoMmMinA *
-        expoenteAcumulado * pow(oportunidadeFinalMin, expoenteAcumulado - 1);
+    final taxaFinalMmH =
+        60 *
+        coeficienteAcumuladoMmMinA *
+        expoenteAcumulado *
+        pow(oportunidadeFinalMin, expoenteAcumulado - 1);
     final result = calcularVazaoReduzida(
       f0MmH: taxaFinalMmH,
       comprimentoM: comprimentoM,
@@ -174,6 +192,97 @@ class FlowManagement {
       vazaoReduzidaLs: result.vazaoReduzidaLs,
       fatorAplicado: result.fatorAplicado,
       formulaUtilizada: 'Qr = VI(To) × L × E / 3600; VI(To) = dI/dt',
+    );
+  }
+
+  /// F24 (p.96): integra a taxa instantânea ao longo de estacas medidas,
+  /// sem extrapolar a curva para além do último ponto observado.
+  static VazaoReduzidaResultado estimarSomatorioEspacial({
+    required List<MedicaoAvanco> estacas,
+    required double comprimentoM,
+    required double espacamentoM,
+    required double instanteMudancaMin,
+    required double coeficienteAcumuladoMmMinA,
+    required double expoenteAcumulado,
+  }) {
+    if (estacas.length < 2 ||
+        estacas.first.distanciaM != 0 ||
+        estacas.first.tempoMin != 0 ||
+        estacas.last.distanciaM < comprimentoM ||
+        !comprimentoM.isFinite ||
+        comprimentoM <= 0 ||
+        !espacamentoM.isFinite ||
+        espacamentoM <= 0 ||
+        !instanteMudancaMin.isFinite ||
+        instanteMudancaMin <= 0 ||
+        !coeficienteAcumuladoMmMinA.isFinite ||
+        coeficienteAcumuladoMmMinA <= 0 ||
+        !expoenteAcumulado.isFinite ||
+        expoenteAcumulado <= 0) {
+      throw const FormatException(
+        'Somatório espacial exige estacas medidas de 0 m ao comprimento total e parâmetros positivos.',
+      );
+    }
+    double? distanciaAnterior;
+    double? tempoAnterior;
+    var totalLMin = 0.0;
+    for (final ponto in estacas) {
+      if (!ponto.distanciaM.isFinite ||
+          !ponto.tempoMin.isFinite ||
+          ponto.distanciaM < 0 ||
+          ponto.tempoMin < 0 ||
+          (distanciaAnterior != null &&
+              (ponto.distanciaM <= distanciaAnterior ||
+                  ponto.tempoMin <= tempoAnterior!))) {
+        throw const FormatException(
+          'Estacas do somatório espacial devem crescer estritamente em distância e tempo.',
+        );
+      }
+      if (ponto.distanciaM > comprimentoM) break;
+      final oportunidade = instanteMudancaMin - ponto.tempoMin;
+      if (oportunidade <= 0) {
+        throw const FormatException(
+          'Somatório espacial indefinido: a troca ocorre antes ou no instante do avanço em uma estaca.',
+        );
+      }
+      final taxaLMinM =
+          coeficienteAcumuladoMmMinA *
+          expoenteAcumulado *
+          pow(oportunidade, expoenteAcumulado - 1) *
+          espacamentoM;
+      if (!taxaLMinM.isFinite) {
+        throw const FormatException(
+          'Taxa do somatório espacial fora do domínio numérico.',
+        );
+      }
+      if (distanciaAnterior != null) {
+        final oportunidadeAnterior = instanteMudancaMin - tempoAnterior!;
+        final taxaAnterior =
+            coeficienteAcumuladoMmMinA *
+            expoenteAcumulado *
+            pow(oportunidadeAnterior, expoenteAcumulado - 1) *
+            espacamentoM;
+        totalLMin +=
+            (taxaAnterior + taxaLMinM) /
+            2 *
+            (ponto.distanciaM - distanciaAnterior);
+      }
+      distanciaAnterior = ponto.distanciaM;
+      tempoAnterior = ponto.tempoMin;
+    }
+    if (distanciaAnterior != comprimentoM) {
+      throw const FormatException(
+        'Somatório espacial exige estaca exatamente no comprimento escolhido.',
+      );
+    }
+    if (!totalLMin.isFinite || totalLMin <= 0) {
+      throw const FormatException(
+        'Somatório espacial fora do domínio numérico.',
+      );
+    }
+    return VazaoReduzidaResultado(
+      vazaoReduzidaLs: totalLMin / 60,
+      formulaUtilizada: 'F24 (p.96): trapézios da VI(x)·E ao longo de 0–L',
     );
   }
 

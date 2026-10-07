@@ -12,15 +12,23 @@ class PerformanceBarsChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final items = [
-      _Indicator('Eficiência Ea', resultado.eficiencia, resultado.classificacaoEa),
+      _Indicator(
+        'Eficiência Ea',
+        resultado.eficiencia,
+        resultado.classificacaoEa,
+      ),
       _Indicator('Uniformidade CUC', resultado.cuc, resultado.classificacaoCuc),
       _Indicator('Distribuição DU', resultado.du, resultado.classificacaoDu),
-      _Indicator('Er (requerimento)', resultado.eficienciaRequerimento, 'Eficiência de requerimento'),
+      _Indicator(
+        'Er (requerimento)',
+        resultado.eficienciaRequerimento,
+        'Eficiência de requerimento',
+      ),
     ];
 
     return Semantics(
       label:
-          'Indicadores de desempenho. Eficiência ${resultado.eficiencia.toStringAsFixed(1)} por cento, CUC ${resultado.cuc.toStringAsFixed(1)} por cento, DU ${resultado.du.toStringAsFixed(1)} por cento.',
+          'Indicadores de desempenho em percentual. Eficiência de aplicação Ea ${resultado.eficiencia.toStringAsFixed(1)} por cento, eficiência de requerimento Er ${resultado.eficienciaRequerimento.toStringAsFixed(1)} por cento, CUC ${resultado.cuc.toStringAsFixed(1)} por cento, DU ${resultado.du.toStringAsFixed(1)} por cento.',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -67,7 +75,11 @@ class PerformanceBarsChart extends StatelessWidget {
                           return SideTitleWidget(
                             meta: meta,
                             child: Text(
-                              items[idx].label.replaceAll('Eficiência ', '').replaceAll('Uniformidade ', '').replaceAll('Distribuição ', '').replaceAll('Adequação ', ''),
+                              items[idx].label
+                                  .replaceAll('Eficiência ', '')
+                                  .replaceAll('Uniformidade ', '')
+                                  .replaceAll('Distribuição ', '')
+                                  .replaceAll('Adequação ', ''),
                               style: Theme.of(context).textTheme.labelSmall,
                             ),
                           );
@@ -110,14 +122,17 @@ class PerformanceBarsChart extends StatelessWidget {
                             toY: items[i].value.clamp(0, 100),
                             color: _indicatorColor(items[i].value, colors),
                             width: 32,
-                            borderRadius:
-                                const BorderRadius.vertical(top: Radius.circular(6)),
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(6),
+                            ),
                           ),
                         ],
                       ),
                   ],
                 ),
-                duration: const Duration(milliseconds: 350),
+                duration: MediaQuery.disableAnimationsOf(context)
+                    ? Duration.zero
+                    : const Duration(milliseconds: 350),
               ),
             ),
           ),
@@ -180,9 +195,8 @@ class _LegendItem extends StatelessWidget {
         const SizedBox(width: 4),
         Text(
           '($sublabel)',
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+          style: Theme.of(context).textTheme.labelSmall
+              ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       ],
     );

@@ -34,10 +34,13 @@ lib/
 │   └── widgets/
 ├── models/
 │   ├── cenarios/
+│   ├── comum/          # caracterização e ensaios compartilhados
+│   ├── faixas/
+│   ├── inundacao/
 │   ├── perfil/
 │   ├── sulcos/
 │   ├── user/
-│   └── shared irrigation contracts at the root
+│   └── shared irrigation compatibility contracts at the root
 ├── services/
 │   ├── auth/
 │   ├── cenarios/
@@ -72,6 +75,28 @@ models, services, controllers/viewmodels, and views in their corresponding
 feature folders. Irrigation is further divided by method (`sulcos/`, `faixas/`,
 `inundacao/`). Keep shared contracts, adapters, providers, mathematical helpers,
 and widgets at the layer root only when they are genuinely used across methods.
+
+Base comum da irrigação:
+- `models/comum/irrigacao_comum.dart` define método (forma de aplicação), sistema,
+  posição, caracterização da área, estacas e observações de infiltração. A
+  classificação segue `docs/Irrigacao_comum/Analise_base_comum.md`: sulcos,
+  faixas e inundação são sistemas do método por superfície. Classificação
+  didática e posição de aplicação são eixos distintos.
+- `models/comum/adaptadores_superficie.dart` projeta `IrrigationProject`,
+  `BorderProject` e cenários rápidos (`IrrigationParameters`) para `BaseIrrigacao`.
+  Os modelos próprios continuam como fonte dos dados de simulação. Ao incluir
+  um método, fornecer seu adaptador sem inventar valores para campos ausentes.
+- `models/inundacao/basin_project.dart` reúne a base comum e os parâmetros dos
+  regimes intermitente e permanente; seu coordenador aceita esse projeto ou o
+  contrato rápido legado. O fluxo rápido também exporta `base_comum` no JSON.
+- Unidades da base: distância/profundidade em m, declividade em %, tempo em min,
+  lâmina em mm, vazão em L/s e clima em mm/dia. Converter explicitamente na
+  borda: faixas guarda declive em m/m e raízes em cm.
+- Ensaios, infiltração, solo, cultura e clima são conceitos compartilhados;
+  calibração, parâmetros com unidades específicas e equações hidráulicas
+  continuam nos serviços de cada sistema. A Aula 5 é conceitual: suas faixas
+  de eficiência e vazão não são constantes de dimensionamento. Consultar
+  `docs/Irrigacao_comum/dados_comuns.json` para páginas e escopo das referências.
 
 Use the smallest applicable structure for each feature:
 - `models/` - application data and immutable state objects
@@ -142,6 +167,11 @@ ResultsScreen
     └── WaterBalanceChart
 ```
 
+`BaseIrrigacao` é uma projeção compartilhada de leitura, usada para
+caracterização/exportação; as entradas hidráulicas continuam nos projetos
+específicos. O coordenador de inundação aceita `BasinProject` (montado a partir
+dos parâmetros do fluxo rápido) e escolhe entre os dois regimes.
+
 Method-specific irrigation files live under matching `sulcos/`, `faixas/`, or
 `inundacao/` folders. The current project workflow and terrain/profile widgets
 under `views/irrigation/sulcos/` are specific to furrow irrigation. Quick-flow
@@ -178,3 +208,5 @@ Skip hook (not recommended): `git commit --no-verify -m "msg"`
 - Prefer package imports across features and relative imports within a feature
 - Keep simulation algorithms separate because they contain substantial, independently testable domain logic
 - Run `dart format` only on files changed by the task, then run `flutter analyze` and `flutter test`
+- Se os pacotes de referência em `docs/` forem renomeados, atualizar os caminhos
+  usados pelos testes de regressão sem alterar os valores esperados.

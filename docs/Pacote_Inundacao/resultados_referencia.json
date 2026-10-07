@@ -1,0 +1,48 @@
+{
+  "origem": "Cálculo independente em Python para verificar as fórmulas; não é execução Dart.",
+  "hipoteses": [
+    "Q0 = Q0max; não houve otimização de vazão.",
+    "Expoente 3/13 usado em profundidade e avanço."
+  ],
+  "resultados": {
+    "primeira": {
+      "q0_m3_min_m": 0.8728887470978953,
+      "r": 0.7820636323436869,
+      "y0_m": 0.10911109338723692,
+      "ta_min": 22.029325408391216,
+      "ti_min": 22.029325408391216,
+      "eficiencia_percent": 58.24490344811151
+    },
+    "terceira": {
+      "q0_m3_min_m": 0.8728887470978953,
+      "r": 0.7858339425591053,
+      "y0_m": 0.10911109338723692,
+      "ta_min": 21.795724239885672,
+      "ti_min": 21.795724239885672,
+      "eficiencia_percent": 58.869157882385934
+    },
+    "continua_slide_73": {
+      "qe_l_s": 166.576,
+      "qm_l_s": 32.944
+    }
+  },
+  "arroz_pagina_84_parcial": {
+    "porosidade": 0.5283018867924528,
+    "us_gravimetrica": 0.4226415094339623,
+    "v1_constante_m3_ha": 3169.8113207547167,
+    "v1_coeficiente_ua_gravimetrica": -7500,
+    "v2_m3_ha": 700.0000000000001,
+    "v3_m3_ha": 8000.0,
+    "v4_m3_ha": 669.9999999999999,
+    "ms_total_coef_massa_saco": 947.4300000000001,
+    "v5_coef_massa_saco": 378.97200000000004
+  },
+  "validacao_revisao": {
+    "paginas_visualmente_conferidas": 84,
+    "newton_independente": [
+      "primeira: Newton independente = 22.029325408391 min; diferença <1e-5 min",
+      "terceira: Newton independente = 21.795724239886 min; diferença <1e-5 min"
+    ],
+    "execucao_dart": false
+  }
+}

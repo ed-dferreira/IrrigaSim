@@ -1,0 +1,8 @@
+31 páginas conferidas visualmente, incluindo quadros e diagramas em imagem.
+Taxonomia da p.5 preservada no JSON e no catálogo Dart.
+Referências numéricas preservam páginas, unidades, contexto e divergências.
+Nenhum valor de eficiência escolhido como padrão global.
+Nenhum cálculo ou perfil hidráulico foi inventado para esta aula conceitual.
+31 registros de auditoria e 31 imagens de evidência.
+Dart SDK não disponível: código não compilado nem executado.
+Catálogo JSON validado por leitura independente; versão embutida no Dart comparada ao JSON externo.

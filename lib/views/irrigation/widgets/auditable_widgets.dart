@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
+import 'package:irrigasim/views/irrigation/widgets/irrigation_project_components.dart';
 
 /// Componentes de apresentação comuns aos relatórios dos métodos de irrigação.
 class IrrigationAuditSection extends StatelessWidget {
@@ -8,43 +9,59 @@ class IrrigationAuditSection extends StatelessWidget {
     required this.title,
     required this.icon,
     required this.children,
+    this.initiallyExpanded = true,
   });
 
   final String title;
   final IconData icon;
   final List<Widget> children;
+  final bool initiallyExpanded;
 
   @override
   Widget build(BuildContext context) => Card(
-    margin: EdgeInsets.zero,
+    margin: const EdgeInsets.only(bottom: IrrigationSpacing.major),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-    child: Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                icon,
-                color: Theme.of(context).colorScheme.primary,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.w700),
-                ),
-              ),
-            ],
+    clipBehavior: Clip.antiAlias,
+    child: initiallyExpanded
+        ? Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _SectionHeading(title: title, icon: icon),
+                const SizedBox(height: IrrigationSpacing.section),
+                ...children,
+              ],
+            ),
+          )
+        : ExpansionTile(
+            leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
+            title: Text(title),
+            initiallyExpanded: false,
+            childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            children: children,
           ),
-          const SizedBox(height: 16),
-          ...children,
-        ],
+  );
+}
+
+class _SectionHeading extends StatelessWidget {
+  const _SectionHeading({required this.title, required this.icon});
+  final String title;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      Icon(icon, color: Theme.of(context).colorScheme.primary, size: 20),
+      const SizedBox(width: 8),
+      Expanded(
+        child: Text(
+          title,
+          style: Theme.of(context).textTheme.titleMedium
+              ?.copyWith(fontWeight: FontWeight.w700),
+        ),
       ),
-    ),
+    ],
   );
 }
 
@@ -84,7 +101,7 @@ class IrrigationAuditRow extends StatelessWidget {
       ],
     );
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: IrrigationSpacing.compact),
       child: LayoutBuilder(
         builder: (context, constraints) {
           if (constraints.maxWidth < 520) {

@@ -36,7 +36,7 @@ class ScenarioComparisonChart extends StatelessWidget {
 
     return Semantics(
       label:
-          'Comparação de cenários. $labelA vs $labelB.',
+          'Comparação de cenários em percentual. $labelA: Ea ${valuesA[0].toStringAsFixed(1)}, CUC ${valuesA[1].toStringAsFixed(1)}, DU ${valuesA[2].toStringAsFixed(1)}, Er ${valuesA[3].toStringAsFixed(1)}. $labelB: Ea ${valuesB[0].toStringAsFixed(1)}, CUC ${valuesB[1].toStringAsFixed(1)}, DU ${valuesB[2].toStringAsFixed(1)}, Er ${valuesB[3].toStringAsFixed(1)}.',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -49,14 +49,8 @@ class ScenarioComparisonChart extends StatelessWidget {
             spacing: 16,
             runSpacing: 8,
             children: [
-              _ScenarioBadge(
-                label: labelA,
-                color: colors.primary,
-              ),
-              _ScenarioBadge(
-                label: labelB,
-                color: colors.tertiary,
-              ),
+              _ScenarioBadge(label: labelA, color: colors.primary),
+              _ScenarioBadge(label: labelB, color: colors.tertiary),
             ],
           ),
           const SizedBox(height: 16),
@@ -71,8 +65,7 @@ class ScenarioComparisonChart extends StatelessWidget {
                     touchTooltipData: BarTouchTooltipData(
                       getTooltipColor: (_) => colors.inverseSurface,
                       getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                        final name =
-                            rodIndex == 0 ? labelA : labelB;
+                        final name = rodIndex == 0 ? labelA : labelB;
                         return BarTooltipItem(
                           '$name\n${rod.toY.toStringAsFixed(1)}%',
                           TextStyle(color: colors.onInverseSurface),
@@ -158,7 +151,9 @@ class ScenarioComparisonChart extends StatelessWidget {
                       ),
                   ],
                 ),
-                duration: const Duration(milliseconds: 350),
+                duration: MediaQuery.disableAnimationsOf(context)
+                    ? Duration.zero
+                    : const Duration(milliseconds: 350),
               ),
             ),
           ),
@@ -244,9 +239,21 @@ class _ComparisonSummary extends StatelessWidget {
         spacing: 20,
         runSpacing: 8,
         children: [
-          _DiffChip(label: 'ΔEa', value: formatDiff(eaDiff), color: diffColor(eaDiff)),
-          _DiffChip(label: 'ΔCUC', value: formatDiff(cucDiff), color: diffColor(cucDiff)),
-          _DiffChip(label: 'ΔDU', value: formatDiff(duDiff), color: diffColor(duDiff)),
+          _DiffChip(
+            label: 'ΔEa',
+            value: formatDiff(eaDiff),
+            color: diffColor(eaDiff),
+          ),
+          _DiffChip(
+            label: 'ΔCUC',
+            value: formatDiff(cucDiff),
+            color: diffColor(cucDiff),
+          ),
+          _DiffChip(
+            label: 'ΔDU',
+            value: formatDiff(duDiff),
+            color: diffColor(duDiff),
+          ),
         ],
       ),
     );
@@ -268,16 +275,11 @@ class _DiffChip extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          '$label: ',
-          style: Theme.of(context).textTheme.labelMedium,
-        ),
+        Text('$label: ', style: Theme.of(context).textTheme.labelMedium),
         Text(
           value,
-          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: color,
-                fontWeight: FontWeight.w700,
-              ),
+          style: Theme.of(context).textTheme.labelMedium
+              ?.copyWith(color: color, fontWeight: FontWeight.w700),
         ),
       ],
     );

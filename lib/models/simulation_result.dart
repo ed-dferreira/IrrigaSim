@@ -1,5 +1,6 @@
 import 'package:irrigasim/services/simulation/operational_planning.dart';
 import 'package:irrigasim/models/faixas/border_result.dart';
+import 'package:irrigasim/models/sulcos/indicadores_balanco_sulco.dart';
 
 class PontoGrafico {
   final double x;
@@ -9,6 +10,7 @@ class PontoGrafico {
 
 class SimulationResult {
   final BorderResult? borderResult;
+  final IndicadoresBalancoSulco? balancoSulco;
   final double eficiencia;
   final double eficienciaRequerimento;
   final double cuc;
@@ -28,6 +30,7 @@ class SimulationResult {
 
   final String resumoTextual;
   final String? alertaVazaoExcedida;
+  final String? alertaInfiltracao;
   final Map<String, double> metricas;
   final Map<String, String> unidadesMetricas;
 
@@ -49,6 +52,7 @@ class SimulationResult {
 
   const SimulationResult({
     this.borderResult,
+    this.balancoSulco,
     required this.eficiencia,
     required this.eficienciaRequerimento,
     required this.cuc,
@@ -63,6 +67,7 @@ class SimulationResult {
     required this.perfilLongitudinal,
     required this.resumoTextual,
     this.alertaVazaoExcedida,
+    this.alertaInfiltracao,
     this.metricas = const {},
     this.unidadesMetricas = const {},
     this.tempoOportunidadeFinalMin,
@@ -85,6 +90,7 @@ class SimulationResult {
     PlanejamentoOperacionalResultado planejamento,
   ) => SimulationResult(
     borderResult: borderResult,
+    balancoSulco: balancoSulco,
     eficiencia: eficiencia,
     eficienciaRequerimento: eficienciaRequerimento,
     cuc: cuc,
@@ -99,6 +105,7 @@ class SimulationResult {
     perfilLongitudinal: perfilLongitudinal,
     resumoTextual: resumoTextual,
     alertaVazaoExcedida: alertaVazaoExcedida,
+    alertaInfiltracao: alertaInfiltracao,
     metricas: metricas,
     unidadesMetricas: unidadesMetricas,
     tempoOportunidadeFinalMin: tempoOportunidadeFinalMin,
@@ -118,6 +125,8 @@ class SimulationResult {
   );
 
   String get classificacaoEa => _classificarEa(eficiencia);
+  String get classificacaoEaIntegral =>
+      _classificarEa(balancoSulco?.eaIntegral ?? eficiencia);
   String get classificacaoCuc => _classificarCuc(cuc);
   String get classificacaoDu => _classificarDu(du);
 

@@ -48,7 +48,7 @@ void main() {
     expect(result.metricas['Vazão máxima não erosiva'], isPositive);
     expect(result.metricas['Tempo de aplicação calculado'], greaterThan(60));
     expectPhysicalBalance(
-      result.eficiencia,
+      result.balancoSulco!.eaIntegral,
       result.perdaPercolacao,
       result.perdaEscoamento,
     );

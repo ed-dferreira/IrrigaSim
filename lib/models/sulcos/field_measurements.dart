@@ -4,6 +4,33 @@ enum OrigemCurvaInfiltracao { equacaoAcumuladaInformada, ensaioEntradaSaida }
 
 enum HipoteseRecessao { desprezada, medidaPorEstaca }
 
+/// Registro de campo para o mesmo solo, seção e orientação do projeto.
+/// A vazão é em L/s; o resultado medido prevalece sobre o qmax empírico.
+class EnsaioErosaoSulco {
+  const EnsaioErosaoSulco({
+    required this.vazaoLs,
+    required this.condicoes,
+    required this.erosaoObservada,
+  });
+
+  final double vazaoLs;
+  final String condicoes;
+  final bool erosaoObservada;
+
+  Map<String, dynamic> toMap() => {
+    'vazao_ls': vazaoLs,
+    'condicoes': condicoes,
+    'erosao_observada': erosaoObservada,
+  };
+
+  factory EnsaioErosaoSulco.fromMap(Map<String, dynamic> map) =>
+      EnsaioErosaoSulco(
+        vazaoLs: (map['vazao_ls'] as num).toDouble(),
+        condicoes: map['condicoes'] as String,
+        erosaoObservada: map['erosao_observada'] as bool,
+      );
+}
+
 class MedicaoAvanco {
   final double distanciaM;
   final double tempoMin;

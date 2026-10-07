@@ -108,6 +108,14 @@ class BorderFieldTrial {
         project.a != null &&
         project.vibMMin != null;
     final avisos = <BorderNotice>[
+      for (var i = 1; i < stakes.length; i++)
+        if ((stakes[i].xM - stakes[i - 1].xM) < 10 ||
+            (stakes[i].xM - stakes[i - 1].xM) > 30)
+          BorderNotice(
+            BorderStatus.avisoOrientativo,
+            'Espaçamento entre estacas ${stakes[i - 1].xM}–${stakes[i].xM} m fora da recomendação de 10–30 m.',
+            pagina: 'pp. 33–41',
+          ),
       if (!recessionAvailable)
         const BorderNotice(
           BorderStatus.avisoOrientativo,

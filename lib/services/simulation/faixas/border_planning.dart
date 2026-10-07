@@ -19,6 +19,7 @@ class BorderGeometry {
 
 class BorderCandidate {
   final double comprimentoM, vazaoLsM;
+  final double larguraM;
   final BorderResult? resultado;
   final String? motivoRejeicao;
 
@@ -30,24 +31,44 @@ class BorderCandidate {
     this.resultado,
     this.motivoRejeicao, [
     this.status,
+    this.larguraM = 0,
   ]);
 }
 
 class BorderAlternatives {
   final List<BorderCandidate> candidatos;
   final BorderCandidate? melhor;
-  const BorderAlternatives(this.candidatos, this.melhor);
-  List<BorderAlternativeRecord> toRecords() => candidatos
-      .map(
-        (c) => BorderAlternativeRecord(
-          c.comprimentoM,
-          c.vazaoLsM,
-          c.resultado?.ea,
-          c.motivoRejeicao,
-          c.status,
-        ),
-      )
-      .toList();
+  final double menorLsM, maiorLsM, passoLsM;
+  final String objetivo;
+  const BorderAlternatives(
+    this.candidatos,
+    this.melhor, {
+    this.menorLsM = 0,
+    this.maiorLsM = 0,
+    this.passoLsM = 0,
+    this.objetivo = 'Ea',
+  });
+  List<BorderAlternativeRecord> toRecords({BorderCandidate? selected}) =>
+      candidatos
+          .map(
+            (c) => BorderAlternativeRecord.withMetrics(
+              c.comprimentoM,
+              c.vazaoLsM,
+              c.resultado?.ea,
+              c.motivoRejeicao,
+              status: c.status,
+              erPercentual: c.resultado?.er,
+              ppPercentual: c.resultado?.pp,
+              pePercentual: c.resultado?.pe,
+              demandaLs: c.vazaoLsM * c.larguraM,
+              gradeMenorLsM: menorLsM,
+              gradeMaiorLsM: maiorLsM,
+              gradePassoLsM: passoLsM,
+              objetivo: objetivo,
+              selecionada: identical(c, selected ?? melhor),
+            ),
+          )
+          .toList();
 }
 
 class BorderOperation {
@@ -105,6 +126,7 @@ class BorderPlanning {
     required double menorLsM,
     required double maiorLsM,
     double passoLsM = .05,
+    String objetivo = 'Ea',
   }) {
     final lt = p.comprimentoAreaM, wt = p.larguraAreaM, l = p.comprimentoM;
     if (lt == null ||
@@ -116,6 +138,7 @@ class BorderPlanning {
         menorLsM <= 0 ||
         maiorLsM < menorLsM ||
         passoLsM <= 0 ||
+        !{'Ea', 'Er'}.contains(objetivo) ||
         [lt, wt, l, menorLsM, maiorLsM, passoLsM].any((v) => !v.isFinite)) {
       throw const BorderModelException(
         BorderStatus.entradaInvalida,
@@ -150,12 +173,7 @@ class BorderPlanning {
         BorderStatus? reasonStatus;
         BorderResult? result;
         try {
-          final s = candidate.declividadeLongitudinal!;
-          if (flow * .06 <
-              BorderHydraulics.vazaoMinimaM3MinM(length, s, p.rugosidadeN!)) {
-            reason = 'q0 abaixo da recomendação F03';
-            reasonStatus = BorderStatus.foraDoDominio;
-          } else if (p.vazaoDisponivelLs != null &&
+          if (p.vazaoDisponivelLs != null &&
               flow * p.larguraM! > p.vazaoDisponivelLs!) {
             reason = 'Oferta de água insuficiente';
             reasonStatus = BorderStatus.foraDoDominio;
@@ -189,13 +207,25 @@ class BorderPlanning {
             reason == null ? result : null,
             reason,
             reasonStatus,
+            p.larguraM!,
           ),
         );
       }
     }
     final viable = candidates.where((c) => c.resultado != null).toList()
-      ..sort((a, b) => b.resultado!.ea.compareTo(a.resultado!.ea));
-    return BorderAlternatives(candidates, viable.firstOrNull);
+      ..sort(
+        (a, b) => (objetivo == 'Ea'
+            ? b.resultado!.ea.compareTo(a.resultado!.ea)
+            : b.resultado!.er.compareTo(a.resultado!.er)),
+      );
+    return BorderAlternatives(
+      candidates,
+      viable.firstOrNull,
+      menorLsM: menorLsM,
+      maiorLsM: maiorLsM,
+      passoLsM: passoLsM,
+      objetivo: objetivo,
+    );
   }
 
   BorderOperation operation(
@@ -275,6 +305,9 @@ class BorderPlanning {
               : simultaneas) *
           p.vazaoFaixaLs!,
     );
+    final atendeOferta =
+        p.vazaoDisponivelLs != null &&
+        groupFlows.every((flow) => flow <= p.vazaoDisponivelLs!);
     return BorderOperation(
       tip,
       npd,
@@ -285,8 +318,8 @@ class BorderPlanning {
       groups,
       total % simultaneas == 0 ? simultaneas : total % simultaneas,
       q,
-      complete > 0 && remaining == 0,
-      p.vazaoDisponivelLs != null && q <= p.vazaoDisponivelLs!,
+      complete > 0 && remaining == 0 && atendeOferta,
+      atendeOferta,
       groupsPerDay,
       agenda,
       groupFlows,

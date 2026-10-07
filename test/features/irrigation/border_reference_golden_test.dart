@@ -1,4 +1,4 @@
-// Regressão dourada da Etapa 7 contra docs/Pacote_irrigacao_por_faixas/faixas.
+// Regressão dourada da Etapa 7 contra docs/Pacote_faixas/faixas.
 // Fonte: extração §§8.3–8.5 e resultados_referencia.json (reconstrução interna,
 // não gabarito oficial da professora).
 import 'dart:convert';
@@ -11,7 +11,7 @@ import 'package:irrigasim/models/faixas/border_project.dart';
 import 'package:irrigasim/models/faixas/border_result.dart';
 import 'package:irrigasim/services/simulation/faixas/border_hydraulics.dart';
 
-const pacote = 'docs/Pacote_irrigacao_por_faixas/faixas';
+const pacote = 'docs/Pacote_faixas/faixas';
 
 Map<String, dynamic> lerJson(String nome) =>
     jsonDecode(File('$pacote/$nome').readAsStringSync())

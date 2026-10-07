@@ -252,6 +252,10 @@ void main() {
         final controller = ParametersController();
         controller.setOrigemAvanco(OrigemAvanco.ensaio);
         controller.setMetodoCurvaAvanco(MetodoCurvaAvanco.minimosQuadrados);
+        controller.updateField(campo: 'vazaoEnsaioAvancoLs', valor: '1');
+        controller.setCondicoesEnsaioAvanco(
+          'Solo médio, seção em V e orientação ensaiada',
+        );
         controller.setPontosEnsaioAvanco(const [
           PontoEnsaio(distanciaM: 0, tempoMin: 0),
           PontoEnsaio(distanciaM: 50, tempoMin: 20),

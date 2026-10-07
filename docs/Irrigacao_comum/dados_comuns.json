@@ -1,0 +1,265 @@
+{
+  "fonte": "Aula 5 - Métodos de irrigação(1).pdf",
+  "paginas_revisadas": 31,
+  "natureza": "catálogo didático; não motor de dimensionamento",
+  "taxonomia": {
+    "superficie": {
+      "sistemas": [
+        "sulcos",
+        "inundação",
+        "faixas"
+      ]
+    },
+    "aspersao": {
+      "convencionais": [
+        "fixo permanente",
+        "fixo temporário",
+        "semifixo (semi-portátil na p. 8)",
+        "portátil"
+      ],
+      "mecanizados": {
+        "linhas laterais autopropelidas": [
+          "sistema linear",
+          "lateral rolante (rolão)",
+          "pivô central"
+        ],
+        "aspersores autopropelidos": [
+          "canhão tracionado por carretel (p. 15)",
+          "barra irrigadora tracionada por carretel (figura p. 15)"
+        ],
+        "montagem direta": [
+          "bombeamento móvel e canhão"
+        ]
+      }
+    },
+    "localizada": {
+      "microaspersao": [
+        "microaspersores rotativos",
+        "microaspersores estacionários",
+        "microaspersores artesanais"
+      ],
+      "gotejamento superficial": [
+        "gotejadores internos",
+        "gotejadores integrados",
+        "gotejadores externos",
+        "gotejadores artesanais"
+      ],
+      "geotexteis e exsudantes": [
+        "mantas (tapetes) capilares",
+        "fitas capilares",
+        "tubos e mangueiras exsudantes"
+      ]
+    },
+    "subsuperficie": {
+      "gotejamento subterraneo": [
+        "gotejamento com tubulação",
+        "sistemas artesanais"
+      ],
+      "geotexteis e exsudantes": [
+        "mantas (tapetes) capilares",
+        "fitas capilares",
+        "tubos e mangueiras exsudantes",
+        "sistemas artesanais"
+      ],
+      "sistemas mistos": [
+        "gotejamento e exsudação; exemplos gráficos: KISSS, ECO-MAT"
+      ],
+      "exemplos_adicionais_p28_29": [
+        "elevação do lençol freático",
+        "subirrigação em ambientes protegidos",
+        "mesa de capilaridade"
+      ]
+    }
+  },
+  "referencias_numericas": [
+    {
+      "id": "ea_aspersao_p4",
+      "paginas": [
+        4
+      ],
+      "grandeza": "eficiência indicada para aspersão",
+      "min": 70,
+      "max": 85,
+      "unidade": "%",
+      "escopo": "quadro comparativo; tipo de eficiência não definido",
+      "uso": "referência didática, não valor de cálculo"
+    },
+    {
+      "id": "ei_aspersao_p19",
+      "paginas": [
+        19
+      ],
+      "grandeza": "eficiência de irrigação",
+      "min": 80,
+      "max": 90,
+      "unidade": "%",
+      "escopo": "água efetivamente utilizada pela cultura / água total captada",
+      "uso": "preservar divergência em relação à p.4"
+    },
+    {
+      "id": "ea_localizada_p4",
+      "paginas": [
+        4
+      ],
+      "grandeza": "eficiência indicada para localizada",
+      "min": 85,
+      "max": 95,
+      "unidade": "%",
+      "escopo": "quadro comparativo; tipo de eficiência não definido",
+      "uso": "referência didática"
+    },
+    {
+      "id": "ea_subsuperficie_p4",
+      "paginas": [
+        4
+      ],
+      "grandeza": "eficiência indicada para subsuperfície",
+      "min_exclusivo": 90,
+      "max": null,
+      "unidade": "%",
+      "escopo": "quadro comparativo; tipo de eficiência não definido",
+      "uso": "não atribuir automaticamente à elevação do lençol"
+    },
+    {
+      "id": "intensidade_p17",
+      "paginas": [
+        17
+      ],
+      "grandeza": "intensidade mínima mencionada para estacionários",
+      "valor": 3,
+      "unidade": "mm/h",
+      "escopo": "afirmação do slide, sem modelo de emissor",
+      "uso": "não é mínimo universal validado"
+    },
+    {
+      "id": "economia_p18",
+      "paginas": [
+        18
+      ],
+      "grandeza": "economia possível em comparação com superfície",
+      "valor": 50,
+      "unidade": "%",
+      "escopo": "afirmação potencial, sem condições de comparação",
+      "uso": "não é eficiência nem desconto fixo no consumo"
+    },
+    {
+      "id": "q_gotejador_p23",
+      "paginas": [
+        23
+      ],
+      "grandeza": "vazão de gotejador",
+      "min": 2,
+      "max": 20,
+      "unidade": "L/h por emissor",
+      "uso": "faixa didática, não limite universal"
+    },
+    {
+      "id": "q_microaspersor_p23",
+      "paginas": [
+        23
+      ],
+      "grandeza": "vazão de microaspersor",
+      "min": 20,
+      "max": 150,
+      "unidade": "L/h por emissor",
+      "uso": "faixa didática, não limite universal"
+    },
+    {
+      "id": "area_molhada_p23",
+      "paginas": [
+        23
+      ],
+      "grandeza": "fração de área molhada",
+      "max": 60,
+      "min_aproximado_umido": 20,
+      "min_aproximado_arido_semiarido": 30,
+      "unidade": "%",
+      "escopo": "cultivos perenes",
+      "uso": "não generalizar para toda cultura nem confundir com eficiência"
+    }
+  ],
+  "ambiguidades": [
+    {
+      "paginas": [
+        4,
+        19
+      ],
+      "tema": "Eficiências de aspersão divergentes",
+      "tratamento": "Guardar faixa, página e definição; não escolher silenciosamente uma nem tirar média."
+    },
+    {
+      "paginas": [
+        4
+      ],
+      "tema": "Gotejo subterrâneo (superficial)",
+      "tratamento": "Expressão contraditória no quadro; preservar como observação da fonte e distinguir posição do emissor."
+    },
+    {
+      "paginas": [
+        5,
+        28,
+        29
+      ],
+      "tema": "Localizada e subsuperficial podem se sobrepor",
+      "tratamento": "Proposta de modelagem: categoria didática e posição de aplicação em campos distintos; gotejamento enterrado mantém ambas as características."
+    },
+    {
+      "paginas": [
+        11,
+        13
+      ],
+      "tema": "Movimentação durante aplicação versus lateral rolante",
+      "tratamento": "Não impor movimento contínuo a todo sistema mecanizado; a p.13 descreve deslocamento intermitente."
+    },
+    {
+      "paginas": [
+        17,
+        18
+      ],
+      "tema": "Frequência e intensidade dependem de projeto e operação",
+      "tratamento": "Não classificar toda lateral móvel como adequada automaticamente à alta frequência; avaliar mão de obra, reposicionamento e infiltração."
+    },
+    {
+      "paginas": [
+        18
+      ],
+      "tema": "Tubulações removíveis versus sistema fixo",
+      "tratamento": "Vantagem depende do arranjo; não atribuir desmontagem/transporte a toda instalação fixa."
+    },
+    {
+      "paginas": [
+        27
+      ],
+      "tema": "Sem escoamento superficial e qualquer dose de fertilizante",
+      "tratamento": "Afirmações gerais do slide; não converter em garantias nem limites automáticos de operação."
+    },
+    {
+      "paginas": [
+        28,
+        29
+      ],
+      "tema": "Subsuperfície não é apenas tubo enterrado",
+      "tratamento": "Preservar também controle do lençol e subirrigação em ambiente protegido."
+    },
+    {
+      "paginas": [
+        30
+      ],
+      "tema": "Impossível prever com precisão",
+      "tratamento": "Indica limitação da previsão da lâmina diante da variabilidade; não elimina possibilidade de estimar e dimensionar, como na Aula 8."
+    }
+  ],
+  "criterios_comuns": [
+    "solo e infiltração",
+    "clima",
+    "cultura e sistema radicular",
+    "topografia",
+    "disponibilidade de água",
+    "qualidade da água",
+    "energia e pressão",
+    "mão de obra e operação",
+    "custos de implantação e operação",
+    "manejo e manutenção"
+  ],
+  "origem_criterios": "síntese das páginas 4, 8, 15, 17–20, 23 e 25–30; não são entradas formalmente exigidas por uma equação nesta aula"
+}

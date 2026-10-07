@@ -1,5 +1,6 @@
 import 'simulation_result.dart';
 import 'faixas/border_result.dart';
+import 'sulcos/indicadores_balanco_sulco.dart';
 
 import 'package:irrigasim/services/simulation/operational_planning.dart';
 
@@ -8,6 +9,8 @@ class SimulationResultModel {
     return {
       if (result.borderResult != null)
         'resultadoFaixa': result.borderResult!.toMap(),
+      if (result.balancoSulco != null)
+        'balancoSulco': result.balancoSulco!.toMap(),
       'eficiencia': result.eficiencia,
       'eficienciaRequerimento': result.eficienciaRequerimento,
       'cuc': result.cuc,
@@ -26,6 +29,7 @@ class SimulationResultModel {
       'perfilLongitudinal': result.perfilLongitudinal,
       'resumoTextual': result.resumoTextual,
       'alertaVazaoExcedida': result.alertaVazaoExcedida,
+      'alertaInfiltracao': result.alertaInfiltracao,
       'metricas': result.metricas,
       'unidadesMetricas': result.unidadesMetricas,
       'tempoOportunidadeFinalMin': result.tempoOportunidadeFinalMin,
@@ -50,6 +54,11 @@ class SimulationResultModel {
       borderResult: map['resultadoFaixa'] is Map
           ? BorderResult.fromMap(
               Map<String, dynamic>.from(map['resultadoFaixa'] as Map),
+            )
+          : null,
+      balancoSulco: map['balancoSulco'] is Map
+          ? IndicadoresBalancoSulco.fromMap(
+              Map<String, dynamic>.from(map['balancoSulco'] as Map),
             )
           : null,
       eficiencia: (map['eficiencia'] as num).toDouble(),
@@ -84,6 +93,7 @@ class SimulationResultModel {
           .toList(),
       resumoTextual: map['resumoTextual'] ?? '',
       alertaVazaoExcedida: map['alertaVazaoExcedida'],
+      alertaInfiltracao: map['alertaInfiltracao'] as String?,
       metricas: (map['metricas'] as Map<String, dynamic>? ?? const {}).map(
         (key, value) => MapEntry(key, (value as num).toDouble()),
       ),

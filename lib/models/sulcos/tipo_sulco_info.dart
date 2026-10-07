@@ -56,7 +56,7 @@ extension TipoSulcoExtension on TipoSulco {
   }
 }
 
-enum FaixaDeclividade { ideal, aconselhavel, usavel, fora }
+enum FaixaDeclividade { ideal, aconselhavel, usavel, fora, naoInformada }
 
 String formatarPercentual(double valor) {
   final fix2 = valor.toStringAsFixed(2);
@@ -94,23 +94,28 @@ class DeclividadeRange {
     if (_contido(percent, aconselhavelMin, aconselhavelMax)) {
       return FaixaDeclividade.aconselhavel;
     }
-    if (_contido(
-      percent,
-      usavelMin ?? aconselhavelMin,
-      usavelMax ?? aconselhavelMax,
-    )) {
+    if (usavelMin == null &&
+        aconselhavelMin != null &&
+        percent < aconselhavelMin! - _eps) {
+      return FaixaDeclividade.naoInformada;
+    }
+    if (_contido(percent, usavelMin, usavelMax)) {
       return FaixaDeclividade.usavel;
+    }
+    if (usavelMin == null && usavelMax == null) {
+      return FaixaDeclividade.naoInformada;
     }
     return FaixaDeclividade.fora;
   }
 
-  String get faixaIdealLabel => _formatarFaixa(idealMin, idealMax) ?? 'Plano';
+  String get faixaIdealLabel =>
+      _formatarFaixa(idealMin, idealMax) ?? 'Não informado';
 
   String get faixaAconselhavelLabel =>
-      _formatarFaixa(aconselhavelMin, aconselhavelMax) ?? '—';
+      _formatarFaixa(aconselhavelMin, aconselhavelMax) ?? 'Não informado';
 
   String get faixaUsavelLabel =>
-      _formatarFaixa(usavelMin ?? aconselhavelMin, usavelMax) ?? '—';
+      _formatarFaixa(usavelMin, usavelMax) ?? 'Não informado';
 
   String? alertaDeclividade({
     required TipoSulco tipo,
@@ -132,6 +137,8 @@ class DeclividadeRange {
         'Declividade de $atual fora da faixa usável para ${tipo.displayName} '
             '(usável: $faixaUsavelLabel). O cálculo não será bloqueado, '
             'mas o resultado pode não ser representativo.',
+      FaixaDeclividade.naoInformada =>
+        'Faixa usável de declividade não informada para ${tipo.displayName}; não é possível classificá-la automaticamente.',
       FaixaDeclividade.ideal || FaixaDeclividade.aconselhavel => null,
     };
   }
@@ -212,8 +219,6 @@ class TipoSulcoInfo {
         idealMax: 1.0,
         aconselhavelMin: 0.5,
         aconselhavelMax: 2.0,
-        usavelMin: 0.5,
-        usavelMax: 2.0,
       ),
       alinhamento: 'Na direção das curvas de nível',
       formas: ['Entalhe com banco no lado de baixo'],
@@ -242,7 +247,6 @@ class TipoSulcoInfo {
         idealMax: 2.0,
         aconselhavelMin: 0.5,
         aconselhavelMax: 12.0,
-        usavelMin: 0.5,
         usavelMax: 15.0,
       ),
       alinhamento: 'Perpendicular às curvas de nível (maior declividade)',
@@ -273,14 +277,7 @@ class TipoSulcoInfo {
     ),
     TipoSulco.sulcos_nivel_tabuleiros: TipoSulcoInfo(
       tipo: TipoSulco.sulcos_nivel_tabuleiros,
-      declividade: DeclividadeRange(
-        idealMin: 0.0,
-        idealMax: 0.0,
-        aconselhavelMin: 0.0,
-        aconselhavelMax: 0.1,
-        usavelMin: 0.0,
-        usavelMax: 0.2,
-      ),
+      declividade: DeclividadeRange(),
       alinhamento: 'Dentro de tabuleiros ou bacias',
       formas: ['Sulcos com água circulando entre canteiros'],
       comprimentoFaixa: 'Variável (conforme tabuleiro)',
@@ -309,14 +306,7 @@ class TipoSulcoInfo {
     ),
     TipoSulco.sulcos_nivel_fechados: TipoSulcoInfo(
       tipo: TipoSulco.sulcos_nivel_fechados,
-      declividade: DeclividadeRange(
-        idealMin: 0.0,
-        idealMax: 0.0,
-        aconselhavelMin: 0.0,
-        aconselhavelMax: 0.1,
-        usavelMin: 0.0,
-        usavelMax: 0.2,
-      ),
+      declividade: DeclividadeRange(),
       alinhamento: 'Sem declividade ou muito pequena',
       formas: ['Sulcos largos fechados nas duas extremidades'],
       comprimentoFaixa: 'Curto (variável)',
@@ -340,14 +330,7 @@ class TipoSulcoInfo {
     ),
     TipoSulco.sulcos_em_zigue_zague: TipoSulcoInfo(
       tipo: TipoSulco.sulcos_em_zigue_zague,
-      declividade: DeclividadeRange(
-        idealMin: 0.0,
-        idealMax: 0.0,
-        aconselhavelMin: 0.0,
-        aconselhavelMax: 0.1,
-        usavelMin: 0.0,
-        usavelMax: 0.2,
-      ),
+      declividade: DeclividadeRange(),
       alinhamento: 'Zigue-zague ao longo do terreno',
       formas: ['Disposição em zigue-zague'],
       comprimentoFaixa: 'Variável conforme traçado',

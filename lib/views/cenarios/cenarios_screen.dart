@@ -564,6 +564,23 @@ class _ScenarioDetails extends ConsumerWidget {
                     label: const Text('Abrir entradas da faixa'),
                   ),
                 ],
+                if (cenario.metodo == MetodoIrrigacao.sulco) ...[
+                  const SizedBox(height: 16),
+                  if (cenario.parametros.entradasProjetoSulco == null)
+                    Text('Cenário legado: entradas agronômicas originais ausentes. '
+                        'Valores ilustrativos não serão usados para recalcular a IRN.',
+                      style: text.bodyMedium?.copyWith(color: colors.onSurfaceVariant)),
+                  FilledButton.icon(
+                    onPressed: () {
+                      ref.read(parametersProvider.notifier)
+                        ..setMetodo(MetodoIrrigacao.sulco)
+                        ..loadFromParams(cenario.parametros);
+                      context.go('/home/irrigation/project');
+                    },
+                    icon: const Icon(AppIcons.visualizarCenario),
+                    label: const Text('Abrir entradas do sulco'),
+                  ),
+                ],
               ],
             ),
           ),

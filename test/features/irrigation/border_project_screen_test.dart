@@ -15,20 +15,20 @@ void main() {
     expect(find.text('Área e geometria'), findsOneWidget);
     expect(find.text('2. Dimensões da faixa'), findsOneWidget);
     expect(find.text('3. Solo'), findsOneWidget);
-    expect(find.text('4. Cultura e raízes'), findsOneWidget);
+    expect(find.text('4. Cultura e sistema radicular'), findsOneWidget);
     expect(find.text('5. Clima e demanda'), findsOneWidget);
     await tester.drag(find.byType(ListView).first, const Offset(0, -550));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Confirmar etapa'));
+    await tester.tap(find.text('Confirmar'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Próxima etapa'));
+    await tester.tap(find.text('Próximo'));
     await tester.pumpAndSettle();
     expect(find.text('Dimensões da faixa'), findsOneWidget);
-    await tester.ensureVisible(find.text('Confirmar etapa'));
-    await tester.tap(find.text('Confirmar etapa'));
+    await tester.ensureVisible(find.text('Confirmar'));
+    await tester.tap(find.text('Confirmar'));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Próxima etapa'));
-    await tester.tap(find.text('Próxima etapa'));
+    await tester.ensureVisible(find.text('Próximo'));
+    await tester.tap(find.text('Próximo'));
     await tester.pumpAndSettle();
     expect(find.text('Solo'), findsOneWidget);
     expect(find.textContaining('Tabela Booher'), findsOneWidget);
@@ -49,20 +49,28 @@ void main() {
     );
     await tester.drag(find.byType(ListView).first, const Offset(0, -1200));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Confirmar etapa'));
+    await tester.ensureVisible(find.text('Confirmar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Confirmar'));
     await tester.pumpAndSettle();
     await tester.drag(find.byType(ListView).first, const Offset(0, -600));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Próxima etapa'));
+    await tester.ensureVisible(find.text('Próximo'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Próximo'));
     await tester.pumpAndSettle();
     expect(find.text('Dimensões da faixa'), findsOneWidget);
     await tester.drag(find.byType(ListView).first, const Offset(0, -1200));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Confirmar etapa'));
+    await tester.ensureVisible(find.text('Confirmar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Confirmar'));
     await tester.pumpAndSettle();
     await tester.drag(find.byType(ListView).first, const Offset(0, -600));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Próxima etapa'));
+    await tester.ensureVisible(find.text('Próximo'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Próximo'));
     await tester.pumpAndSettle();
     expect(find.text('Solo'), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -77,7 +85,7 @@ void main() {
 
     await tester.drag(find.byType(ListView).first, const Offset(0, -550));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Confirmar etapa'));
+    await tester.tap(find.text('Confirmar'));
     await tester.pumpAndSettle();
     expect(find.text('Confirmada'), findsOneWidget);
 
@@ -88,7 +96,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('Confirmada'), findsNothing);
-    expect(find.text('Confirmar etapa'), findsOneWidget);
+    expect(find.text('Confirmar'), findsOneWidget);
 
     await tester.ensureVisible(find.text('8. Revisão'));
     await tester.pumpAndSettle();

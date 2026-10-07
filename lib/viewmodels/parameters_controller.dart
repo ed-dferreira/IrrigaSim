@@ -9,10 +9,13 @@ import 'package:irrigasim/viewmodels/faixas/border_simulation_coordinator.dart';
 import 'package:irrigasim/viewmodels/sulcos/furrow_simulation_coordinator.dart';
 import 'package:irrigasim/viewmodels/inundacao/basin_simulation_coordinator.dart';
 import 'package:irrigasim/services/simulation/lamina_requerida.dart';
+import 'package:irrigasim/services/simulation/blaney_criddle.dart';
 import 'package:irrigasim/services/simulation/sulcos/flow_management.dart';
 import 'package:irrigasim/models/sulcos/irrigation_project.dart'
     show MetodoAjusteAvanco, PontoEnsaio;
 import 'package:irrigasim/models/sulcos/field_measurements.dart';
+import 'package:irrigasim/models/sulcos/curva_infiltracao_sulco.dart';
+import 'package:irrigasim/models/sulcos/entradas_projeto_sulco.dart';
 import 'package:irrigasim/services/simulation/sulcos/advance_curve_model.dart';
 
 enum OrigemAvanco { estimativa, ensaio }
@@ -75,7 +78,25 @@ class ParametersState {
   final double profundidadeRaizesCm;
   final double fracaoAguaDisponivel;
   final LaminaRequeridaResultado? laminaRequeridaResultado;
+  final bool projetoSulcoLegado;
+  final Map<String, ProvenienciaSulco> origemEntradasSulco;
+  final CurvaInfiltracaoSulco? curvaInfiltracaoSulco;
+  final double? etoMmDia;
+  final double? temperaturaMediaC;
+  final double? latitudeGraus;
+  final int? mesReferencia;
+  final OrigemChuvaSulco origemChuva;
+  final MetodoEtcSulco metodoEtc;
+  final double? decliveEncostaPercent;
+  final String? orientacaoSulco;
+  final ProvenienciaSulco origemGeometria;
+  final bool dimensionarComprimentoCriddle;
   final double vazaoReduzidaLs;
+  final OrigemVazaoReduzida origemVazaoReduzida;
+  final bool fator11Vib;
+  final double? vazaoEnsaioAvancoLs;
+  final String? condicoesEnsaioAvanco;
+  final EnsaioErosaoSulco? ensaioErosao;
   final double jornadaDiariaH;
   final int periodoIrrigacaoDias;
   final double tempoMudancaParcelaMin;
@@ -149,7 +170,25 @@ class ParametersState {
     this.profundidadeRaizesCm = 40,
     this.fracaoAguaDisponivel = 0.5,
     this.laminaRequeridaResultado,
+    this.projetoSulcoLegado = false,
+    this.origemEntradasSulco = const {},
+    this.curvaInfiltracaoSulco,
+    this.etoMmDia,
+    this.temperaturaMediaC,
+    this.latitudeGraus,
+    this.mesReferencia,
+    this.origemChuva = OrigemChuvaSulco.efetiva,
+    this.metodoEtc = MetodoEtcSulco.adotada,
+    this.decliveEncostaPercent,
+    this.orientacaoSulco,
+    this.origemGeometria = ProvenienciaSulco.ilustrativo,
+    this.dimensionarComprimentoCriddle = false,
     this.vazaoReduzidaLs = 0,
+    this.origemVazaoReduzida = OrigemVazaoReduzida.taxaFinalDaCurva,
+    this.fator11Vib = false,
+    this.vazaoEnsaioAvancoLs,
+    this.condicoesEnsaioAvanco,
+    this.ensaioErosao,
     this.jornadaDiariaH = 24,
     this.periodoIrrigacaoDias = 10,
     this.tempoMudancaParcelaMin = 30,
@@ -168,9 +207,92 @@ class ParametersState {
   double get declividade =>
       distanciaHorizontalM > 0 ? desnivelM / distanciaHorizontalM : 0;
 
+  double? get etoBlaneyCriddle {
+    if (temperaturaMediaC == null ||
+        latitudeGraus == null ||
+        mesReferencia == null) {
+      return null;
+    }
+    try {
+      return BlaneyCriddle.etoMmDia(
+        temperaturaMediaC: temperaturaMediaC!,
+        latitudeGraus: latitudeGraus!,
+        mes: mesReferencia!,
+      );
+    } on ArgumentError {
+      return null;
+    }
+  }
+
+  double get evapotranspiracaoCulturaMmDia => switch (metodoEtc) {
+    MetodoEtcSulco.adotada => evapotranspiracaoMmDia,
+    MetodoEtcSulco.etoVezesKc => (etoMmDia ?? 0) * kc,
+    MetodoEtcSulco.blaneyCriddle => (etoBlaneyCriddle ?? 0) * kc,
+  };
+
   double get declividadeTransversal => distanciaTransversalM > 0
       ? desnivelTransversalM / distanciaTransversalM
       : 0;
+
+  EntradasProjetoSulco get entradasSulco {
+    double? valor(String nome, double atual) =>
+        origemEntradasSulco[nome] == ProvenienciaSulco.naoInformado
+        ? null
+        : atual;
+    final curva =
+        origemCurvaInfiltracao ==
+            OrigemCurvaInfiltracao.equacaoAcumuladaInformada
+        ? curvaInfiltracaoSulco
+        : null;
+    return EntradasProjetoSulco(
+      uccPercentual: valor('uccPercentual', uccPercentual),
+      upmpPercentual: valor('upmpPercentual', upmpPercentual),
+      densidadeAparenteGcm3: valor(
+        'densidadeAparenteGcm3',
+        densidadeAparenteGcm3,
+      ),
+      profundidadeRadicularCm: valor(
+        'profundidadeRaizesCm',
+        profundidadeRaizesCm,
+      ),
+      fracaoDisponivel: valor('fracaoAguaDisponivel', fracaoAguaDisponivel),
+      etcAdotadaMmDia: valor('evapotranspiracaoMmDia', evapotranspiracaoMmDia),
+      etoMmDia: etoMmDia,
+      temperaturaMediaC: temperaturaMediaC,
+      latitudeGraus: latitudeGraus,
+      mesReferencia: mesReferencia,
+      kc: valor('kc', kc),
+      precipitacaoMmDia: valor(
+        'precipitacaoEfetivaMmDia',
+        precipitacaoEfetivaMmDia,
+      ),
+      origemChuva: origemChuva,
+      metodoEtc: metodoEtc,
+      desnivelLongitudinalM: desnivelM,
+      baseLongitudinalM: distanciaHorizontalM,
+      decliveEncostaPercent: decliveEncostaPercent,
+      orientacaoSulco: orientacaoSulco,
+      origemGeometria: origemGeometria,
+      dimensionarComprimentoCriddle: dimensionarComprimentoCriddle,
+      origens: {
+        for (final nome in [
+          'uccPercentual',
+          'upmpPercentual',
+          'densidadeAparenteGcm3',
+          'profundidadeRaizesCm',
+          'fracaoAguaDisponivel',
+          'evapotranspiracaoMmDia',
+          'kc',
+          'precipitacaoEfetivaMmDia',
+        ])
+          nome: origemEntradasSulco[nome] ?? ProvenienciaSulco.ilustrativo,
+        if (etoMmDia != null)
+          'etoMmDia':
+              origemEntradasSulco['etoMmDia'] ?? ProvenienciaSulco.informado,
+      },
+      curvaInfiltracao: curva,
+    );
+  }
 
   double get expoenteAvancoB =>
       expoenteAvancoBInformado ??
@@ -244,7 +366,31 @@ class ParametersState {
     double? fracaoAguaDisponivel,
     LaminaRequeridaResultado? laminaRequeridaResultado,
     bool clearLaminaRequeridaResultado = false,
+    bool? projetoSulcoLegado,
+    Map<String, ProvenienciaSulco>? origemEntradasSulco,
+    CurvaInfiltracaoSulco? curvaInfiltracaoSulco,
+    bool clearCurvaInfiltracaoSulco = false,
+    double? etoMmDia,
+    bool clearEtoMmDia = false,
+    double? temperaturaMediaC,
+    bool clearTemperaturaMediaC = false,
+    double? latitudeGraus,
+    bool clearLatitudeGraus = false,
+    int? mesReferencia,
+    OrigemChuvaSulco? origemChuva,
+    MetodoEtcSulco? metodoEtc,
+    double? decliveEncostaPercent,
+    bool clearDecliveEncostaPercent = false,
+    String? orientacaoSulco,
+    ProvenienciaSulco? origemGeometria,
+    bool? dimensionarComprimentoCriddle,
     double? vazaoReduzidaLs,
+    OrigemVazaoReduzida? origemVazaoReduzida,
+    bool? fator11Vib,
+    double? vazaoEnsaioAvancoLs,
+    String? condicoesEnsaioAvanco,
+    EnsaioErosaoSulco? ensaioErosao,
+    bool clearEnsaioErosao = false,
     double? jornadaDiariaH,
     int? periodoIrrigacaoDias,
     double? tempoMudancaParcelaMin,
@@ -337,7 +483,37 @@ class ParametersState {
       laminaRequeridaResultado: clearLaminaRequeridaResultado
           ? null
           : laminaRequeridaResultado ?? this.laminaRequeridaResultado,
+      projetoSulcoLegado: projetoSulcoLegado ?? this.projetoSulcoLegado,
+      origemEntradasSulco: origemEntradasSulco ?? this.origemEntradasSulco,
+      curvaInfiltracaoSulco: clearCurvaInfiltracaoSulco
+          ? null
+          : curvaInfiltracaoSulco ?? this.curvaInfiltracaoSulco,
+      etoMmDia: clearEtoMmDia ? null : etoMmDia ?? this.etoMmDia,
+      temperaturaMediaC: clearTemperaturaMediaC
+          ? null
+          : temperaturaMediaC ?? this.temperaturaMediaC,
+      latitudeGraus: clearLatitudeGraus
+          ? null
+          : latitudeGraus ?? this.latitudeGraus,
+      mesReferencia: mesReferencia ?? this.mesReferencia,
+      origemChuva: origemChuva ?? this.origemChuva,
+      metodoEtc: metodoEtc ?? this.metodoEtc,
+      decliveEncostaPercent: clearDecliveEncostaPercent
+          ? null
+          : decliveEncostaPercent ?? this.decliveEncostaPercent,
+      orientacaoSulco: orientacaoSulco ?? this.orientacaoSulco,
+      origemGeometria: origemGeometria ?? this.origemGeometria,
+      dimensionarComprimentoCriddle:
+          dimensionarComprimentoCriddle ?? this.dimensionarComprimentoCriddle,
       vazaoReduzidaLs: vazaoReduzidaLs ?? this.vazaoReduzidaLs,
+      origemVazaoReduzida: origemVazaoReduzida ?? this.origemVazaoReduzida,
+      fator11Vib: fator11Vib ?? this.fator11Vib,
+      vazaoEnsaioAvancoLs: vazaoEnsaioAvancoLs ?? this.vazaoEnsaioAvancoLs,
+      condicoesEnsaioAvanco:
+          condicoesEnsaioAvanco ?? this.condicoesEnsaioAvanco,
+      ensaioErosao: clearEnsaioErosao
+          ? null
+          : ensaioErosao ?? this.ensaioErosao,
       jornadaDiariaH: jornadaDiariaH ?? this.jornadaDiariaH,
       periodoIrrigacaoDias: periodoIrrigacaoDias ?? this.periodoIrrigacaoDias,
       tempoMudancaParcelaMin:
@@ -360,7 +536,15 @@ class ParametersState {
   }
 
   IrrigationParameters toIrrigationParameters() {
+    final curva = metodo == MetodoIrrigacao.sulco && !projetoSulcoLegado
+        ? entradasSulco.curvaInfiltracao
+        : null;
+    final convertida = curva?.acumuladaMm();
     return IrrigationParameters(
+      entradasProjetoSulco:
+          metodo == MetodoIrrigacao.sulco && !projetoSulcoLegado
+          ? entradasSulco
+          : null,
       projetoFaixa: metodo == MetodoIrrigacao.faixa
           ? BorderProject(
               versao: 0,
@@ -385,8 +569,8 @@ class ParametersState {
       declividade: declividade,
       declividadeTransversal: declividadeTransversal,
       larguraOuEspacamento: larguraOuEspacamento,
-      k: k,
-      a: a,
+      k: convertida?.k ?? k,
+      a: convertida?.a ?? a,
       vib: vib,
       vazao: vazao,
       tempoAplicacao: tempoAplicacao,
@@ -413,11 +597,16 @@ class ParametersState {
       condutividadeHidraulicaMmDia: condutividadeHidraulicaMmDia,
       dtaMmCm: dtaMmCm,
       fatorDisponibilidade: fatorDisponibilidade,
-      evapotranspiracaoMmDia: evapotranspiracaoMmDia,
+      evapotranspiracaoMmDia: evapotranspiracaoCulturaMmDia,
       laminaSuperficialMm: laminaSuperficialMm,
       vazaoDisponivelLps: vazaoDisponivelLps,
       manejoSulco: manejoSulco,
       vazaoReduzidaLs: vazaoReduzidaLs,
+      origemVazaoReduzida: origemVazaoReduzida,
+      fator11Vib: fator11Vib,
+      vazaoEnsaioAvancoLs: vazaoEnsaioAvancoLs,
+      condicoesEnsaioAvanco: condicoesEnsaioAvanco,
+      ensaioErosao: ensaioErosao,
       tempoMudancaMin: tempoMudancaMin,
       cicloSurtirMin: cicloSurtirMin,
       jornadaDiariaH: jornadaDiariaH,
@@ -433,26 +622,14 @@ class ParametersState {
       profundidadeSulcoM: profundidadeSulcoM,
       metodoCurvaAvanco: metodoCurvaAvanco,
       usarEnsaioAvanco: origemAvanco == OrigemAvanco.ensaio,
-      medicoesAvanco:
-          (pontosEnsaioAvanco.isEmpty && origemAvanco == OrigemAvanco.ensaio
-                  ? [
-                      PontoEnsaio(
-                        distanciaM: distanciaEnsaioIntermediariaM,
-                        tempoMin: tempoEnsaioIntermediarioMin,
-                      ),
-                      PontoEnsaio(
-                        distanciaM: comprimento,
-                        tempoMin: tempoAvancoFinalMin,
-                      ),
-                    ]
-                  : pontosEnsaioAvanco)
-              .map(
-                (point) => MedicaoAvanco(
-                  distanciaM: point.distanciaM,
-                  tempoMin: point.tempoMin,
-                ),
-              )
-              .toList(),
+      medicoesAvanco: pontosEnsaioAvanco
+          .map(
+            (point) => MedicaoAvanco(
+              distanciaM: point.distanciaM,
+              tempoMin: point.tempoMin,
+            ),
+          )
+          .toList(),
       origemCurvaInfiltracao: origemCurvaInfiltracao,
       distanciaEnsaioInfiltracaoM: distanciaEnsaioInfiltracaoM,
       espacamentoEnsaioInfiltracaoM: espacamentoEnsaioInfiltracaoM,
@@ -468,8 +645,20 @@ class ParametersController extends StateNotifier<ParametersState> {
 
   static ParametersState _recalcularLamina(ParametersState current) {
     if (current.metodo == MetodoIrrigacao.faixa) return current;
-    final demandaLiquida =
-        current.evapotranspiracaoMmDia - current.precipitacaoEfetivaMmDia;
+    final entradas = current.entradasSulco;
+    if (current.metodo == MetodoIrrigacao.sulco &&
+        !entradas.podeRecalcularIrrigacao) {
+      return current.copyWith(clearLaminaRequeridaResultado: true);
+    }
+    final etoCalculada = current.metodoEtc == MetodoEtcSulco.blaneyCriddle
+        ? _etoBlaneyCriddle(current)
+        : current.etoMmDia;
+    if (current.metodoEtc == MetodoEtcSulco.blaneyCriddle &&
+        etoCalculada == null) {
+      return current.copyWith(clearLaminaRequeridaResultado: true);
+    }
+    final etc = current.evapotranspiracaoCulturaMmDia;
+    final demandaLiquida = etc - current.precipitacaoEfetivaMmDia;
     if (demandaLiquida <= 0) {
       return current.copyWith(clearLaminaRequeridaResultado: true);
     }
@@ -482,7 +671,8 @@ class ParametersController extends StateNotifier<ParametersState> {
         profundidadeRaizesCm: current.profundidadeRaizesCm,
         fracaoAguaDisponivel: current.fracaoAguaDisponivel,
         demandaLiquidaMmDia: demandaLiquida,
-        etcMmDia: current.evapotranspiracaoMmDia,
+        etoMmDia: etoCalculada,
+        etcMmDia: etc,
         precipitacaoEfetivaMmDia: current.precipitacaoEfetivaMmDia,
       );
       return current.copyWith(
@@ -492,6 +682,36 @@ class ParametersController extends StateNotifier<ParametersState> {
     } on ArgumentError {
       return current.copyWith(clearLaminaRequeridaResultado: true);
     }
+  }
+
+  static double? _etoBlaneyCriddle(ParametersState state) {
+    final temperatura = state.temperaturaMediaC;
+    final latitude = state.latitudeGraus;
+    final mes = state.mesReferencia;
+    if (temperatura == null || latitude == null || mes == null) return null;
+    try {
+      return BlaneyCriddle.etoMmDia(
+        temperaturaMediaC: temperatura,
+        latitudeGraus: latitude,
+        mes: mes,
+      );
+    } on ArgumentError {
+      return null;
+    }
+  }
+
+  void _redimensionarCriddleSeSelecionado() {
+    if (!state.dimensionarComprimentoCriddle) return;
+    if (state.laminaRequeridaResultado == null) {
+      if (state.origemGeometria == ProvenienciaSulco.calculado) {
+        state = state.copyWith(
+          origemGeometria: ProvenienciaSulco.naoInformado,
+          mensagemPlanejamento: null,
+        );
+      }
+      return;
+    }
+    dimensionarComprimentoCriddle();
   }
 
   void setMetodo(MetodoIrrigacao metodo) {
@@ -628,8 +848,9 @@ class ParametersController extends StateNotifier<ParametersState> {
   }
 
   void loadFromParams(IrrigationParameters params) {
-    // declividade is in m/m; convert to desnivelM/distanciaHorizontalM pair
-    final distancia = 100.0;
+    final projeto = params.entradasProjetoSulco;
+    // Cenários legados preservam a inclinação, não recuperam uma base medida.
+    final distancia = projeto?.baseLongitudinalM ?? 100.0;
     final distanciaReferenciaAvanco =
         params.distanciaReferenciaAvancoM ?? params.comprimento;
     final bAvanco =
@@ -645,28 +866,48 @@ class ParametersController extends StateNotifier<ParametersState> {
         (params.comprimento > 0
             ? params.tempoAvancoFinalMin / math.pow(params.comprimento, bAvanco)
             : 0.0659064448778603);
-    final pontosAvanco = params.medicoesAvanco.isNotEmpty
-        ? params.medicoesAvanco
-              .map(
-                (point) => PontoEnsaio(
-                  distanciaM: point.distanciaM,
-                  tempoMin: point.tempoMin,
-                ),
-              )
-              .toList()
-        : params.usarEnsaioAvanco
-        ? [
-            PontoEnsaio(
-              distanciaM: params.comprimento / 2,
-              tempoMin: params.tempoAvancoMetadeMin,
-            ),
-            PontoEnsaio(
-              distanciaM: params.comprimento,
-              tempoMin: params.tempoAvancoFinalMin,
-            ),
-          ]
-        : <PontoEnsaio>[];
-    final desnivel = params.declividade * distancia;
+    final pontosAvanco = params.medicoesAvanco
+        .map(
+          (point) => PontoEnsaio(
+            distanciaM: point.distanciaM,
+            tempoMin: point.tempoMin,
+          ),
+        )
+        .toList();
+    final desnivel =
+        projeto?.desnivelLongitudinalM ?? params.declividade * distancia;
+    ProvenienciaSulco origem(String key, double? value) =>
+        projeto?.origens[key] ??
+        (value == null
+            ? ProvenienciaSulco.naoInformado
+            : ProvenienciaSulco.informado);
+    final origens = <String, ProvenienciaSulco>{
+      'uccPercentual': origem('uccPercentual', projeto?.uccPercentual),
+      'upmpPercentual': origem('upmpPercentual', projeto?.upmpPercentual),
+      'densidadeAparenteGcm3': origem(
+        'densidadeAparenteGcm3',
+        projeto?.densidadeAparenteGcm3,
+      ),
+      'profundidadeRaizesCm': origem(
+        'profundidadeRaizesCm',
+        projeto?.profundidadeRadicularCm,
+      ),
+      'fracaoAguaDisponivel': origem(
+        'fracaoAguaDisponivel',
+        projeto?.fracaoDisponivel,
+      ),
+      'evapotranspiracaoMmDia': origem(
+        'evapotranspiracaoMmDia',
+        projeto?.etcAdotadaMmDia,
+      ),
+      'kc': origem('kc', projeto?.kc),
+      'precipitacaoEfetivaMmDia': origem(
+        'precipitacaoEfetivaMmDia',
+        projeto?.precipitacaoMmDia,
+      ),
+      'k': origem('k', projeto?.curvaInfiltracao?.coeficiente),
+      'a': origem('a', projeto?.curvaInfiltracao?.expoente),
+    };
     final distanciaTransversal = 10.0;
     state = _recalcularLamina(
       state.copyWith(
@@ -679,10 +920,39 @@ class ParametersController extends StateNotifier<ParametersState> {
         larguraOuEspacamento: params.larguraOuEspacamento,
         k: params.k,
         a: params.a,
+        projetoSulcoLegado: projeto == null,
+        origemEntradasSulco: origens,
+        curvaInfiltracaoSulco: projeto?.curvaInfiltracao,
+        clearCurvaInfiltracaoSulco: projeto?.curvaInfiltracao == null,
+        etoMmDia: projeto?.etoMmDia,
+        clearEtoMmDia: projeto?.etoMmDia == null,
+        temperaturaMediaC: projeto?.temperaturaMediaC,
+        clearTemperaturaMediaC: projeto?.temperaturaMediaC == null,
+        latitudeGraus: projeto?.latitudeGraus,
+        clearLatitudeGraus: projeto?.latitudeGraus == null,
+        mesReferencia: projeto?.mesReferencia,
+        origemChuva: projeto?.origemChuva ?? OrigemChuvaSulco.naoInformada,
+        metodoEtc: projeto?.metodoEtc ?? MetodoEtcSulco.adotada,
+        decliveEncostaPercent: projeto?.decliveEncostaPercent,
+        clearDecliveEncostaPercent: projeto?.decliveEncostaPercent == null,
+        orientacaoSulco: projeto?.orientacaoSulco ?? '',
+        origemGeometria:
+            projeto?.origemGeometria ?? ProvenienciaSulco.naoInformado,
+        dimensionarComprimentoCriddle:
+            projeto?.dimensionarComprimentoCriddle == true ||
+            projeto?.origemGeometria == ProvenienciaSulco.calculado,
         vib: params.vib,
         vazao: params.vazao,
         tempoAplicacao: params.tempoAplicacao,
         laminaRequerida: params.laminaRequerida,
+        uccPercentual: projeto?.uccPercentual ?? state.uccPercentual,
+        upmpPercentual: projeto?.upmpPercentual ?? state.upmpPercentual,
+        densidadeAparenteGcm3:
+            projeto?.densidadeAparenteGcm3 ?? state.densidadeAparenteGcm3,
+        profundidadeRaizesCm:
+            projeto?.profundidadeRadicularCm ?? state.profundidadeRaizesCm,
+        fracaoAguaDisponivel:
+            projeto?.fracaoDisponivel ?? state.fracaoAguaDisponivel,
         manningN: params.manningN,
         sigmaZ: params.sigmaZ,
         texturaSolo: params.texturaSolo,
@@ -701,7 +971,8 @@ class ParametersController extends StateNotifier<ParametersState> {
         condutividadeHidraulicaMmDia: params.condutividadeHidraulicaMmDia,
         dtaMmCm: params.dtaMmCm,
         fatorDisponibilidade: params.fatorDisponibilidade,
-        evapotranspiracaoMmDia: params.evapotranspiracaoMmDia,
+        evapotranspiracaoMmDia:
+            projeto?.etcAdotadaMmDia ?? params.evapotranspiracaoMmDia,
         laminaSuperficialMm: params.laminaSuperficialMm,
         vazaoDisponivelLps: params.vazaoDisponivelLps,
         manejoSulco: params.manejoSulco,
@@ -712,9 +983,10 @@ class ParametersController extends StateNotifier<ParametersState> {
         periodoIrrigacaoDias: params.periodoIrrigacaoDias,
         tempoMudancaParcelaMin: params.tempoMudancaParcelaMin,
         perdasConducaoLs: params.perdasConducaoLs,
-        precipitacaoEfetivaMmDia: params.precipitacaoEfetivaMmDia,
+        precipitacaoEfetivaMmDia:
+            projeto?.precipitacaoMmDia ?? params.precipitacaoEfetivaMmDia,
         nomeCultura: params.nomeCultura,
-        kc: params.kc,
+        kc: projeto?.kc ?? params.kc,
         espacamentoFileirasM: params.espacamentoFileirasM,
         espacamentoPlantasM: params.espacamentoPlantasM,
         larguraSulcoM: params.larguraSulcoM,
@@ -730,12 +1002,94 @@ class ParametersController extends StateNotifier<ParametersState> {
         origemAvanco: params.usarEnsaioAvanco
             ? OrigemAvanco.ensaio
             : OrigemAvanco.estimativa,
+        origemVazaoReduzida: params.origemVazaoReduzida,
+        fator11Vib: params.fator11Vib,
+        vazaoEnsaioAvancoLs: params.vazaoEnsaioAvancoLs,
+        condicoesEnsaioAvanco: params.condicoesEnsaioAvanco ?? '',
+        ensaioErosao: params.ensaioErosao,
+        clearEnsaioErosao: params.ensaioErosao == null,
       ),
     );
   }
 
   void updateField({String? campo, String? valor}) {
     if (campo == null || valor == null) return;
+    final atualCurva =
+        state.curvaInfiltracaoSulco ?? state.entradasSulco.curvaInfiltracao;
+    if ({
+          'curvaEspacamentoM',
+          'curvaVibMmHora',
+          'curvaTempoMin',
+          'curvaTempoMax',
+        }.contains(campo) &&
+        atualCurva != null) {
+      final number = double.tryParse(valor.replaceAll(',', '.'));
+      final nova = switch (campo) {
+        'curvaEspacamentoM' => atualCurva.copyWith(
+          espacamentoConversaoM: number,
+          clearEspacamento: number == null,
+        ),
+        'curvaVibMmHora' => atualCurva.copyWith(
+          vibMmHora: number,
+          clearVib: number == null,
+        ),
+        'curvaTempoMin' => atualCurva.copyWith(
+          tempoMinCalibrado: number,
+          clearTempoMin: number == null,
+        ),
+        _ => atualCurva.copyWith(
+          tempoMaxCalibrado: number,
+          clearTempoMax: number == null,
+        ),
+      };
+      state = state.copyWith(
+        curvaInfiltracaoSulco: nova,
+        projetoSulcoLegado: false,
+      );
+      _redimensionarCriddleSeSelecionado();
+      return;
+    }
+    if ({
+      'etoMmDia',
+      'decliveEncostaPercent',
+      'temperaturaMediaC',
+      'latitudeGraus',
+    }.contains(campo)) {
+      final number = double.tryParse(valor.replaceAll(',', '.'));
+      state = switch (campo) {
+        'etoMmDia' => state.copyWith(
+          etoMmDia: number,
+          clearEtoMmDia: number == null,
+          projetoSulcoLegado: false,
+          origemEntradasSulco: {
+            ...state.origemEntradasSulco,
+            'etoMmDia': number == null
+                ? ProvenienciaSulco.naoInformado
+                : ProvenienciaSulco.informado,
+          },
+        ),
+        'temperaturaMediaC' => state.copyWith(
+          temperaturaMediaC: number,
+          clearTemperaturaMediaC: number == null,
+          projetoSulcoLegado: false,
+        ),
+        'latitudeGraus' => state.copyWith(
+          latitudeGraus: number,
+          clearLatitudeGraus: number == null,
+          projetoSulcoLegado: false,
+        ),
+        _ => state.copyWith(
+          decliveEncostaPercent: number,
+          clearDecliveEncostaPercent: number == null,
+          projetoSulcoLegado: false,
+        ),
+      };
+      if (campo != 'decliveEncostaPercent') {
+        state = _recalcularLamina(state);
+        _redimensionarCriddleSeSelecionado();
+      }
+      return;
+    }
     if (campo == 'larguraSulcoM' || campo == 'profundidadeSulcoM') {
       final parsedOptional = double.tryParse(valor.replaceAll(',', '.'));
       state = campo == 'larguraSulcoM'
@@ -756,7 +1110,11 @@ class ParametersController extends StateNotifier<ParametersState> {
     final comprimentoAnterior = state.comprimento;
     switch (campo) {
       case 'comprimento':
-        state = state.copyWith(comprimento: parsed);
+        state = state.copyWith(
+          comprimento: parsed,
+          origemGeometria: ProvenienciaSulco.medido,
+          dimensionarComprimentoCriddle: false,
+        );
       case 'distanciaReferenciaAvancoM':
         state = state.copyWith(distanciaReferenciaAvancoM: parsed);
       case 'desnivelM':
@@ -771,8 +1129,44 @@ class ParametersController extends StateNotifier<ParametersState> {
         state = state.copyWith(larguraOuEspacamento: parsed);
       case 'k':
         state = state.copyWith(k: parsed);
+        if (atualCurva?.tipo == TipoCurvaInfiltracaoSulco.acumulada &&
+            atualCurva?.base == BaseInfiltracaoSulco.milimetros) {
+          state = state.copyWith(
+            curvaInfiltracaoSulco: atualCurva!.copyWith(
+              coeficiente: parsed,
+              proveniencia: ProvenienciaSulco.informado,
+            ),
+          );
+        }
       case 'a':
         state = state.copyWith(a: parsed);
+        if (atualCurva?.tipo == TipoCurvaInfiltracaoSulco.acumulada &&
+            atualCurva?.base == BaseInfiltracaoSulco.milimetros) {
+          state = state.copyWith(
+            curvaInfiltracaoSulco: atualCurva!.copyWith(
+              expoente: parsed,
+              proveniencia: ProvenienciaSulco.informado,
+            ),
+          );
+        }
+      case 'curvaCoeficiente':
+        if (atualCurva != null) {
+          state = state.copyWith(
+            curvaInfiltracaoSulco: atualCurva.copyWith(
+              coeficiente: parsed,
+              proveniencia: ProvenienciaSulco.informado,
+            ),
+          );
+        }
+      case 'curvaExpoente':
+        if (atualCurva != null) {
+          state = state.copyWith(
+            curvaInfiltracaoSulco: atualCurva.copyWith(
+              expoente: parsed,
+              proveniencia: ProvenienciaSulco.informado,
+            ),
+          );
+        }
       case 'vib':
         state = state.copyWith(vib: parsed);
       case 'vazao':
@@ -829,6 +1223,10 @@ class ParametersController extends StateNotifier<ParametersState> {
         state = state.copyWith(vazaoDisponivelLps: parsed);
       case 'kc':
         state = state.copyWith(kc: parsed);
+        if (state.metodoEtc == MetodoEtcSulco.etoVezesKc ||
+            state.metodoEtc == MetodoEtcSulco.blaneyCriddle) {
+          recalcularLamina = true;
+        }
       case 'espacamentoFileirasM':
         state = state.copyWith(espacamentoFileirasM: parsed);
       case 'espacamentoPlantasM':
@@ -853,6 +1251,8 @@ class ParametersController extends StateNotifier<ParametersState> {
         recalcularLamina = true;
       case 'vazaoReduzidaLs':
         state = state.copyWith(vazaoReduzidaLs: parsed);
+      case 'vazaoEnsaioAvancoLs':
+        state = state.copyWith(vazaoEnsaioAvancoLs: parsed);
       case 'jornadaDiariaH':
         state = state.copyWith(jornadaDiariaH: parsed);
       case 'periodoIrrigacaoDias':
@@ -867,6 +1267,45 @@ class ParametersController extends StateNotifier<ParametersState> {
       case 'cicloSurtirMin':
         state = state.copyWith(cicloSurtirMin: parsed);
     }
+    const tracked = {
+      'uccPercentual',
+      'upmpPercentual',
+      'densidadeAparenteGcm3',
+      'profundidadeRaizesCm',
+      'fracaoAguaDisponivel',
+      'evapotranspiracaoMmDia',
+      'precipitacaoEfetivaMmDia',
+      'kc',
+      'k',
+      'a',
+    };
+    if (state.metodo == MetodoIrrigacao.sulco && tracked.contains(campo)) {
+      state = state.copyWith(
+        projetoSulcoLegado: false,
+        origemEntradasSulco: {
+          ...state.origemEntradasSulco,
+          campo: ProvenienciaSulco.informado,
+        },
+        origemChuva: campo == 'precipitacaoEfetivaMmDia'
+            ? OrigemChuvaSulco.efetiva
+            : null,
+      );
+    }
+    if (state.metodo == MetodoIrrigacao.sulco &&
+        (campo == 'k' || campo == 'a') &&
+        atualCurva == null &&
+        state.origemCurvaInfiltracao ==
+            OrigemCurvaInfiltracao.equacaoAcumuladaInformada) {
+      state = state.copyWith(
+        curvaInfiltracaoSulco: CurvaInfiltracaoSulco(
+          tipo: TipoCurvaInfiltracaoSulco.acumulada,
+          base: BaseInfiltracaoSulco.milimetros,
+          coeficiente: state.k,
+          expoente: state.a,
+          proveniencia: ProvenienciaSulco.informado,
+        ),
+      );
+    }
     if (campo == 'comprimento' ||
         campo == 'coeficienteAvancoK' ||
         campo == 'expoenteAvancoB') {
@@ -877,7 +1316,10 @@ class ParametersController extends StateNotifier<ParametersState> {
       }
       state = _sincronizarAvancoEstimado(state);
     }
-    if (recalcularLamina) state = _recalcularLamina(state);
+    if (recalcularLamina) {
+      state = _recalcularLamina(state);
+    }
+    _redimensionarCriddleSeSelecionado();
   }
 
   ParametersState _sincronizarAvancoEstimado(ParametersState source) {
@@ -917,34 +1359,140 @@ class ParametersController extends StateNotifier<ParametersState> {
     state = state.copyWith(manejoSulco: manejo);
   }
 
+  void setOrigemVazaoReduzida(OrigemVazaoReduzida origem) =>
+      state = state.copyWith(
+        origemVazaoReduzida: origem,
+        vazaoReduzidaLs: origem == OrigemVazaoReduzida.informada
+            ? state.vazaoReduzidaLs
+            : 0,
+      );
+
+  void setFator11Vib(bool value) => state = state.copyWith(fator11Vib: value);
+
+  void setCondicoesEnsaioAvanco(String value) {
+    state = state.copyWith(condicoesEnsaioAvanco: value);
+    _redimensionarCriddleSeSelecionado();
+  }
+
+  void setEnsaioErosao(EnsaioErosaoSulco? value) => state = state.copyWith(
+    ensaioErosao: value,
+    clearEnsaioErosao: value == null,
+  );
+
   void setOrigemAvanco(OrigemAvanco origem) {
     state = _sincronizarAvancoEstimado(
       state.copyWith(origemAvanco: origem, mensagemPlanejamento: null),
     );
+    _redimensionarCriddleSeSelecionado();
   }
 
   void setPontosEnsaioAvanco(List<PontoEnsaio> pontos) {
     state = state.copyWith(pontosEnsaioAvanco: List.unmodifiable(pontos));
+    _redimensionarCriddleSeSelecionado();
   }
 
   void setMetodoCurvaAvanco(MetodoCurvaAvanco method) {
     state = state.copyWith(metodoCurvaAvanco: method);
+    _redimensionarCriddleSeSelecionado();
   }
 
   void setOrigemCurvaInfiltracao(OrigemCurvaInfiltracao origem) {
     state = state.copyWith(origemCurvaInfiltracao: origem);
+    _redimensionarCriddleSeSelecionado();
+  }
+
+  void setMetodoEtc(MetodoEtcSulco metodo) {
+    state = _recalcularLamina(
+      state.copyWith(metodoEtc: metodo, projetoSulcoLegado: false),
+    );
+    _redimensionarCriddleSeSelecionado();
+  }
+
+  void setMesReferencia(int mes) {
+    state = _recalcularLamina(
+      state.copyWith(mesReferencia: mes, projetoSulcoLegado: false),
+    );
+    _redimensionarCriddleSeSelecionado();
+  }
+
+  void setOrigemChuva(OrigemChuvaSulco origem) {
+    state = _recalcularLamina(
+      state.copyWith(origemChuva: origem, projetoSulcoLegado: false),
+    );
+    _redimensionarCriddleSeSelecionado();
+  }
+
+  void setOrientacaoSulco(String value) =>
+      state = state.copyWith(orientacaoSulco: value, projetoSulcoLegado: false);
+
+  void setOrigemGeometria(ProvenienciaSulco origem) => state = state.copyWith(
+    origemGeometria: origem,
+    dimensionarComprimentoCriddle: false,
+    projetoSulcoLegado: false,
+  );
+
+  void setDimensionarComprimentoCriddle(bool ativo) {
+    state = state.copyWith(
+      dimensionarComprimentoCriddle: ativo,
+      origemGeometria: ativo ? state.origemGeometria : ProvenienciaSulco.medido,
+      mensagemPlanejamento: null,
+    );
+    _redimensionarCriddleSeSelecionado();
+  }
+
+  void configurarCurvaInfiltracao({
+    TipoCurvaInfiltracaoSulco? tipo,
+    BaseInfiltracaoSulco? base,
+  }) {
+    final curva =
+        state.curvaInfiltracaoSulco ??
+        state.entradasSulco.curvaInfiltracao ??
+        CurvaInfiltracaoSulco(
+          tipo: TipoCurvaInfiltracaoSulco.acumulada,
+          base: BaseInfiltracaoSulco.milimetros,
+          coeficiente: state.k,
+          expoente: state.a,
+          proveniencia: ProvenienciaSulco.ilustrativo,
+        );
+    state = state.copyWith(
+      curvaInfiltracaoSulco: curva.copyWith(
+        tipo: tipo,
+        base: base,
+        proveniencia: ProvenienciaSulco.informado,
+        clearEspacamento: base == BaseInfiltracaoSulco.litrosPorMetro,
+      ),
+      projetoSulcoLegado: false,
+    );
+    _redimensionarCriddleSeSelecionado();
+  }
+
+  void setDataCurvaInfiltracao(DateTime? data) {
+    final curva = state.entradasSulco.curvaInfiltracao;
+    if (curva != null) {
+      state = state.copyWith(
+        curvaInfiltracaoSulco: curva.copyWith(
+          dataEnsaio: data,
+          clearData: data == null,
+        ),
+        projetoSulcoLegado: false,
+      );
+      _redimensionarCriddleSeSelecionado();
+    }
   }
 
   void setMedicoesEntradaSaida(List<MedicaoEntradaSaida> points) {
     state = state.copyWith(medicoesEntradaSaida: List.unmodifiable(points));
+    _redimensionarCriddleSeSelecionado();
   }
 
   void setHipoteseRecessao(HipoteseRecessao hipotese) {
     state = state.copyWith(hipoteseRecessao: hipotese);
+    _redimensionarCriddleSeSelecionado();
   }
 
   void setMedicoesRecessao(List<MedicaoRecessao> points) {
     state = state.copyWith(medicoesRecessao: List.unmodifiable(points));
+    _redimensionarCriddleSeSelecionado();
   }
 
   String? validarEnsaio() {
@@ -965,6 +1513,15 @@ class ParametersController extends StateNotifier<ParametersState> {
     }
     final erros = AdvanceCurveModel.validarPontos(state.pontosEnsaioAvanco);
     if (erros.isNotEmpty) return erros.join('; ');
+    if (state.vazaoEnsaioAvancoLs == null ||
+        !state.vazaoEnsaioAvancoLs!.isFinite ||
+        state.vazaoEnsaioAvancoLs! <= 0 ||
+        state.condicoesEnsaioAvanco?.trim().isEmpty != false) {
+      return 'Informe vazão e condições do ensaio de avanço medido.';
+    }
+    if ((state.vazaoEnsaioAvancoLs! - state.vazao).abs() > 1e-8) {
+      return 'A vazão do ensaio de avanço difere da vazão de projeto; faça novo ensaio.';
+    }
     try {
       _curvaAvancoDaOrigem(state);
       return null;
@@ -993,6 +1550,128 @@ class ParametersController extends StateNotifier<ParametersState> {
       metodo: MetodoAjusteAvanco.doisPontos,
       pontosOriginais: const [],
     );
+  }
+
+  /// Dimensiona o sulco pela regra prática de Criddle: Ta(L) = To / 4.
+  /// To vem da inversa da curva acumulada para a IRN; a curva de avanço
+  /// ajustada ao ensaio é invertida e limitada ao domínio das estacas medidas.
+  void dimensionarComprimentoCriddle() {
+    if (state.metodo != MetodoIrrigacao.sulco) return;
+    if (!state.dimensionarComprimentoCriddle) {
+      state = state.copyWith(dimensionarComprimentoCriddle: true);
+    }
+    try {
+      final irn =
+          state.laminaRequeridaResultado?.irnMm ?? state.laminaRequerida;
+      if (!irn.isFinite || irn <= 0) {
+        throw const FormatException('Informe uma IRN positiva.');
+      }
+
+      final infiltracao =
+          state.curvaInfiltracaoSulco?.acumuladaMm() ??
+          (k: state.k, a: state.a);
+      if (!infiltracao.k.isFinite ||
+          infiltracao.k <= 0 ||
+          !infiltracao.a.isFinite ||
+          infiltracao.a <= 0) {
+        throw const FormatException(
+          'Informe uma curva de infiltração acumulada válida para calcular To.',
+        );
+      }
+      final to = math.pow(irn / infiltracao.k, 1 / infiltracao.a).toDouble();
+      if (!to.isFinite || to <= 0) {
+        throw const FormatException('Não foi possível calcular To pela IRN.');
+      }
+      final avisoInfiltracao = state.curvaInfiltracaoSulco
+          ?.avisoParaOportunidade(to, menorTempoMin: to);
+      final taAlvo = to / 4;
+      double comprimento;
+      AdvanceCurveResult? curva;
+      if (state.origemAvanco == OrigemAvanco.ensaio) {
+        final erroEnsaio = validarEnsaio();
+        if (erroEnsaio != null) throw FormatException(erroEnsaio);
+        final pontos = [...state.pontosEnsaioAvanco]
+          ..sort((a, b) => a.distanciaM.compareTo(b.distanciaM));
+        if (taAlvo > pontos.last.tempoMin) {
+          throw FormatException(
+            'Ta alvo (${taAlvo.toStringAsFixed(2)} min) excede o último tempo '
+            'medido (${pontos.last.tempoMin.toStringAsFixed(2)} min); '
+            'o ensaio não cobre o comprimento necessário.',
+          );
+        }
+        final curvaMedida = _curvaAvancoDaOrigem(state);
+        comprimento = AdvanceCurveModel.distanciaEmTempo(
+          tempoMin: taAlvo,
+          parametros: curvaMedida,
+        );
+        if (comprimento < pontos.first.distanciaM ||
+            comprimento > pontos.last.distanciaM) {
+          throw const FormatException(
+            'O comprimento calculado fica fora do intervalo coberto pelas estacas.',
+          );
+        }
+      } else {
+        curva = _curvaAvancoDaOrigem(state);
+        comprimento = AdvanceCurveModel.distanciaEmTempo(
+          tempoMin: taAlvo,
+          parametros: curva,
+        );
+      }
+      if (!comprimento.isFinite || comprimento <= 0) {
+        throw const FormatException('O comprimento calculado não é válido.');
+      }
+      if (comprimento > state.comprimentoMaximoTerrenoM) {
+        throw FormatException(
+          'Criddle resulta em ${comprimento.toStringAsFixed(1)} m, acima do '
+          'limite informado para o terreno (${state.comprimentoMaximoTerrenoM.toStringAsFixed(1)} m). '
+          'Ajuste o limite ou escolha outro critério; nenhum comprimento foi alterado.',
+        );
+      }
+      final advance = state.origemAvanco == OrigemAvanco.ensaio
+          ? _curvaAvancoDaOrigem(state)
+          : curva!;
+      final avancoMetade = AdvanceCurveModel.tempoAvanco(
+        distanciaM: comprimento / 2,
+        parametros: advance,
+      );
+      final avancoFinal = state.origemAvanco == OrigemAvanco.ensaio
+          ? taAlvo
+          : AdvanceCurveModel.tempoAvanco(
+              distanciaM: comprimento,
+              parametros: advance,
+            );
+      state = state.copyWith(
+        comprimento: comprimento,
+        origemGeometria: ProvenienciaSulco.calculado,
+        tempoAplicacao: to,
+        tempoAvancoMetadeMin: avancoMetade,
+        tempoAvancoFinalMin: avancoFinal,
+        distanciaReferenciaAvancoM: comprimento,
+        distanciaEnsaioIntermediariaM: comprimento / 2,
+        tempoEnsaioIntermediarioMin: avancoMetade,
+        mensagemPlanejamento:
+            'Comprimento dimensionado pela regra prática de Criddle: '
+            'IRN=${irn.toStringAsFixed(2)} mm, To=${to.toStringAsFixed(2)} min, '
+            'Ta alvo=To/4=${taAlvo.toStringAsFixed(2)} min e '
+            'L=${comprimento.toStringAsFixed(2)} m. '
+            'Confirme depois erosão, eficiência, domínio do ensaio e operação.'
+            '${avisoInfiltracao == null ? '' : ' Aviso: $avisoInfiltracao'}',
+      );
+    } on FormatException catch (error) {
+      state = state.copyWith(
+        origemGeometria: state.dimensionarComprimentoCriddle
+            ? ProvenienciaSulco.naoInformado
+            : null,
+        mensagemPlanejamento: error.message.toString(),
+      );
+    } on ArgumentError catch (error) {
+      state = state.copyWith(
+        origemGeometria: state.dimensionarComprimentoCriddle
+            ? ProvenienciaSulco.naoInformado
+            : null,
+        mensagemPlanejamento: error.message.toString(),
+      );
+    }
   }
 
   ParametersState _stateComAvancoDaOrigem(ParametersState source) {
@@ -1057,6 +1736,15 @@ class ParametersController extends StateNotifier<ParametersState> {
       }
       comprimentos.sort();
       for (final comprimento in comprimentos) {
+        if (state.origemAvanco == OrigemAvanco.ensaio &&
+            comprimento > state.pontosEnsaioAvanco.last.distanciaM) {
+          avaliacoes.add(
+            '${comprimento.toStringAsFixed(0)} m: sem validação — ensaio cobre apenas '
+            '${state.pontosEnsaioAvanco.last.distanciaM.toStringAsFixed(0)} m; '
+            'extrapolação não é aprovada.',
+          );
+          continue;
+        }
         final declividadeFaixa = TipoSulcoInfo.getInfo(tipo).declividade;
         final faixa = declividadeFaixa.classificar(declividadePercent);
         if (faixa == FaixaDeclividade.fora) {
@@ -1102,8 +1790,14 @@ class ParametersController extends StateNotifier<ParametersState> {
             candidato.toIrrigationParameters(),
           );
           final aprovado =
-              resultado.eficiencia >= 60 &&
-              resultado.alertaVazaoExcedida == null;
+              (resultado.balancoSulco?.eaIntegral ?? resultado.eficiencia) >=
+                  60 &&
+              resultado.alertaVazaoExcedida == null &&
+              resultado.alertaInfiltracao == null &&
+              !resultado.extrapolouAvanco &&
+              (resultado.planejamentoOperacional?.agendaViavel ?? true) &&
+              (resultado.planejamentoOperacional?.vazaoDisponivelSuficiente ??
+                  true);
           final alertas = <String>[
             if ((resultado.eficienciaDistribuicaoEd ?? 100) < 70)
               'Ed abaixo da referência de 70% (indicativa)',
@@ -1112,12 +1806,17 @@ class ParametersController extends StateNotifier<ParametersState> {
             if (faixa == FaixaDeclividade.usavel)
               'declividade fora do aconselhável',
             if (resultado.extrapolouAvanco) 'curva de avanço extrapolada',
+            ?resultado.alertaInfiltracao,
+            if (resultado.planejamentoOperacional?.agendaViavel == false ||
+                resultado.planejamentoOperacional?.vazaoDisponivelSuficiente ==
+                    false)
+              'operação ou oferta de água inviável',
           ];
           avaliacoes.add(
             '${comprimento.toStringAsFixed(0)} m: '
-            '${aprovado ? 'aprovado' : 'reprovado'} — '
+            '${aprovado ? 'candidato segundo hipóteses' : 'reprovado'} — '
             'Ta=${resultado.tempoAvanco.toStringAsFixed(1)} min, '
-            'Ea=${resultado.eficiencia.toStringAsFixed(1)}% '
+            'Ea integral=${(resultado.balancoSulco?.eaIntegral ?? resultado.eficiencia).toStringAsFixed(1)}% '
             '(mín. 60%), '
             'Ed=${(resultado.eficienciaDistribuicaoEd ?? 0).toStringAsFixed(1)}%, '
             'Pp=${resultado.perdaPercolacao.toStringAsFixed(1)}%, '
@@ -1137,17 +1836,17 @@ class ParametersController extends StateNotifier<ParametersState> {
       }
       final relatorio =
           'Avaliação de comprimentos (critérios: declividade usável, '
-          'Q ≤ qmax e Ea ≥ 60%):\n${avaliacoes.join('\n')}';
+          'Q ≤ qmax, Ea integral ≥ 60%, cobertura do ensaio e operação):\n${avaliacoes.join('\n')}';
       if (recomendado == null) {
         state = state.copyWith(
           mensagemPlanejamento:
-              'Nenhum comprimento atende aos critérios.\n$relatorio',
+              'Nenhum comprimento atende aos critérios com os dados disponíveis.\n$relatorio',
         );
         return;
       }
       state = recomendado.copyWith(
         mensagemPlanejamento:
-            'Maior comprimento aprovado: ${recomendado.comprimento.toStringAsFixed(0)} m.\n$relatorio',
+            'Maior candidato segundo as hipóteses: ${recomendado.comprimento.toStringAsFixed(0)} m.\n$relatorio',
       );
     } on FormatException catch (e) {
       state = state.copyWith(mensagemPlanejamento: e.message.toString());

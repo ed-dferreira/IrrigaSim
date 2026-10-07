@@ -17,9 +17,9 @@ class DepthAlongFurrowChart extends StatelessWidget {
     }
 
     final requiredDepth = resultado.laminaRequerida * 1000;
-    final depths =
-        resultado.perfilLongitudinal.map((d) => d * 1000).toList();
-    final maxY = math.max(
+    final depths = resultado.perfilLongitudinal.map((d) => d * 1000).toList();
+    final maxY =
+        math.max(
           depths.fold<double>(0, (m, d) => math.max(m, d)),
           requiredDepth,
         ) *
@@ -158,11 +158,11 @@ class DepthAlongFurrowChart extends StatelessWidget {
                         show: true,
                         getDotPainter: (spot, percent, barData, index) =>
                             FlDotCirclePainter(
-                          radius: 3,
-                          color: colors.primary,
-                          strokeColor: colors.surface,
-                          strokeWidth: 1.5,
-                        ),
+                              radius: 3,
+                              color: colors.primary,
+                              strokeColor: colors.surface,
+                              strokeWidth: 1.5,
+                            ),
                       ),
                       belowBarData: BarAreaData(
                         show: true,
@@ -171,7 +171,9 @@ class DepthAlongFurrowChart extends StatelessWidget {
                     ),
                   ],
                 ),
-                duration: const Duration(milliseconds: 350),
+                duration: MediaQuery.disableAnimationsOf(context)
+                    ? Duration.zero
+                    : const Duration(milliseconds: 350),
               ),
             ),
           ),
@@ -223,9 +225,8 @@ class _StatChip extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             '$label: $value',
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: color,
-                ),
+            style: Theme.of(context).textTheme.labelMedium
+                ?.copyWith(color: color),
           ),
         ],
       ),
@@ -245,19 +246,19 @@ class _LegendLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            width: 24,
-            child: Divider(
-              color: color,
-              thickness: 2,
-              indent: dashed ? 4 : 0,
-              endIndent: dashed ? 4 : 0,
-            ),
-          ),
-          const SizedBox(width: 6),
-          Text(label, style: Theme.of(context).textTheme.labelSmall),
-        ],
-      );
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      SizedBox(
+        width: 24,
+        child: Divider(
+          color: color,
+          thickness: 2,
+          indent: dashed ? 4 : 0,
+          endIndent: dashed ? 4 : 0,
+        ),
+      ),
+      const SizedBox(width: 6),
+      Text(label, style: Theme.of(context).textTheme.labelSmall),
+    ],
+  );
 }

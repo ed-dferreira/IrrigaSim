@@ -7,10 +7,10 @@ import 'package:irrigasim/models/faixas/border_project.dart';
 import 'package:irrigasim/models/simulation_result.dart';
 import 'package:irrigasim/models/irrigation_parameters.dart';
 import 'package:irrigasim/services/simulation/faixas/border_planning.dart';
-import 'package:irrigasim/services/simulation/faixas/border_hydraulics.dart';
 import 'package:irrigasim/services/simulation/faixas/border_csv.dart';
 import 'package:irrigasim/views/irrigation/sulcos/widgets/terrain_view.dart';
 import 'package:irrigasim/views/irrigation/widgets/auditable_widgets.dart';
+import 'package:irrigasim/views/irrigation/widgets/irrigation_project_components.dart';
 
 import 'border_charts.dart';
 
@@ -105,28 +105,83 @@ class BorderResultsScreen extends ConsumerWidget {
     final alternatives = projectOverride == null
         ? ref.watch(borderAlternativesProvider)
         : null;
+    final selectedAlternative = projectOverride == null
+        ? ref.watch(borderSelectedAlternativeProvider)
+        : null;
+    final chartOperation = _operationForCharts(project, r: r);
     final buscando = ref.watch(borderAlternativesLoadingProvider);
+    final scenarioComparison = ref.watch(borderScenarioComparisonProvider);
+    final scenarioProfiles = scenarioComparison == null
+        ? null
+        : [
+            (
+              'Primeira irrigação',
+              scenarioComparison.primeira,
+              project.copyWith(
+                cenarioInfiltracao: CenarioInfiltracaoFaixa.primeira,
+                k: project.dadosPrimeira!.k,
+                a: project.dadosPrimeira!.a,
+                vibMMin: project.dadosPrimeira!.vibMMin,
+              ),
+            ),
+            (
+              'Terceira irrigação',
+              scenarioComparison.terceira,
+              project.copyWith(
+                cenarioInfiltracao: CenarioInfiltracaoFaixa.terceira,
+                k: project.dadosTerceira!.k,
+                a: project.dadosTerceira!.a,
+                vibMMin: project.dadosTerceira!.vibMMin,
+              ),
+            ),
+          ];
     Widget row(
       String label,
       String value, {
       String? detail,
       bool warning = false,
     }) => IrrigationAuditRow(label, value, detail: detail, isWarning: warning);
-    Widget section(String title, List<Widget> children) =>
-        IrrigationAuditSection(
-          title: title,
-          icon: switch (title) {
-            'Dados e hipóteses' => AppIcons.projetoArea,
-            'Indicadores principais' => AppIcons.indicadores,
-            'Avanço e recessão' => AppIcons.curvaAvanco,
-            'Perfil e balanço' => AppIcons.balancoHidrico,
-            'Auditoria e operação' => AppIcons.projetoOperacao,
-            'Salvar este projeto' => AppIcons.salvarCenario,
-            _ => AppIcons.relatorio,
-          },
-          children: children,
-        );
-    String f(double v) => v.toStringAsFixed(2);
+    Widget section(
+      String title,
+      List<Widget> children, {
+      bool advanced = false,
+    }) => IrrigationAuditSection(
+      title: title,
+      icon: switch (title) {
+        'Dados e hipóteses' => AppIcons.projetoArea,
+        'Indicadores principais' => AppIcons.indicadores,
+        'Avanço e recessão' => AppIcons.curvaAvanco,
+        'Perfil e balanço' => AppIcons.balancoHidrico,
+        'Auditoria e operação' => AppIcons.projetoOperacao,
+        'Salvar este projeto' => AppIcons.salvarCenario,
+        _ => AppIcons.relatorio,
+      },
+      initiallyExpanded: !advanced,
+      children: children,
+    );
+    String f(double? v) => v == null ? '—' : v.toStringAsFixed(2);
+    final areaParaDemandaM2 =
+        project.areaUtilM2 ??
+        (project.comprimentoAreaM != null && project.larguraAreaM != null
+            ? project.comprimentoAreaM! * project.larguraAreaM!
+            : null);
+    final irnVolumeM3 = areaParaDemandaM2 == null
+        ? null
+        : areaParaDemandaM2 * project.irnEfetivaMm! / 1000;
+    final demandaLiquidaDiariaMm =
+        project.agronomia?.evapotranspiracaoMmDia == null ||
+            project.agronomia?.precipitacaoEfetivaMmDia == null
+        ? null
+        : project.agronomia!.evapotranspiracaoMmDia! -
+              project.agronomia!.precipitacaoEfetivaMmDia!;
+    final demandaDiariaM3 =
+        areaParaDemandaM2 == null || demandaLiquidaDiariaMm == null
+        ? null
+        : areaParaDemandaM2 * demandaLiquidaDiariaMm / 1000;
+    final intervaloSimplificadoDias =
+        demandaLiquidaDiariaMm == null || demandaLiquidaDiariaMm <= 0
+        ? null
+        : project.irnEfetivaMm! / demandaLiquidaDiariaMm;
     final save = ref.watch(resultsProvider);
     return Scaffold(
       appBar: AppBar(
@@ -137,7 +192,11 @@ class BorderResultsScreen extends ConsumerWidget {
             onPressed: () => _mostrarExportacao(
               context,
               borderCsv(
-                project.copyWith(alternativas: alternatives?.toRecords()),
+                project.copyWith(
+                  alternativas: alternatives?.toRecords(
+                    selected: selectedAlternative,
+                  ),
+                ),
                 r,
               ),
             ),
@@ -146,11 +205,11 @@ class BorderResultsScreen extends ConsumerWidget {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 48),
         children: [
           Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 900),
+              constraints: const BoxConstraints(maxWidth: 980),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -159,14 +218,18 @@ class BorderResultsScreen extends ConsumerWidget {
                     project: project,
                     result: r,
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: IrrigationSpacing.major),
                   BorderCharts(
                     result: r,
                     irnMm: project.irnEfetivaMm!,
+                    project: project,
+                    alternatives: alternatives,
+                    operation: chartOperation,
+                    scenarioProfiles: scenarioProfiles,
                     selectedIndex: save.abaAtual,
                     onTabSelected: ref.read(resultsProvider.notifier).setAba,
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: IrrigationSpacing.major),
                   TerrainView(
                     comprimentoM:
                         project.comprimentoAreaM ?? project.comprimentoM!,
@@ -176,7 +239,7 @@ class BorderResultsScreen extends ConsumerWidget {
                         (project.declividadeLongitudinal ?? 0) * 100,
                     distributionName: 'faixas',
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: IrrigationSpacing.major),
                   section('Indicadores principais', [
                     LayoutBuilder(
                       builder: (context, constraints) {
@@ -202,9 +265,34 @@ class BorderResultsScreen extends ConsumerWidget {
                           ('Percolação Pp', '${f(r.pp)}%', 'Perda profunda'),
                           ('Escoamento Pe', '${f(r.pe)}%', 'Perda superficial'),
                           (
+                            'Volume aplicado',
+                            '${f(r.volumeEntradaTotalM3)} m³',
+                            'Volume total na faixa',
+                          ),
+                          (
+                            'Volume percolado',
+                            '${f(r.volumePercoladoTotalM3)} m³',
+                            'Perda profunda total',
+                          ),
+                          (
+                            'Volume escoado',
+                            '${f(r.volumeEscoadoTotalM3)} m³',
+                            'Perda superficial total',
+                          ),
+                          (
                             'Tempo de avanço',
                             '${f(r.taFinalMin)} min',
                             'Até o final da faixa',
+                          ),
+                          (
+                            'Oportunidade alvo',
+                            '${f(r.t0Min)} min',
+                            'Tempo requerido pela IRN',
+                          ),
+                          (
+                            'Tempo de corte',
+                            '${f(r.tiMin)} min',
+                            'Interrupção da aplicação',
                           ),
                           (
                             'Lâmina útil média',
@@ -218,8 +306,8 @@ class BorderResultsScreen extends ConsumerWidget {
                           ),
                         ];
                         return Wrap(
-                          spacing: 12,
-                          runSpacing: 12,
+                          spacing: IrrigationSpacing.field,
+                          runSpacing: IrrigationSpacing.field,
                           children: [
                             for (final item in values)
                               SizedBox(
@@ -294,6 +382,15 @@ class BorderResultsScreen extends ConsumerWidget {
                       'Faixa aberta, vazão constante',
                       '${f(project.comprimentoM!)} × ${f(project.larguraM!)} m',
                     ),
+                    row(
+                      'Gleba bruta · área útil',
+                      '${f(project.comprimentoAreaM)} × ${f(project.larguraAreaM)} m · ${f(areaParaDemandaM2)} m²',
+                      detail: 'Área de demanda usa área útil informada ou produto das dimensões brutas quando área útil não foi cadastrada.',
+                    ),
+                    row(
+                      'Orientação · tipo de dique',
+                      '${project.orientacaoArea ?? 'não informada'} · ${project.tipoDique ?? 'não informado'}',
+                    ),
                     row('q0', '${f(project.vazaoUnitariaLsM!)} L/s/m'),
                     row('Qfaixa', '${f(project.vazaoFaixaLs!)} L/s'),
                     row(
@@ -301,9 +398,34 @@ class BorderResultsScreen extends ConsumerWidget {
                       '${f(project.irnEfetivaMm!)} mm',
                     ),
                     row(
+                      'Volume líquido IRN estimado',
+                      '${f(irnVolumeM3)} m³',
+                      detail: 'IRN × área considerada; não inclui perdas hidráulicas.',
+                    ),
+                    row(
+                      'Demanda líquida diária simplificada',
+                      '${f(demandaLiquidaDiariaMm)} mm/dia · ${f(demandaDiariaM3)} m³/dia',
+                    ),
+                    row(
+                      'Intervalo simplificado IRN/demanda',
+                      '${f(intervaloSimplificadoDias)} dias',
+                      detail: 'Derivação agronômica simplificada; não é balanço diário completo de chuva/armazenamento.',
+                    ),
+                    row(
                       'Cenário de infiltração',
                       project.cenarioInfiltracao.name,
                     ),
+                    row(
+                      'Perfil longitudinal levantado',
+                      project.perfilLongitudinal.isEmpty
+                          ? 'Não informado; S0 único'
+                          : '${project.perfilLongitudinal.length} estações topográficas; S0 uniforme verificado',
+                    ),
+                    if (project.estacas.isNotEmpty)
+                      row(
+                        'Proveniência do ensaio',
+                        '${project.dataEnsaioIso ?? 'data não registrada'} · ${project.referenciaRelogioEnsaio ?? 'referência do relógio não registrada'} · ${project.observacoesEnsaio ?? 'sem observações'}',
+                      ),
                     row(
                       'Fonte e versão',
                       '${BorderResult.documentoFonte} · ${BorderResult.versaoEquacoes} · ${BorderResult.paginasFonte}',
@@ -321,11 +443,19 @@ class BorderResultsScreen extends ConsumerWidget {
                       '${f(r.tdMin)} · ${f(r.trFinalMin)} min',
                     ),
                     row(
+                      'Duração da depleção td−ti · da recessão tr−td',
+                      '${f(r.tdMin - r.tiMin)} · ${f(r.trFinalMin - r.tdMin)} min',
+                    ),
+                    row(
                       'y0 · r · σz · qf',
                       '${f(r.y0M)} m · ${f(r.r)} · ${f(r.sigmaZ)} · ${f(r.qfM3MinM)} m³/min/m',
                     ),
                   ]),
                   section('Fórmulas e critérios', [
+                    const IrrigationFormulaCard(
+                      formula: 'Correções editoriais E04 · E09 · E10 · E16',
+                      description: 'Usa Sy=yf/L; separa tr=t0+ta de ti; fixa expoentes da p.43; e interpreta IRN como lâmina após conversão mm→m. E16 exige confirmação com a planilha original para reprodução oficial.',
+                    ),
                     const IrrigationFormulaCard(
                       formula: 'I(τ) = k·τᵃ + VIB·τ',
                       description: 'Infiltração acumulada de Kostiakov–Lewis usada para obter a oportunidade alvo t0 (F06–F07).',
@@ -338,11 +468,15 @@ class BorderResultsScreen extends ConsumerWidget {
                       formula: 'Dmax = 0,4·hn  ·  Wmax = Dmax/|St|',
                       description: 'Limite geométrico de desnível transversal e largura máxima quando há declividade transversal (pp. 13 e 19).',
                     ),
-                  ]),
+                  ], advanced: true),
                   section('Perfil e balanço', [
                     row(
                       'Entrada · útil',
                       '${f(r.volumeEntradaTotalM3)} · ${f(r.volumeUtilTotalM3)} m³',
+                    ),
+                    row(
+                      'Infiltrado total Vi = útil + percolado',
+                      '${f((r.volumeUtilM3M + r.volumePercoladoM3M) * r.larguraM)} m³',
                     ),
                     row(
                       'Percolado · escoado · déficit',
@@ -357,7 +491,7 @@ class BorderResultsScreen extends ConsumerWidget {
                       '${f(r.volumeAdequadoM3M * project.larguraM!)} m³',
                     ),
                     row(
-                      'Volume deficitário Vd',
+                      'Infiltração na região deficitária Vd',
                       '${f(r.volumeDeficitarioM3M * project.larguraM!)} m³',
                     ),
                     row(
@@ -386,45 +520,18 @@ class BorderResultsScreen extends ConsumerWidget {
                   ]),
                   section('Auditoria e operação', [
                     row('Desnível transversal D', '${f(geo.desnivelM)} m'),
-                    row(
-                      'Dmáx = 0,4 hn',
-                      geo.limiteDesnivelM == null
-                          ? 'Pendente: hn não informada'
-                          : '${f(geo.limiteDesnivelM!)} m',
-                    ),
-                    row(
-                      'Wmáx',
-                      geo.limiteDesnivelM == null
-                          ? 'Pendente'
-                          : geo.larguraMaximaM == null
-                          ? 'Sem restrição por St = 0'
-                          : '${f(geo.larguraMaximaM!)} m',
-                    ),
-                    row(
-                      'Altura real do dique',
-                      geo.diqueSuficiente == null
-                          ? 'Pendente'
-                          : geo.diqueSuficiente!
-                          ? 'Suficiente para y0'
-                          : 'Insuficiente para y0',
-                    ),
+                    if (geo.limiteDesnivelM != null)
+                      row('Dmáx = 0,4 hn', '${f(geo.limiteDesnivelM!)} m'),
+                    if (geo.larguraMaximaM != null)
+                      row('Wmáx = Dmáx/|St|', '${f(geo.larguraMaximaM!)} m'),
+                    if (geo.diqueSuficiente != null)
+                      row(
+                        'Verificação do dique em relação a y0',
+                        geo.diqueSuficiente! ? 'Suficiente' : 'Insuficiente',
+                      ),
                     row(
                       'Resíduo F07 · F09 · F19',
                       '${r.residualOportunidadeM.toStringAsExponential(2)} m · ${r.residualAvancoM3M.toStringAsExponential(2)} m³/m · ${r.residualRecessaoMin.toStringAsExponential(2)} min',
-                    ),
-                    row(
-                      'qmin F03 (sugestão)',
-                      '${f(BorderHydraulics.vazaoMinimaM3MinM(project.comprimentoM!, project.declividadeLongitudinal!, project.rugosidadeN!) / .06)} L/s/m',
-                    ),
-                    row(
-                      'Hart F01 (literal, unidade empírica não confirmada)',
-                      '${f(BorderHydraulics.hartLiteral(project.declividadeLongitudinal!, coberturaTotal: project.cobertura == CoberturaFaixa.coberturaTotal))} m³/min/m conforme leitura do slide',
-                    ),
-                    row(
-                      'F04 · L ≤ qmax/VIB',
-                      project.vibMMin! == 0
-                          ? 'Sem restrição por VIB = 0 neste critério'
-                          : 'Se qmax for Hart literal: L ≤ ${f(BorderHydraulics.hartLiteral(project.declividadeLongitudinal!, coberturaTotal: project.cobertura == CoberturaFaixa.coberturaTotal) / project.vibMMin!)} m (não usado para aprovação)',
                     ),
                     row(
                       'Núcleo numérico: passo · resíduo · iterações',
@@ -436,34 +543,16 @@ class BorderResultsScreen extends ConsumerWidget {
                       'Núcleo numérico: segmentos · expoentes · integração',
                       '${r.numerico.nSegmentos} · ${r.numerico.versaoExpoentesRecessao} · ${r.numerico.metodoIntegracao}',
                     ),
-                    if (r.avisos.isEmpty) const Text('Sem avisos do modelo.'),
-                    for (final notice in r.avisos)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: IrrigationAlertBanner(
-                          message:
-                              '[${notice.codigo}] ${notice.mensagem}'
-                              '${notice.pagina == null ? '' : ' (${notice.pagina})'}',
-                        ),
-                      ),
-                    for (final bloco in BorderResult.blocosFonte.entries)
-                      row(bloco.key, bloco.value),
-                    for (final fonte in BorderResult.proveniencia)
-                      row(
-                        '${fonte.id} · ${fonte.pagina}',
-                        '${fonte.descricao} · ${fonte.versao} · origem ${fonte.origem.name}',
-                      ),
-                    if (project.periodoDias == null ||
-                        project.jornadaHoras == null ||
-                        project.mudancaMin == null ||
-                        project.faixasSimultaneas == null ||
-                        project.janelaFornecimentoHorasDia == null ||
-                        project.inicioFornecimentoH == null ||
-                        project.diasFornecimento.isEmpty)
-                      const Text(
-                        'Cronograma pendente: informe PI, TDF, tmu, NFP, início, duração e dias reais de fornecimento.',
-                      )
-                    else
+                    for (final fonte
+                        in BorderResult.provenienciaHidraulicaExecutada)
+                      row(fonte.id, fonte.descricao),
+                    if (project.periodoDias != null &&
+                        project.jornadaHoras != null &&
+                        project.mudancaMin != null &&
+                        project.faixasSimultaneas != null &&
+                        project.janelaFornecimentoHorasDia != null &&
+                        project.inicioFornecimentoH != null &&
+                        project.diasFornecimento.isNotEmpty)
                       Builder(
                         builder: (context) {
                           try {
@@ -520,6 +609,9 @@ class BorderResultsScreen extends ConsumerWidget {
                         },
                       ),
                   ]),
+                  section('Detalhes técnicos', [
+                    BorderConvergenceDetails(result: r),
+                  ], advanced: true),
                   if (project.comprimentoAreaM != null &&
                       project.larguraAreaM != null) ...[
                     OutlinedButton.icon(
@@ -533,8 +625,124 @@ class BorderResultsScreen extends ConsumerWidget {
                                       )
                                       .state =
                                   true;
+                              final qAtual = project.vazaoUnitariaLsM!;
+                              final menor = TextEditingController(
+                                text: (qAtual * .75).toStringAsFixed(2),
+                              );
+                              final maior = TextEditingController(
+                                text: (qAtual * 1.25).toStringAsFixed(2),
+                              );
+                              final passo = TextEditingController(text: '0.05');
+                              var objetivo = 'Ea';
+                              final grade = await showDialog<(double, double, double, String)>(
+                                context: context,
+                                builder: (dialogContext) => StatefulBuilder(
+                                  builder: (dialogContext, setDialogState) => AlertDialog(
+                                    title: const Text('Configurar comparação'),
+                                    content: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        TextField(
+                                          controller: menor,
+                                          keyboardType:
+                                              const TextInputType.numberWithOptions(
+                                                decimal: true,
+                                              ),
+                                          decoration: const InputDecoration(
+                                            labelText: 'q0 mínimo (L/s/m)',
+                                          ),
+                                        ),
+                                        TextField(
+                                          controller: maior,
+                                          keyboardType:
+                                              const TextInputType.numberWithOptions(
+                                                decimal: true,
+                                              ),
+                                          decoration: const InputDecoration(
+                                            labelText: 'q0 máximo (L/s/m)',
+                                          ),
+                                        ),
+                                        TextField(
+                                          controller: passo,
+                                          keyboardType:
+                                              const TextInputType.numberWithOptions(
+                                                decimal: true,
+                                              ),
+                                          decoration: const InputDecoration(
+                                            labelText: 'Passo da grade (L/s/m)',
+                                          ),
+                                        ),
+                                        DropdownButtonFormField<String>(
+                                          initialValue: objetivo,
+                                          decoration: const InputDecoration(
+                                            labelText: 'Objetivo da busca',
+                                          ),
+                                          items: const [
+                                            DropdownMenuItem(
+                                              value: 'Ea',
+                                              child: Text('Maximizar Ea'),
+                                            ),
+                                            DropdownMenuItem(
+                                              value: 'Er',
+                                              child: Text('Maximizar Er'),
+                                            ),
+                                          ],
+                                          onChanged: (value) => setDialogState(
+                                            () => objetivo = value ?? 'Ea',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(dialogContext),
+                                        child: const Text('Cancelar'),
+                                      ),
+                                      FilledButton(
+                                        onPressed: () {
+                                          double? parse(String text) =>
+                                              double.tryParse(
+                                                text.replaceAll(',', '.'),
+                                              );
+                                          final values = (
+                                            parse(menor.text),
+                                            parse(maior.text),
+                                            parse(passo.text),
+                                          );
+                                          if (values.$1 == null ||
+                                              values.$2 == null ||
+                                              values.$3 == null ||
+                                              values.$1! <= 0 ||
+                                              values.$2! < values.$1! ||
+                                              values.$3! <= 0) {
+                                            return;
+                                          }
+                                          Navigator.pop(dialogContext, (
+                                            values.$1!,
+                                            values.$2!,
+                                            values.$3!,
+                                            objetivo,
+                                          ));
+                                        },
+                                        child: const Text('Comparar'),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                              menor.dispose();
+                              maior.dispose();
+                              passo.dispose();
+                              if (grade == null) return;
                               try {
-                                final found = await buscarAlternativas(project);
+                                final found = await buscarAlternativas(
+                                  project,
+                                  menorLsM: grade.$1,
+                                  maiorLsM: grade.$2,
+                                  passoLsM: grade.$3,
+                                  objetivo: grade.$4,
+                                );
                                 if (context.mounted) {
                                   ref
                                           .read(
@@ -570,24 +778,45 @@ class BorderResultsScreen extends ConsumerWidget {
                       label: Text(
                         buscando
                             ? 'Avaliando alternativas…'
-                            : 'Comparar vazões (passo 0,05 L/s/m)',
+                            : 'Configurar comparação de vazões',
                       ),
                     ),
                     if (alternatives != null)
                       section('Alternativas testadas', [
                         row(
                           'Melhor entre candidatas viáveis',
-                          alternatives.melhor == null
+                          (selectedAlternative ?? alternatives.melhor) == null
                               ? 'Nenhuma'
-                              : 'L=${f(alternatives.melhor!.comprimentoM)} m · q0=${f(alternatives.melhor!.vazaoLsM)} L/s/m · Ea=${f(alternatives.melhor!.resultado!.ea)}%',
+                              : 'Melhor na grade por ${alternatives.objetivo} · L=${f((selectedAlternative ?? alternatives.melhor)!.comprimentoM)} m · q0=${f((selectedAlternative ?? alternatives.melhor)!.vazaoLsM)} L/s/m · Ea=${f((selectedAlternative ?? alternatives.melhor)!.resultado!.ea)}% · Er=${f((selectedAlternative ?? alternatives.melhor)!.resultado!.er)}%',
                         ),
                         for (final c in alternatives.candidatos)
-                          row(
-                            'L=${f(c.comprimentoM)} m · q0=${f(c.vazaoLsM)} L/s/m',
-                            c.motivoRejeicao == null
-                                ? 'Ea=${f(c.resultado!.ea)}%'
-                                : '[${c.status?.codigo ?? BorderStatus.entradaInvalida.codigo}] ${c.motivoRejeicao}',
+                          Semantics(
+                            button: true,
+                            label:
+                                'Selecionar alternativa L ${f(c.comprimentoM)} metros, q0 ${f(c.vazaoLsM)} litros por segundo por metro',
+                            child: InkWell(
+                              onTap: c.resultado == null
+                                  ? null
+                                  : () =>
+                                        ref
+                                                .read(
+                                                  borderSelectedAlternativeProvider
+                                                      .notifier,
+                                                )
+                                                .state =
+                                            c,
+                              child: row(
+                                'L=${f(c.comprimentoM)} m · q0=${f(c.vazaoLsM)} L/s/m${identical(c, selectedAlternative ?? alternatives.melhor) ? ' · selecionada' : ''}',
+                                c.motivoRejeicao == null
+                                    ? 'Ea=${f(c.resultado!.ea)}% · Er=${f(c.resultado!.er)}% · Pp=${f(c.resultado!.pp)}% · Pe=${f(c.resultado!.pe)}% · demanda Q=${f(c.vazaoLsM * c.resultado!.larguraM)} L/s'
+                                    : '[${c.status?.codigo ?? BorderStatus.entradaInvalida.codigo}] ${c.motivoRejeicao} · Qfaixa=${f(c.vazaoLsM * c.larguraM)} L/s',
+                              ),
+                            ),
                           ),
+                        row(
+                          'Grade e critério',
+                          'q0 ${f(alternatives.menorLsM)}–${f(alternatives.maiorLsM)} L/s/m · passo ${f(alternatives.passoLsM)} · maximizar ${alternatives.objetivo}',
+                        ),
                       ]),
                     if (alternatives == null && project.alternativas.isNotEmpty)
                       section('Alternativas salvas', [
@@ -595,11 +824,54 @@ class BorderResultsScreen extends ConsumerWidget {
                           row(
                             'L=${f(c.comprimentoM)} m · q0=${f(c.vazaoLsM)} L/s/m',
                             c.motivoRejeicao == null
-                                ? 'Ea=${f(c.eficienciaPercentual!)}%'
+                                ? 'Ea=${f(c.eficienciaPercentual!)}% · Er=${f(c.erPercentual ?? 0)}% · Pp=${f(c.ppPercentual ?? 0)}% · Pe=${f(c.pePercentual ?? 0)}% · Q=${f(c.demandaLs ?? 0)} L/s${c.selecionada ? ' · selecionada' : ''} · objetivo ${c.objetivo ?? 'Ea'}'
                                 : '[${c.status?.codigo ?? BorderStatus.entradaInvalida.codigo}] ${c.motivoRejeicao}',
                           ),
                       ]),
                   ],
+                  if (project.dadosPrimeira != null ||
+                      project.dadosTerceira != null)
+                    section('Comparar cenários de infiltração', [
+                      row(
+                        'Primeira irrigação · k, a, VIB',
+                        '${f(project.dadosPrimeira?.k ?? (project.cenarioInfiltracao == CenarioInfiltracaoFaixa.primeira ? project.k : null))} · ${f(project.dadosPrimeira?.a ?? (project.cenarioInfiltracao == CenarioInfiltracaoFaixa.primeira ? project.a : null))} · ${f(project.dadosPrimeira?.vibMMin ?? (project.cenarioInfiltracao == CenarioInfiltracaoFaixa.primeira ? project.vibMMin : null))}',
+                      ),
+                      row(
+                        'Terceira irrigação · k, a, VIB',
+                        '${f(project.dadosTerceira?.k ?? (project.cenarioInfiltracao == CenarioInfiltracaoFaixa.terceira ? project.k : null))} · ${f(project.dadosTerceira?.a ?? (project.cenarioInfiltracao == CenarioInfiltracaoFaixa.terceira ? project.a : null))} · ${f(project.dadosTerceira?.vibMMin ?? (project.cenarioInfiltracao == CenarioInfiltracaoFaixa.terceira ? project.vibMMin : null))}',
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: () {
+                          try {
+                            ref
+                                .read(borderScenarioComparisonProvider.notifier)
+                                .state = calcularComparacaoCenarios(
+                              project,
+                            );
+                          } on FormatException catch (error) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(error.message)),
+                            );
+                          }
+                        },
+                        icon: const Icon(AppIcons.comparar),
+                        label: const Text('Calcular em paralelo'),
+                      ),
+                      if (scenarioComparison case final comparison?) ...[
+                        row(
+                          'Primeira · Ea / Er / Pp / Pe',
+                          '${f(comparison.primeira.ea)}% · ${f(comparison.primeira.er)}% · ${f(comparison.primeira.pp)}% · ${f(comparison.primeira.pe)}%',
+                        ),
+                        row(
+                          'Terceira · Ea / Er / Pp / Pe',
+                          '${f(comparison.terceira.ea)}% · ${f(comparison.terceira.er)}% · ${f(comparison.terceira.pp)}% · ${f(comparison.terceira.pe)}%',
+                        ),
+                        row(
+                          'Premissas mantidas',
+                          'Mesma geometria, q0, IRN e rugosidade; cada cenário usa seus próprios k, a e VIB.',
+                        ),
+                      ],
+                    ]),
                   section('Salvar este projeto', [
                     TextField(
                       textInputAction: TextInputAction.done,
@@ -624,8 +896,9 @@ class BorderResultsScreen extends ConsumerWidget {
                                     metodo: MetodoIrrigacao.faixa,
                                     parametros: project
                                         .copyWith(
-                                          alternativas: alternatives
-                                              ?.toRecords(),
+                                          alternativas: alternatives?.toRecords(
+                                            selected: selectedAlternative,
+                                          ),
                                         )
                                         .toCompatParameters(),
                                     resultado: result,
@@ -654,6 +927,34 @@ class BorderResultsScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+}
+
+BorderOperation? _operationForCharts(
+  BorderProject project, {
+  required BorderResult r,
+}) {
+  if (project.periodoDias == null ||
+      project.jornadaHoras == null ||
+      project.mudancaMin == null ||
+      project.faixasSimultaneas == null ||
+      project.janelaFornecimentoHorasDia == null ||
+      project.inicioFornecimentoH == null ||
+      project.diasFornecimento.isEmpty) {
+    return null;
+  }
+  try {
+    return const BorderPlanning().operation(
+      project,
+      r,
+      dias: project.periodoDias!,
+      jornadaHoras: project.jornadaHoras!,
+      mudancaMin: project.mudancaMin!,
+      simultaneas: project.faixasSimultaneas!,
+      janelaFornecimentoHorasDia: project.janelaFornecimentoHorasDia!,
+    );
+  } on FormatException {
+    return null;
   }
 }
 

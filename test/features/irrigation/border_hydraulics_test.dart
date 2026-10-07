@@ -63,6 +63,14 @@ void main() {
         ),
       );
       expect(r.residualAvancoM3M, lessThan(.00001));
+      expect(r.convergencia.opportunityMin, isNotEmpty);
+      expect(r.convergencia.advanceExponent, isNotEmpty);
+      expect(r.convergencia.recessionEndMin, isNotEmpty);
+      final restored = BorderResult.fromMap(r.toMap());
+      expect(
+        restored.convergencia.advanceExponent,
+        r.convergencia.advanceExponent,
+      );
     }
   });
 
@@ -112,105 +120,149 @@ void main() {
     );
   });
 
-  test('falhas de domínio e convergência carregam código canônico e página', () {
-    Object? capturar(void Function() acao) {
-      try {
-        acao();
-        return null;
-      } on FormatException catch (e) {
-        return e;
+  test(
+    'falhas de domínio e convergência carregam código canônico e página',
+    () {
+      Object? capturar(void Function() acao) {
+        try {
+          acao();
+          return null;
+        } on FormatException catch (e) {
+          return e;
+        }
       }
-    }
 
-    final nivel = capturar(
-      () => solver.dimensionar(
-        BorderProject.ilustrativo.copyWith(desnivelLongitudinalM: 0),
-      ),
-    );
-    expect(nivel, isA<BorderModelException>());
-    expect((nivel! as BorderModelException).status, BorderStatus.foraDoDominio);
-    expect((nivel as BorderModelException).codigo, 'fora_do_dominio');
-
-    final fechada = capturar(
-      () => solver.dimensionar(
-        BorderProject.ilustrativo.copyWith(
-          jusante: CondicaoJusanteFaixa.fechada,
+      final nivel = capturar(
+        () => solver.dimensionar(
+          BorderProject.ilustrativo.copyWith(desnivelLongitudinalM: 0),
         ),
-      ),
-    );
-    expect((fechada! as BorderModelException).status, BorderStatus.foraDoDominio);
+      );
+      expect(nivel, isA<BorderModelException>());
+      expect(
+        (nivel! as BorderModelException).status,
+        BorderStatus.foraDoDominio,
+      );
+      expect((nivel as BorderModelException).codigo, 'fora_do_dominio');
 
-    final reuso = capturar(
-      () => solver.dimensionar(
-        BorderProject.ilustrativo.copyWith(manejo: ManejoFaixa.reuso),
-      ),
-    );
-    expect(
-      (reuso! as BorderModelException).status,
-      BorderStatus.modeloNaoImplementado,
-    );
-
-    final naoFinito = capturar(
-      () => solver.dimensionar(BorderProject.ilustrativo.copyWith(a: double.nan)),
-    );
-    expect(
-      (naoFinito! as BorderModelException).status,
-      BorderStatus.entradaInvalida,
-    );
-
-    // Versão de expoentes fora da implementada: modelo não implementado.
-    final expoentes = capturar(
-      () => solver.dimensionar(
-        BorderProject.ilustrativo.copyWith(
-          numerico: const BorderNumericConfig(
-            versaoExpoentesRecessao: 'p63',
+      final fechada = capturar(
+        () => solver.dimensionar(
+          BorderProject.ilustrativo.copyWith(
+            jusante: CondicaoJusanteFaixa.fechada,
           ),
         ),
-      ),
-    );
-    expect(
-      (expoentes! as BorderModelException).status,
-      BorderStatus.modeloNaoImplementado,
-    );
-    // Método de integração desconhecido: entrada inválida.
-    final metodo = capturar(
-      () => solver.dimensionar(
-        BorderProject.ilustrativo.copyWith(
-          numerico: const BorderNumericConfig(metodoIntegracao: 'rk4'),
-        ),
-      ),
-    );
-    expect(
-      (metodo! as BorderModelException).status,
-      BorderStatus.entradaInvalida,
-    );
-    expect(BorderProject.ilustrativo.impedimento, isNull);
-    expect(
-      BorderProject.ilustrativo
-          .copyWith(jusante: CondicaoJusanteFaixa.fechada)
-          .impedimento!
-          .codigo,
-      'fora_do_dominio',
-    );
-  });
+      );
+      expect(
+        (fechada! as BorderModelException).status,
+        BorderStatus.foraDoDominio,
+      );
 
-  test('método de integração declarado troca a quadratura sem quebrar balanço', () {
-    final base = BorderProject.ilustrativo.copyWith(
-      alturaDiqueM: .1,
-      laminaSuperficialM: .1,
-    );
-    final cruzamento = solver.dimensionar(base);
-    final simples = solver.dimensionar(
-      base.copyWith(
-        numerico: const BorderNumericConfig(metodoIntegracao: 'trapezios'),
-      ),
-    );
-    expect(simples.numerico.metodoIntegracao, 'trapezios');
-    expect(simples.perfil.length, cruzamento.perfil.length);
-    expect(simples.ea + simples.pp + simples.pe, closeTo(100, 1e-6));
+      final reuso = capturar(
+        () => solver.dimensionar(
+          BorderProject.ilustrativo.copyWith(manejo: ManejoFaixa.reuso),
+        ),
+      );
+      expect(
+        (reuso! as BorderModelException).status,
+        BorderStatus.modeloNaoImplementado,
+      );
+      final vazaoReduzida = capturar(
+        () => solver.dimensionar(
+          BorderProject.ilustrativo.copyWith(manejo: ManejoFaixa.vazaoReduzida),
+        ),
+      );
+      expect(
+        (vazaoReduzida! as BorderModelException).status,
+        BorderStatus.modeloNaoImplementado,
+      );
+
+      final naoFinito = capturar(
+        () => solver.dimensionar(
+          BorderProject.ilustrativo.copyWith(a: double.nan),
+        ),
+      );
+      expect(
+        (naoFinito! as BorderModelException).status,
+        BorderStatus.entradaInvalida,
+      );
+
+      // Versão de expoentes fora da implementada: modelo não implementado.
+      final expoentes = capturar(
+        () => solver.dimensionar(
+          BorderProject.ilustrativo.copyWith(
+            numerico: const BorderNumericConfig(versaoExpoentesRecessao: 'p63'),
+          ),
+        ),
+      );
+      expect(
+        (expoentes! as BorderModelException).status,
+        BorderStatus.modeloNaoImplementado,
+      );
+      // Método de integração desconhecido: entrada inválida.
+      final metodo = capturar(
+        () => solver.dimensionar(
+          BorderProject.ilustrativo.copyWith(
+            numerico: const BorderNumericConfig(metodoIntegracao: 'rk4'),
+          ),
+        ),
+      );
+      expect(
+        (metodo! as BorderModelException).status,
+        BorderStatus.entradaInvalida,
+      );
+      expect(BorderProject.ilustrativo.impedimento, isNull);
+      expect(
+        BorderProject.ilustrativo
+            .copyWith(jusante: CondicaoJusanteFaixa.fechada)
+            .impedimento!
+            .codigo,
+        'fora_do_dominio',
+      );
+    },
+  );
+
+  test(
+    'método de integração declarado troca a quadratura sem quebrar balanço',
+    () {
+      final base = BorderProject.ilustrativo.copyWith(
+        alturaDiqueM: .1,
+        laminaSuperficialM: .1,
+      );
+      final cruzamento = solver.dimensionar(base);
+      final simples = solver.dimensionar(
+        base.copyWith(
+          numerico: const BorderNumericConfig(metodoIntegracao: 'trapezios'),
+        ),
+      );
+      expect(simples.numerico.metodoIntegracao, 'trapezios');
+      expect(simples.perfil.length, cruzamento.perfil.length);
+      expect(simples.ea + simples.pp + simples.pe, closeTo(100, 1e-6));
+      expect(
+        simples.volumeUtilM3M + simples.volumeDeficitM3M,
+        closeTo(0.056 * 400, 1e-7),
+      );
+    },
+  );
+
+  test('integra volumes Va/Vd em todas as regiões e cruzamentos da IRN', () {
+    const profile = [
+      BorderProfilePoint(0, 0, 0, 0, .02),
+      BorderProfilePoint(25, 0, 0, 0, .08),
+      BorderProfilePoint(50, 0, 0, 0, .03),
+      BorderProfilePoint(75, 0, 0, 0, .09),
+      BorderProfilePoint(100, 0, 0, 0, .02),
+    ];
+    final volumes = BorderHydraulics.integrarPerfil(profile, .05);
+    final totalInfiltrado = 12.5 * (.02 + 2 * .08 + 2 * .03 + 2 * .09 + .02);
     expect(
-      simples.volumeUtilM3M + simples.volumeDeficitM3M,
-      closeTo(0.056 * 400, 1e-7),
+      volumes.infiltradoAdequadoM3M + volumes.infiltradoDeficitarioM3M,
+      closeTo(totalInfiltrado, 1e-12),
     );
+    expect(
+      volumes.utilM3M + volumes.percoladoM3M,
+      closeTo(totalInfiltrado, 1e-12),
+    );
+    expect(volumes.utilM3M + volumes.deficitM3M, closeTo(.05 * 100, 1e-12));
+    expect(volumes.comprimentoAdequadoM, greaterThan(0));
+    expect(volumes.comprimentoAdequadoM, lessThan(100));
   });
 }

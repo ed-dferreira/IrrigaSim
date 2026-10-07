@@ -111,6 +111,28 @@ void main() {
         isTrue,
       );
       expect(find.text('Infiltração e IRN'), findsOneWidget);
+      final volumeTab = find.byWidgetPredicate(
+        (widget) =>
+            widget is Semantics &&
+            widget.properties.label == 'Gráfico de Volumes',
+      );
+      await tester.ensureVisible(volumeTab);
+      await tester.tap(volumeTab);
+      await tester.pumpAndSettle();
+      expect(find.text('Volumes calculados'), findsOneWidget);
+      final convergenceDetails = find.widgetWithText(
+        ExpansionTile,
+        'Detalhes técnicos',
+      );
+      expect(convergenceDetails, findsOneWidget);
+      final velocityTab = find.byWidgetPredicate(
+        (widget) =>
+            widget is Semantics && widget.properties.label == 'Gráfico de VI',
+      );
+      await tester.ensureVisible(velocityTab);
+      await tester.tap(velocityTab);
+      await tester.pumpAndSettle();
+      expect(find.text('Velocidade de infiltração VI'), findsOneWidget);
       expect(find.text('Dados e hipóteses'), findsOneWidget);
       expect(find.textContaining('(entrada_invalida)'), findsWidgets);
       expect(find.textContaining('faixas-F01-F32-p43-v2'), findsOneWidget);
@@ -120,11 +142,15 @@ void main() {
       expect(find.textContaining('Ea=Lf/Lm'), findsNothing);
       final r = result.borderResult!;
       final csv = borderCsv(BorderProject.ilustrativo, r);
+      expect(csv, contains('convergencia_r;'));
       expect(csv, contains('versao_equacoes'));
       expect(csv, contains('q0;3.33;L/s/m'));
       // Selo de escopo real (F01–F32) e status canônico.
       expect(csv, contains('faixas-F01-F32-p43-v2'));
       expect(csv, contains('status;${r.status.codigo};'));
+      expect(csv, contains('etapa_ensaio;não_executada;'));
+      expect(csv, contains('etapa_cronograma;pendente_ou_não_anexado;'));
+      expect(csv, contains('proveniencia_entrada;alturaDiqueM;pendente;m'));
       // Grupo numérico declarado nas linhas do CSV.
       expect(csv, contains('num_tolerancia_passo;1e-10;'));
       expect(csv, contains('num_tolerancia_residuo;1e-12;'));
@@ -132,16 +158,50 @@ void main() {
       expect(csv, contains('num_n_segmentos;2000;pontos'));
       expect(csv, contains('num_versao_expoentes;p43;'));
       expect(csv, contains('num_metodo_integracao;trapezios_cruzamento_irn;'));
-      // Proveniência por bloco e por fórmula com página, versão e origem.
+      // Proveniência somente das fórmulas realmente executadas pela hidráulica.
       expect(csv, contains('bloco;F01–F05'));
       expect(csv, contains('formula_F07;'));
+      expect(csv, contains('status_F02;modelo_nao_implementado;'));
+      expect(csv, contains('formula_F02;'));
       expect(csv, contains('p. 53 · única · derivada'));
       expect(csv, contains('derivada'));
-      expect(csv, contains('· medida'));
       expect(csv, contains('· assumida'));
+      expect(csv, isNot(contains('formula_F08;')));
+      expect(csv, isNot(contains('formula_F26;')));
       // Avisos saem com código e página.
       expect(csv, contains('[aviso_orientativo]'));
       expect(csv, contains('[entrada_invalida]'));
+      store.dispose();
+    },
+  );
+
+  testWidgets(
+    'resultado de faixa permanece utilizável em tema escuro e texto ampliado',
+    (tester) async {
+      final result = calcularProjetoFaixa(BorderProject.ilustrativo);
+      final store = LocalScenarioStore();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            scenarioServiceProvider.overrideWithValue(
+              ScenarioService(store, null),
+            ),
+          ],
+          child: MediaQuery(
+            data: const MediaQueryData(textScaler: TextScaler.linear(1.8)),
+            child: MaterialApp(
+              theme: ThemeData(colorScheme: const ColorScheme.dark()),
+              home: BorderResultsScreen(
+                projectOverride: BorderProject.ilustrativo,
+                resultOverride: result,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(find.text('Indicadores principais'), findsOneWidget);
+      expect(tester.takeException(), isNull);
       store.dispose();
     },
   );

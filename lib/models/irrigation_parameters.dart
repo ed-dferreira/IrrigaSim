@@ -2,6 +2,7 @@ import 'package:irrigasim/models/sulcos/tipo_sulco_info.dart';
 import 'package:irrigasim/models/faixas/border_project.dart';
 
 import 'sulcos/field_measurements.dart';
+import 'sulcos/entradas_projeto_sulco.dart';
 
 enum MetodoIrrigacao { sulco, faixa, inundacao }
 
@@ -10,6 +11,8 @@ enum TipoInundacao { intermitente, permanente }
 enum TexturaSolo { muitoFina, fina, media, grossa, muitoGrossa }
 
 enum ManejoSulco { constante, reduzida, surtir }
+
+enum OrigemVazaoReduzida { informada, taxaFinalDaCurva, vib, somatorioEspacial }
 
 extension ManejoSulcoExtension on ManejoSulco {
   String get displayName => switch (this) {
@@ -74,6 +77,8 @@ extension MetodoIrrigacaoExtension on MetodoIrrigacao {
 }
 
 class IrrigationParameters {
+  /// Contrato versionado de sulcos; null indica cenário legado sem essas entradas.
+  final EntradasProjetoSulco? entradasProjetoSulco;
   final BorderProject? projetoFaixa;
   final double comprimento;
   final double declividade;
@@ -113,6 +118,11 @@ class IrrigationParameters {
   // ---- Campos específicos de irrigação por sulcos ----
   final ManejoSulco manejoSulco;
   final double vazaoReduzidaLs;
+  final OrigemVazaoReduzida origemVazaoReduzida;
+  final bool fator11Vib;
+  final double? vazaoEnsaioAvancoLs;
+  final String? condicoesEnsaioAvanco;
+  final EnsaioErosaoSulco? ensaioErosao;
   final double tempoMudancaMin;
   final double cicloSurtirMin;
   final double jornadaDiariaH;
@@ -137,6 +147,7 @@ class IrrigationParameters {
   final List<MedicaoRecessao> medicoesRecessao;
 
   const IrrigationParameters({
+    this.entradasProjetoSulco,
     this.projetoFaixa,
     required this.comprimento,
     required this.declividade,
@@ -171,6 +182,11 @@ class IrrigationParameters {
     this.vazaoDisponivelLps = 36,
     this.manejoSulco = ManejoSulco.constante,
     this.vazaoReduzidaLs = 0,
+    this.origemVazaoReduzida = OrigemVazaoReduzida.taxaFinalDaCurva,
+    this.fator11Vib = false,
+    this.vazaoEnsaioAvancoLs,
+    this.condicoesEnsaioAvanco,
+    this.ensaioErosao,
     this.tempoMudancaMin = 0,
     this.cicloSurtirMin = 0,
     this.jornadaDiariaH = 24,
@@ -197,6 +213,8 @@ class IrrigationParameters {
   });
 
   IrrigationParameters copyWith({
+    EntradasProjetoSulco? entradasProjetoSulco,
+    bool clearEntradasProjetoSulco = false,
     BorderProject? projetoFaixa,
     double? comprimento,
     double? declividade,
@@ -231,6 +249,12 @@ class IrrigationParameters {
     double? vazaoDisponivelLps,
     ManejoSulco? manejoSulco,
     double? vazaoReduzidaLs,
+    OrigemVazaoReduzida? origemVazaoReduzida,
+    bool? fator11Vib,
+    double? vazaoEnsaioAvancoLs,
+    String? condicoesEnsaioAvanco,
+    EnsaioErosaoSulco? ensaioErosao,
+    bool clearEnsaioErosao = false,
     double? tempoMudancaMin,
     double? cicloSurtirMin,
     double? jornadaDiariaH,
@@ -255,6 +279,9 @@ class IrrigationParameters {
     List<MedicaoRecessao>? medicoesRecessao,
   }) {
     return IrrigationParameters(
+      entradasProjetoSulco: clearEntradasProjetoSulco
+          ? null
+          : entradasProjetoSulco ?? this.entradasProjetoSulco,
       projetoFaixa: projetoFaixa ?? this.projetoFaixa,
       comprimento: comprimento ?? this.comprimento,
       declividade: declividade ?? this.declividade,
@@ -295,6 +322,14 @@ class IrrigationParameters {
       vazaoDisponivelLps: vazaoDisponivelLps ?? this.vazaoDisponivelLps,
       manejoSulco: manejoSulco ?? this.manejoSulco,
       vazaoReduzidaLs: vazaoReduzidaLs ?? this.vazaoReduzidaLs,
+      origemVazaoReduzida: origemVazaoReduzida ?? this.origemVazaoReduzida,
+      fator11Vib: fator11Vib ?? this.fator11Vib,
+      vazaoEnsaioAvancoLs: vazaoEnsaioAvancoLs ?? this.vazaoEnsaioAvancoLs,
+      condicoesEnsaioAvanco:
+          condicoesEnsaioAvanco ?? this.condicoesEnsaioAvanco,
+      ensaioErosao: clearEnsaioErosao
+          ? null
+          : ensaioErosao ?? this.ensaioErosao,
       tempoMudancaMin: tempoMudancaMin ?? this.tempoMudancaMin,
       cicloSurtirMin: cicloSurtirMin ?? this.cicloSurtirMin,
       jornadaDiariaH: jornadaDiariaH ?? this.jornadaDiariaH,

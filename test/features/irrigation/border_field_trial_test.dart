@@ -32,8 +32,10 @@ void main() {
     expect(at15.recessaoMin, closeTo(83.75, 1e-8));
     expect(at15.avancoMin, closeTo(7.5, 1e-8));
     final withCut = trial.evaluate(project, stakes, cutoffMin: 30);
-    expect(result.avisos.map((n) => n.status),
-        contains(BorderStatus.avisoOrientativo));
+    expect(
+      result.avisos.map((n) => n.status),
+      contains(BorderStatus.avisoOrientativo),
+    );
     expect(withCut.entradaM3M, greaterThan(0));
     expect(withCut.deficitM3M, greaterThan(0));
     expect(
@@ -44,15 +46,12 @@ void main() {
 
   test('avisos do ensaio carregam código canônico e página', () {
     final project = BorderProject.ilustrativo.copyWith(comprimentoM: 60);
-    final semRecessao = trial.evaluate(
-      project,
-      const [
-        BorderStake(0, 0),
-        BorderStake(20, 10),
-        BorderStake(40, 20),
-        BorderStake(60, 30),
-      ],
-    );
+    final semRecessao = trial.evaluate(project, const [
+      BorderStake(0, 0),
+      BorderStake(20, 10),
+      BorderStake(40, 20),
+      BorderStake(60, 30),
+    ]);
     expect(semRecessao.status, BorderStatus.avisoOrientativo);
     final csv = borderTrialCsv(project, semRecessao);
     expect(csv, contains('status;aviso_orientativo;'));
@@ -64,28 +63,21 @@ void main() {
       isTrue,
     );
 
-    final completo = trial.evaluate(
-      project,
-      const [
-        BorderStake(0, 0, recessaoMin: 80),
-        BorderStake(20, 10, recessaoMin: 85),
-        BorderStake(40, 20, recessaoMin: 90),
-        BorderStake(60, 30, recessaoMin: 95),
-      ],
-      cutoffMin: 30,
-    );
+    final completo = trial.evaluate(project, const [
+      BorderStake(0, 0, recessaoMin: 80),
+      BorderStake(20, 10, recessaoMin: 85),
+      BorderStake(40, 20, recessaoMin: 90),
+      BorderStake(60, 30, recessaoMin: 95),
+    ], cutoffMin: 30);
     expect(completo.avisos, isEmpty);
     expect(completo.status, BorderStatus.validoNoModelo);
 
     expect(
-      () => trial.evaluate(
-        project,
-        const [
-          BorderStake(0, 0, recessaoMin: 80),
-          BorderStake(20, 10, recessaoMin: 85),
-          BorderStake(40, 20, recessaoMin: 90),
-        ],
-      ),
+      () => trial.evaluate(project, const [
+        BorderStake(0, 0, recessaoMin: 80),
+        BorderStake(20, 10, recessaoMin: 85),
+        BorderStake(40, 20, recessaoMin: 90),
+      ]),
       throwsA(
         isA<BorderModelException>().having(
           (e) => e.status,
@@ -95,4 +87,21 @@ void main() {
       ),
     );
   });
+
+  test(
+    'estacas fora de 10–30 m geram aviso orientativo sem descartar o ensaio',
+    () {
+      final project = BorderProject.ilustrativo.copyWith(comprimentoM: 80);
+      final result = trial.evaluate(project, const [
+        BorderStake(0, 0),
+        BorderStake(40, 20),
+        BorderStake(80, 40),
+      ]);
+      expect(result.advance.stakes, hasLength(3));
+      expect(
+        result.avisos.any((notice) => notice.mensagem.contains('10–30 m')),
+        isTrue,
+      );
+    },
+  );
 }

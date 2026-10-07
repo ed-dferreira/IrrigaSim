@@ -340,9 +340,9 @@ class AdvanceCurveModel {
       }
     }
 
-    // Verificar tempos não decrescentes
+    // O avanço medido deve ser estritamente crescente a cada estaca.
     for (int i = 1; i < pontos.length; i++) {
-      if (pontos[i].tempoMin < pontos[i - 1].tempoMin) {
+      if (pontos[i].tempoMin <= pontos[i - 1].tempoMin) {
         erros.add(
           'Tempo de avanço diminuiu na distância ${pontos[i].distanciaM}m '
           '(de ${pontos[i - 1].tempoMin} para ${pontos[i].tempoMin} min)',

@@ -27,14 +27,11 @@ class BorderHydraulics {
     BorderNumericConfig numerico,
     String step, {
     required String? pagina,
+    List<double>? history,
   }) {
     var lo = 0.0;
     var hi = math.max(initial, 1.0);
-    for (
-      var i = 0;
-      i < numerico.maxIteracoes && f(hi) < 0;
-      i++
-    ) {
+    for (var i = 0; i < numerico.maxIteracoes && f(hi) < 0; i++) {
       hi *= 2;
       if (!hi.isFinite || hi > 1e12) {
         throw BorderModelException(
@@ -54,6 +51,7 @@ class BorderHydraulics {
     var x = (lo + hi) / 2;
     for (var i = 0; i < numerico.maxIteracoes; i++) {
       final residual = f(x);
+      history?.add(x);
       if (residual.abs() <= numerico.toleranciaResiduo &&
           (hi - lo) <= 1e-5 * math.max(1, x)) {
         return x;
@@ -82,6 +80,7 @@ class BorderHydraulics {
     double a,
     double vib, {
     BorderNumericConfig numerico = BorderNumericConfig.padrao,
+    List<double>? history,
   }) {
     if (!irnM.isFinite || irnM <= 0) {
       throw const BorderModelException(
@@ -96,6 +95,7 @@ class BorderHydraulics {
       numerico,
       'Oportunidade',
       pagina: 'pp. 47, 56',
+      history: history,
     );
   }
 
@@ -135,7 +135,13 @@ class BorderHydraulics {
         );
       }
       perfil.add(
-        BorderProfilePoint(x, avanco, recessao, tau, infiltracao(tau, k, a, vib)),
+        BorderProfilePoint(
+          x,
+          avanco,
+          recessao,
+          tau,
+          infiltracao(tau, k, a, vib),
+        ),
       );
     }
     return perfil;
@@ -156,6 +162,7 @@ class BorderHydraulics {
       );
     }
     var util = 0.0, perc = 0.0, deficit = 0.0, adequado = 0.0;
+    var infiltradoAdequado = 0.0, infiltradoDeficitario = 0.0;
     for (var i = 0; i < perfil.length - 1; i++) {
       final left = perfil[i], right = perfil[i + 1];
       final dx = right.xM - left.xM;
@@ -166,7 +173,22 @@ class BorderHydraulics {
         adequado += dx * (irnM - z0).abs() / (z1 - z0).abs();
       }
       final cross = (irnM - z0) / (z1 - z0);
-      final splits = (metodo == BorderNumericConfig.metodoIntegracaoPadrao &&
+      final regionalSplits = cross > 0 && cross < 1 && cross.isFinite
+          ? [0.0, cross, 1.0]
+          : [0.0, 1.0];
+      for (var j = 0; j < regionalSplits.length - 1; j++) {
+        final f0 = regionalSplits[j], f1 = regionalSplits[j + 1];
+        final zA = z0 + (z1 - z0) * f0, zB = z0 + (z1 - z0) * f1;
+        final width = dx * (f1 - f0);
+        final regional = width * (zA + zB) / 2;
+        if ((zA + zB) / 2 >= irnM) {
+          infiltradoAdequado += regional;
+        } else {
+          infiltradoDeficitario += regional;
+        }
+      }
+      final splits =
+          (metodo == BorderNumericConfig.metodoIntegracaoPadrao &&
               cross > 0 &&
               cross < 1 &&
               cross.isFinite)
@@ -178,10 +200,18 @@ class BorderHydraulics {
         final width = dx * (f1 - f0);
         util += width * (math.min(zA, irnM) + math.min(zB, irnM)) / 2;
         perc += width * (math.max(zA - irnM, 0) + math.max(zB - irnM, 0)) / 2;
-        deficit += width * (math.max(irnM - zA, 0) + math.max(irnM - zB, 0)) / 2;
+        deficit +=
+            width * (math.max(irnM - zA, 0) + math.max(irnM - zB, 0)) / 2;
       }
     }
-    return BorderVolumes(util, perc, deficit, adequado);
+    return BorderVolumes(
+      util,
+      perc,
+      deficit,
+      adequado,
+      infiltradoAdequado,
+      infiltradoDeficitario,
+    );
   }
 
   BorderResult dimensionar(BorderProject p) {
@@ -205,7 +235,15 @@ class BorderHydraulics {
         'Entradas não finitas.',
       );
     }
-    final t0 = oportunidade(irn, k, a, vib, numerico: numerico);
+    final historyT0 = <double>[], historyR = <double>[], historyTd = <double>[];
+    final t0 = oportunidade(
+      irn,
+      k,
+      a,
+      vib,
+      numerico: numerico,
+      history: historyT0,
+    );
     final y0 = math.pow(q * q * n * n / (3600 * s), 0.3).toDouble();
     var r = p.rInicial ?? 0.7;
     if (r <= 0) {
@@ -240,6 +278,7 @@ class BorderHydraulics {
       tm = solve(l / 2);
       ta = solve(l);
       final calculated = math.ln2 / math.log(ta / tm);
+      historyR.add(calculated);
       if (!calculated.isFinite || calculated <= 0) {
         throw const BorderModelException(
           BorderStatus.foraDoDominio,
@@ -308,6 +347,7 @@ class BorderHydraulics {
     var td = alvo;
     for (var i = 0; i < numerico.maxIteracoes; i++) {
       final next = alvo - duracao(td);
+      historyTd.add(next);
       if (next <= ta) {
         throw const BorderModelException(
           BorderStatus.foraDoDominio,
@@ -388,7 +428,7 @@ class BorderHydraulics {
       if (s > 0.03)
         const BorderNotice(
           BorderStatus.avisoOrientativo,
-          'Declive acima de 3%: considerar sulcos transversais (não modelados).',
+          'Declive >3%: aula recomenda dois sulcos transversais no início e aproximadamente três adicionais equidistantes; construção não modelada.',
           pagina: 'p. 15',
         ),
       if (q < vazaoMinimaM3MinM(l, s, n))
@@ -408,6 +448,13 @@ class BorderHydraulics {
           'Altura real do dique não informada.',
           pagina: 'p. 23',
         ),
+      if (p.alturaDiqueM != null &&
+          (!p.alturaDiqueM!.isFinite || p.alturaDiqueM! <= 0))
+        const BorderNotice(
+          BorderStatus.entradaInvalida,
+          'Altura real do dique deve ser finita e positiva.',
+          pagina: 'p. 23',
+        ),
       if (p.alturaDiqueM != null && y0 > p.alturaDiqueM!)
         const BorderNotice(
           BorderStatus.foraDoDominio,
@@ -419,6 +466,13 @@ class BorderHydraulics {
           BorderStatus.entradaInvalida,
           'Lâmina superficial hn não informada; largura não verificada.',
           pagina: 'p. 13',
+        ),
+      if (p.laminaSuperficialM != null &&
+          (!p.laminaSuperficialM!.isFinite || p.laminaSuperficialM! <= 0))
+        const BorderNotice(
+          BorderStatus.entradaInvalida,
+          'Lâmina superficial hn deve ser finita e positiva.',
+          pagina: 'pp. 13, 19',
         ),
       if (p.laminaSuperficialM != null &&
           p.declividadeTransversal != null &&
@@ -449,8 +503,8 @@ class BorderHydraulics {
       volumeEscoadoM3M: runoff,
       volumeDeficitM3M: deficit,
       comprimentoAdequadoM: volumes.comprimentoAdequadoM,
-      volumeAdequadoM3M: util,
-      volumeDeficitarioM3M: deficit,
+      volumeAdequadoM3M: volumes.infiltradoAdequadoM3M,
+      volumeDeficitarioM3M: volumes.infiltradoDeficitarioM3M,
       infiltracaoFinalM: infiltracao(tr - ta, k, a, vib),
       ea: 100 * util / entrada,
       er: 100 * util / (irn * l),
@@ -461,6 +515,11 @@ class BorderHydraulics {
       status: BorderStatus.pior(avisos.map((notice) => notice.status)),
       avisos: avisos,
       numerico: numerico,
+      convergencia: BorderConvergenceHistory(
+        opportunityMin: historyT0,
+        advanceExponent: historyR,
+        recessionEndMin: historyTd,
+      ),
     );
   }
 }

@@ -19,6 +19,17 @@ class BorderStake {
   );
 }
 
+class BorderTerrainPoint {
+  final double xM, cotaM;
+  const BorderTerrainPoint(this.xM, this.cotaM);
+  Map<String, double> toMap() => {'xM': xM, 'cotaM': cotaM};
+  factory BorderTerrainPoint.fromMap(Map<String, dynamic> map) =>
+      BorderTerrainPoint(
+        (map['xM'] as num).toDouble(),
+        (map['cotaM'] as num).toDouble(),
+      );
+}
+
 class BorderMeasuredAdvance {
   final List<BorderStake> stakes;
   final double p, r, rmseMin;
