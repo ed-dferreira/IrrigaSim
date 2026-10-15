@@ -2,72 +2,87 @@ import 'dart:math';
 
 import 'package:irrigasim/models/irrigation_parameters.dart';
 import 'package:irrigasim/models/simulation_result.dart';
+
 import '../performance_indicators.dart';
 import '../surface_irrigation_math.dart';
+import 'basin_reference_math.dart';
 
+/// Inundação intermitente pela referência da Aula 8.
+///
+/// Semântica de vazão: [IrrigationParameters.vazao] é a vazão **total** em
+/// L/s. A hidráulica é resolvida por unidade de largura
+/// (Q0 = vazão total · 60/1000 / largura, em m³/(min·m)) e as grandezas
+/// totais voltam multiplicadas pela largura do tabuleiro.
 class RunBasinSimulation {
+  /// Vmax adotado na aula, m/min.
+  static const double _vmaxMMin = 8.0;
+
+  /// Passo da grade de perfil em metros: L = 200 m gera 41 pontos (G7).
+  static const double _passoPerfilM = 5.0;
+
   SimulationResult call(IrrigationParameters params) {
     _validate(params);
-    const velocityMaxMMin = 8.0;
     final lengthM = params.comprimento;
     final widthM = params.larguraOuEspacamento;
     final areaM2 = lengthM * widthM;
-    final flowM3Min = params.vazao * 60 / 1000;
     final requiredDepthM = params.laminaRequerida / 1000;
-    final a0 = pow(
-      (pow(flowM3Min, 2) * pow(params.manningN, 2) * lengthM) / 3600,
-      3.0 / 13,
-    ).toDouble();
-    final y0 = pow(
-      (pow(flowM3Min, 2) * pow(params.manningN, 2) * lengthM) / 3600,
-      0.23,
-    ).toDouble();
-    final qMaxM3MinM = pow(
-      (pow(velocityMaxMMin, 3.3) * pow(params.manningN, 2) * lengthM) / 3600,
-      3 / 7,
-    ).toDouble();
-    final qMaxLpsM = qMaxM3MinM * 1000 / 60;
-    final advance = _solveAdvance(
-      flowM3Min: flowM3Min,
+    final q0M3MinM = params.vazao * 60 / 1000 / widthM;
+    final q0MaxM3MinM = vazaoMaxima(_vmaxMMin, params.manningN, lengthM);
+    final q0MaxLpsTotal = q0MaxM3MinM * widthM * 1000 / 60;
+    final solo = Infiltracao(params.k, params.a, params.vib);
+    final dim = _dimensionar(
+      solo,
       lengthM: lengthM,
-      k: params.k,
-      exponent: params.a,
-      basicRate: params.vib,
-      initialR: params.sigmaZ,
-      y0: a0,
+      n: params.manningN,
+      irn: requiredDepthM,
+      q0M3MinM: q0M3MinM,
+      rInicial: params.projetoInundacao?.rInicial ?? 0.7,
     );
-    final taTotal = advance.timeAt(lengthM);
-    final r = advance.exponent;
-    final opportunityMin =
-        ((requiredDepthM * lengthM - 0.8 * y0 * lengthM) / flowM3Min) +
-        taTotal;
-    final irrigationTimeMin = opportunityMin;
+    final taMin = dim.taMin;
+    final tiMin = dim.tiMin;
+    final y0M = dim.y0M;
+    final r = dim.r;
+
+    // Perfil: tx = ta (x/L)^(1/r) e lâmina I(ta−tx) + 0,80 y0 +
+    // Q0(ti−ta)/L; em x = 0 a fórmula coincide com infiltracaoInicio (p. 47).
+    final laminaEntrada = infiltracaoInicio(
+      solo,
+      taMin,
+      tiMin,
+      y0M,
+      q0M3MinM,
+      lengthM,
+    );
+    final avanco = AdvanceCurve(
+      coefficient: taMin / pow(lengthM, 1 / r),
+      exponent: 1 / r,
+      points: const [],
+    );
+    final segmentos = max(1, (lengthM / _passoPerfilM).ceil());
+    final iEntrada = solo.acumulada(taMin);
     final profile = <double>[];
-    for (var i = 0; i <= 20; i++) {
-      final distance = lengthM * i / 20;
-      final advanceTime = distance == 0 ? 0.0 : advance.timeAt(distance);
-      profile.add(
-        params.k * pow(advanceTime, params.a) +
-            params.vib * advanceTime +
-            0.8 * y0 +
-            flowM3Min * (irrigationTimeMin - advanceTime) / lengthM,
-      );
+    final curvaAvanco = <PontoGrafico>[];
+    for (var i = 0; i <= segmentos; i++) {
+      final distance = lengthM * i / segmentos;
+      final tx = avanco.timeAt(distance);
+      profile.add(laminaEntrada - iEntrada + solo.acumulada(taMin - tx));
+      curvaAvanco.add(PontoGrafico(tx, distance));
     }
-    final infiltratedDepthM = _trapezoidalMean(profile);
-    final appliedVolumeM3 = flowM3Min * irrigationTimeMin;
-    final requiredVolumeM3 = requiredDepthM * lengthM;
-    final infiltratedVolumeM3 = infiltratedDepthM * lengthM;
-    final applicationEfficiency =
-        (requiredVolumeM3 / appliedVolumeM3) * 100;
+
+    final laminaMediaM = _trapezoidalMean(profile);
+    final appliedDepthM = q0M3MinM * tiMin / lengthM;
+    final appliedVolumeM3 = q0M3MinM * tiMin * widthM;
+    // Ea = 100 IRN L/(Q0 ti), em porcentagem.
+    final applicationEfficiency = dim.eficienciaPercent;
     final deepPercolationPercent =
-        ((infiltratedVolumeM3 - requiredVolumeM3) / appliedVolumeM3) * 100;
+        ((laminaMediaM - requiredDepthM) / appliedDepthM) * 100;
     final runoffPercent = 100 - applicationEfficiency - deepPercolationPercent;
     final adjustedRunoff = runoffPercent < 0 ? 0.0 : runoffPercent;
     final adjustedPercolation = 100 - applicationEfficiency - adjustedRunoff;
     final cuc = PerformanceIndicators.calcularCuc(profile).clamp(0, 100);
     final du = PerformanceIndicators.calcularDu(profile).clamp(0, 100);
-    final flowWarning = params.vazao > qMaxLpsM
-        ? 'A vazão total excede o limite não erosivo para a bacia.'
+    final flowWarning = params.vazao > q0MaxLpsTotal
+        ? 'A vazão total excede a vazão não erosiva total (Q0max × largura).'
         : null;
 
     return SimulationResult(
@@ -77,71 +92,64 @@ class RunBasinSimulation {
           .toDouble(),
       cuc: cuc.toDouble(),
       du: du.toDouble(),
-      laminaMedia: infiltratedDepthM,
+      laminaMedia: laminaMediaM,
       laminaRequerida: requiredDepthM,
-      tempoAvanco: taTotal,
+      tempoAvanco: taMin,
       perdaPercolacao: adjustedPercolation,
       perdaEscoamento: adjustedRunoff,
-      curvaAvanco: [
-        for (var i = 0; i <= 20; i++)
-          PontoGrafico(
-            advance.timeAt(lengthM * i / 20),
-            lengthM * i / 20,
-          ),
-      ],
+      curvaAvanco: curvaAvanco,
       perfilLongitudinal: profile,
       alertaVazaoExcedida: flowWarning,
       resumoTextual:
-          'Cálculo conforme a planilha de referência: inundação intermitente com y0 de Manning.',
+          'Inundação intermitente pela referência da Aula 8: hidráulica por '
+          'unidade de largura (Q0 em m³/(min·m)), avanço por bisseção com '
+          'expoente 3/13 e ti = max[ta,(IRN−0,80 y0)L/Q0+ta].',
       metricas: {
         'Área do tabuleiro': areaM2,
         'Vazão total': params.vazao,
-        'Vazão total máxima': qMaxLpsM,
-        'Tempo de oportunidade': irrigationTimeMin,
-        'Tempo de avanço': taTotal,
-        'Fim da depleção': irrigationTimeMin,
-        'Tempo de irrigação': irrigationTimeMin,
-        'Profundidade normal y0': y0 * 1000,
+        'Vazão total máxima': q0MaxLpsTotal,
+        'Vazão unitária Q0': q0M3MinM,
+        'Vazão unitária máxima Q0max': q0MaxM3MinM,
+        'Tempo de oportunidade': tiMin,
+        'Tempo de avanço': taMin,
+        'Fim da depleção': tiMin,
+        'Tempo de irrigação': tiMin,
+        'Profundidade normal y0': y0M * 1000,
         'Expoente do avanço': r,
-        'Volume infiltrado': infiltratedDepthM * areaM2,
-        'Volume aplicado': flowM3Min * irrigationTimeMin,
-        'Lâmina aplicada':
-            (flowM3Min * irrigationTimeMin / areaM2) * 1000,
-        'Lâmina média infiltrada': infiltratedDepthM * 1000,
+        'Declividade da superfície líquida S0': dim.s0,
+        'Resíduo do balanço': dim.residualBalancoM3M,
+        'Infiltração no início I0': laminaEntrada * 1000,
+        'Volume infiltrado': laminaMediaM * areaM2,
+        'Volume aplicado': appliedVolumeM3,
+        'Lâmina aplicada': appliedDepthM * 1000,
+        'Lâmina média infiltrada': laminaMediaM * 1000,
         'Balanço - Aproveitado': applicationEfficiency,
         'Balanço - Percolação': adjustedPercolation,
         'Balanço - Escoamento': adjustedRunoff,
-        'Lâmina útil':
-            applicationEfficiency / 100 *
-            (flowM3Min * irrigationTimeMin / areaM2) *
-            1000,
-        'Lâmina percolada':
-            adjustedPercolation / 100 *
-            (flowM3Min * irrigationTimeMin / areaM2) *
-            1000,
-        'Lâmina escoada':
-            adjustedRunoff / 100 *
-            (flowM3Min * irrigationTimeMin / areaM2) *
-            1000,
-        'Déficit de lâmina':
-            max(
-              0.0,
-              requiredDepthM * 1000 -
-                  applicationEfficiency / 100 *
-                      (flowM3Min * irrigationTimeMin / areaM2) *
-                      1000,
-            ),
+        'Lâmina útil': applicationEfficiency / 100 * appliedDepthM * 1000,
+        'Lâmina percolada': adjustedPercolation / 100 * appliedDepthM * 1000,
+        'Lâmina escoada': adjustedRunoff / 100 * appliedDepthM * 1000,
+        'Déficit de lâmina': max(
+          0.0,
+          requiredDepthM * 1000 -
+              applicationEfficiency / 100 * appliedDepthM * 1000,
+        ),
       },
       unidadesMetricas: const {
         'Área do tabuleiro': 'm²',
         'Vazão total': 'L/s',
         'Vazão total máxima': 'L/s',
+        'Vazão unitária Q0': 'm³/(min·m)',
+        'Vazão unitária máxima Q0max': 'm³/(min·m)',
         'Tempo de oportunidade': 'min',
         'Tempo de avanço': 'min',
         'Fim da depleção': 'min',
         'Tempo de irrigação': 'min',
         'Profundidade normal y0': 'mm',
-        'Expoente do avanço': '',
+        'Expoente do avanço': 'adimensional',
+        'Declividade da superfície líquida S0': 'adimensional',
+        'Resíduo do balanço': 'm³/m',
+        'Infiltração no início I0': 'mm',
         'Volume infiltrado': 'm³',
         'Volume aplicado': 'm³',
         'Lâmina aplicada': 'mm',
@@ -157,84 +165,32 @@ class RunBasinSimulation {
     );
   }
 
-  AdvanceCurve _solveAdvance({
-    required double flowM3Min,
+  /// Executa o núcleo da referência e converte erros de domínio
+  /// (ArgumentError/StateError) em [FormatException] amigável.
+  BasinDimensioningResult _dimensionar(
+    Infiltracao solo, {
     required double lengthM,
-    required double k,
-    required double exponent,
-    required double basicRate,
-    required double initialR,
-    required double y0,
+    required double n,
+    required double irn,
+    required double q0M3MinM,
+    double rInicial = 0.7,
   }) {
-    final sigma =
-        (exponent + initialR * (1 - exponent) + 1) /
-        ((1 + exponent) * (1 + initialR));
-    final finalAdvance = _solveAdvanceTime(
-      initialTime: 5 * y0 * lengthM / flowM3Min,
-      flowM3Min: flowM3Min,
-      areaAtInlet: y0,
-      lengthM: lengthM,
-      sigma: sigma,
-      k: k,
-      exponent: exponent,
-      basicRate: basicRate,
-      r: initialR,
-    );
-    final midAdvance = _solveAdvanceTime(
-      initialTime: 5 * y0 * (lengthM / 2) / flowM3Min,
-      flowM3Min: flowM3Min,
-      areaAtInlet: y0,
-      lengthM: lengthM / 2,
-      sigma: sigma,
-      k: k,
-      exponent: exponent,
-      basicRate: basicRate,
-      r: initialR,
-    );
-    final r = log(2) / (log(finalAdvance) - log(midAdvance));
-    final coefficient = finalAdvance / pow(lengthM, 1 / r);
-    return AdvanceCurve(
-      coefficient: coefficient,
-      exponent: 1 / r,
-      points: const [],
-    );
-  }
-
-  double _solveAdvanceTime({
-    required double initialTime,
-    required double flowM3Min,
-    required double areaAtInlet,
-    required double lengthM,
-    required double sigma,
-    required double k,
-    required double exponent,
-    required double basicRate,
-    required double r,
-  }) {
-    var time = initialTime;
-    for (var iteration = 0; iteration < 200; iteration++) {
-      final residual =
-          flowM3Min * time -
-          0.77 * areaAtInlet * lengthM -
-          sigma * k * pow(time, exponent) * lengthM -
-          basicRate * time * lengthM / (1 + r);
-      final derivative =
-          flowM3Min -
-          sigma * exponent * k * lengthM / pow(time, 1 - exponent) -
-          basicRate * lengthM / (1 + r);
-      if (derivative.abs() < 1e-12) {
-        final step = time * 0.5;
-        time = time - step;
-        continue;
-      }
-      var next = time - residual / derivative;
-      if (next <= 0 || !next.isFinite) {
-        next = time * 0.5;
-      }
-      if ((next - time).abs() < 0.000001) return next;
-      time = next;
+    try {
+      return dimensionar(
+        solo,
+        l: lengthM,
+        n: n,
+        irn: irn,
+        vmax: _vmaxMMin,
+        vazao: q0M3MinM,
+        rInicial: rInicial,
+        exigirVazaoNaoErosiva: false,
+      );
+    } on ArgumentError catch (e) {
+      throw FormatException('Dimensionamento da inundação: ${e.message}');
+    } on StateError catch (e) {
+      throw FormatException('Dimensionamento da inundação: ${e.message}');
     }
-    return time;
   }
 
   double _trapezoidalMean(List<double> values) {
@@ -251,11 +207,16 @@ class RunBasinSimulation {
     if (params.comprimento <= 0 ||
         params.larguraOuEspacamento <= 0 ||
         params.vazao <= 0 ||
-        params.laminaRequerida <= 0) {
+        params.laminaRequerida <= 0 ||
+        params.manningN <= 0 ||
+        params.k <= 0 ||
+        !(params.a > 0 && params.a < 1)) {
       throw const FormatException(
-        'Revise dimensões, vazão e lâmina requerida.',
+        'Revise dimensões, vazão, lâmina requerida e curva de infiltração '
+        '(0 < a < 1).',
       );
     }
+    // G9: a declividade é validada também no regime permanente.
     if (params.declividade >= 0.02) {
       throw const FormatException(
         'A inundação exige declividade longitudinal inferior a 2%.',

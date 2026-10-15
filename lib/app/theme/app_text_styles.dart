@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'app_colors.dart';
 
 class AppTextStyles {
@@ -175,8 +176,14 @@ class AppTextStyles {
       headlineMedium: TextStyle(fontSize: 28 * fontScale, fontWeight: weight),
       headlineSmall: TextStyle(fontSize: 24 * fontScale, fontWeight: weight),
       titleLarge: TextStyle(fontSize: 22 * fontScale, fontWeight: weight),
-      titleMedium: TextStyle(fontSize: 16 * fontScale, fontWeight: FontWeight.w600),
-      titleSmall: TextStyle(fontSize: 14 * fontScale, fontWeight: FontWeight.w600),
+      titleMedium: TextStyle(
+        fontSize: 16 * fontScale,
+        fontWeight: FontWeight.w600,
+      ),
+      titleSmall: TextStyle(
+        fontSize: 14 * fontScale,
+        fontWeight: FontWeight.w600,
+      ),
       bodyLarge: TextStyle(fontSize: 16 * fontScale, fontWeight: weight),
       bodyMedium: TextStyle(fontSize: 14 * fontScale, fontWeight: weight),
       bodySmall: TextStyle(fontSize: 12 * fontScale, fontWeight: weight),

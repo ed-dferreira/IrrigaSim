@@ -122,10 +122,8 @@ class BorderNumericConfig {
     final segmentos = inteiro('nSegmentos');
     final iteracoes = inteiro('maxIteracoes');
     return BorderNumericConfig(
-      toleranciaPasso:
-          numero('toleranciaPasso') ?? toleranciaPassoPadrao,
-      toleranciaResiduo:
-          numero('toleranciaResiduo') ?? toleranciaResiduoPadrao,
+      toleranciaPasso: numero('toleranciaPasso') ?? toleranciaPassoPadrao,
+      toleranciaResiduo: numero('toleranciaResiduo') ?? toleranciaResiduoPadrao,
       maxIteracoes: iteracoes < 0 ? maxIteracoesPadrao : iteracoes,
       nSegmentos: segmentos < 0 ? nSegmentosPadrao : segmentos,
       versaoExpoentesRecessao:

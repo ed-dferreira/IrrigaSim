@@ -1,8 +1,13 @@
+import 'package:irrigasim/models/comum/clima_demanda.dart';
+
 import 'curva_infiltracao_sulco.dart';
 
-enum OrigemChuvaSulco { naoInformada, efetiva, provavel, observada }
+/// Compatibilidade: os enums climáticos foram extraídos para
+/// lib/models/comum/clima_demanda.dart (uso compartilhado com a inundação).
+/// Nenhum call site de sulcos muda e a serialização por `.name` fica idêntica.
+typedef OrigemChuvaSulco = OrigemChuva;
 
-enum MetodoEtcSulco { adotada, etoVezesKc, blaneyCriddle }
+typedef MetodoEtcSulco = MetodoEtc;
 
 /// Contrato versionado das entradas originais (não dos resultados derivados).
 /// null significa ausente, inclusive ao migrar um cenário anterior à versão 1.

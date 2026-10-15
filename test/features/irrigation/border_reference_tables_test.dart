@@ -17,30 +17,35 @@ void main() {
     expect(tables.booher(16, 10), isNull);
   });
 
-  test('três células suspeitas carregam dado_fonte_suspeito e nunca são sugestão', () {
-    final suspeitas = [
-      tables.booher(12.5, 10)!,
-      tables.booher(25, 15)!,
-      tables.booher(35, 15)!,
-    ];
-    for (final cell in suspeitas) {
-      expect(cell.status, BorderStatus.dadoFonteSuspeito);
-      expect(cell.status.codigo, 'dado_fonte_suspeito');
-      expect(tables.sugestao(cell.diametroCm, cell.cargaCm), isNull);
-    }
-    // Nenhuma das 49 células é suspeita fora das três conhecidas.
-    for (final d in BorderReferenceTables.diametrosCm) {
-      for (final c in BorderReferenceTables.cargasCm) {
-        final cell = tables.booher(d, c)!;
-        final suspeita = cell.status == BorderStatus.dadoFonteSuspeito;
-        expect(suspeita, cell.revisaoPendente);
-        expect(tables.sugestao(d, c) == null, suspeita);
+  test(
+    'três células suspeitas carregam dado_fonte_suspeito e nunca são sugestão',
+    () {
+      final suspeitas = [
+        tables.booher(12.5, 10)!,
+        tables.booher(25, 15)!,
+        tables.booher(35, 15)!,
+      ];
+      for (final cell in suspeitas) {
+        expect(cell.status, BorderStatus.dadoFonteSuspeito);
+        expect(cell.status.codigo, 'dado_fonte_suspeito');
+        expect(tables.sugestao(cell.diametroCm, cell.cargaCm), isNull);
       }
-    }
-    expect(tables.sugestao(15, 10), isNotNull);
-    expect(tables.sugestao(16, 10), isNull);
-    // Marr é orientativa, nunca coeficiente de infiltração.
-    expect(tables.suggest(TexturaSolo.fina, .6).first.status,
-        BorderStatus.avisoOrientativo);
-  });
+      // Nenhuma das 49 células é suspeita fora das três conhecidas.
+      for (final d in BorderReferenceTables.diametrosCm) {
+        for (final c in BorderReferenceTables.cargasCm) {
+          final cell = tables.booher(d, c)!;
+          final suspeita = cell.status == BorderStatus.dadoFonteSuspeito;
+          expect(suspeita, cell.revisaoPendente);
+          expect(tables.sugestao(d, c) == null, suspeita);
+        }
+      }
+      expect(tables.sugestao(15, 10), isNotNull);
+      expect(tables.sugestao(16, 10), isNull);
+      // Marr é orientativa, nunca coeficiente de infiltração.
+      expect(
+        tables.suggest(TexturaSolo.fina, .6).first.status,
+        BorderStatus.avisoOrientativo,
+      );
+    },
+  );
 }

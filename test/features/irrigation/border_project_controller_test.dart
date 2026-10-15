@@ -21,7 +21,10 @@ void main() {
     }.entries) {
       controller.setNumero(entry.key, entry.value.toString());
     }
-    expect(container.read(borderProjectProvider).irnEfetivaMm, closeTo(42, 1e-8));
+    expect(
+      container.read(borderProjectProvider).irnEfetivaMm,
+      closeTo(42, 1e-8),
+    );
     controller.setNumero('uccPercentual', '');
     expect(container.read(borderProjectProvider).irnEfetivaMm, isNull);
     container.dispose();

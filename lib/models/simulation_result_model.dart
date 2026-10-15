@@ -1,8 +1,10 @@
 import 'simulation_result.dart';
 import 'faixas/border_result.dart';
+import 'inundacao/basin_annexes.dart';
 import 'sulcos/indicadores_balanco_sulco.dart';
 
 import 'package:irrigasim/services/simulation/operational_planning.dart';
+import 'package:irrigasim/services/simulation/inundacao/basin_planning.dart';
 
 class SimulationResultModel {
   static Map<String, dynamic> toMap(SimulationResult result) {
@@ -46,6 +48,14 @@ class SimulationResultModel {
       'hipoteseRecessao': result.hipoteseRecessao,
       'extrapolouAvanco': result.extrapolouAvanco,
       'planejamentoOperacional': result.planejamentoOperacional?.toMap(),
+      if (result.planejamentoParcelas != null)
+        'planejamentoParcelas': result.planejamentoParcelas!.toMap(),
+      if (result.selecaoVazao != null)
+        'selecaoVazao': result.selecaoVazao!.toMap(),
+      if (result.volumesArroz != null)
+        'volumesArroz': result.volumesArroz!.toMap(),
+      if (result.checagemOperacional != null)
+        'checagemOperacional': result.checagemOperacional!.toMap(),
     };
   }
 
@@ -123,6 +133,18 @@ class SimulationResultModel {
           ? PlanejamentoOperacionalResultado.fromMap(
               Map<String, dynamic>.from(map['planejamentoOperacional'] as Map),
             )
+          : null,
+      planejamentoParcelas: map['planejamentoParcelas'] is Map
+          ? BasinParcelasAnexo.fromMap(map['planejamentoParcelas'])
+          : null,
+      selecaoVazao: map['selecaoVazao'] is Map
+          ? BasinSelecaoVazaoAnexo.fromMap(map['selecaoVazao'])
+          : null,
+      volumesArroz: map['volumesArroz'] is Map
+          ? BasinVolumesAnexo.fromMap(map['volumesArroz'])
+          : null,
+      checagemOperacional: map['checagemOperacional'] is Map
+          ? BasinChecagemOperacional.fromMap(map['checagemOperacional'])
           : null,
     );
   }

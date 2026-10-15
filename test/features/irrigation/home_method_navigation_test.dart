@@ -36,9 +36,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          authServiceProvider.overrideWithValue(_TestAuthService()),
-        ],
+        overrides: [authServiceProvider.overrideWithValue(_TestAuthService())],
         child: MaterialApp.router(routerConfig: router),
       ),
     );

@@ -2783,45 +2783,6 @@ class _RevisaoStep extends StatelessWidget {
               ),
           ],
         ),
-      if (state.metodo == MetodoIrrigacao.inundacao)
-        _ReviewSection(
-          icon: AppIcons.inundacao,
-          title: 'Inundação',
-          rows: [
-            _ReviewRow('Regime', state.tipoInundacao.displayName),
-            if (state.tipoInundacao == TipoInundacao.permanente) ...[
-              _ReviewRow(
-                'Área irrigada',
-                '${state.areaHectares.toStringAsFixed(2)} ha',
-              ),
-              _ReviewRow('Porosidade', state.porosidade.toStringAsFixed(2)),
-              _ReviewRow(
-                'Profundidade da camada',
-                '${state.profundidadeCamadaMm.toStringAsFixed(0)} mm',
-              ),
-              _ReviewRow(
-                'Condutividade hidráulica K₀',
-                '${state.condutividadeHidraulicaMmDia.toStringAsFixed(1)} mm/dia',
-              ),
-              _ReviewRow(
-                'Disponibilidade total de água',
-                '${state.dtaMmCm.toStringAsFixed(1)} mm/cm',
-              ),
-              _ReviewRow(
-                'Fator de disponibilidade',
-                state.fatorDisponibilidade.toStringAsFixed(2),
-              ),
-              _ReviewRow(
-                'Lâmina superficial',
-                '${state.laminaSuperficialMm.toStringAsFixed(0)} mm',
-              ),
-              _ReviewRow(
-                'Vazão disponível',
-                '${state.vazaoDisponivelLps.toStringAsFixed(1)} L/s',
-              ),
-            ],
-          ],
-        ),
       _ReviewSection(
         icon: AppIcons.projetoOperacao,
         title: 'Operação',
@@ -2845,8 +2806,6 @@ class _RevisaoStep extends StatelessWidget {
           _ReviewRow(
             state.metodo == MetodoIrrigacao.faixa
                 ? 'Vazão unitária'
-                : state.metodo == MetodoIrrigacao.inundacao
-                ? 'Vazão total'
                 : 'Vazão por sulco',
             '${state.vazao.toStringAsFixed(2)} '
             '${state.metodo == MetodoIrrigacao.faixa ? 'L/s/m' : 'L/s'}',

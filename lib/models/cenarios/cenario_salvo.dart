@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../irrigation_parameters.dart';
 import '../faixas/border_project.dart';
+import '../inundacao/basin_project.dart';
 import '../simulation_result.dart';
 import '../sulcos/tipo_sulco_info.dart';
 
@@ -63,6 +64,11 @@ class CenarioSalvo {
         if (metodo == MetodoIrrigacao.faixa)
           'projetoFaixa':
               (parametros.projetoFaixa ?? BorderProject.fromLegacy(parametros))
+                  .toMap(),
+        if (metodo == MetodoIrrigacao.inundacao)
+          'projetoInundacao':
+              (parametros.projetoInundacao ??
+                      BasinProject.fromLegacy(parametros))
                   .toMap(),
         'declividade': parametros.declividade,
         'declividadeTransversal': parametros.declividadeTransversal,
@@ -148,6 +154,11 @@ class CenarioSalvo {
     final projeto = metodo == MetodoIrrigacao.faixa && projetoMap is Map
         ? BorderProject.fromMap(Map<String, dynamic>.from(projetoMap))
         : null;
+    final projetoInundacaoMap = paramData['projetoInundacao'];
+    final projetoInundacao =
+        metodo == MetodoIrrigacao.inundacao && projetoInundacaoMap is Map
+        ? BasinProject.fromMap(Map<String, dynamic>.from(projetoInundacaoMap))
+        : null;
     return CenarioSalvo(
       id: id ?? map['id'] ?? '',
       nome: map['nome'] ?? '',
@@ -186,6 +197,60 @@ class CenarioSalvo {
                       manningN:
                           (paramData['manningN'] as num?)?.toDouble() ?? 0.015,
                       sigmaZ: (paramData['sigmaZ'] as num?)?.toDouble() ?? 0.4,
+                    ),
+                  )
+                : null),
+        projetoInundacao:
+            projetoInundacao ??
+            (metodo == MetodoIrrigacao.inundacao
+                ? BasinProject.fromLegacy(
+                    IrrigationParameters(
+                      comprimento: (paramData['comprimento'] as num).toDouble(),
+                      declividade: (paramData['declividade'] as num).toDouble(),
+                      larguraOuEspacamento:
+                          (paramData['larguraOuEspacamento'] as num).toDouble(),
+                      areaHectares:
+                          (paramData['areaHectares'] as num?)?.toDouble() ?? 2,
+                      tipoInundacao: TipoInundacaoExtension.fromString(
+                        paramData['tipoInundacao'] as String?,
+                      ),
+                      porosidade:
+                          (paramData['porosidade'] as num?)?.toDouble() ?? 0.5,
+                      profundidadeCamadaMm:
+                          (paramData['profundidadeCamadaMm'] as num?)
+                              ?.toDouble() ??
+                          500,
+                      condutividadeHidraulicaMmDia:
+                          (paramData['condutividadeHidraulicaMmDia'] as num?)
+                              ?.toDouble() ??
+                          7,
+                      dtaMmCm: (paramData['dtaMmCm'] as num?)?.toDouble() ?? 2,
+                      fatorDisponibilidade:
+                          (paramData['fatorDisponibilidade'] as num?)
+                              ?.toDouble() ??
+                          0.5,
+                      evapotranspiracaoMmDia:
+                          (paramData['evapotranspiracaoMmDia'] as num?)
+                              ?.toDouble() ??
+                          7.2,
+                      laminaSuperficialMm:
+                          (paramData['laminaSuperficialMm'] as num?)
+                              ?.toDouble() ??
+                          150,
+                      vazaoDisponivelLps:
+                          (paramData['vazaoDisponivelLps'] as num?)
+                              ?.toDouble() ??
+                          36,
+                      k: (paramData['k'] as num).toDouble(),
+                      a: (paramData['a'] as num).toDouble(),
+                      vib: (paramData['vib'] as num).toDouble(),
+                      vazao: (paramData['vazao'] as num?)?.toDouble() ?? 0,
+                      tempoAplicacao:
+                          (paramData['tempoAplicacao'] as num?)?.toDouble() ??
+                          60,
+                      laminaRequerida:
+                          (paramData['laminaRequerida'] as num?)?.toDouble() ??
+                          70,
                     ),
                   )
                 : null),

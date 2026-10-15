@@ -1,6 +1,8 @@
 import 'package:irrigasim/services/simulation/operational_planning.dart';
 import 'package:irrigasim/models/faixas/border_result.dart';
+import 'package:irrigasim/models/inundacao/basin_annexes.dart';
 import 'package:irrigasim/models/sulcos/indicadores_balanco_sulco.dart';
+import 'package:irrigasim/services/simulation/inundacao/basin_planning.dart';
 
 class PontoGrafico {
   final double x;
@@ -50,6 +52,16 @@ class SimulationResult {
   final bool extrapolouAvanco;
   final PlanejamentoOperacionalResultado? planejamentoOperacional;
 
+  /// Anexos da inundação (Fase 6): planejamento em parcelas, seleção entre
+  /// vazões candidatas e volumes do arroz, nulos fora desse regime.
+  final BasinParcelasAnexo? planejamentoParcelas;
+  final BasinSelecaoVazaoAnexo? selecaoVazao;
+  final BasinVolumesAnexo? volumesArroz;
+
+  /// Checagem operacional obrigatória G3 (vazão e geometria), nula quando o
+  /// simulador do regime não a calculou.
+  final BasinChecagemOperacional? checagemOperacional;
+
   const SimulationResult({
     this.borderResult,
     this.balancoSulco,
@@ -84,6 +96,10 @@ class SimulationResult {
     this.hipoteseRecessao,
     this.extrapolouAvanco = false,
     this.planejamentoOperacional,
+    this.planejamentoParcelas,
+    this.selecaoVazao,
+    this.volumesArroz,
+    this.checagemOperacional,
   });
 
   SimulationResult comPlanejamentoOperacional(
@@ -122,6 +138,62 @@ class SimulationResult {
     hipoteseRecessao: hipoteseRecessao,
     extrapolouAvanco: extrapolouAvanco,
     planejamentoOperacional: planejamento,
+    planejamentoParcelas: planejamentoParcelas,
+    selecaoVazao: selecaoVazao,
+    volumesArroz: volumesArroz,
+    checagemOperacional: checagemOperacional,
+  );
+
+  /// Anexa os resultados tipados da inundação e mescla métricas extras,
+  /// preservando todos os campos já calculados pelo simulador do regime.
+  /// [alertaInfiltracao] substitui o alerta quando informado.
+  SimulationResult comAnexosInundacao({
+    BasinParcelasAnexo? parcelas,
+    BasinSelecaoVazaoAnexo? selecao,
+    BasinVolumesAnexo? volumes,
+    BasinChecagemOperacional? checagem,
+    Map<String, double> metricasExtras = const {},
+    Map<String, String> unidadesExtras = const {},
+    String? alertaInfiltracao,
+    String? alertaVazaoExcedida,
+  }) => SimulationResult(
+    borderResult: borderResult,
+    balancoSulco: balancoSulco,
+    eficiencia: eficiencia,
+    eficienciaRequerimento: eficienciaRequerimento,
+    cuc: cuc,
+    du: du,
+    laminaMedia: laminaMedia,
+    laminaRequerida: laminaRequerida,
+    tempoAvanco: tempoAvanco,
+    perdaPercolacao: perdaPercolacao,
+    perdaEscoamento: perdaEscoamento,
+    curvaAvanco: curvaAvanco,
+    curvaOportunidade: curvaOportunidade,
+    perfilLongitudinal: perfilLongitudinal,
+    resumoTextual: resumoTextual,
+    alertaVazaoExcedida: alertaVazaoExcedida ?? this.alertaVazaoExcedida,
+    alertaInfiltracao: alertaInfiltracao ?? this.alertaInfiltracao,
+    metricas: {...metricas, ...metricasExtras},
+    unidadesMetricas: {...unidadesMetricas, ...unidadesExtras},
+    tempoOportunidadeFinalMin: tempoOportunidadeFinalMin,
+    tempoFornecimentoMin: tempoFornecimentoMin,
+    laminainfiltradaInicioMm: laminainfiltradaInicioMm,
+    laminainfiltradaFinalMm: laminainfiltradaFinalMm,
+    laminainfiltradaMediaMm: laminainfiltradaMediaMm,
+    laminaAplicadaMediaMm: laminaAplicadaMediaMm,
+    eficienciaDistribuicaoEd: eficienciaDistribuicaoEd,
+    adequacaoUtilGa: adequacaoUtilGa,
+    origemCurvaAvanco: origemCurvaAvanco,
+    metodoCurvaAvanco: metodoCurvaAvanco,
+    origemCurvaInfiltracao: origemCurvaInfiltracao,
+    hipoteseRecessao: hipoteseRecessao,
+    extrapolouAvanco: extrapolouAvanco,
+    planejamentoOperacional: planejamentoOperacional,
+    planejamentoParcelas: parcelas ?? planejamentoParcelas,
+    selecaoVazao: selecao ?? selecaoVazao,
+    volumesArroz: volumes ?? volumesArroz,
+    checagemOperacional: checagem ?? checagemOperacional,
   );
 
   String get classificacaoEa => _classificarEa(eficiencia);

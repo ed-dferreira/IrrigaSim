@@ -9,6 +9,9 @@ import 'package:irrigasim/views/irrigation/irrigation_screen.dart';
 import 'package:irrigasim/views/irrigation/parameters_screen.dart';
 import 'package:irrigasim/views/irrigation/faixas/border_project_screen.dart';
 import 'package:irrigasim/views/irrigation/faixas/border_results_screen.dart';
+import 'package:irrigasim/views/irrigation/inundacao/basin_project_screen.dart';
+import 'package:irrigasim/views/irrigation/inundacao/basin_reference_screen.dart';
+import 'package:irrigasim/views/irrigation/inundacao/basin_results_screen.dart';
 import 'package:irrigasim/views/irrigation/sulcos/project_screen.dart';
 import 'package:irrigasim/views/irrigation/sulcos/project_results_screen.dart';
 import 'package:irrigasim/views/irrigation/results_screen.dart';
@@ -88,6 +91,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'irrigation/border-results',
                     builder: (context, state) => const BorderResultsScreen(),
+                  ),
+                  GoRoute(
+                    path: 'irrigation/basin-project',
+                    builder: (context, state) => const BasinProjectScreen(),
+                  ),
+                  GoRoute(
+                    path: 'irrigation/basin-results',
+                    builder: (context, state) => const BasinResultsScreen(),
+                  ),
+                  GoRoute(
+                    path: 'irrigation/basin-reference',
+                    builder: (context, state) => const BasinReferenceScreen(),
                   ),
                   GoRoute(
                     path: 'irrigation/project',

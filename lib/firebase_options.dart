@@ -45,7 +45,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1019259738242',
     projectId: 'irrigasim-3c73d',
     authDomain: 'irrigasim-3c73d.firebaseapp.com',
-    storageBucket: 'irrigasim-3c73d.firebasestorage.app',    androidClientId: 'YOUR_ANDROID_CLIENT_ID.apps.googleusercontent.com',
+    storageBucket: 'irrigasim-3c73d.firebasestorage.app',
+    androidClientId: 'YOUR_ANDROID_CLIENT_ID.apps.googleusercontent.com',
     iosClientId: '1019259738242-dh1uscq38ckqv1fd8ch7hbdsm931e84g.apps.googleusercontent.com',
     iosBundleId: 'com.example.irrigasim',
   );

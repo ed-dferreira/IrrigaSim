@@ -211,7 +211,10 @@ class TerrainPainter extends CustomPainter {
       ..strokeWidth = 1.2
       ..color = AppColors.outline;
 
-    final cols = math.max(2, (comprimentoM / math.max(espacamentoSulcosM, 1)).floor().clamp(2, 8));
+    final cols = math.max(
+      2,
+      (comprimentoM / math.max(espacamentoSulcosM, 1)).floor().clamp(2, 8),
+    );
     final boardWidth = boardRect.width / cols;
     final boardHeight = boardRect.height / (numFurrows + 1);
 

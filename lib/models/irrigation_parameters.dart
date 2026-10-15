@@ -1,5 +1,6 @@
 import 'package:irrigasim/models/sulcos/tipo_sulco_info.dart';
 import 'package:irrigasim/models/faixas/border_project.dart';
+import 'package:irrigasim/models/inundacao/basin_project.dart';
 
 import 'sulcos/field_measurements.dart';
 import 'sulcos/entradas_projeto_sulco.dart';
@@ -80,6 +81,10 @@ class IrrigationParameters {
   /// Contrato versionado de sulcos; null indica cenário legado sem essas entradas.
   final EntradasProjetoSulco? entradasProjetoSulco;
   final BorderProject? projetoFaixa;
+
+  /// Contrato versionado de inundação; null indica cenário legado sem o
+  /// projeto tipado (campos planos abaixo continuam válidos).
+  final BasinProject? projetoInundacao;
   final double comprimento;
   final double declividade;
   final double declividadeTransversal;
@@ -149,6 +154,7 @@ class IrrigationParameters {
   const IrrigationParameters({
     this.entradasProjetoSulco,
     this.projetoFaixa,
+    this.projetoInundacao,
     required this.comprimento,
     required this.declividade,
     this.declividadeTransversal = 0,
@@ -216,6 +222,8 @@ class IrrigationParameters {
     EntradasProjetoSulco? entradasProjetoSulco,
     bool clearEntradasProjetoSulco = false,
     BorderProject? projetoFaixa,
+    BasinProject? projetoInundacao,
+    bool clearProjetoInundacao = false,
     double? comprimento,
     double? declividade,
     double? declividadeTransversal,
@@ -283,6 +291,9 @@ class IrrigationParameters {
           ? null
           : entradasProjetoSulco ?? this.entradasProjetoSulco,
       projetoFaixa: projetoFaixa ?? this.projetoFaixa,
+      projetoInundacao: clearProjetoInundacao
+          ? null
+          : projetoInundacao ?? this.projetoInundacao,
       comprimento: comprimento ?? this.comprimento,
       declividade: declividade ?? this.declividade,
       declividadeTransversal:

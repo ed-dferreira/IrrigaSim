@@ -10,12 +10,16 @@ class IrrigationAuditSection extends StatelessWidget {
     required this.icon,
     required this.children,
     this.initiallyExpanded = true,
+    this.pagina,
   });
 
   final String title;
   final IconData icon;
   final List<Widget> children;
   final bool initiallyExpanded;
+
+  /// Página do material didático associada à seção (ex.: '16').
+  final String? pagina;
 
   @override
   Widget build(BuildContext context) => Card(
@@ -28,7 +32,10 @@ class IrrigationAuditSection extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _SectionHeading(title: title, icon: icon),
+                _SectionHeading(
+                  title: pagina == null ? title : '$title (p. $pagina)',
+                  icon: icon,
+                ),
                 const SizedBox(height: IrrigationSpacing.section),
                 ...children,
               ],
@@ -36,7 +43,7 @@ class IrrigationAuditSection extends StatelessWidget {
           )
         : ExpansionTile(
             leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
-            title: Text(title),
+            title: Text(pagina == null ? title : '$title (p. $pagina)'),
             initiallyExpanded: false,
             childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
             children: children,
@@ -72,11 +79,18 @@ class IrrigationAuditRow extends StatelessWidget {
     super.key,
     this.detail,
     this.isWarning = false,
+    this.pagina,
   });
   final String label;
   final String value;
   final String? detail;
   final bool isWarning;
+
+  /// Página do material didático associada ao valor (ex.: '16').
+  final String? pagina;
+
+  String get _label =>
+      pagina == null || pagina!.trim().isEmpty ? label : '$label (p. $pagina)';
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +122,7 @@ class IrrigationAuditRow extends StatelessWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: Theme.of(context).textTheme.labelLarge),
+                Text(_label, style: Theme.of(context).textTheme.labelLarge),
                 const SizedBox(height: 2),
                 valueContent,
               ],
@@ -120,7 +134,7 @@ class IrrigationAuditRow extends StatelessWidget {
               SizedBox(
                 width: 220,
                 child: Text(
-                  label,
+                  _label,
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
               ),
@@ -138,9 +152,13 @@ class IrrigationFormulaCard extends StatelessWidget {
     super.key,
     required this.formula,
     required this.description,
+    this.pagina,
   });
   final String formula;
   final String description;
+
+  /// Página do material didático da fórmula (auditoria), ex.: '61'.
+  final String? pagina;
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +182,9 @@ class IrrigationFormulaCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            description,
+            pagina == null || pagina!.trim().isEmpty
+                ? description
+                : '$description (p. $pagina)',
             style: Theme.of(context).textTheme.bodySmall
                 ?.copyWith(color: colors.onSurfaceVariant),
           ),
