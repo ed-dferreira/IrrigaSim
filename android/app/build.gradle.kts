@@ -4,7 +4,6 @@ plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
-    id("com.google.gms.google-services")
 }
 
 val signingPropertiesFile = rootProject.file("key.properties")
@@ -43,7 +42,7 @@ android {
         release {
             if (signingPropertiesFile.exists()) {
                 signingConfig = signingConfigs.create("release") {
-                    storeFile = file(signingProperties.getProperty("storeFile"))
+                    storeFile = rootProject.file(signingProperties.getProperty("storeFile"))
                     storePassword = signingProperties.getProperty("storePassword")
                     keyAlias = signingProperties.getProperty("keyAlias")
                     keyPassword = signingProperties.getProperty("keyPassword")

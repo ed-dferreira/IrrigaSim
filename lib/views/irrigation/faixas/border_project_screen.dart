@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
 import 'package:irrigasim/app/theme/app_colors.dart';
+import 'package:irrigasim/models/comum/crop_presets.dart';
 import 'package:irrigasim/models/faixas/border_project.dart';
 import 'package:irrigasim/models/faixas/border_measurements.dart';
 import 'package:irrigasim/models/irrigation_parameters.dart';
@@ -17,56 +18,15 @@ import 'package:irrigasim/views/irrigation/widgets/irrigation_project_components
 
 import 'border_trial_chart.dart';
 
-class _BorderCropPreset {
-  const _BorderCropPreset(
-    this.name,
-    this.kc,
-    this.rows,
-    this.plants,
-    this.roots,
-    this.fraction,
-  );
-
-  final String name;
-  final double kc, rows, plants, roots, fraction;
-}
-
-const _borderCropPresets = <_BorderCropPreset>[
-  _BorderCropPreset('Soja', 1.15, .45, .07, 60, .50),
-  _BorderCropPreset('Arroz irrigado', 1.20, .17, .03, 20, .20),
-  _BorderCropPreset('Milho', 1.20, .80, .20, 100, .55),
-  _BorderCropPreset('Trigo', 1.15, .17, .02, 100, .55),
-  _BorderCropPreset('Fumo', 1.10, 1.10, .50, 60, .30),
-  _BorderCropPreset('Feijão', 1.15, .45, .07, 50, .45),
-  _BorderCropPreset('Cevada', 1.15, .17, .02, 100, .55),
-  _BorderCropPreset('Aveia', 1.15, .17, .02, 100, .55),
-  _BorderCropPreset('Mandioca', .80, 1.00, .60, 80, .35),
-  _BorderCropPreset('Cana-de-açúcar', 1.25, 1.40, .50, 120, .65),
-  _BorderCropPreset('Uva', .70, 2.50, 1.20, 100, .35),
-  _BorderCropPreset('Batata', 1.15, .80, .30, 40, .35),
-  _BorderCropPreset('Cebola', 1.05, .30, .10, 30, .30),
-  _BorderCropPreset('Canola', 1.15, .35, .04, 100, .60),
-  _BorderCropPreset('Sorgo', 1.00, .50, .05, 100, .55),
-  _BorderCropPreset('Tomate', 1.15, 1.00, .50, 70, .40),
-  _BorderCropPreset('Melancia', 1.00, 2.00, 1.00, 80, .40),
-  _BorderCropPreset('Amendoim', 1.15, .50, .10, 50, .50),
-  _BorderCropPreset('Triticale', 1.15, .17, .02, 100, .55),
-  _BorderCropPreset('Azevém (forragem)', 1.05, .17, .02, 40, .60),
-];
-
-_BorderCropPreset? _selectedBorderCropPreset(BorderProject project) {
-  for (final preset in _borderCropPresets) {
-    if (preset.name == project.cultura &&
-        preset.kc == project.agronomia?.kc &&
-        preset.rows == project.agronomia?.espacamentoFileirasM &&
-        preset.plants == project.agronomia?.espacamentoPlantasM &&
-        preset.roots == project.agronomia?.profundidadeRaizesCm &&
-        preset.fraction == project.agronomia?.fracaoDisponivel) {
-      return preset;
-    }
-  }
-  return null;
-}
+CropPreset? _selectedBorderCropPreset(BorderProject project) =>
+    selectedCropPreset(
+      cultura: project.cultura,
+      kc: project.agronomia?.kc,
+      rows: project.agronomia?.espacamentoFileirasM,
+      plants: project.agronomia?.espacamentoPlantasM,
+      roots: project.agronomia?.profundidadeRaizesCm,
+      fraction: project.agronomia?.fracaoDisponivel,
+    );
 
 class BorderProjectScreen extends ConsumerStatefulWidget {
   const BorderProjectScreen({super.key});
@@ -760,7 +720,7 @@ class _BorderProjectScreenState extends ConsumerState<BorderProjectScreen> {
               const SizedBox(height: 16),
               _BorderInput(
                 label: 'Predefinição de cultura',
-                child: DropdownButtonFormField<_BorderCropPreset?>(
+                child: DropdownButtonFormField<CropPreset?>(
                   key: ValueKey('crop-preset-$_cropPresetRevision'),
                   isExpanded: true,
                   initialValue: _selectedBorderCropPreset(p),
@@ -768,12 +728,12 @@ class _BorderProjectScreenState extends ConsumerState<BorderProjectScreen> {
                     helperText: 'Selecione uma cultura para preencher os parâmetros; eles podem ser ajustados depois.',
                   ),
                   items: [
-                    const DropdownMenuItem<_BorderCropPreset?>(
+                    const DropdownMenuItem<CropPreset?>(
                       value: null,
                       child: Text('Personalizada / sem predefinição'),
                     ),
-                    ..._borderCropPresets.map(
-                      (preset) => DropdownMenuItem<_BorderCropPreset?>(
+                    ...cropPresets.map(
+                      (preset) => DropdownMenuItem<CropPreset?>(
                         value: preset,
                         child: Text(preset.name),
                       ),

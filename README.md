@@ -47,7 +47,7 @@ Desenvolvido no âmbito de um **projeto de pesquisa (UFLA/DEG)**, o projeto ofer
 - 🗂️ **Histórico de Cenários Salvos**: reabra resultados anteriores e exclua cenários; comparação lado a lado (máx. 2) prevista na especificação do produto.
 - ♿ **Acessibilidade Persistida**: tema claro/escuro, tamanho de fonte, alto contraste, negrito, espaçamento de texto, redução de animações e modo leitor de tela — salvos por plataforma (SharedPreferences / NSUserDefaults).
 - 🔗 **Navegação Type-Safe + Deep Linking**: pilha manual com transições animadas, botão voltar do sistema, pager sincronizado com a bottom bar e esquema `irrigasim://` para abrir telas específicas.
-- 🔒 **Autenticação & Offline-First**: e-mail/senha e Google via Firebase Auth (Android); cálculos 100% offline para uso em campo.
+- 🔒 **100% Offline-First**: sem login e sem backend — preferências e perfil salvos localmente; cálculos 100% offline para uso em campo.
 
 ---
 
@@ -108,7 +108,7 @@ graph TD
 - **Linguagem**: Kotlin 1.9.20
 - **Multiplataforma**: Compose Multiplatform 1.5.10 (Android & iOS), Android Gradle Plugin 8.2.2
 - **Desenho de Gráficos**: Compose Canvas (100% nativo KMP, sem bibliotecas externas)
-- **Autenticação**: Firebase Auth — Android (`firebase-auth-ktx` via BOM) · iOS (CocoaPods `Firebase/Auth`)
+- **Autenticação**: nenhuma — o app não possui login nem dependência de backend
 - **Persistência local**: SharedPreferences (Android) / NSUserDefaults (iOS)
 
 ---
@@ -117,7 +117,7 @@ graph TD
 
 ```
 IrrigaSim/
-├── androidApp/                   # App Android (MainActivity, Firebase Auth)
+├── androidApp/                   # App Android (MainActivity)
 ├── iosApp/                       # App iOS (SwiftUI + ComposeUIViewController, CocoaPods)
 ├── shared/                       # Módulo Kotlin Multiplatform compartilhado
 │   └── src/
@@ -138,7 +138,6 @@ IrrigaSim/
 │       │       ├── App.kt                 # Entrypoint Compose + navegação + pager
 │       │       ├── screens/               # Metodo, Wizard, Parametros, Resultado,
 │       │       │   │                      # Historico, Perfil
-│       │       │   └── auth/              # LoginScreen, CadastroScreen
 │       │       ├── components/            # KpiCard, Campo, CustomChip, CustomProgressBar,
 │       │       │                          # GraficoAvanco, GraficoBalancoHidrico,
 │       │       │                          # GraficoLaminaLongitudinal

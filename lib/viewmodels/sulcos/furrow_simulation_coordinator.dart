@@ -11,11 +11,7 @@ class FurrowSimulationCoordinator {
   SimulationResult simular(
     IrrigationParameters parametros, {
     AdvanceCurveResult? curvaAvanco,
-  }) =>
-      RunFurrowSimulation()(
-        parametros,
-        advanceCurve: curvaAvanco,
-      );
+  }) => RunFurrowSimulation()(parametros, advanceCurve: curvaAvanco);
 
   SimulationResult executar(
     IrrigationParameters parametros, {

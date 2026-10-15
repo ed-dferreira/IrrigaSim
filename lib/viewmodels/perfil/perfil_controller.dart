@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../services/perfil/preferencias_app.dart';
 import '../../models/perfil/tamanho_fonte.dart';
-import '../../models/user/user.dart';
 
 class PerfilState {
   final bool editando;
@@ -68,11 +67,14 @@ class PerfilState {
 }
 
 class PerfilController extends StateNotifier<PerfilState> {
-  User? _user;
+  ({String nome, String instituicao, String curso})? _edicaoAnterior;
 
   PerfilController()
     : super(
         PerfilState(
+          nome: PreferenciasApp.perfilNome(),
+          instituicao: PreferenciasApp.perfilInstituicao(),
+          curso: PreferenciasApp.perfilCurso(),
           temaEscuro: PreferenciasApp.temaEscuro(),
           tamanhoFonte: PreferenciasApp.tamanhoFonte(),
           altoContraste: PreferenciasApp.altoContraste(),
@@ -85,21 +87,33 @@ class PerfilController extends StateNotifier<PerfilState> {
   // ---- Edição do perfil ----
 
   void iniciarEdicao() {
+    _edicaoAnterior = (
+      nome: state.nome,
+      instituicao: state.instituicao,
+      curso: state.curso,
+    );
     state = state.copyWith(editando: true);
   }
 
   void cancelarEdicao() {
+    final anterior = _edicaoAnterior;
     state = state.copyWith(
       editando: false,
-      nome: _user?.nome ?? '',
-      instituicao: _user?.instituicao ?? '',
-      curso: _user?.curso ?? '',
+      nome: anterior?.nome ?? state.nome,
+      instituicao: anterior?.instituicao ?? state.instituicao,
+      curso: anterior?.curso ?? state.curso,
     );
+    _edicaoAnterior = null;
   }
 
-  void salvarEdicao() {
+  Future<void> salvarEdicao() async {
     state = state.copyWith(editando: false);
-    // TODO: Persistir no Firestore
+    _edicaoAnterior = null;
+    await Future.wait([
+      PreferenciasApp.definirPerfilNome(state.nome),
+      PreferenciasApp.definirPerfilInstituicao(state.instituicao),
+      PreferenciasApp.definirPerfilCurso(state.curso),
+    ]);
   }
 
   void atualizarNome(String nome) {
@@ -144,18 +158,6 @@ class PerfilController extends StateNotifier<PerfilState> {
   void alternarModoLeitorTela(bool ativo) {
     state = state.copyWith(modoLeitorTela: ativo);
     PreferenciasApp.definirModoLeitorTela(ativo);
-  }
-
-  // ---- Sincronização com conta ----
-
-  void sincronizarCom(User? user) {
-    _user = user;
-    if (user == null || state.editando) return;
-    state = state.copyWith(
-      nome: user.nome ?? '',
-      instituicao: user.instituicao ?? '',
-      curso: user.curso ?? '',
-    );
   }
 
   // ---- Estatísticas ----

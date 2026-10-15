@@ -28,10 +28,15 @@ class CustomChip<T> extends StatelessWidget {
     return GestureDetector(
       onTap: onSelected,
       child: AnimatedContainer(
-        duration: animationDuration(reduced, normal: const Duration(milliseconds: 200)),
+        duration: animationDuration(
+          reduced,
+          normal: const Duration(milliseconds: 200),
+        ),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? chipColor.withValues(alpha: 0.15) : colorScheme.surface,
+          color: selected
+              ? chipColor.withValues(alpha: 0.15)
+              : colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: selected ? chipColor : colorScheme.outline,

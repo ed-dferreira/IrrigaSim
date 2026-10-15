@@ -6,6 +6,7 @@ import 'package:irrigasim/models/cenarios/cenario_salvo.dart';
 import 'package:irrigasim/models/irrigation_parameters.dart';
 import 'package:irrigasim/viewmodels/parameters_controller.dart';
 import 'package:irrigasim/viewmodels/faixas/border_project_controller.dart';
+import 'package:irrigasim/viewmodels/inundacao/basin_project_controller.dart';
 import 'package:irrigasim/viewmodels/cenarios/scenario_providers.dart';
 
 class CenariosScreen extends ConsumerStatefulWidget {
@@ -567,9 +568,13 @@ class _ScenarioDetails extends ConsumerWidget {
                 if (cenario.metodo == MetodoIrrigacao.sulco) ...[
                   const SizedBox(height: 16),
                   if (cenario.parametros.entradasProjetoSulco == null)
-                    Text('Cenário legado: entradas agronômicas originais ausentes. '
-                        'Valores ilustrativos não serão usados para recalcular a IRN.',
-                      style: text.bodyMedium?.copyWith(color: colors.onSurfaceVariant)),
+                    Text(
+                      'Cenário legado: entradas agronômicas originais ausentes. '
+                      'Valores ilustrativos não serão usados para recalcular a IRN.',
+                      style: text.bodyMedium?.copyWith(
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
                   FilledButton.icon(
                     onPressed: () {
                       ref.read(parametersProvider.notifier)
@@ -579,6 +584,20 @@ class _ScenarioDetails extends ConsumerWidget {
                     },
                     icon: const Icon(AppIcons.visualizarCenario),
                     label: const Text('Abrir entradas do sulco'),
+                  ),
+                ],
+                if (cenario.metodo == MetodoIrrigacao.inundacao &&
+                    cenario.parametros.projetoInundacao != null) ...[
+                  const SizedBox(height: 16),
+                  FilledButton.icon(
+                    onPressed: () {
+                      ref
+                          .read(basinProjectProvider.notifier)
+                          .carregar(cenario.parametros.projetoInundacao!);
+                      context.go('/home/irrigation/basin-project');
+                    },
+                    icon: const Icon(AppIcons.visualizarCenario),
+                    label: const Text('Abrir entradas da inundação'),
                   ),
                 ],
               ],

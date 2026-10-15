@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
-import 'package:irrigasim/viewmodels/auth/auth_providers.dart';
 import 'package:irrigasim/models/irrigation_parameters.dart';
 import 'package:irrigasim/viewmodels/parameters_controller.dart';
 import 'package:irrigasim/viewmodels/perfil/perfil_controller.dart';
@@ -14,8 +13,10 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
-    final userName = ref.watch(authProvider).user?.nome ?? 'Usuário';
-    final firstName = userName.trim().split(' ').first;
+    final userName = ref.watch(perfilProvider.select((state) => state.nome));
+    final firstName = userName.trim().isEmpty
+        ? 'Usuário'
+        : userName.trim().split(' ').first;
     final isDark = ref.watch(
       perfilProvider.select((state) => state.temaEscuro),
     );
@@ -120,6 +121,8 @@ class HomeScreen extends ConsumerWidget {
       context.push('/home/irrigation/tipo-sulco');
     } else if (method == MetodoIrrigacao.faixa) {
       context.push('/home/irrigation/border-project');
+    } else if (method == MetodoIrrigacao.inundacao) {
+      context.push('/home/irrigation/basin-project');
     } else {
       context.push('/home/irrigation/parameters');
     }

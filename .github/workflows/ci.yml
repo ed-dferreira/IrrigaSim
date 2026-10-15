@@ -13,6 +13,9 @@
 # 3. Roda o analyzer (verifica erros de código)
 # 4. Roda os testes automatizados
 #
+# O projeto não usa Firebase nem qualquer outro backend: nenhuma
+# configuração, credencial ou secret adicional é necessária aqui.
+#
 # Se qualquer etapa falhar, o PR não poderá ser merged.
 # ============================================================
 

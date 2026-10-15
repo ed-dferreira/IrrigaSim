@@ -5,10 +5,7 @@ import 'package:irrigasim/app/theme/app_icons.dart';
 class MainShell extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
-  const MainShell({
-    super.key,
-    required this.navigationShell,
-  });
+  const MainShell({super.key, required this.navigationShell});
 
   @override
   Widget build(BuildContext context) {
@@ -43,10 +40,7 @@ class MainShell extends StatelessWidget {
           ),
           NavigationDestination(
             icon: const Icon(AppIcons.navPerfil),
-            selectedIcon: Icon(
-              AppIcons.navPerfil,
-              color: colorScheme.primary,
-            ),
+            selectedIcon: Icon(AppIcons.navPerfil, color: colorScheme.primary),
             label: 'Perfil',
           ),
         ],

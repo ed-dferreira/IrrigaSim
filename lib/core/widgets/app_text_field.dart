@@ -48,11 +48,17 @@ class AppTextField extends StatelessWidget {
             hintText: hint,
             errorText: error,
             prefixIcon: prefixIcon != null
-                ? Icon(prefixIcon, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6), size: 20)
+                ? Icon(
+                    prefixIcon,
+                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                    size: 20,
+                  )
                 : null,
             suffixIcon: suffix,
             filled: true,
-            fillColor: enabled ? colorScheme.surfaceContainerHighest : colorScheme.surfaceContainerHigh,
+            fillColor: enabled
+                ? colorScheme.surfaceContainerHighest
+                : colorScheme.surfaceContainerHigh,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: colorScheme.outline),

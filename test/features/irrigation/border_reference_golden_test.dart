@@ -39,8 +39,7 @@ BorderProject cenarioProjeto(Map<String, dynamic> cenario, {int? nSegmentos}) =>
     );
 
 List<BorderProfilePoint> perfilConstante(double z, {double l = 100}) => [
-  for (var i = 0; i <= 10; i++)
-    BorderProfilePoint(l * i / 10, 0, 0, 0, z),
+  for (var i = 0; i <= 10; i++) BorderProfilePoint(l * i / 10, 0, 0, 0, z),
 ];
 
 void main() {
@@ -52,15 +51,13 @@ void main() {
   final tolTempos = numero(tolerancias['tempos_min']);
   final tolLaminas = numero(tolerancias['laminas_m']);
   final tolEficiencias = numero(tolerancias['eficiencias_pontos_percentuais']);
-  final cenarios =
-      (referencia['cenarios'] as List).cast<Map<String, dynamic>>();
+  final cenarios = (referencia['cenarios'] as List)
+      .cast<Map<String, dynamic>>();
 
   group('Etapa 7 · regressão dourada §8.4', () {
     for (final cenario in cenarios) {
       final nome = cenario['nome'] as String;
-      final esperado = Map<String, dynamic>.from(
-        cenario['resultados'] as Map,
-      );
+      final esperado = Map<String, dynamic>.from(cenario['resultados'] as Map);
 
       test('$nome reproduz resultados_referencia.json', () {
         final projeto = cenarioProjeto(cenario);
@@ -118,12 +115,11 @@ void main() {
 
       test('$nome confere perfil com perfil_$nome.csv', () {
         final r = solver.dimensionar(cenarioProjeto(cenario));
-        final linhas =
-            File('$pacote/perfil_$nome.csv')
-                .readAsLinesSync()
-                .skip(1)
-                .where((linha) => linha.trim().isNotEmpty)
-                .toList();
+        final linhas = File('$pacote/perfil_$nome.csv')
+            .readAsLinesSync()
+            .skip(1)
+            .where((linha) => linha.trim().isNotEmpty)
+            .toList();
         expect(r.perfil.length, linhas.length);
         var xMax = 0.0, avancoMax = 0.0, recessaoMax = 0.0;
         var oportunidadeMax = 0.0, infiltracaoMax = 0.0;
@@ -132,7 +128,10 @@ void main() {
           final ponto = r.perfil[i];
           xMax = math.max(xMax, (ponto.xM - campos[0]).abs());
           avancoMax = math.max(avancoMax, (ponto.avancoMin - campos[1]).abs());
-          recessaoMax = math.max(recessaoMax, (ponto.recessaoMin - campos[2]).abs());
+          recessaoMax = math.max(
+            recessaoMax,
+            (ponto.recessaoMin - campos[2]).abs(),
+          );
           oportunidadeMax = math.max(
             oportunidadeMax,
             (ponto.oportunidadeMin - campos[3]).abs(),
@@ -174,7 +173,10 @@ void main() {
       expect(100 * v.utilM3M / entrada, closeTo(100, 1e-9));
       expect(100 * v.utilM3M / 5, closeTo(100, 1e-9));
       expect(100 * v.percoladoM3M / entrada, closeTo(0, 1e-9));
-      expect(100 * (entrada - v.utilM3M - v.percoladoM3M) / entrada, closeTo(0, 1e-9));
+      expect(
+        100 * (entrada - v.utilM3M - v.percoladoM3M) / entrada,
+        closeTo(0, 1e-9),
+      );
     });
 
     test('perfil constante I=0,06 → Ea=62,5 Er=100 Pp=12,5 Pe=25', () {
@@ -230,9 +232,7 @@ void main() {
 
     test('depleção ajustada para t0 com q=0,4 m³/min/m (§8.5)', () {
       final r = solver.dimensionar(
-        cenarioProjeto(cenarios.first).copyWith(
-          vazaoUnitariaLsM: 0.4 / 0.06,
-        ),
+        cenarioProjeto(cenarios.first).copyWith(vazaoUnitariaLsM: 0.4 / 0.06),
       );
       expect(r.tdMin, closeTo(r.t0Min, 1e-6));
       expect(r.perfil.first.infiltracaoM, closeTo(0.056, 1e-8));
@@ -350,8 +350,11 @@ void main() {
     test('td ≤ ta rejeita a depleção', () {
       expect(
         () => solver.dimensionar(
-          base.copyWith(rugosidadeN: 0.2, comprimentoM: 800,
-              desnivelLongitudinalM: 0.8),
+          base.copyWith(
+            rugosidadeN: 0.2,
+            comprimentoM: 800,
+            desnivelLongitudinalM: 0.8,
+          ),
         ),
         throwsA(
           isA<FormatException>().having(

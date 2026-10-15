@@ -1,14 +1,13 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:irrigasim/viewmodels/auth/auth_providers.dart';
-import 'package:irrigasim/views/auth/login_screen.dart';
-import 'package:irrigasim/views/auth/register_screen.dart';
 import 'package:irrigasim/views/home/home_screen.dart';
 import 'package:irrigasim/views/irrigation/irrigation_screen.dart';
 import 'package:irrigasim/views/irrigation/parameters_screen.dart';
 import 'package:irrigasim/views/irrigation/faixas/border_project_screen.dart';
 import 'package:irrigasim/views/irrigation/faixas/border_results_screen.dart';
+import 'package:irrigasim/views/irrigation/inundacao/basin_project_screen.dart';
+import 'package:irrigasim/views/irrigation/inundacao/basin_reference_screen.dart';
+import 'package:irrigasim/views/irrigation/inundacao/basin_results_screen.dart';
 import 'package:irrigasim/views/irrigation/sulcos/project_screen.dart';
 import 'package:irrigasim/views/irrigation/sulcos/project_results_screen.dart';
 import 'package:irrigasim/views/irrigation/results_screen.dart';
@@ -18,46 +17,10 @@ import 'package:irrigasim/views/tutorial/tutorial_screen.dart';
 import 'package:irrigasim/views/perfil/perfil_screen.dart';
 import 'package:irrigasim/core/navigation/main_shell.dart';
 
-class _AuthRefreshNotifier extends ChangeNotifier {
-  _AuthRefreshNotifier(this._ref) {
-    _subscription = _ref.listen<AuthState>(authProvider, (_, _) {
-      notifyListeners();
-    });
-  }
-
-  final Ref _ref;
-  late final ProviderSubscription<AuthState> _subscription;
-
-  @override
-  void dispose() {
-    _subscription.close();
-    super.dispose();
-  }
-}
-
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final authRefreshNotifier = _AuthRefreshNotifier(ref);
-
   return GoRouter(
-    initialLocation: '/login',
-    refreshListenable: authRefreshNotifier,
-    redirect: (context, state) {
-      final authState = ref.read(authProvider);
-      final isLoggedIn = authState.isAuthenticated;
-      final isAuthRoute =
-          state.matchedLocation == '/login' ||
-          state.matchedLocation == '/register';
-
-      if (!isLoggedIn && !isAuthRoute) return '/login';
-      if (isLoggedIn && isAuthRoute) return '/home';
-      return null;
-    },
+    initialLocation: '/home',
     routes: [
-      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
-      GoRoute(
-        path: '/register',
-        builder: (context, state) => const RegisterScreen(),
-      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return MainShell(navigationShell: navigationShell);
@@ -88,6 +51,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'irrigation/border-results',
                     builder: (context, state) => const BorderResultsScreen(),
+                  ),
+                  GoRoute(
+                    path: 'irrigation/basin-project',
+                    builder: (context, state) => const BasinProjectScreen(),
+                  ),
+                  GoRoute(
+                    path: 'irrigation/basin-results',
+                    builder: (context, state) => const BasinResultsScreen(),
+                  ),
+                  GoRoute(
+                    path: 'irrigation/basin-reference',
+                    builder: (context, state) => const BasinReferenceScreen(),
                   ),
                   GoRoute(
                     path: 'irrigation/project',

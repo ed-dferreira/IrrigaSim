@@ -73,8 +73,9 @@ class BorderNotice {
 
   /// Aceita mapa novo e texto de aviso legado (que vira aviso orientativo).
   factory BorderNotice.fromMap(Object? data) {
-    if (data is String)
+    if (data is String) {
       return BorderNotice(BorderStatus.avisoOrientativo, data);
+    }
     if (data is! Map) {
       throw const FormatException('Aviso de faixa em formato desconhecido.');
     }

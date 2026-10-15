@@ -52,10 +52,7 @@ class UnitsService {
   // ── Validações ──────────────────────────────────────────────────────────
 
   /// Valida se um valor numérico não é negativo.
-  static ValidationResult validarNaoNegativo(
-    double valor,
-    String nomeCampo,
-  ) {
+  static ValidationResult validarNaoNegativo(double valor, String nomeCampo) {
     if (valor < 0) {
       return ValidationResult.invalida(
         '$nomeCampo não pode ser negativo (recebido: $valor)',
@@ -65,10 +62,7 @@ class UnitsService {
   }
 
   /// Valida se um valor é positivo (maior que zero).
-  static ValidationResult validarPositivo(
-    double valor,
-    String nomeCampo,
-  ) {
+  static ValidationResult validarPositivo(double valor, String nomeCampo) {
     if (valor <= 0) {
       return ValidationResult.invalida(
         '$nomeCampo deve ser maior que zero (recebido: $valor)',
@@ -98,10 +92,7 @@ class UnitsService {
   }
 
   /// Valida porcentagem (0 a 100).
-  static ValidationResult validarPorcentagem(
-    double valor,
-    String nomeCampo,
-  ) {
+  static ValidationResult validarPorcentagem(double valor, String nomeCampo) {
     return validarFaixa(valor, 0, 100, nomeCampo);
   }
 
@@ -121,10 +112,7 @@ class UnitsService {
   }
 
   /// Valida que a vazão de saída não é maior que a de entrada.
-  static ValidationResult validarVazaoSaida(
-    double qEntrada,
-    double qSaida,
-  ) {
+  static ValidationResult validarVazaoSaida(double qEntrada, double qSaida) {
     if (qSaida > qEntrada) {
       return ValidationResult.aviso(
         'Vazão de saída ($qSaida) é maior que a de entrada ($qEntrada). '
@@ -150,19 +138,17 @@ class ValidationResult {
   factory ValidationResult.valida() =>
       const ValidationResult._(isValida: true, tipo: TipoValidacao.ok);
 
-  factory ValidationResult.invalida(String mensagem) =>
-      ValidationResult._(
-        isValida: false,
-        mensagem: mensagem,
-        tipo: TipoValidacao.erro,
-      );
+  factory ValidationResult.invalida(String mensagem) => ValidationResult._(
+    isValida: false,
+    mensagem: mensagem,
+    tipo: TipoValidacao.erro,
+  );
 
-  factory ValidationResult.aviso(String mensagem) =>
-      ValidationResult._(
-        isValida: true,
-        mensagem: mensagem,
-        tipo: TipoValidacao.aviso,
-      );
+  factory ValidationResult.aviso(String mensagem) => ValidationResult._(
+    isValida: true,
+    mensagem: mensagem,
+    tipo: TipoValidacao.aviso,
+  );
 }
 
 enum TipoValidacao { ok, aviso, erro }
@@ -173,8 +159,7 @@ class ValidacaoEntradas {
 
   List<ValidationResult> get resultados => List.unmodifiable(_resultados);
 
-  bool get tudoValido =>
-      _resultados.every((r) => r.tipo != TipoValidacao.erro);
+  bool get tudoValido => _resultados.every((r) => r.tipo != TipoValidacao.erro);
 
   List<String> get erros => _resultados
       .where((r) => r.tipo == TipoValidacao.erro)

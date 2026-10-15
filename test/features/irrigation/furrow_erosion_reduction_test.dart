@@ -331,7 +331,8 @@ void main() {
     controller.setOrigemVazaoReduzida(OrigemVazaoReduzida.vib);
     expect(controller.state.vazaoReduzidaLs, 0);
     final params = controller.state.toIrrigationParameters().copyWith(
-      k: .5, a: .5,
+      k: .5,
+      a: .5,
     );
     expect(params.origemVazaoReduzida, OrigemVazaoReduzida.vib);
     expect(

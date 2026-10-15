@@ -1,6 +1,8 @@
 import 'package:irrigasim/models/irrigation_parameters.dart';
 import 'package:irrigasim/models/comum/adaptadores_superficie.dart';
 import 'package:irrigasim/models/cenarios/cenario_salvo.dart';
+import 'package:irrigasim/models/faixas/border_project.dart';
+import 'package:irrigasim/models/inundacao/basin_project.dart';
 import 'package:irrigasim/models/simulation_result_model.dart';
 import 'package:irrigasim/models/sulcos/tipo_sulco_info.dart';
 
@@ -26,6 +28,12 @@ class ProjectStore {
       'base_comum': p.baseComumPara(cenario.metodo).toMap(),
       if (cenario.metodo == MetodoIrrigacao.sulco)
         'entradas_projeto_sulco': p.entradasProjetoSulco?.toMap(),
+      if (cenario.metodo == MetodoIrrigacao.faixa)
+        'projeto_faixa': (p.projetoFaixa ?? BorderProject.fromLegacy(p))
+            .toMap(),
+      if (cenario.metodo == MetodoIrrigacao.inundacao)
+        'projeto_inundacao': (p.projetoInundacao ?? BasinProject.fromLegacy(p))
+            .toMap(),
       'unidades': {
         'comprimento': 'm',
         'largura_ou_espacamento': 'm',
@@ -118,7 +126,6 @@ class ProjectStore {
         'data_criacao': cenario.dataCriacao.toIso8601String(),
         'data_modificacao': cenario.dataModificacao.toIso8601String(),
         'versao_calculo': '1.0',
-        'usuario_id': cenario.usuarioId,
       },
     };
   }
@@ -155,24 +162,28 @@ class ProjectStore {
     buffer.writeln('Manejo: ${p.manejoSulco.displayName}');
     if (cenario.metodo == MetodoIrrigacao.sulco) {
       final entradas = p.entradasProjetoSulco;
-      buffer.writeln(entradas == null
-          ? 'Projeto legado: UCC, UPMP, Ds, raízes, f, ETo e origem da chuva ausentes.'
-          : 'Entradas do projeto de sulcos v${entradas.versao}: '
-            'UCC=${entradas.uccPercentual ?? 'ausente'}%; '
-            'UPMP=${entradas.upmpPercentual ?? 'ausente'}%; '
-            'Ds=${entradas.densidadeAparenteGcm3 ?? 'ausente'} g/cm³; '
-            'raízes=${entradas.profundidadeRadicularCm ?? 'ausente'} cm; '
-            'f=${entradas.fracaoDisponivel ?? 'ausente'}; '
-            'ETc adotada=${entradas.etcAdotadaMmDia ?? 'ausente'} mm/dia; '
-            'ETo=${entradas.etoMmDia ?? 'ausente'} mm/dia; '
-            'chuva ${entradas.origemChuva.name}=${entradas.precipitacaoMmDia ?? 'ausente'} mm/dia.');
+      buffer.writeln(
+        entradas == null
+            ? 'Projeto legado: UCC, UPMP, Ds, raízes, f, ETo e origem da chuva ausentes.'
+            : 'Entradas do projeto de sulcos v${entradas.versao}: '
+                  'UCC=${entradas.uccPercentual ?? 'ausente'}%; '
+                  'UPMP=${entradas.upmpPercentual ?? 'ausente'}%; '
+                  'Ds=${entradas.densidadeAparenteGcm3 ?? 'ausente'} g/cm³; '
+                  'raízes=${entradas.profundidadeRadicularCm ?? 'ausente'} cm; '
+                  'f=${entradas.fracaoDisponivel ?? 'ausente'}; '
+                  'ETc adotada=${entradas.etcAdotadaMmDia ?? 'ausente'} mm/dia; '
+                  'ETo=${entradas.etoMmDia ?? 'ausente'} mm/dia; '
+                  'chuva ${entradas.origemChuva.name}=${entradas.precipitacaoMmDia ?? 'ausente'} mm/dia.',
+      );
       if (entradas?.curvaInfiltracao case final curva?) {
-        buffer.writeln('Curva ${curva.tipo.name} (${curva.base.name}): '
-            'K=${curva.coeficiente} ${curva.unidadeCoeficiente}; '
-            'expoente=${curva.expoente}; E=${curva.espacamentoConversaoM ?? 'não aplicável'} m; '
-            'VIB=${curva.vibMmHora ?? 'ausente'} mm/h; '
-            'calibração=${curva.tempoMinCalibrado ?? 'ausente'}–'
-            '${curva.tempoMaxCalibrado ?? 'ausente'} min.');
+        buffer.writeln(
+          'Curva ${curva.tipo.name} (${curva.base.name}): '
+          'K=${curva.coeficiente} ${curva.unidadeCoeficiente}; '
+          'expoente=${curva.expoente}; E=${curva.espacamentoConversaoM ?? 'não aplicável'} m; '
+          'VIB=${curva.vibMmHora ?? 'ausente'} mm/h; '
+          'calibração=${curva.tempoMinCalibrado ?? 'ausente'}–'
+          '${curva.tempoMaxCalibrado ?? 'ausente'} min.',
+        );
       }
     }
     if (p.manejoSulco == ManejoSulco.reduzida) {
@@ -336,7 +347,6 @@ class ProjectStore {
       resultado: original.resultado,
       dataCriacao: DateTime.now(),
       dataModificacao: DateTime.now(),
-      usuarioId: original.usuarioId,
     );
   }
 

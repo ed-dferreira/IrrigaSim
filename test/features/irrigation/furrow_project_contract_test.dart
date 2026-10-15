@@ -66,4 +66,36 @@ void main() {
     expect(entradas.curvaInfiltracao, isNull);
     expect(entradas.podeRecalcularIrrigacao, isFalse);
   });
+
+  test('typedefs de clima preservam a serialização de sulcos', () {
+    final entradas = EntradasProjetoSulco.fromMap(const {
+      'versao': 2,
+      'origem_chuva': 'provavel',
+      'metodo_etc': 'blaneyCriddle',
+      'temperatura_media_c': 21,
+      'latitude_graus': -30.1,
+      'mes_referencia': 3,
+      'kc': 1.15,
+    });
+
+    expect(entradas.origemChuva, OrigemChuvaSulco.provavel);
+    expect(entradas.metodoEtc, MetodoEtcSulco.blaneyCriddle);
+
+    final mapa = entradas.toMap();
+    expect(mapa['origem_chuva'], 'provavel');
+    expect(mapa['metodo_etc'], 'blaneyCriddle');
+
+    final restaurada = EntradasProjetoSulco.fromMap(
+      Map<String, dynamic>.from(mapa),
+    );
+    expect(restaurada.origemChuva, OrigemChuvaSulco.provavel);
+    expect(restaurada.metodoEtc, MetodoEtcSulco.blaneyCriddle);
+    expect(restaurada.temperaturaMediaC, 21);
+    expect(restaurada.latitudeGraus, -30.1);
+    expect(restaurada.mesReferencia, 3);
+    // Os nomes `.name` são idênticos aos de antes da extração: cenários
+    // salvos continuam legíveis.
+    expect(OrigemChuvaSulco.provavel.name, 'provavel');
+    expect(MetodoEtcSulco.blaneyCriddle.name, 'blaneyCriddle');
+  });
 }

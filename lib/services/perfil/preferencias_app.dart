@@ -11,6 +11,9 @@ class PreferenciasApp {
   static const _keyAnimacoesReduzidas = 'animacoes_reduzidas';
   static const _keyModoLeitorTela = 'modo_leitor_tela';
   static const _keyTamanhoFonte = 'tamanho_fonte';
+  static const _keyPerfilNome = 'perfil_nome';
+  static const _keyPerfilInstituicao = 'perfil_instituicao';
+  static const _keyPerfilCurso = 'perfil_curso';
 
   static Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
@@ -58,6 +61,20 @@ class PreferenciasApp {
   static Future<void> definirTamanhoFonte(TamanhoFonte tamanho) =>
       prefs.setInt(_keyTamanhoFonte, tamanho.index);
 
+  // Dados do perfil (locais, sem conta)
+  static String perfilNome() => prefs.getString(_keyPerfilNome) ?? '';
+  static Future<void> definirPerfilNome(String nome) =>
+      prefs.setString(_keyPerfilNome, nome);
+
+  static String perfilInstituicao() =>
+      prefs.getString(_keyPerfilInstituicao) ?? '';
+  static Future<void> definirPerfilInstituicao(String instituicao) =>
+      prefs.setString(_keyPerfilInstituicao, instituicao);
+
+  static String perfilCurso() => prefs.getString(_keyPerfilCurso) ?? '';
+  static Future<void> definirPerfilCurso(String curso) =>
+      prefs.setString(_keyPerfilCurso, curso);
+
   // Limpar todas as preferências
   static Future<void> limpar() async {
     await prefs.remove(_keyTemaEscuro);
@@ -66,5 +83,8 @@ class PreferenciasApp {
     await prefs.remove(_keyAnimacoesReduzidas);
     await prefs.remove(_keyModoLeitorTela);
     await prefs.remove(_keyTamanhoFonte);
+    await prefs.remove(_keyPerfilNome);
+    await prefs.remove(_keyPerfilInstituicao);
+    await prefs.remove(_keyPerfilCurso);
   }
 }
