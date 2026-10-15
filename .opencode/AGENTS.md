@@ -24,7 +24,6 @@ at the layer root:
 ```
 lib/
 ├── main.dart
-├── firebase_options.dart
 ├── app/
 │   ├── app.dart
 │   ├── router/
@@ -120,10 +119,10 @@ Keep providers close to their feature in `providers.dart`. Do not add repository
 
 ## Current State
 
-- Navigation uses `go_router` with authenticated routes and a stateful bottom-navigation shell.
-- Firebase Authentication is used on supported platforms; Linux authentication uses the Firebase REST API.
-- Firestore stores authenticated users' scenarios on supported platforms.
-- `SharedPreferences` stores theme and accessibility settings.
+- Navigation uses `go_router` with a stateful bottom-navigation shell (no authentication).
+- There is no backend: the app has no login and works fully offline.
+- Scenarios are kept in a local in-memory `LocalScenarioStore` (no remote sync).
+- `SharedPreferences` stores theme, accessibility settings, and local profile data.
 - Simulation tests live under `test/features/irrigation/`.
 
 ## Simulation Flow (Irrigation Feature)

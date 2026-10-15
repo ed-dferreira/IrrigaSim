@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 import '../irrigation_parameters.dart';
 import '../faixas/border_project.dart';
 import '../inundacao/basin_project.dart';
@@ -18,7 +16,6 @@ class CenarioSalvo {
   final SimulationResult resultado;
   final DateTime dataCriacao;
   final DateTime dataModificacao;
-  final String? usuarioId;
 
   const CenarioSalvo({
     required this.id,
@@ -28,7 +25,6 @@ class CenarioSalvo {
     required this.resultado,
     required this.dataCriacao,
     required this.dataModificacao,
-    this.usuarioId,
   });
 
   CenarioSalvo copyWith({
@@ -39,7 +35,6 @@ class CenarioSalvo {
     SimulationResult? resultado,
     DateTime? dataCriacao,
     DateTime? dataModificacao,
-    String? usuarioId,
   }) {
     return CenarioSalvo(
       id: id ?? this.id,
@@ -49,7 +44,6 @@ class CenarioSalvo {
       resultado: resultado ?? this.resultado,
       dataCriacao: dataCriacao ?? this.dataCriacao,
       dataModificacao: dataModificacao ?? this.dataModificacao,
-      usuarioId: usuarioId ?? this.usuarioId,
     );
   }
 
@@ -138,9 +132,8 @@ class CenarioSalvo {
             .toList(),
       },
       'resultado': SimulationResultModel.toMap(resultado),
-      'dataCriacao': Timestamp.fromDate(dataCriacao),
-      'dataModificacao': Timestamp.fromDate(dataModificacao),
-      'usuarioId': usuarioId,
+      'dataCriacao': dataCriacao.toIso8601String(),
+      'dataModificacao': dataModificacao.toIso8601String(),
     };
   }
 
@@ -397,18 +390,17 @@ class CenarioSalvo {
       resultado: SimulationResultModel.fromMap(
         map['resultado'] as Map<String, dynamic>,
       ),
-      dataCriacao: map['dataCriacao'] is Timestamp
-          ? (map['dataCriacao'] as Timestamp).toDate()
-          : DateTime.now(),
-      dataModificacao: map['dataModificacao'] is Timestamp
-          ? (map['dataModificacao'] as Timestamp).toDate()
-          : DateTime.now(),
-      usuarioId: map['usuarioId'],
+      dataCriacao: _parseDateTime(map['dataCriacao']) ?? DateTime.now(),
+      dataModificacao: _parseDateTime(map['dataModificacao']) ?? DateTime.now(),
     );
   }
 
-  factory CenarioSalvo.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    return CenarioSalvo.fromMap(data, id: doc.id);
+  static DateTime? _parseDateTime(Object? value) {
+    if (value is DateTime) return value;
+    if (value is String) return DateTime.tryParse(value);
+    if (value is num) {
+      return DateTime.fromMillisecondsSinceEpoch(value.toInt());
+    }
+    return null;
   }
 }

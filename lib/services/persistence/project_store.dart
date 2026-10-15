@@ -126,7 +126,6 @@ class ProjectStore {
         'data_criacao': cenario.dataCriacao.toIso8601String(),
         'data_modificacao': cenario.dataModificacao.toIso8601String(),
         'versao_calculo': '1.0',
-        'usuario_id': cenario.usuarioId,
       },
     };
   }
@@ -348,7 +347,6 @@ class ProjectStore {
       resultado: original.resultado,
       dataCriacao: DateTime.now(),
       dataModificacao: DateTime.now(),
-      usuarioId: original.usuarioId,
     );
   }
 

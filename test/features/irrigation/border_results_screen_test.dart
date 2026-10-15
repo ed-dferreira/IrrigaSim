@@ -87,7 +87,7 @@ void main() {
           overrides: [
             borderProjectResultProvider.overrideWith((ref) => result),
             scenarioServiceProvider.overrideWithValue(
-              ScenarioService(store, null),
+              ScenarioService(store),
             ),
           ],
           child: const MaterialApp(home: BorderResultsScreen()),
@@ -184,7 +184,7 @@ void main() {
         ProviderScope(
           overrides: [
             scenarioServiceProvider.overrideWithValue(
-              ScenarioService(store, null),
+              ScenarioService(store),
             ),
           ],
           child: MediaQuery(

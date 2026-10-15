@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
-import 'package:irrigasim/viewmodels/auth/auth_providers.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:irrigasim/models/perfil/tamanho_fonte.dart';
@@ -9,36 +8,15 @@ import 'package:irrigasim/viewmodels/perfil/perfil_controller.dart';
 
 const _appVersion = '1.0.0';
 
-class PerfilScreen extends ConsumerStatefulWidget {
+class PerfilScreen extends ConsumerWidget {
   const PerfilScreen({super.key});
 
   @override
-  ConsumerState<PerfilScreen> createState() => _PerfilScreenState();
-}
-
-class _PerfilScreenState extends ConsumerState<PerfilScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref
-          .read(perfilProvider.notifier)
-          .sincronizarCom(ref.read(authProvider).user);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(perfilProvider);
-    final user = ref.watch(authProvider).user;
     final viewModel = ref.read(perfilProvider.notifier);
     final colors = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
-
-    ref.listen<AuthState>(
-      authProvider,
-      (_, next) => viewModel.sincronizarCom(next.user),
-    );
 
     return Scaffold(
       body: SafeArea(
@@ -64,18 +42,18 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Gerencie sua conta e adapte o IrrigaSim ao seu jeito.',
+                        'Gerencie seus dados e adapte o IrrigaSim ao seu jeito.',
                         style: text.bodyLarge?.copyWith(
                           color: colors.onSurfaceVariant,
                         ),
                       ),
                       const SizedBox(height: 22),
                       _ProfileCard(
-                        name: user?.nome ?? 'Usuário',
-                        email: user?.email ?? '',
-                        institution: user?.instituicao,
-                        course: user?.curso,
-                        photoUrl: user?.photoUrl,
+                        name: profile.nome.trim().isEmpty
+                            ? 'Usuário'
+                            : profile.nome.trim(),
+                        institution: profile.instituicao,
+                        course: profile.curso,
                         profile: profile,
                         viewModel: viewModel,
                       ),
@@ -98,10 +76,7 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
                             profile: profile,
                             viewModel: viewModel,
                           );
-                          final about = _AboutCard(
-                            onLogout: () =>
-                                ref.read(authProvider.notifier).logout(),
-                          );
+                          final about = _AboutCard();
                           if (inner.maxWidth < 820) {
                             return Column(
                               children: [
@@ -135,18 +110,14 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
 
 class _ProfileCard extends StatelessWidget {
   final String name;
-  final String email;
   final String? institution;
   final String? course;
-  final String? photoUrl;
   final PerfilState profile;
   final PerfilController viewModel;
   const _ProfileCard({
     required this.name,
-    required this.email,
     required this.institution,
     required this.course,
-    required this.photoUrl,
     required this.profile,
     required this.viewModel,
   });
@@ -165,10 +136,8 @@ class _ProfileCard extends StatelessWidget {
               ? _EditProfile(profile: profile, viewModel: viewModel)
               : _ProfileSummary(
                   name: name,
-                  email: email,
                   institution: institution,
                   course: course,
-                  photoUrl: photoUrl,
                   onEdit: viewModel.iniciarEdicao,
                 ),
         ),
@@ -179,17 +148,13 @@ class _ProfileCard extends StatelessWidget {
 
 class _ProfileSummary extends StatelessWidget {
   final String name;
-  final String email;
   final String? institution;
   final String? course;
-  final String? photoUrl;
   final VoidCallback onEdit;
   const _ProfileSummary({
     required this.name,
-    required this.email,
     required this.institution,
     required this.course,
-    required this.photoUrl,
     required this.onEdit,
   });
 
@@ -200,7 +165,7 @@ class _ProfileSummary extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final compact = constraints.maxWidth < 560;
-        final avatar = _UserAvatar(name: name, photoUrl: photoUrl);
+        final avatar = _UserAvatar(name: name);
         final details = Column(
           crossAxisAlignment: compact
               ? CrossAxisAlignment.center
@@ -214,16 +179,6 @@ class _ProfileSummary extends StatelessWidget {
               ),
               textAlign: compact ? TextAlign.center : TextAlign.start,
             ),
-            if (email.isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Text(
-                email,
-                style: text.bodyMedium?.copyWith(
-                  color: colors.onPrimaryContainer.withValues(alpha: .78),
-                ),
-                textAlign: compact ? TextAlign.center : TextAlign.start,
-              ),
-            ],
             if (institution != null && institution!.trim().isNotEmpty) ...[
               const SizedBox(height: 8),
               Row(
@@ -367,8 +322,7 @@ class _EditField extends StatelessWidget {
 
 class _UserAvatar extends StatelessWidget {
   final String name;
-  final String? photoUrl;
-  const _UserAvatar({required this.name, required this.photoUrl});
+  const _UserAvatar({required this.name});
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
@@ -385,9 +339,6 @@ class _UserAvatar extends StatelessWidget {
       child: CircleAvatar(
         radius: 43,
         backgroundColor: colors.onPrimaryContainer.withValues(alpha: .12),
-        foregroundImage: photoUrl == null || photoUrl!.isEmpty
-            ? null
-            : NetworkImage(photoUrl!),
         child: Text(
           initials.isEmpty ? '?' : initials,
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -707,8 +658,7 @@ class _InsetDivider extends StatelessWidget {
 }
 
 class _AboutCard extends StatelessWidget {
-  final VoidCallback onLogout;
-  const _AboutCard({required this.onLogout});
+  const _AboutCard();
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
@@ -784,46 +734,7 @@ class _AboutCard extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 16),
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton.icon(
-            onPressed: () => _confirmLogout(context),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: colors.error,
-              side: BorderSide(color: colors.error),
-            ),
-            icon: const Icon(Icons.logout_rounded),
-            label: const Text('Sair da conta'),
-          ),
-        ),
       ],
-    );
-  }
-
-  void _confirmLogout(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        icon: const Icon(Icons.logout_rounded),
-        title: const Text('Sair da conta?'),
-        content: const Text(
-          'Você precisará entrar novamente para acessar seus dados sincronizados.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancelar'),
-          ),
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              onLogout();
-            },
-            child: const Text('Sair'),
-          ),
-        ],
-      ),
     );
   }
 

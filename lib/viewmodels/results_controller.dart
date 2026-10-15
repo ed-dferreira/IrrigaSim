@@ -52,7 +52,6 @@ class ResultsController extends StateNotifier<ResultsState> {
     required MetodoIrrigacao metodo,
     required IrrigationParameters parametros,
     required SimulationResult resultado,
-    String? usuarioId,
   }) async {
     state = state.copyWith(salvando: true, clearErro: true);
     try {
@@ -65,7 +64,6 @@ class ResultsController extends StateNotifier<ResultsState> {
         resultado: resultado,
         dataCriacao: now,
         dataModificacao: now,
-        usuarioId: usuarioId,
       );
       await _scenarioService.salvar(cenario);
       state = state.copyWith(salvando: false);

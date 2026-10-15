@@ -50,13 +50,6 @@ iosApp/DerivedData/
 *.bak
 .cache/
 
-# ─── Firebase (gerado por tools/generate_firebase_config.dart — NÃO versionar) ─
-!lib/firebase_options.dart
-android/app/google-services.json
-ios/Runner/GoogleService-Info.plist
-**/.firebase*
-firebase.json
-
 # multitask (logs/prompts de agentes paralelos)
 .multitask/
 # Miscellaneous
