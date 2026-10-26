@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/models/faixas/border_numeric.dart';
-import 'package:irrigasim/models/faixas/border_project.dart';
-import 'package:irrigasim/models/faixas/border_result.dart';
-import 'package:irrigasim/services/simulation/faixas/border_hydraulics.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/border_numeric.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/border_project.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/border_result.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/border_hydraulics.dart';
 
 void main() {
   const solver = BorderHydraulics();

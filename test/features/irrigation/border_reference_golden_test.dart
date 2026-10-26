@@ -6,10 +6,10 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/models/faixas/border_numeric.dart';
-import 'package:irrigasim/models/faixas/border_project.dart';
-import 'package:irrigasim/models/faixas/border_result.dart';
-import 'package:irrigasim/services/simulation/faixas/border_hydraulics.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/border_numeric.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/border_project.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/border_result.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/border_hydraulics.dart';
 
 const pacote = 'docs/Pacote_faixas/faixas';
 

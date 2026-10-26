@@ -1,20 +1,20 @@
 import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/models/irrigation_parameters.dart';
-import 'package:irrigasim/models/sulcos/irrigation_project.dart';
-import 'package:irrigasim/models/sulcos/field_measurements.dart';
-import 'package:irrigasim/models/sulcos/tipo_sulco_info.dart';
-import 'package:irrigasim/services/simulation/sulcos/advance_curve_model.dart';
-import 'package:irrigasim/services/simulation/sulcos/depth_performance.dart';
-import 'package:irrigasim/services/simulation/sulcos/flow_management.dart';
-import 'package:irrigasim/services/simulation/sulcos/infiltration_model.dart';
-import 'package:irrigasim/services/simulation/lamina_requerida.dart';
-import 'package:irrigasim/services/simulation/sulcos/length_selector.dart';
-import 'package:irrigasim/services/simulation/operational_planning.dart';
-import 'package:irrigasim/services/simulation/sulcos/opportunity_time.dart';
-import 'package:irrigasim/services/simulation/sulcos/run_furrow_simulation.dart';
-import 'package:irrigasim/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/irrigation_project.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/field_measurements.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/advance_curve_model.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/depth_performance.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/flow_management.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/infiltration_model.dart';
+import 'package:irrigasim/shared/irrigacao/services/lamina_requerida.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/length_selector.dart';
+import 'package:irrigasim/shared/irrigacao/services/operational_planning.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/opportunity_time.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/run_furrow_simulation.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/parameters_controller.dart';
 
 void main() {
   group('documented domain regressions', () {

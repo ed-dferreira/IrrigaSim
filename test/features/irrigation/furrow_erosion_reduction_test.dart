@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/models/cenarios/cenario_salvo.dart';
-import 'package:irrigasim/models/irrigation_parameters.dart';
-import 'package:irrigasim/models/sulcos/field_measurements.dart';
-import 'package:irrigasim/services/persistence/project_store.dart';
-import 'package:irrigasim/services/simulation/sulcos/flow_management.dart';
-import 'package:irrigasim/services/simulation/sulcos/run_furrow_simulation.dart';
-import 'package:irrigasim/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/shared/cenarios/models/cenario_salvo.dart';
+import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/field_measurements.dart';
+import 'package:irrigasim/shared/cenarios/services/project_store.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/flow_management.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/run_furrow_simulation.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/parameters_controller.dart';
 
 void main() {
   const conditions = 'Solo médio, seção V e orientação do projeto';

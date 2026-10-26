@@ -4,8 +4,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/services/simulation/inundacao/basin_reference_math.dart';
-import 'package:irrigasim/views/irrigation/inundacao/basin_project_screen.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/services/basin_reference_math.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/views/basin_project_screen.dart';
 
 void main() {
   Future<void> abrirEtapa(

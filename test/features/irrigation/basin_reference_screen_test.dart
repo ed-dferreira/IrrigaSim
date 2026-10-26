@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/views/irrigation/inundacao/basin_reference_screen.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/views/basin_reference_screen.dart';
 import 'package:markdown/markdown.dart' show ExtensionSet;
 
 const assetEsperado = 'docs/Pacote_Inundacao/Resumo_irrigacao_por_inundacao.md';

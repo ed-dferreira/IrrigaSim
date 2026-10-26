@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:irrigasim/models/faixas/border_project.dart';
-import 'package:irrigasim/viewmodels/faixas/border_project_controller.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/border_project.dart';
+import 'package:irrigasim/features/irrigacao_faixas/viewmodels/border_project_controller.dart';
 
 void main() {
   test('IRN calculada usa somente agronomia informada; campo removido volta a pendente', () {

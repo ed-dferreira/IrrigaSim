@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/views/irrigation/faixas/border_project_screen.dart';
+import 'package:irrigasim/features/irrigacao_faixas/views/border_project_screen.dart';
 
 void main() {
   testWidgets('projeto de faixas segue etapas agronômicas e hidráulicas', (

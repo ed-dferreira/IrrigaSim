@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/models/faixas/border_measurements.dart';
-import 'package:irrigasim/models/faixas/border_project.dart';
-import 'package:irrigasim/models/faixas/border_result.dart';
-import 'package:irrigasim/services/simulation/faixas/border_csv.dart';
-import 'package:irrigasim/services/simulation/faixas/border_field_trial.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/border_measurements.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/border_project.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/border_result.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/border_csv.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/border_field_trial.dart';
 
 void main() {
   const trial = BorderFieldTrial();

@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/models/cenarios/cenario_salvo.dart';
-import 'package:irrigasim/models/faixas/border_numeric.dart';
-import 'package:irrigasim/models/faixas/border_agronomy.dart';
-import 'package:irrigasim/models/faixas/border_project.dart';
-import 'package:irrigasim/models/faixas/border_result.dart';
-import 'package:irrigasim/models/irrigation_parameters.dart';
-import 'package:irrigasim/services/simulation/faixas/run_border_simulation.dart';
+import 'package:irrigasim/shared/cenarios/models/cenario_salvo.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/border_numeric.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/border_agronomy.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/border_project.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/border_result.dart';
+import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/run_border_simulation.dart';
 
 void main() {
   const project = BorderProject.ilustrativo;

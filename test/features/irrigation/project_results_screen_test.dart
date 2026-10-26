@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/app/theme/app_theme.dart';
-import 'package:irrigasim/models/cenarios/cenario_salvo.dart';
-import 'package:irrigasim/models/sulcos/field_measurements.dart';
-import 'package:irrigasim/models/sulcos/irrigation_project.dart';
-import 'package:irrigasim/services/persistence/local_scenario_store.dart';
-import 'package:irrigasim/services/cenarios/scenario_service.dart';
-import 'package:irrigasim/viewmodels/cenarios/scenario_providers.dart';
-import 'package:irrigasim/viewmodels/parameters_controller.dart';
-import 'package:irrigasim/viewmodels/results_controller.dart';
-import 'package:irrigasim/views/irrigation/sulcos/project_results_screen.dart';
-import 'package:irrigasim/views/irrigation/sulcos/project_screen.dart';
+import 'package:irrigasim/shared/cenarios/models/cenario_salvo.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/field_measurements.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/irrigation_project.dart';
+import 'package:irrigasim/shared/cenarios/persistence/local_scenario_store.dart';
+import 'package:irrigasim/shared/cenarios/services/scenario_service.dart';
+import 'package:irrigasim/shared/cenarios/providers/scenario_providers.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/shared/cenarios/controllers/salvar_cenario_controller.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/views/project_results_screen.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/views/project_screen.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

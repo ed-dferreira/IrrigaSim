@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/models/sulcos/curva_infiltracao_sulco.dart';
-import 'package:irrigasim/models/sulcos/entradas_projeto_sulco.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/curva_infiltracao_sulco.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/entradas_projeto_sulco.dart';
 
 void main() {
   group('contrato de infiltração de sulcos', () {

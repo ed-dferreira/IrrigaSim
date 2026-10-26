@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/models/irrigation_parameters.dart';
-import 'package:irrigasim/models/simulation_result_model.dart';
-import 'package:irrigasim/services/simulation/sulcos/run_furrow_simulation.dart';
-import 'package:irrigasim/services/simulation/surface_irrigation_math.dart';
+import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
+import 'package:irrigasim/shared/irrigacao/models/simulation_result_model.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/run_furrow_simulation.dart';
+import 'package:irrigasim/shared/irrigacao/services/surface_irrigation_math.dart';
 
 void main() {
   test(

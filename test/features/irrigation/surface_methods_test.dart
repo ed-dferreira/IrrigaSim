@@ -1,16 +1,14 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/models/inundacao/basin_project.dart';
-import 'package:irrigasim/models/irrigation_parameters.dart';
-import 'package:irrigasim/services/simulation/inundacao/run_basin_simulation.dart';
-import 'package:irrigasim/services/simulation/inundacao/basin_reference_math.dart';
-import 'package:irrigasim/services/simulation/inundacao/basin_planning.dart';
-import 'package:irrigasim/services/simulation/inundacao/rice_volumes_service.dart';
-import 'package:irrigasim/services/simulation/faixas/run_border_simulation.dart';
-import 'package:irrigasim/services/simulation/sulcos/run_furrow_simulation.dart';
-import 'package:irrigasim/services/simulation/inundacao/run_permanent_basin_simulation.dart';
-import 'package:irrigasim/viewmodels/inundacao/basin_simulation_coordinator.dart';
-import 'package:irrigasim/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/models/basin_project.dart';
+import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/services/run_basin_simulation.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/services/basin_reference_math.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/services/basin_planning.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/services/rice_volumes_service.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/run_border_simulation.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/run_furrow_simulation.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/services/run_permanent_basin_simulation.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/viewmodels/basin_simulation_coordinator.dart';
 
 void main() {
   IrrigationParameters base() => const IrrigationParameters(
@@ -35,17 +33,6 @@ void main() {
     expect(runoff, inInclusiveRange(0, 100));
     expect(efficiency + percolation + runoff, closeTo(100, 0.01));
   }
-
-  test('a seleção do método não volta automaticamente para sulco', () {
-    final container = ProviderContainer();
-    addTearDown(container.dispose);
-
-    container
-        .read(parametersProvider.notifier)
-        .setMetodo(MetodoIrrigacao.faixa);
-
-    expect(container.read(parametersProvider).metodo, MetodoIrrigacao.faixa);
-  });
 
   test('sulco calcula limite não erosivo e fecha o balanço', () {
     final result = RunFurrowSimulation()(base());

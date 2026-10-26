@@ -6,12 +6,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/models/inundacao/basin_project.dart';
-import 'package:irrigasim/services/cenarios/scenario_service.dart';
-import 'package:irrigasim/services/persistence/local_scenario_store.dart';
-import 'package:irrigasim/viewmodels/inundacao/basin_simulation_coordinator.dart';
-import 'package:irrigasim/viewmodels/results_controller.dart';
-import 'package:irrigasim/views/irrigation/inundacao/basin_results_screen.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/models/basin_project.dart';
+import 'package:irrigasim/shared/cenarios/services/scenario_service.dart';
+import 'package:irrigasim/shared/cenarios/persistence/local_scenario_store.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/viewmodels/basin_simulation_coordinator.dart';
+import 'package:irrigasim/shared/cenarios/controllers/salvar_cenario_controller.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/views/basin_results_screen.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

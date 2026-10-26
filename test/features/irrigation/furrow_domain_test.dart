@@ -1,13 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/models/irrigation_parameters.dart';
-import 'package:irrigasim/models/sulcos/field_measurements.dart';
-import 'package:irrigasim/models/sulcos/irrigation_project.dart'
+import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/field_measurements.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/irrigation_project.dart'
     show FormaSulco, GeometriaSulco, PontoEnsaio;
-import 'package:irrigasim/models/sulcos/tipo_sulco_info.dart';
-import 'package:irrigasim/models/sulcos/tabela_corrugados.dart';
-import 'package:irrigasim/services/simulation/sulcos/advance_curve_model.dart';
-import 'package:irrigasim/services/simulation/sulcos/infiltration_model.dart';
-import 'package:irrigasim/services/simulation/sulcos/run_furrow_simulation.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/tabela_corrugados.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/advance_curve_model.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/infiltration_model.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/run_furrow_simulation.dart';
 
 void main() {
   const base = IrrigationParameters(

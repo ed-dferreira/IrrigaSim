@@ -3,9 +3,9 @@
 // intactos (G16: o preset nunca recalcula IRN/ET de referência).
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/models/comum/clima_demanda.dart';
-import 'package:irrigasim/models/inundacao/basin_project.dart';
-import 'package:irrigasim/viewmodels/inundacao/basin_project_controller.dart';
+import 'package:irrigasim/shared/irrigacao/models/comum/clima_demanda.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/models/basin_project.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/viewmodels/basin_project_controller.dart';
 
 void main() {
   ProviderContainer container() => ProviderContainer();

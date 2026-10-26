@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/models/cenarios/cenario_salvo.dart';
-import 'package:irrigasim/models/irrigation_parameters.dart';
-import 'package:irrigasim/models/simulation_result.dart';
-import 'package:irrigasim/models/sulcos/field_measurements.dart';
-import 'package:irrigasim/services/simulation/operational_planning.dart';
-import 'package:irrigasim/services/persistence/project_store.dart';
+import 'package:irrigasim/shared/cenarios/models/cenario_salvo.dart';
+import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
+import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/field_measurements.dart';
+import 'package:irrigasim/shared/irrigacao/services/operational_planning.dart';
+import 'package:irrigasim/shared/cenarios/services/project_store.dart';
 
 void main() {
   test(

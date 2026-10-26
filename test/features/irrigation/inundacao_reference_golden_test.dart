@@ -10,10 +10,10 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/models/faixas/border_result.dart';
-import 'package:irrigasim/services/simulation/inundacao/basin_reference_math.dart';
-import 'package:irrigasim/services/simulation/inundacao/basin_reference_tables.dart';
-import 'package:irrigasim/services/simulation/inundacao/rice_volumes_service.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/border_result.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/services/basin_reference_math.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/services/basin_reference_tables.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/services/rice_volumes_service.dart';
 
 const pacote = 'docs/Pacote_Inundacao';
 const tolerancia = 1e-5;

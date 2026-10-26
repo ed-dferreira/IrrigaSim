@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/models/sulcos/curva_infiltracao_sulco.dart';
-import 'package:irrigasim/models/sulcos/entradas_projeto_sulco.dart';
-import 'package:irrigasim/services/simulation/blaney_criddle.dart';
-import 'package:irrigasim/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/curva_infiltracao_sulco.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/entradas_projeto_sulco.dart';
+import 'package:irrigasim/shared/irrigacao/services/blaney_criddle.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/parameters_controller.dart';
 
 void main() {
   group('Blaney–Criddle', () {

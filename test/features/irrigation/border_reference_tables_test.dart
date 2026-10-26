@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/models/faixas/border_result.dart';
-import 'package:irrigasim/models/irrigation_parameters.dart';
-import 'package:irrigasim/services/simulation/faixas/border_reference_tables.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/border_result.dart';
+import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/border_reference_tables.dart';
 
 void main() {
   const tables = BorderReferenceTables();

@@ -1,13 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/models/comum/adaptadores_superficie.dart';
-import 'package:irrigasim/models/comum/irrigacao_comum.dart';
-import 'package:irrigasim/models/faixas/border_agronomy.dart';
-import 'package:irrigasim/models/faixas/border_measurements.dart';
-import 'package:irrigasim/models/faixas/border_project.dart';
-import 'package:irrigasim/models/inundacao/basin_project.dart';
-import 'package:irrigasim/models/irrigation_parameters.dart';
-import 'package:irrigasim/models/sulcos/field_measurements.dart';
-import 'package:irrigasim/models/sulcos/irrigation_project.dart';
+import 'package:irrigasim/shared/irrigacao/models/comum/adaptadores_superficie.dart';
+import 'package:irrigasim/shared/irrigacao/models/comum/irrigacao_comum.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/border_agronomy.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/border_measurements.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/border_project.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/models/basin_project.dart';
+import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/field_measurements.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/irrigation_project.dart';
 
 void main() {
   test('sulcos: solo, clima, ensaios e unidades sobrevivem ao mapa', () {

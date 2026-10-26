@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/models/faixas/border_project.dart';
-import 'package:irrigasim/models/faixas/border_result.dart';
-import 'package:irrigasim/services/cenarios/scenario_service.dart';
-import 'package:irrigasim/services/persistence/local_scenario_store.dart';
-import 'package:irrigasim/viewmodels/cenarios/scenario_providers.dart';
-import 'package:irrigasim/viewmodels/faixas/border_project_controller.dart';
-import 'package:irrigasim/views/irrigation/faixas/border_results_screen.dart';
-import 'package:irrigasim/services/simulation/faixas/border_csv.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/border_project.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/border_result.dart';
+import 'package:irrigasim/shared/cenarios/services/scenario_service.dart';
+import 'package:irrigasim/shared/cenarios/persistence/local_scenario_store.dart';
+import 'package:irrigasim/shared/cenarios/providers/scenario_providers.dart';
+import 'package:irrigasim/features/irrigacao_faixas/viewmodels/border_project_controller.dart';
+import 'package:irrigasim/features/irrigacao_faixas/views/border_results_screen.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/border_csv.dart';
 
 void main() {
   test('os oito status canônicos têm texto e ícone próprios na tela', () {
@@ -86,9 +86,7 @@ void main() {
         ProviderScope(
           overrides: [
             borderProjectResultProvider.overrideWith((ref) => result),
-            scenarioServiceProvider.overrideWithValue(
-              ScenarioService(store),
-            ),
+            scenarioServiceProvider.overrideWithValue(ScenarioService(store)),
           ],
           child: const MaterialApp(home: BorderResultsScreen()),
         ),
@@ -183,9 +181,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            scenarioServiceProvider.overrideWithValue(
-              ScenarioService(store),
-            ),
+            scenarioServiceProvider.overrideWithValue(ScenarioService(store)),
           ],
           child: MediaQuery(
             data: const MediaQueryData(textScaler: TextScaler.linear(1.8)),

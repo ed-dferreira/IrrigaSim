@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/models/sulcos/irrigation_project.dart';
-import 'package:irrigasim/models/sulcos/curva_infiltracao_sulco.dart';
-import 'package:irrigasim/services/simulation/sulcos/advance_curve_model.dart';
-import 'package:irrigasim/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/irrigation_project.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/curva_infiltracao_sulco.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/advance_curve_model.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/parameters_controller.dart';
 
 void main() {
   group('planejamento de comprimento e avanço', () {

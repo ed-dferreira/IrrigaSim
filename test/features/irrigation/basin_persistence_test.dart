@@ -2,14 +2,14 @@
 // (planejamento, seleção de vazão, volumes do arroz) atravessam o
 // CenarioSalvo e o exportarJson. Espelha border_persistence_test.dart.
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/models/cenarios/cenario_salvo.dart';
-import 'package:irrigasim/models/comum/clima_demanda.dart';
-import 'package:irrigasim/models/inundacao/basin_annexes.dart';
-import 'package:irrigasim/models/inundacao/basin_project.dart';
-import 'package:irrigasim/models/irrigation_parameters.dart';
-import 'package:irrigasim/models/simulation_result_model.dart';
-import 'package:irrigasim/services/persistence/project_store.dart';
-import 'package:irrigasim/viewmodels/inundacao/basin_simulation_coordinator.dart';
+import 'package:irrigasim/shared/cenarios/models/cenario_salvo.dart';
+import 'package:irrigasim/shared/irrigacao/models/comum/clima_demanda.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/models/basin_annexes.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/models/basin_project.dart';
+import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
+import 'package:irrigasim/shared/irrigacao/models/simulation_result_model.dart';
+import 'package:irrigasim/shared/cenarios/services/project_store.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/viewmodels/basin_simulation_coordinator.dart';
 
 void main() {
   final project = BasinProject.exemploAula8Intermitente();
