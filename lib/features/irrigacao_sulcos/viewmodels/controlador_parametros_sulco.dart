@@ -20,7 +20,8 @@ import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/estado_parametros
 export 'estado_parametros_sulco.dart';
 
 class ControladorParametrosSulco extends StateNotifier<EstadoParametrosSulco> {
-  ControladorParametrosSulco() : super(_recalcularLamina(const EstadoParametrosSulco()));
+  ControladorParametrosSulco()
+    : super(_recalcularLamina(const EstadoParametrosSulco()));
 
   static EstadoParametrosSulco _recalcularLamina(EstadoParametrosSulco atual) {
     final entradas = atual.entradasSulco;
@@ -99,9 +100,7 @@ class ControladorParametrosSulco extends StateNotifier<EstadoParametrosSulco> {
   void definirTipoSulco(TipoSulco tipo) {
     final padroes = _padroesParaTipoSulco(tipo);
     final b =
-        (math.log(
-          padroes.tempoAvancoMetadeMin / padroes.tempoAvancoFinalMin,
-        ) /
+        (math.log(padroes.tempoAvancoMetadeMin / padroes.tempoAvancoFinalMin) /
         math.log(0.5));
     final k = padroes.tempoAvancoFinalMin / math.pow(padroes.comprimento, b);
     state = _recalcularLamina(
@@ -634,7 +633,9 @@ class ControladorParametrosSulco extends StateNotifier<EstadoParametrosSulco> {
     _redimensionarCriddleSeSelecionado();
   }
 
-  EstadoParametrosSulco _sincronizarAvancoEstimado(EstadoParametrosSulco source) {
+  EstadoParametrosSulco _sincronizarAvancoEstimado(
+    EstadoParametrosSulco source,
+  ) {
     if (source.origemAvanco != OrigemAvanco.estimativa ||
         source.comprimento <= 0 ||
         source.coeficienteAvancoK <= 0 ||
@@ -679,7 +680,8 @@ class ControladorParametrosSulco extends StateNotifier<EstadoParametrosSulco> {
             : 0,
       );
 
-  void definirFator11Vib(bool value) => state = state.copyWith(fator11Vib: value);
+  void definirFator11Vib(bool value) =>
+      state = state.copyWith(fator11Vib: value);
 
   void definirCondicoesEnsaioAvanco(String value) {
     state = state.copyWith(condicoesEnsaioAvanco: value);
@@ -737,11 +739,12 @@ class ControladorParametrosSulco extends StateNotifier<EstadoParametrosSulco> {
   void definirOrientacaoSulco(String value) =>
       state = state.copyWith(orientacaoSulco: value, projetoSulcoLegado: false);
 
-  void definirOrigemGeometria(ProvenienciaDado origem) => state = state.copyWith(
-    provenienciaGeometria: origem,
-    dimensionarComprimentoCriddle: false,
-    projetoSulcoLegado: false,
-  );
+  void definirOrigemGeometria(ProvenienciaDado origem) =>
+      state = state.copyWith(
+        provenienciaGeometria: origem,
+        dimensionarComprimentoCriddle: false,
+        projetoSulcoLegado: false,
+      );
 
   void definirDimensionarComprimentoCriddle(bool ativo) {
     state = state.copyWith(
@@ -1193,6 +1196,8 @@ class ControladorParametrosSulco extends StateNotifier<EstadoParametrosSulco> {
 /// Mantém a escolha durante a navegação. Com `autoDispose`, o estado podia ser
 /// recriado como Sulco entre o toque no cartão e a abertura do formulário.
 final provedorParametrosSulco =
-    StateNotifierProvider<ControladorParametrosSulco, EstadoParametrosSulco>((ref) {
+    StateNotifierProvider<ControladorParametrosSulco, EstadoParametrosSulco>((
+      ref,
+    ) {
       return ControladorParametrosSulco();
     });
