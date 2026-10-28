@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
 import 'package:irrigasim/core/widgets/calculated_field.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/curva_infiltracao_sulco.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/proveniencia_dado.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/controlador_parametros_sulco.dart';
 
 import 'project_step_widgets.dart';
 
@@ -17,7 +17,7 @@ class OperacaoStep extends ConsumerWidget {
     required this.accent,
     required this.wide,
   });
-  final ParametersState state;
+  final EstadoParametrosSulco state;
   final Color accent;
   final bool wide;
 
@@ -41,8 +41,8 @@ class OperacaoStep extends ConsumerWidget {
                   .toList(),
               selected: {state.manejoSulco},
               onSelectionChanged: (value) => ref
-                  .read(parametersProvider.notifier)
-                  .setManejoSulco(value.first),
+                  .read(provedorParametrosSulco.notifier)
+                  .definirManejoSulco(value.first),
             ),
             const SizedBox(height: 12),
             Container(
@@ -75,7 +75,7 @@ class OperacaoStep extends ConsumerWidget {
               suffix: 'L/s',
             ),
             if (state.dimensionarComprimentoCriddle &&
-                state.origemGeometria == ProvenienciaSulco.calculado)
+                state.provenienciaGeometria == ProvenienciaDado.calculado)
               CalculatedField(
                 label: 'Tempo de oportunidade (To)',
                 value: state.tempoAplicacao,
@@ -196,8 +196,8 @@ class OperacaoStep extends ConsumerWidget {
                 onChanged: (value) {
                   if (value != null) {
                     ref
-                        .read(parametersProvider.notifier)
-                        .setOrigemVazaoReduzida(value);
+                        .read(provedorParametrosSulco.notifier)
+                        .definirOrigemVazaoReduzida(value);
                   }
                 },
               ),
@@ -213,8 +213,8 @@ class OperacaoStep extends ConsumerWidget {
                   title: const Text('Aplicar fator 1,1 à estimativa F23'),
                   value: state.fator11Vib,
                   onChanged: ref
-                      .read(parametersProvider.notifier)
-                      .setFator11Vib,
+                      .read(provedorParametrosSulco.notifier)
+                      .definirFator11Vib,
                 ),
               ],
               if (state.origemVazaoReduzida ==

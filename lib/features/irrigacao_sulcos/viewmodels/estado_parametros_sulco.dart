@@ -1,19 +1,21 @@
 import 'dart:math' as math;
 
+import 'package:irrigasim/shared/irrigacao/models/comum/clima_demanda.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
 import 'package:irrigasim/shared/irrigacao/services/blaney_criddle.dart';
 import 'package:irrigasim/shared/irrigacao/services/lamina_requerida.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/curva_infiltracao_sulco.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/entradas_projeto_sulco.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/field_measurements.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/irrigation_project.dart'
-    show PontoEnsaio;
+import 'package:irrigasim/features/irrigacao_sulcos/models/proveniencia_dado.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/curva_infiltracao.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/entradas_projeto.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/ensaios_sulco.dart'
+    show PontoEnsaioAvanco;
 import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart';
 
 enum OrigemAvanco { estimativa, ensaio }
 
-class ParametersState {
+class EstadoParametrosSulco {
   final TipoSulco? tipoSulco;
   final double comprimento;
   final double desnivelM;
@@ -37,8 +39,8 @@ class ParametersState {
   final double distanciaReferenciaAvancoM;
   final double comprimentoMaximoTerrenoM;
   final OrigemAvanco origemAvanco;
-  final MetodoCurvaAvanco metodoCurvaAvanco;
-  final List<PontoEnsaio> pontosEnsaioAvanco;
+  final MetodoAjusteAvanco metodoCurvaAvanco;
+  final List<PontoEnsaioAvanco> pontosEnsaioAvanco;
   final OrigemCurvaInfiltracao origemCurvaInfiltracao;
   final double distanciaEnsaioInfiltracaoM;
   final double espacamentoEnsaioInfiltracaoM;
@@ -64,24 +66,24 @@ class ParametersState {
   final double fracaoAguaDisponivel;
   final LaminaRequeridaResultado? laminaRequeridaResultado;
   final bool projetoSulcoLegado;
-  final Map<String, ProvenienciaSulco> origemEntradasSulco;
-  final CurvaInfiltracaoSulco? curvaInfiltracaoSulco;
+  final Map<String, ProvenienciaDado> origemEntradasSulco;
+  final CurvaInfiltracao? curvaInfiltracaoSulco;
   final double? etoMmDia;
   final double? temperaturaMediaC;
   final double? latitudeGraus;
   final int? mesReferencia;
-  final OrigemChuvaSulco origemChuva;
-  final MetodoEtcSulco metodoEtc;
+  final OrigemChuva origemChuva;
+  final MetodoEtc metodoEtc;
   final double? decliveEncostaPercent;
   final String? orientacaoSulco;
-  final ProvenienciaSulco origemGeometria;
+  final ProvenienciaDado provenienciaGeometria;
   final bool dimensionarComprimentoCriddle;
   final double vazaoReduzidaLs;
   final OrigemVazaoReduzida origemVazaoReduzida;
   final bool fator11Vib;
   final double? vazaoEnsaioAvancoLs;
   final String? condicoesEnsaioAvanco;
-  final EnsaioErosaoSulco? ensaioErosao;
+  final EnsaioErosao? ensaioErosao;
   final double jornadaDiariaH;
   final int periodoIrrigacaoDias;
   final double tempoMudancaParcelaMin;
@@ -96,7 +98,7 @@ class ParametersState {
   final String? erro;
   final String? mensagemPlanejamento;
 
-  const ParametersState({
+  const EstadoParametrosSulco({
     this.tipoSulco,
     this.comprimento = 200,
     this.desnivelM = 1,
@@ -120,7 +122,7 @@ class ParametersState {
     this.distanciaReferenciaAvancoM = 200,
     this.comprimentoMaximoTerrenoM = 200,
     this.origemAvanco = OrigemAvanco.estimativa,
-    this.metodoCurvaAvanco = MetodoCurvaAvanco.doisPontos,
+    this.metodoCurvaAvanco = MetodoAjusteAvanco.doisPontos,
     this.pontosEnsaioAvanco = const [],
     this.origemCurvaInfiltracao =
         OrigemCurvaInfiltracao.equacaoAcumuladaInformada,
@@ -154,11 +156,11 @@ class ParametersState {
     this.temperaturaMediaC,
     this.latitudeGraus,
     this.mesReferencia,
-    this.origemChuva = OrigemChuvaSulco.efetiva,
-    this.metodoEtc = MetodoEtcSulco.adotada,
+    this.origemChuva = OrigemChuva.efetiva,
+    this.metodoEtc = MetodoEtc.adotada,
     this.decliveEncostaPercent,
     this.orientacaoSulco,
-    this.origemGeometria = ProvenienciaSulco.ilustrativo,
+    this.provenienciaGeometria = ProvenienciaDado.ilustrativo,
     this.dimensionarComprimentoCriddle = false,
     this.vazaoReduzidaLs = 0,
     this.origemVazaoReduzida = OrigemVazaoReduzida.taxaFinalDaCurva,
@@ -202,18 +204,18 @@ class ParametersState {
   }
 
   double get evapotranspiracaoCulturaMmDia => switch (metodoEtc) {
-    MetodoEtcSulco.adotada => evapotranspiracaoMmDia,
-    MetodoEtcSulco.etoVezesKc => (etoMmDia ?? 0) * kc,
-    MetodoEtcSulco.blaneyCriddle => (etoBlaneyCriddle ?? 0) * kc,
+    MetodoEtc.adotada => evapotranspiracaoMmDia,
+    MetodoEtc.etoVezesKc => (etoMmDia ?? 0) * kc,
+    MetodoEtc.blaneyCriddle => (etoBlaneyCriddle ?? 0) * kc,
   };
 
   double get declividadeTransversal => distanciaTransversalM > 0
       ? desnivelTransversalM / distanciaTransversalM
       : 0;
 
-  EntradasProjetoSulco get entradasSulco {
+  EntradasProjeto get entradasSulco {
     double? valor(String nome, double atual) =>
-        origemEntradasSulco[nome] == ProvenienciaSulco.naoInformado
+        origemEntradasSulco[nome] == ProvenienciaDado.naoInformado
         ? null
         : atual;
     final curva =
@@ -221,7 +223,7 @@ class ParametersState {
             OrigemCurvaInfiltracao.equacaoAcumuladaInformada
         ? curvaInfiltracaoSulco
         : null;
-    return EntradasProjetoSulco(
+    return EntradasProjeto(
       uccPercentual: valor('uccPercentual', uccPercentual),
       upmpPercentual: valor('upmpPercentual', upmpPercentual),
       densidadeAparenteGcm3: valor(
@@ -249,7 +251,7 @@ class ParametersState {
       baseLongitudinalM: distanciaHorizontalM,
       decliveEncostaPercent: decliveEncostaPercent,
       orientacaoSulco: orientacaoSulco,
-      origemGeometria: origemGeometria,
+      provenienciaGeometria: provenienciaGeometria,
       dimensionarComprimentoCriddle: dimensionarComprimentoCriddle,
       origens: {
         for (final nome in [
@@ -262,10 +264,10 @@ class ParametersState {
           'kc',
           'precipitacaoEfetivaMmDia',
         ])
-          nome: origemEntradasSulco[nome] ?? ProvenienciaSulco.ilustrativo,
+          nome: origemEntradasSulco[nome] ?? ProvenienciaDado.ilustrativo,
         if (etoMmDia != null)
           'etoMmDia':
-              origemEntradasSulco['etoMmDia'] ?? ProvenienciaSulco.informado,
+              origemEntradasSulco['etoMmDia'] ?? ProvenienciaDado.informado,
       },
       curvaInfiltracao: curva,
     );
@@ -284,7 +286,7 @@ class ParametersState {
           ? tempoAvancoFinalMin / math.pow(comprimento, expoenteAvancoB)
           : 0.0659064448778603);
 
-  ParametersState copyWith({
+  EstadoParametrosSulco copyWith({
     TipoSulco? tipoSulco,
     double? comprimento,
     double? desnivelM,
@@ -308,8 +310,8 @@ class ParametersState {
     double? distanciaReferenciaAvancoM,
     double? comprimentoMaximoTerrenoM,
     OrigemAvanco? origemAvanco,
-    MetodoCurvaAvanco? metodoCurvaAvanco,
-    List<PontoEnsaio>? pontosEnsaioAvanco,
+    MetodoAjusteAvanco? metodoCurvaAvanco,
+    List<PontoEnsaioAvanco>? pontosEnsaioAvanco,
     OrigemCurvaInfiltracao? origemCurvaInfiltracao,
     double? distanciaEnsaioInfiltracaoM,
     double? espacamentoEnsaioInfiltracaoM,
@@ -334,32 +336,32 @@ class ParametersState {
     double? profundidadeRaizesCm,
     double? fracaoAguaDisponivel,
     LaminaRequeridaResultado? laminaRequeridaResultado,
-    bool clearLaminaRequeridaResultado = false,
+    bool limparLaminaRequeridaResultado = false,
     bool? projetoSulcoLegado,
-    Map<String, ProvenienciaSulco>? origemEntradasSulco,
-    CurvaInfiltracaoSulco? curvaInfiltracaoSulco,
-    bool clearCurvaInfiltracaoSulco = false,
+    Map<String, ProvenienciaDado>? origemEntradasSulco,
+    CurvaInfiltracao? curvaInfiltracaoSulco,
+    bool limparCurvaInfiltracaoSulco = false,
     double? etoMmDia,
-    bool clearEtoMmDia = false,
+    bool limparEtoMmDia = false,
     double? temperaturaMediaC,
-    bool clearTemperaturaMediaC = false,
+    bool limparTemperaturaMediaC = false,
     double? latitudeGraus,
-    bool clearLatitudeGraus = false,
+    bool limparLatitudeGraus = false,
     int? mesReferencia,
-    OrigemChuvaSulco? origemChuva,
-    MetodoEtcSulco? metodoEtc,
+    OrigemChuva? origemChuva,
+    MetodoEtc? metodoEtc,
     double? decliveEncostaPercent,
-    bool clearDecliveEncostaPercent = false,
+    bool limparDecliveEncostaPercent = false,
     String? orientacaoSulco,
-    ProvenienciaSulco? origemGeometria,
+    ProvenienciaDado? provenienciaGeometria,
     bool? dimensionarComprimentoCriddle,
     double? vazaoReduzidaLs,
     OrigemVazaoReduzida? origemVazaoReduzida,
     bool? fator11Vib,
     double? vazaoEnsaioAvancoLs,
     String? condicoesEnsaioAvanco,
-    EnsaioErosaoSulco? ensaioErosao,
-    bool clearEnsaioErosao = false,
+    EnsaioErosao? ensaioErosao,
+    bool limparEnsaioErosao = false,
     double? jornadaDiariaH,
     int? periodoIrrigacaoDias,
     double? tempoMudancaParcelaMin,
@@ -369,14 +371,14 @@ class ParametersState {
     double? cicloSurtirMin,
     double? larguraSulcoM,
     double? profundidadeSulcoM,
-    bool clearLarguraSulcoM = false,
-    bool clearProfundidadeSulcoM = false,
+    bool limparLarguraSulcoM = false,
+    bool limparProfundidadeSulcoM = false,
     SimulationResult? resultado,
     bool? executando,
     String? erro,
     String? mensagemPlanejamento,
   }) {
-    return ParametersState(
+    return EstadoParametrosSulco(
       tipoSulco: tipoSulco ?? this.tipoSulco,
       comprimento: comprimento ?? this.comprimento,
       desnivelM: desnivelM ?? this.desnivelM,
@@ -440,29 +442,30 @@ class ParametersState {
           densidadeAparenteGcm3 ?? this.densidadeAparenteGcm3,
       profundidadeRaizesCm: profundidadeRaizesCm ?? this.profundidadeRaizesCm,
       fracaoAguaDisponivel: fracaoAguaDisponivel ?? this.fracaoAguaDisponivel,
-      laminaRequeridaResultado: clearLaminaRequeridaResultado
+      laminaRequeridaResultado: limparLaminaRequeridaResultado
           ? null
           : laminaRequeridaResultado ?? this.laminaRequeridaResultado,
       projetoSulcoLegado: projetoSulcoLegado ?? this.projetoSulcoLegado,
       origemEntradasSulco: origemEntradasSulco ?? this.origemEntradasSulco,
-      curvaInfiltracaoSulco: clearCurvaInfiltracaoSulco
+      curvaInfiltracaoSulco: limparCurvaInfiltracaoSulco
           ? null
           : curvaInfiltracaoSulco ?? this.curvaInfiltracaoSulco,
-      etoMmDia: clearEtoMmDia ? null : etoMmDia ?? this.etoMmDia,
-      temperaturaMediaC: clearTemperaturaMediaC
+      etoMmDia: limparEtoMmDia ? null : etoMmDia ?? this.etoMmDia,
+      temperaturaMediaC: limparTemperaturaMediaC
           ? null
           : temperaturaMediaC ?? this.temperaturaMediaC,
-      latitudeGraus: clearLatitudeGraus
+      latitudeGraus: limparLatitudeGraus
           ? null
           : latitudeGraus ?? this.latitudeGraus,
       mesReferencia: mesReferencia ?? this.mesReferencia,
       origemChuva: origemChuva ?? this.origemChuva,
       metodoEtc: metodoEtc ?? this.metodoEtc,
-      decliveEncostaPercent: clearDecliveEncostaPercent
+      decliveEncostaPercent: limparDecliveEncostaPercent
           ? null
           : decliveEncostaPercent ?? this.decliveEncostaPercent,
       orientacaoSulco: orientacaoSulco ?? this.orientacaoSulco,
-      origemGeometria: origemGeometria ?? this.origemGeometria,
+      provenienciaGeometria:
+          provenienciaGeometria ?? this.provenienciaGeometria,
       dimensionarComprimentoCriddle:
           dimensionarComprimentoCriddle ?? this.dimensionarComprimentoCriddle,
       vazaoReduzidaLs: vazaoReduzidaLs ?? this.vazaoReduzidaLs,
@@ -471,7 +474,7 @@ class ParametersState {
       vazaoEnsaioAvancoLs: vazaoEnsaioAvancoLs ?? this.vazaoEnsaioAvancoLs,
       condicoesEnsaioAvanco:
           condicoesEnsaioAvanco ?? this.condicoesEnsaioAvanco,
-      ensaioErosao: clearEnsaioErosao
+      ensaioErosao: limparEnsaioErosao
           ? null
           : ensaioErosao ?? this.ensaioErosao,
       jornadaDiariaH: jornadaDiariaH ?? this.jornadaDiariaH,
@@ -482,10 +485,10 @@ class ParametersState {
       manejoSulco: manejoSulco ?? this.manejoSulco,
       tempoMudancaMin: tempoMudancaMin ?? this.tempoMudancaMin,
       cicloSurtirMin: cicloSurtirMin ?? this.cicloSurtirMin,
-      larguraSulcoM: clearLarguraSulcoM
+      larguraSulcoM: limparLarguraSulcoM
           ? null
           : larguraSulcoM ?? this.larguraSulcoM,
-      profundidadeSulcoM: clearProfundidadeSulcoM
+      profundidadeSulcoM: limparProfundidadeSulcoM
           ? null
           : profundidadeSulcoM ?? this.profundidadeSulcoM,
       resultado: resultado,
@@ -495,17 +498,17 @@ class ParametersState {
     );
   }
 
-  IrrigationParameters toIrrigationParameters() {
+  IrrigationParameters paraParametrosIrrigacao() {
     final curva = projetoSulcoLegado ? null : entradasSulco.curvaInfiltracao;
-    final convertida = curva?.acumuladaMm();
+    final convertida = curva?.parametrosAcumulados();
     return IrrigationParameters(
-      entradasProjetoSulco: projetoSulcoLegado ? null : entradasSulco,
+      entradasProjeto: projetoSulcoLegado ? null : entradasSulco,
       comprimento: comprimento,
       declividade: declividade,
       declividadeTransversal: declividadeTransversal,
       larguraOuEspacamento: larguraOuEspacamento,
-      k: convertida?.k ?? k,
-      a: convertida?.a ?? a,
+      k: convertida?.coeficiente ?? k,
+      a: convertida?.expoente ?? a,
       vib: vib,
       vazao: vazao,
       tempoAplicacao: tempoAplicacao,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/controlador_parametros_sulco.dart';
 
 import 'project_step_widgets.dart';
 
@@ -46,7 +46,7 @@ const culturaPresets = <CulturaPreset>[
   CulturaPreset('Azevém (forragem)', 1.05, 0.17, 0.02, 40, 0.60),
 ];
 
-CulturaPreset? culturaPreset(ParametersState state) {
+CulturaPreset? culturaPreset(EstadoParametrosSulco state) {
   for (final preset in culturaPresets) {
     if (preset.nome == state.nomeCultura &&
         preset.kc == state.kc &&
@@ -69,7 +69,7 @@ class CulturaStep extends ConsumerWidget {
     required this.accent,
     required this.wide,
   });
-  final ParametersState state;
+  final EstadoParametrosSulco state;
   final Color accent;
   final bool wide;
 
@@ -103,8 +103,8 @@ class CulturaStep extends ConsumerWidget {
           ],
           onChanged: (preset) {
             if (preset == null) return;
-            final controller = ref.read(parametersProvider.notifier);
-            controller.setNomeCultura(preset.nome);
+            final controller = ref.read(provedorParametrosSulco.notifier);
+            controller.definirNomeCultura(preset.nome);
             for (final entry in {
               'kc': preset.kc,
               'espacamentoFileirasM': preset.fileiras,
@@ -112,7 +112,7 @@ class CulturaStep extends ConsumerWidget {
               'profundidadeRaizesCm': preset.raizes,
               'fracaoAguaDisponivel': preset.fracao,
             }.entries) {
-              controller.updateField(
+              controller.atualizarCampo(
                 campo: entry.key,
                 valor: entry.value.toString(),
               );

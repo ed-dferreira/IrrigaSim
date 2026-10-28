@@ -1,6 +1,6 @@
-import 'advance_curve_model.dart';
-import 'infiltration_model.dart';
-import 'flow_management.dart';
+import 'modelo_curva_avanco.dart';
+import 'modelo_infiltracao.dart';
+import 'manejo_vazao.dart';
 
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart';
@@ -38,8 +38,8 @@ class SelecaoComprimentoResultado {
 /// Não escolhe o maior comprimento cegamente. Avalia sequencialmente:
 /// comprimento, declividade, erosão, tempo de avanço, uniformidade,
 /// eficiência e operação.
-class LengthSelector {
-  const LengthSelector._();
+class SeletorComprimento {
+  const SeletorComprimento._();
 
   /// Seleciona o maior comprimento viável.
   ///
@@ -53,8 +53,8 @@ class LengthSelector {
   /// [comprimentoMaximo] — Comprimento máximo do terreno (m)
   static SelecaoComprimentoResultado selecionar({
     required List<double> comprimentosCandidatos,
-    required AdvanceCurveResult parametrosAvanco,
-    required InfiltrationParameters parametrosInfiltracao,
+    required ResultadoCurvaAvanco parametrosAvanco,
+    required ParametrosInfiltracao parametrosInfiltracao,
     required double vazaoLs,
     required double espacamentoM,
     required double declividadePercent,
@@ -97,7 +97,7 @@ class LengthSelector {
         );
         continue;
       }
-      final declividadeInfo = TipoSulcoInfo.getInfo(tipo).declividade;
+      final declividadeInfo = TipoSulcoInfo.para(tipo).declividade;
       if (declividadeInfo.classificar(declividadePercent) ==
           FaixaDeclividade.fora) {
         avaliacoes.add(
@@ -110,7 +110,7 @@ class LengthSelector {
         );
         continue;
       }
-      final qmax = FlowManagement.calcularVazaoMaxima(
+      final qmax = ManejoVazao.calcularVazaoMaxima(
         declividadePercent: declividadePercent,
         textura: textura,
       ).qmaxLs;
@@ -139,7 +139,7 @@ class LengthSelector {
       }
 
       // Calcular tempo de avanço no final do sulco
-      final tempoAvanco = AdvanceCurveModel.tempoAvanco(
+      final tempoAvanco = ModeloCurvaAvanco.tempoAvanco(
         distanciaM: comp,
         parametros: parametrosAvanco,
       );
@@ -210,7 +210,7 @@ class LengthSelector {
     required double tempoAplicacaoMin,
     required double vazaoLs,
     required double espacamentoM,
-    required InfiltrationParameters parametrosInfiltracao,
+    required ParametrosInfiltracao parametrosInfiltracao,
   }) {
     final tempoTotal = tempoAvancoMin + tempoAplicacaoMin;
 
@@ -219,7 +219,7 @@ class LengthSelector {
         (vazaoLs * tempoTotal * 60) / (comprimentoM * espacamentoM);
 
     // Ea conforme referência: lâmina infiltrada no final sobre Lm.
-    final laminaFinal = InfiltrationModel.infiltracaoAcumulada(
+    final laminaFinal = ModeloInfiltracao.infiltracaoAcumulada(
       tempoMin: tempoAplicacaoMin,
       parametros: parametrosInfiltracao,
     );

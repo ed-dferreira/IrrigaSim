@@ -5,8 +5,8 @@ import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart';
 
 import 'package:irrigasim/shared/irrigacao/models/simulation_result_model.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/field_measurements.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/entradas_projeto_sulco.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/entradas_projeto.dart';
 
 class CenarioSalvo {
   final String id;
@@ -53,7 +53,7 @@ class CenarioSalvo {
       'metodo': metodo.name,
       'parametros': {
         if (metodo == MetodoIrrigacao.sulco)
-          'entradasProjetoSulco': parametros.entradasProjetoSulco?.toMap(),
+          'entradasProjeto': parametros.entradasProjeto?.toMap(),
         'comprimento': parametros.comprimento,
         if (metodo == MetodoIrrigacao.faixa)
           'projetoFaixa':
@@ -157,13 +157,11 @@ class CenarioSalvo {
       nome: map['nome'] ?? '',
       metodo: metodo,
       parametros: IrrigationParameters(
-        entradasProjetoSulco:
+        entradasProjeto:
             metodo == MetodoIrrigacao.sulco &&
-                paramData['entradasProjetoSulco'] is Map
-            ? EntradasProjetoSulco.fromMap(
-                Map<String, dynamic>.from(
-                  paramData['entradasProjetoSulco'] as Map,
-                ),
+                paramData['entradasProjeto'] is Map
+            ? EntradasProjeto.fromMap(
+                Map<String, dynamic>.from(paramData['entradasProjeto'] as Map),
               )
             : null,
         projetoFaixa:
@@ -316,7 +314,7 @@ class CenarioSalvo {
             ?.toDouble(),
         condicoesEnsaioAvanco: paramData['condicoesEnsaioAvanco'] as String?,
         ensaioErosao: paramData['ensaioErosao'] is Map
-            ? EnsaioErosaoSulco.fromMap(
+            ? EnsaioErosao.fromMap(
                 Map<String, dynamic>.from(paramData['ensaioErosao'] as Map),
               )
             : null,
@@ -341,9 +339,9 @@ class CenarioSalvo {
         larguraSulcoM: (paramData['larguraSulcoM'] as num?)?.toDouble(),
         profundidadeSulcoM: (paramData['profundidadeSulcoM'] as num?)
             ?.toDouble(),
-        metodoCurvaAvanco: MetodoCurvaAvanco.values.firstWhere(
+        metodoCurvaAvanco: MetodoAjusteAvanco.values.firstWhere(
           (value) => value.name == paramData['metodoCurvaAvanco'],
-          orElse: () => MetodoCurvaAvanco.doisPontos,
+          orElse: () => MetodoAjusteAvanco.doisPontos,
         ),
         usarEnsaioAvanco: paramData['usarEnsaioAvanco'] as bool? ?? false,
         medicoesAvanco:

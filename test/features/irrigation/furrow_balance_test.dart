@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result_model.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/services/run_furrow_simulation.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/simulador_sulcos.dart';
 import 'package:irrigasim/shared/irrigacao/services/surface_irrigation_math.dart';
 
 void main() {
@@ -66,7 +66,7 @@ void main() {
   });
 
   test('sulco deficitário não publica Pp slide negativa como perda', () {
-    final result = RunFurrowSimulation()(
+    final result = SimuladorSulcos()(
       const IrrigationParameters(
         comprimento: 100,
         declividade: 0.002,
@@ -79,7 +79,7 @@ void main() {
         laminaRequerida: 60,
       ),
     );
-    expect(result.balancoSulco!.ppSlide, isNull);
+    expect(result.balancoSulco!.perdaPercolacaoSlidePercentual, isNull);
     expect(result.balancoSulco!.deficitMm, greaterThan(0));
     expect(result.perdaPercolacao, 0);
     expect(result.metricas.containsKey('Pp slide (Lmi−IRN)/Lm'), isFalse);
@@ -88,7 +88,7 @@ void main() {
   test(
     'resultado separa slide e integral e conserva indicadores na restauração',
     () {
-      final result = RunFurrowSimulation()(
+      final result = SimuladorSulcos()(
         const IrrigationParameters(
           comprimento: 200,
           declividade: 0.005,
@@ -104,11 +104,17 @@ void main() {
         ),
       );
       final b = result.balancoSulco!;
-      expect(b.eaSlide, closeTo(result.eficiencia, 1e-10));
-      expect(b.eaIntegral, isNot(closeTo(b.eaSlide, 0.01)));
-      expect(b.ppSlide, isNotNull);
       expect(
-        b.laminaInfiltradaMm,
+        b.eficienciaAplicacaoSlidePercentual,
+        closeTo(result.eficiencia, 1e-10),
+      );
+      expect(
+        b.eficienciaAplicacaoIntegralPercentual,
+        isNot(closeTo(b.eficienciaAplicacaoSlidePercentual, 0.01)),
+      );
+      expect(b.perdaPercolacaoSlidePercentual, isNotNull);
+      expect(
+        b.laminaMediaInfiltradaMm,
         closeTo(b.laminaUtilMm + b.laminaPercoladaMm, 1e-8),
       );
       expect(

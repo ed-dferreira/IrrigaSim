@@ -1,5 +1,5 @@
-import 'advance_curve_model.dart';
-import 'infiltration_model.dart';
+import 'modelo_curva_avanco.dart';
+import 'modelo_infiltracao.dart';
 
 /// Resultado do cálculo de tempo de oportunidade para um ponto.
 class TempoOportunidadeResultado {
@@ -74,8 +74,8 @@ class TempoIrrigacaoResultado {
 /// - Td = tempo de depleção
 /// - Trec = tempo de recesso
 /// - Tx = tempo de avanço
-class OpportunityTime {
-  const OpportunityTime._();
+class TempoOportunidade {
+  const TempoOportunidade._();
 
   /// Calcula o tempo de oportunidade para um ponto específico.
   ///
@@ -125,7 +125,7 @@ class OpportunityTime {
     required double tempoCorteMin,
     double tempoDeplecaoMin = 0,
     double tempoRecessoMin = 0,
-    required List<AdvancePoint> pontosAvanco,
+    required List<PontoAvanco> pontosAvanco,
   }) {
     return pontosAvanco.map((ponto) {
       return calcularPonto(
@@ -144,7 +144,7 @@ class OpportunityTime {
   static TempoIrrigacaoResultado calcularTempoIrrigacao({
     required double tempoOportunidadeMin,
     required double tempoAvancoMin,
-    required List<AdvancePoint> pontosAvanco,
+    required List<PontoAvanco> pontosAvanco,
   }) {
     // Ti = To + Ta
     final tempoTotal = tempoOportunidadeMin + tempoAvancoMin;
@@ -179,11 +179,11 @@ class OpportunityTime {
   /// [parametrosInfiltracao] — Parâmetros de infiltração (K, n)
   static List<double> calcularLaminaPorPonto({
     required List<TempoOportunidadeResultado> pontosOportunidade,
-    required InfiltrationParameters parametrosInfiltracao,
+    required ParametrosInfiltracao parametrosInfiltracao,
   }) {
     return pontosOportunidade.map((ponto) {
       if (ponto.tempoMin <= 0) return 0.0;
-      return InfiltrationModel.infiltracaoAcumulada(
+      return ModeloInfiltracao.infiltracaoAcumulada(
         tempoMin: ponto.tempoMin,
         parametros: parametrosInfiltracao,
       );

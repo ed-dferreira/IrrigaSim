@@ -58,7 +58,7 @@ extension TipoSulcoExtension on TipoSulco {
 
 enum FaixaDeclividade { ideal, aconselhavel, usavel, fora, naoInformada }
 
-String formatarPercentual(double valor) {
+String _formatarPercentual(double valor) {
   final fix2 = valor.toStringAsFixed(2);
   if (fix2.endsWith('00')) {
     final fix0 = valor.toStringAsFixed(0);
@@ -68,7 +68,7 @@ String formatarPercentual(double valor) {
   return fix2;
 }
 
-class DeclividadeRange {
+class LimitesDeclividade {
   final double? idealMin;
   final double? idealMax;
   final double? aconselhavelMin;
@@ -76,7 +76,7 @@ class DeclividadeRange {
   final double? usavelMin;
   final double? usavelMax;
 
-  const DeclividadeRange({
+  const LimitesDeclividade({
     this.idealMin,
     this.idealMax,
     this.aconselhavelMin,
@@ -126,7 +126,7 @@ class DeclividadeRange {
         faixa == FaixaDeclividade.aconselhavel) {
       return null;
     }
-    final atual = '${formatarPercentual(percent)}%';
+    final atual = '${_formatarPercentual(percent)}%';
     return switch (faixa) {
       FaixaDeclividade.usavel =>
         'Declividade de $atual fora da faixa aconselhável para '
@@ -153,17 +153,17 @@ class DeclividadeRange {
   static String? _formatarFaixa(double? min, double? max) {
     if (min == null && max == null) return null;
     if (min != null && max != null) {
-      if (min == max) return '${formatarPercentual(min)}%';
-      return '${formatarPercentual(min)}% a ${formatarPercentual(max)}%';
+      if (min == max) return '${_formatarPercentual(min)}%';
+      return '${_formatarPercentual(min)}% a ${_formatarPercentual(max)}%';
     }
-    if (max != null) return 'até ${formatarPercentual(max)}%';
-    return 'a partir de ${formatarPercentual(min!)}%';
+    if (max != null) return 'até ${_formatarPercentual(max)}%';
+    return 'a partir de ${_formatarPercentual(min!)}%';
   }
 }
 
 class TipoSulcoInfo {
   final TipoSulco tipo;
-  final DeclividadeRange declividade;
+  final LimitesDeclividade declividade;
   final String alinhamento;
   final List<String> formas;
   final String comprimentoFaixa;
@@ -187,7 +187,7 @@ class TipoSulcoInfo {
   static const Map<TipoSulco, TipoSulcoInfo> dados = {
     TipoSulco.sulcos_comuns: TipoSulcoInfo(
       tipo: TipoSulco.sulcos_comuns,
-      declividade: DeclividadeRange(
+      declividade: LimitesDeclividade(
         idealMin: 0.1,
         idealMax: 0.1,
         aconselhavelMin: 0.05,
@@ -214,7 +214,7 @@ class TipoSulcoInfo {
     ),
     TipoSulco.sulcos_contorno: TipoSulcoInfo(
       tipo: TipoSulco.sulcos_contorno,
-      declividade: DeclividadeRange(
+      declividade: LimitesDeclividade(
         idealMin: 1.0,
         idealMax: 1.0,
         aconselhavelMin: 0.5,
@@ -242,7 +242,7 @@ class TipoSulcoInfo {
     ),
     TipoSulco.sulcos_corrugados: TipoSulcoInfo(
       tipo: TipoSulco.sulcos_corrugados,
-      declividade: DeclividadeRange(
+      declividade: LimitesDeclividade(
         idealMin: 1.0,
         idealMax: 2.0,
         aconselhavelMin: 0.5,
@@ -277,7 +277,7 @@ class TipoSulcoInfo {
     ),
     TipoSulco.sulcos_nivel_tabuleiros: TipoSulcoInfo(
       tipo: TipoSulco.sulcos_nivel_tabuleiros,
-      declividade: DeclividadeRange(),
+      declividade: LimitesDeclividade(),
       alinhamento: 'Dentro de tabuleiros ou bacias',
       formas: ['Sulcos com água circulando entre canteiros'],
       comprimentoFaixa: 'Variável (conforme tabuleiro)',
@@ -306,7 +306,7 @@ class TipoSulcoInfo {
     ),
     TipoSulco.sulcos_nivel_fechados: TipoSulcoInfo(
       tipo: TipoSulco.sulcos_nivel_fechados,
-      declividade: DeclividadeRange(),
+      declividade: LimitesDeclividade(),
       alinhamento: 'Sem declividade ou muito pequena',
       formas: ['Sulcos largos fechados nas duas extremidades'],
       comprimentoFaixa: 'Curto (variável)',
@@ -330,7 +330,7 @@ class TipoSulcoInfo {
     ),
     TipoSulco.sulcos_em_zigue_zague: TipoSulcoInfo(
       tipo: TipoSulco.sulcos_em_zigue_zague,
-      declividade: DeclividadeRange(),
+      declividade: LimitesDeclividade(),
       alinhamento: 'Zigue-zague ao longo do terreno',
       formas: ['Disposição em zigue-zague'],
       comprimentoFaixa: 'Variável conforme traçado',
@@ -354,5 +354,5 @@ class TipoSulcoInfo {
     ),
   };
 
-  static TipoSulcoInfo getInfo(TipoSulco tipo) => dados[tipo]!;
+  static TipoSulcoInfo para(TipoSulco tipo) => dados[tipo]!;
 }

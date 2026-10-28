@@ -2,8 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart';
 
 void main() {
-  DeclividadeRange range(TipoSulco tipo) =>
-      TipoSulcoInfo.getInfo(tipo).declividade;
+  LimitesDeclividade range(TipoSulco tipo) =>
+      TipoSulcoInfo.para(tipo).declividade;
 
   String? alerta(TipoSulco tipo, double percent) =>
       range(tipo).alertaDeclividade(tipo: tipo, percent: percent);

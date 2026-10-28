@@ -3,12 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/app/theme/app_theme.dart';
 import 'package:irrigasim/shared/cenarios/models/cenario_salvo.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/field_measurements.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/irrigation_project.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/ensaios_sulco.dart';
 import 'package:irrigasim/shared/cenarios/persistence/local_scenario_store.dart';
 import 'package:irrigasim/shared/cenarios/services/scenario_service.dart';
 import 'package:irrigasim/shared/cenarios/providers/scenario_providers.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/controlador_parametros_sulco.dart';
 import 'package:irrigasim/shared/cenarios/controllers/salvar_cenario_controller.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/views/project_results_screen.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/views/project_screen.dart';
@@ -24,23 +24,23 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      final parameters = ParametersController();
-      parameters.setOrigemAvanco(OrigemAvanco.ensaio);
-      parameters.updateField(campo: 'vazaoEnsaioAvancoLs', valor: '1');
-      parameters.setCondicoesEnsaioAvanco(
+      final parameters = ControladorParametrosSulco();
+      parameters.definirOrigemAvanco(OrigemAvanco.ensaio);
+      parameters.atualizarCampo(campo: 'vazaoEnsaioAvancoLs', valor: '1');
+      parameters.definirCondicoesEnsaioAvanco(
         'Solo médio, seção em V e orientação ensaiada',
       );
-      parameters.setMetodoCurvaAvanco(MetodoCurvaAvanco.minimosQuadrados);
-      parameters.setPontosEnsaioAvanco(const [
-        PontoEnsaio(distanciaM: 0, tempoMin: 0),
-        PontoEnsaio(distanciaM: 50, tempoMin: 20),
-        PontoEnsaio(distanciaM: 100, tempoMin: 43),
-        PontoEnsaio(distanciaM: 200, tempoMin: 95),
+      parameters.definirMetodoCurvaAvanco(MetodoAjusteAvanco.minimosQuadrados);
+      parameters.definirPontosEnsaioAvanco(const [
+        PontoEnsaioAvanco(distanciaM: 0, tempoMin: 0),
+        PontoEnsaioAvanco(distanciaM: 50, tempoMin: 20),
+        PontoEnsaioAvanco(distanciaM: 100, tempoMin: 43),
+        PontoEnsaioAvanco(distanciaM: 200, tempoMin: 95),
       ]);
-      parameters.setOrigemCurvaInfiltracao(
+      parameters.definirOrigemCurvaInfiltracao(
         OrigemCurvaInfiltracao.ensaioEntradaSaida,
       );
-      parameters.setMedicoesEntradaSaida(const [
+      parameters.definirMedicoesEntradaSaida(const [
         MedicaoEntradaSaida(tempoMin: 10, vazaoEntradaLs: 1, vazaoSaidaLs: .5),
         MedicaoEntradaSaida(tempoMin: 20, vazaoEntradaLs: 1, vazaoSaidaLs: .6),
         MedicaoEntradaSaida(tempoMin: 30, vazaoEntradaLs: 1, vazaoSaidaLs: .7),
@@ -52,7 +52,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            parametersProvider.overrideWith((ref) => parameters),
+            provedorParametrosSulco.overrideWith((ref) => parameters),
             resultsProvider.overrideWith(
               (ref) => ResultsController(ScenarioService(store)),
             ),
@@ -105,10 +105,10 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    final parameters = ParametersController();
+    final parameters = ControladorParametrosSulco();
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [parametersProvider.overrideWith((ref) => parameters)],
+        overrides: [provedorParametrosSulco.overrideWith((ref) => parameters)],
         child: MaterialApp(
           theme: AppTheme.light(),
           home: const ProjectScreen(),

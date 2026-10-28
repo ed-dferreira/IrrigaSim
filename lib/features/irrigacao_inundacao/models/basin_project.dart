@@ -455,7 +455,7 @@ class BasinProject {
   }
 
   /// ETc pela convenção do método escolhido (espelho de
-  /// `parameters_controller.evapotranspiracaoCulturaMmDia`, sem fabricar 0):
+  /// `controlador_parametros_sulco.evapotranspiracaoCulturaMmDia`, sem fabricar 0):
   /// adotada lê o campo do regime; ETo×Kc e Blaney-Criddle usam a agronomia.
   double? get etcMmDia => switch (metodoEtc) {
     MetodoEtc.adotada =>

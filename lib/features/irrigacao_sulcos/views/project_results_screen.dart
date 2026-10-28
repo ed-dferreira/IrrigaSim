@@ -3,10 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/field_measurements.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/controlador_parametros_sulco.dart';
 import 'package:irrigasim/shared/cenarios/controllers/salvar_cenario_controller.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/terrain/terrain_view.dart';
 
@@ -18,7 +18,7 @@ class ProjectResultsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(parametersProvider);
+    final state = ref.watch(provedorParametrosSulco);
     final result = state.resultado;
     if (state.executando) {
       return Scaffold(
@@ -102,7 +102,7 @@ class ProjectResultsScreen extends ConsumerWidget {
   Future<void> _saveScenario(
     BuildContext context,
     WidgetRef ref,
-    ParametersState state,
+    EstadoParametrosSulco state,
     SimulationResult result,
   ) async {
     final notifier = ref.read(resultsProvider.notifier);
@@ -114,7 +114,7 @@ class ProjectResultsScreen extends ConsumerWidget {
     }
     await notifier.salvarCenario(
       metodo: MetodoIrrigacao.sulco,
-      parametros: state.toIrrigationParameters(),
+      parametros: state.paraParametrosIrrigacao(),
       resultado: result,
     );
     if (!context.mounted) return;
@@ -126,7 +126,7 @@ class ProjectResultsScreen extends ConsumerWidget {
 
   void _showExport(
     BuildContext context,
-    ParametersState state,
+    EstadoParametrosSulco state,
     SimulationResult result,
   ) {
     final csv = _buildCsv(state, result);
@@ -207,7 +207,7 @@ class _AuditResultsBody extends StatelessWidget {
     required this.onSave,
   });
 
-  final ParametersState state;
+  final EstadoParametrosSulco state;
   final SimulationResult result;
   final ResultsState resultsState;
   final ValueChanged<int> onTabSelected;
@@ -219,10 +219,10 @@ class _AuditResultsBody extends StatelessWidget {
     final tempoAvancoNaMetade = result.curvaAvanco.isEmpty
         ? state.tempoAvancoMetadeMin
         : result.curvaAvanco.reduce((left, right) {
-            final leftDistance = (left.x - state.comprimento / 2).abs();
-            final rightDistance = (right.x - state.comprimento / 2).abs();
+            final leftDistance = (left.y - state.comprimento / 2).abs();
+            final rightDistance = (right.y - state.comprimento / 2).abs();
             return leftDistance <= rightDistance ? left : right;
-          }).y;
+          }).x;
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 48),
       children: [
@@ -279,19 +279,25 @@ class _AuditResultsBody extends StatelessWidget {
                     ),
                     AuditRow(
                       'Eficiência para avaliação (${result.balancoSulco == null ? 'Ea' : 'Ea integral'})',
-                      '${(result.balancoSulco?.eaIntegral ?? result.eficiencia).toStringAsFixed(1)}%',
+                      '${(result.balancoSulco?.eficienciaAplicacaoIntegralPercentual ?? result.eficiencia).toStringAsFixed(1)}%',
                       detail:
-                          (result.balancoSulco?.eaIntegral ??
+                          (result
+                                      .balancoSulco
+                                      ?.eficienciaAplicacaoIntegralPercentual ??
                                   result.eficiencia) <
                               60
                           ? 'Abaixo do critério indicativo (60%)'
-                          : (result.balancoSulco?.eaIntegral ??
+                          : (result
+                                        .balancoSulco
+                                        ?.eficienciaAplicacaoIntegralPercentual ??
                                     result.eficiencia) >=
                                 75
                           ? 'Acima da referência de 75%'
                           : 'Atende ao critério indicativo',
                       isWarning:
-                          (result.balancoSulco?.eaIntegral ??
+                          (result
+                                  .balancoSulco
+                                  ?.eficienciaAplicacaoIntegralPercentual ??
                               result.eficiencia) <
                           60,
                     ),
@@ -483,15 +489,15 @@ class _AuditResultsBody extends StatelessWidget {
                     if (result.balancoSulco case final balanco?) ...[
                       AuditRow(
                         'Ea integral (Lútil/Lm)',
-                        '${balanco.eaIntegral.toStringAsFixed(2)}%',
+                        '${balanco.eficienciaAplicacaoIntegralPercentual.toStringAsFixed(2)}%',
                         detail:
                             'Usada nos critérios de avaliação; perfil de 0 a L',
                       ),
                       AuditRow(
                         'Pp slide (Lmi−IRN)/Lm',
-                        balanco.ppSlide == null
+                        balanco.perdaPercolacaoSlidePercentual == null
                             ? 'Não aplicável sob déficit'
-                            : '${balanco.ppSlide!.toStringAsFixed(2)}%',
+                            : '${balanco.perdaPercolacaoSlidePercentual!.toStringAsFixed(2)}%',
                       ),
                       AuditRow(
                         'Déficit espacial',
@@ -694,7 +700,7 @@ class _AuditResultsBody extends StatelessWidget {
 
 // ──────────────────────── CSV Builder ────────────────────────
 
-String _buildCsv(ParametersState state, SimulationResult result) {
+String _buildCsv(EstadoParametrosSulco state, SimulationResult result) {
   final rows = <String>[
     'grupo;indicador;valor;unidade',
     'identificação;método;Sulco;',
@@ -759,10 +765,10 @@ String _buildCsv(ParametersState state, SimulationResult result) {
     'entrada;hipótese recessão;${state.hipoteseRecessao.name};',
     'resultado;${result.balancoSulco == null ? 'eficiência de aplicação' : 'Ea slide (Lf/Lm)'};${result.eficiencia};%',
     if (result.balancoSulco case final balanco?) ...[
-      'resultado;Ea integral (Lútil/Lm);${balanco.eaIntegral};%',
-      'resultado;Pp slide (Lmi−IRN)/Lm;${balanco.ppSlide?.toString() ?? 'não aplicável'};%',
-      'resultado;Pp integral;${balanco.ppIntegral};%',
-      'resultado;Pe integral;${balanco.peIntegral};%',
+      'resultado;Ea integral (Lútil/Lm);${balanco.eficienciaAplicacaoIntegralPercentual};%',
+      'resultado;Pp slide (Lmi−IRN)/Lm;${balanco.perdaPercolacaoSlidePercentual?.toString() ?? 'não aplicável'};%',
+      'resultado;Pp integral;${balanco.perdaPercolacaoIntegralPercentual};%',
+      'resultado;Pe integral;${balanco.perdaEscoamentoIntegralPercentual};%',
       'resultado;déficit espacial;${balanco.deficitMm};mm',
       'resultado;domínio do perfil;0 a ${state.comprimento} m (trapézios igualmente espaçados);',
     ],
@@ -794,7 +800,7 @@ String _buildCsv(ParametersState state, SimulationResult result) {
     );
   }
   if (state.origemAvanco == OrigemAvanco.ensaio &&
-      state.metodoCurvaAvanco == MetodoCurvaAvanco.doisPontos &&
+      state.metodoCurvaAvanco == MetodoAjusteAvanco.doisPontos &&
       state.pontosEnsaioAvanco.isEmpty) {
     rows.add(
       'ensaio avanço;distância intermediária;${state.distanciaEnsaioIntermediariaM};m',

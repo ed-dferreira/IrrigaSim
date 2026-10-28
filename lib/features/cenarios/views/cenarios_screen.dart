@@ -543,7 +543,7 @@ class _ScenarioDetails extends StatelessWidget {
                   ),
                 ),
                 if (cenario.metodo == MetodoIrrigacao.sulco &&
-                    cenario.parametros.entradasProjetoSulco == null)
+                    cenario.parametros.entradasProjeto == null)
                   Text(
                     'Cenário legado: entradas agronômicas originais ausentes. '
                     'Valores ilustrativos não serão usados para recalcular a IRN.',

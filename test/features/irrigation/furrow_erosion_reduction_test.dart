@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/shared/cenarios/models/cenario_salvo.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/field_measurements.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
 import 'package:irrigasim/shared/cenarios/services/project_store.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/services/flow_management.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/services/run_furrow_simulation.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/manejo_vazao.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/simulador_sulcos.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/controlador_parametros_sulco.dart';
 
 void main() {
   const conditions = 'Solo médio, seção V e orientação do projeto';
@@ -39,21 +39,21 @@ void main() {
 
   test('erosão observada no campo prevalece sobre qmax empírico', () {
     final params = base.copyWith(
-      ensaioErosao: const EnsaioErosaoSulco(
+      ensaioErosao: const EnsaioErosao(
         vazaoLs: 1,
         condicoes: conditions,
         erosaoObservada: true,
       ),
     );
     expect(
-      FlowManagement.calcularVazaoMaxima(
+      ManejoVazao.calcularVazaoMaxima(
         declividadePercent: .2,
         textura: params.texturaSolo,
       ).qmaxLs,
       greaterThan(1),
     );
     expect(
-      () => RunFurrowSimulation()(params),
+      () => SimuladorSulcos()(params),
       throwsA(
         isA<FormatException>().having(
           (e) => e.message,
@@ -63,9 +63,9 @@ void main() {
       ),
     );
     expect(
-      RunFurrowSimulation()(
+      SimuladorSulcos()(
         params.copyWith(
-          ensaioErosao: const EnsaioErosaoSulco(
+          ensaioErosao: const EnsaioErosao(
             vazaoLs: 1,
             condicoes: conditions,
             erosaoObservada: false,
@@ -81,9 +81,9 @@ void main() {
       usarEnsaioAvanco: true,
       medicoesAvanco: stakes,
     );
-    expect(() => RunFurrowSimulation()(measured), throwsFormatException);
+    expect(() => SimuladorSulcos()(measured), throwsFormatException);
     expect(
-      () => RunFurrowSimulation()(
+      () => SimuladorSulcos()(
         measured.copyWith(
           vazaoEnsaioAvancoLs: .8,
           condicoesEnsaioAvanco: conditions,
@@ -98,7 +98,7 @@ void main() {
       ),
     );
     expect(
-      RunFurrowSimulation()(
+      SimuladorSulcos()(
         measured.copyWith(
           vazaoEnsaioAvancoLs: 1,
           condicoesEnsaioAvanco: conditions,
@@ -107,7 +107,7 @@ void main() {
       isFalse,
     );
     expect(
-      RunFurrowSimulation()(
+      SimuladorSulcos()(
         measured.copyWith(
           vazaoEnsaioAvancoLs: 1,
           condicoesEnsaioAvanco: conditions,
@@ -121,7 +121,7 @@ void main() {
   test(
     'somatório F24 p.96 usa somente estacas no domínio e não a derivada final',
     () {
-      final sum = FlowManagement.estimarSomatorioEspacial(
+      final sum = ManejoVazao.estimarSomatorioEspacial(
         estacas: stakes,
         comprimentoM: 200,
         espacamentoM: .9,
@@ -131,7 +131,7 @@ void main() {
       );
       expect(sum.vazaoReduzidaLs, closeTo(.7472335436, .00005));
       expect(
-        () => FlowManagement.estimarSomatorioEspacial(
+        () => ManejoVazao.estimarSomatorioEspacial(
           estacas: stakes,
           comprimentoM: 220,
           espacamentoM: .9,
@@ -150,7 +150,7 @@ void main() {
         condicoesEnsaioAvanco: conditions,
         tempoMudancaMin: 20,
       );
-      final result = RunFurrowSimulation()(params);
+      final result = SimuladorSulcos()(params);
       expect(
         result.metricas['Vazão reduzida pelo somatório espacial'],
         closeTo(.7472335436, .00005),
@@ -171,8 +171,8 @@ void main() {
       manejoSulco: ManejoSulco.reduzida,
       origemVazaoReduzida: OrigemVazaoReduzida.vib,
     );
-    final without = RunFurrowSimulation()(params);
-    final withFactor = RunFurrowSimulation()(params.copyWith(fator11Vib: true));
+    final without = SimuladorSulcos()(params);
+    final withFactor = SimuladorSulcos()(params.copyWith(fator11Vib: true));
     expect(
       without.metricas['Vazão reduzida estimada por VIB'],
       closeTo(.4388888889, 1e-9),
@@ -184,7 +184,7 @@ void main() {
     expect(withFactor.metricas['Fator da estimativa VIB'], 1.1);
     expect(withFactor.metricas['VIB usada na redução'], closeTo(7.9, 1e-9));
     expect(
-      () => RunFurrowSimulation()(params.copyWith(vazaoDisponivelLps: .9)),
+      () => SimuladorSulcos()(params.copyWith(vazaoDisponivelLps: .9)),
       throwsA(
         isA<FormatException>().having(
           (e) => e.message,
@@ -194,7 +194,7 @@ void main() {
       ),
     );
     expect(
-      () => RunFurrowSimulation()(params.copyWith(tempoMudancaMin: -1)),
+      () => SimuladorSulcos()(params.copyWith(tempoMudancaMin: -1)),
       throwsFormatException,
     );
   });
@@ -203,7 +203,7 @@ void main() {
     'vazão informada abaixo da demanda espacial medida não mantém a hipótese',
     () {
       expect(
-        () => RunFurrowSimulation()(
+        () => SimuladorSulcos()(
           base.copyWith(
             manejoSulco: ManejoSulco.reduzida,
             origemVazaoReduzida: OrigemVazaoReduzida.informada,
@@ -236,7 +236,7 @@ void main() {
         fator11Vib: true,
         vazaoEnsaioAvancoLs: 1,
         condicoesEnsaioAvanco: conditions,
-        ensaioErosao: const EnsaioErosaoSulco(
+        ensaioErosao: const EnsaioErosao(
           vazaoLs: 1.5,
           condicoes: conditions,
           erosaoObservada: true,
@@ -248,7 +248,7 @@ void main() {
         nome: 'sulco',
         metodo: MetodoIrrigacao.sulco,
         parametros: params,
-        resultado: RunFurrowSimulation()(params),
+        resultado: SimuladorSulcos()(params),
         dataCriacao: now,
         dataModificacao: now,
       );
@@ -281,13 +281,13 @@ void main() {
       manejoSulco: ManejoSulco.reduzida,
       origemVazaoReduzida: OrigemVazaoReduzida.vib,
       fator11Vib: true,
-      ensaioErosao: const EnsaioErosaoSulco(
+      ensaioErosao: const EnsaioErosao(
         vazaoLs: 1.5,
         condicoes: conditions,
         erosaoObservada: true,
       ),
     );
-    final result = RunFurrowSimulation()(params);
+    final result = SimuladorSulcos()(params);
     final saved = CenarioSalvo(
       id: 'vib',
       nome: 'F23',
@@ -324,19 +324,19 @@ void main() {
   });
 
   test('trocar a origem limpa vazão informada antiga antes de estimar', () {
-    final controller = ParametersController();
-    controller.setManejoSulco(ManejoSulco.reduzida);
-    controller.setOrigemVazaoReduzida(OrigemVazaoReduzida.informada);
-    controller.updateField(campo: 'vazaoReduzidaLs', valor: '0.75');
-    controller.setOrigemVazaoReduzida(OrigemVazaoReduzida.vib);
+    final controller = ControladorParametrosSulco();
+    controller.definirManejoSulco(ManejoSulco.reduzida);
+    controller.definirOrigemVazaoReduzida(OrigemVazaoReduzida.informada);
+    controller.atualizarCampo(campo: 'vazaoReduzidaLs', valor: '0.75');
+    controller.definirOrigemVazaoReduzida(OrigemVazaoReduzida.vib);
     expect(controller.state.vazaoReduzidaLs, 0);
-    final params = controller.state.toIrrigationParameters().copyWith(
+    final params = controller.state.paraParametrosIrrigacao().copyWith(
       k: .5,
       a: .5,
     );
     expect(params.origemVazaoReduzida, OrigemVazaoReduzida.vib);
     expect(
-      RunFurrowSimulation()(params).metricas['Vazão reduzida estimada por VIB'],
+      SimuladorSulcos()(params).metricas['Vazão reduzida estimada por VIB'],
       isNotNull,
     );
   });

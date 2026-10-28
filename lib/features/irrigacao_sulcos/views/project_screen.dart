@@ -6,7 +6,7 @@ import 'package:irrigasim/shared/cenarios/providers/scenario_providers.dart';
 import 'package:irrigasim/app/theme/app_colors.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/irrigation_project_components.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/controlador_parametros_sulco.dart';
 
 import 'project_steps/area_step.dart';
 import 'project_steps/avanco_step.dart';
@@ -45,9 +45,9 @@ class _ProjectScreenState extends ConsumerState<ProjectScreen> {
   Future<void> _carregarCenario(String id) async {
     final cenario = await ref.read(scenarioServiceProvider).buscarPorId(id);
     if (!mounted || cenario == null) return;
-    ref.read(parametersProvider.notifier)
+    ref.read(provedorParametrosSulco.notifier)
       ..resetar()
-      ..loadFromParams(cenario.parametros);
+      ..carregarDeParametros(cenario.parametros);
   }
 
   static const _stepTitles = [
@@ -81,7 +81,7 @@ class _ProjectScreenState extends ConsumerState<ProjectScreen> {
     final valid = _formKey.currentState?.validate() ?? false;
     if (!valid) return false;
     if (_currentStep == 4) {
-      final error = ref.read(parametersProvider.notifier).validarEnsaio();
+      final error = ref.read(provedorParametrosSulco.notifier).validarEnsaio();
       if (error != null) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(error)));
@@ -101,11 +101,11 @@ class _ProjectScreenState extends ConsumerState<ProjectScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(parametersProvider);
+    final state = ref.watch(provedorParametrosSulco);
     final accent = AppColors.sulco;
     final wide = MediaQuery.sizeOf(context).width >= 760;
 
-    ref.listen(parametersProvider, (previous, next) {
+    ref.listen(provedorParametrosSulco, (previous, next) {
       if (next.resultado != null && previous?.resultado == null) {
         context.push(AppRoutes.sulcosResultados);
       }
@@ -172,7 +172,7 @@ class _ProjectScreenState extends ConsumerState<ProjectScreen> {
                         if (_formKey.currentState!.validate()) {
                           setState(() => _completedSteps.add(_currentStep));
                           ref
-                              .read(parametersProvider.notifier)
+                              .read(provedorParametrosSulco.notifier)
                               .executarSimulacao();
                         }
                       },
@@ -187,7 +187,7 @@ class _ProjectScreenState extends ConsumerState<ProjectScreen> {
     );
   }
 
-  Widget _buildStepContent(ParametersState state, Color accent, bool wide) {
+  Widget _buildStepContent(EstadoParametrosSulco state, Color accent, bool wide) {
     return switch (_currentStep) {
       0 => AreaStep(state: state, accent: accent, wide: wide),
       1 => SoloStep(state: state, accent: accent, wide: wide),

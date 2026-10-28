@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
 import 'package:irrigasim/core/widgets/calculated_field.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/curva_infiltracao_sulco.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/proveniencia_dado.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/controlador_parametros_sulco.dart';
 
 import 'project_step_widgets.dart';
 
@@ -18,7 +18,7 @@ class SulcoStep extends ConsumerWidget {
     required this.accent,
     required this.wide,
   });
-  final ParametersState state;
+  final EstadoParametrosSulco state;
   final Color accent;
   final bool wide;
 
@@ -26,7 +26,7 @@ class SulcoStep extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final fields = <Widget>[
       if (state.dimensionarComprimentoCriddle &&
-          state.origemGeometria == ProvenienciaSulco.calculado)
+          state.provenienciaGeometria == ProvenienciaDado.calculado)
         CalculatedField(
           label: 'Comprimento dimensionado por Criddle',
           value: state.comprimento,
@@ -99,23 +99,24 @@ class SulcoStep extends ConsumerWidget {
                     label: const Text('Informar comprimento'),
                     selected: !state.dimensionarComprimentoCriddle,
                     onSelected: (_) => ref
-                        .read(parametersProvider.notifier)
-                        .setDimensionarComprimentoCriddle(false),
+                        .read(provedorParametrosSulco.notifier)
+                        .definirDimensionarComprimentoCriddle(false),
                   ),
                   ChoiceChip(
                     avatar: const Icon(AppIcons.curvaAvanco),
                     label: const Text('Dimensionar por Criddle'),
                     selected: state.dimensionarComprimentoCriddle,
                     onSelected: (_) => ref
-                        .read(parametersProvider.notifier)
-                        .setDimensionarComprimentoCriddle(true),
+                        .read(provedorParametrosSulco.notifier)
+                        .definirDimensionarComprimentoCriddle(true),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
               StepFieldGrid(fields: fields, wide: wide),
               if (state.dimensionarComprimentoCriddle &&
-                  state.origemGeometria == ProvenienciaSulco.calculado) ...[
+                  state.provenienciaGeometria ==
+                      ProvenienciaDado.calculado) ...[
                 const SizedBox(height: 12),
                 ComprimentoCriddleResult(state: state),
               ],
@@ -130,7 +131,7 @@ class SulcoStep extends ConsumerWidget {
 class ComprimentoCriddleResult extends StatelessWidget {
   const ComprimentoCriddleResult({super.key, required this.state});
 
-  final ParametersState state;
+  final EstadoParametrosSulco state;
 
   @override
   Widget build(BuildContext context) {
@@ -213,7 +214,7 @@ class TipoSulcoInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final info = TipoSulcoInfo.getInfo(tipo);
+    final info = TipoSulcoInfo.para(tipo);
     final accent = AppColors.sulco;
 
     return StepBentoCard(

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:irrigasim/shared/irrigacao/models/comum/clima_demanda.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/entradas_projeto_sulco.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/controlador_parametros_sulco.dart';
 
 import 'project_step_widgets.dart';
 
@@ -15,7 +15,7 @@ class ClimaStep extends ConsumerWidget {
     required this.accent,
     required this.wide,
   });
-  final ParametersState state;
+  final EstadoParametrosSulco state;
   final Color accent;
   final bool wide;
 
@@ -35,44 +35,44 @@ class ClimaStep extends ConsumerWidget {
             ChoiceChip(
               avatar: const Icon(AppIcons.editarPerfil),
               label: const Text('Informar dados'),
-              selected: state.metodoEtc != MetodoEtcSulco.blaneyCriddle,
+              selected: state.metodoEtc != MetodoEtc.blaneyCriddle,
               onSelected: (_) => ref
-                  .read(parametersProvider.notifier)
-                  .setMetodoEtc(MetodoEtcSulco.adotada),
+                  .read(provedorParametrosSulco.notifier)
+                  .definirMetodoEtc(MetodoEtc.adotada),
             ),
             ChoiceChip(
               avatar: const Icon(AppIcons.climaSolar),
               label: const Text('Blaney–Criddle'),
-              selected: state.metodoEtc == MetodoEtcSulco.blaneyCriddle,
+              selected: state.metodoEtc == MetodoEtc.blaneyCriddle,
               onSelected: (_) => ref
-                  .read(parametersProvider.notifier)
-                  .setMetodoEtc(MetodoEtcSulco.blaneyCriddle),
+                  .read(provedorParametrosSulco.notifier)
+                  .definirMetodoEtc(MetodoEtc.blaneyCriddle),
             ),
           ],
         ),
         const SizedBox(height: 12),
-        if (state.metodoEtc != MetodoEtcSulco.blaneyCriddle)
-          DropdownButtonFormField<MetodoEtcSulco>(
+        if (state.metodoEtc != MetodoEtc.blaneyCriddle)
+          DropdownButtonFormField<MetodoEtc>(
             isExpanded: true,
             initialValue: state.metodoEtc,
             decoration: const InputDecoration(labelText: 'Dados manuais'),
             items: const [
               DropdownMenuItem(
-                value: MetodoEtcSulco.adotada,
+                value: MetodoEtc.adotada,
                 child: Text('Informar ETc diretamente'),
               ),
               DropdownMenuItem(
-                value: MetodoEtcSulco.etoVezesKc,
+                value: MetodoEtc.etoVezesKc,
                 child: Text('Informar ETo e calcular ETc = ETo × Kc'),
               ),
             ],
             onChanged: (value) {
               if (value != null) {
-                ref.read(parametersProvider.notifier).setMetodoEtc(value);
+                ref.read(provedorParametrosSulco.notifier).definirMetodoEtc(value);
               }
             },
           ),
-        if (state.metodoEtc == MetodoEtcSulco.blaneyCriddle) ...[
+        if (state.metodoEtc == MetodoEtc.blaneyCriddle) ...[
           Container(
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(12),
@@ -132,8 +132,8 @@ class ClimaStep extends ConsumerWidget {
                 onChanged: (value) {
                   if (value != null) {
                     ref
-                        .read(parametersProvider.notifier)
-                        .setMesReferencia(value);
+                        .read(provedorParametrosSulco.notifier)
+                        .definirMesReferencia(value);
                   }
                 },
               ),
@@ -160,7 +160,7 @@ class ClimaStep extends ConsumerWidget {
             ),
         ],
         const SizedBox(height: 12),
-        DropdownButtonFormField<OrigemChuvaSulco>(
+        DropdownButtonFormField<OrigemChuva>(
           isExpanded: true,
           initialValue: state.origemChuva,
           decoration: const InputDecoration(
@@ -168,29 +168,29 @@ class ClimaStep extends ConsumerWidget {
           ),
           items: const [
             DropdownMenuItem(
-              value: OrigemChuvaSulco.naoInformada,
+              value: OrigemChuva.naoInformada,
               child: Text('Não informada'),
             ),
             DropdownMenuItem(
-              value: OrigemChuvaSulco.efetiva,
+              value: OrigemChuva.efetiva,
               child: Text('Efetiva adotada'),
             ),
             DropdownMenuItem(
-              value: OrigemChuvaSulco.observada,
+              value: OrigemChuva.observada,
               child: Text('Efetiva observada'),
             ),
             DropdownMenuItem(
-              value: OrigemChuvaSulco.provavel,
+              value: OrigemChuva.provavel,
               child: Text('Provável (não convertida em efetiva)'),
             ),
           ],
           onChanged: (value) {
             if (value != null) {
-              ref.read(parametersProvider.notifier).setOrigemChuva(value);
+              ref.read(provedorParametrosSulco.notifier).definirOrigemChuva(value);
             }
           },
         ),
-        if (state.origemChuva == OrigemChuvaSulco.provavel)
+        if (state.origemChuva == OrigemChuva.provavel)
           Text(
             'Chuva provável foi registrada, mas não pode ser subtraída da ETc como Pef sem um método explícito.',
             style: Theme.of(context).textTheme.bodyMedium,
@@ -199,14 +199,14 @@ class ClimaStep extends ConsumerWidget {
         StepFieldGrid(
           wide: wide,
           fields: [
-            if (state.metodoEtc == MetodoEtcSulco.adotada)
+            if (state.metodoEtc == MetodoEtc.adotada)
               StepField(
                 name: 'evapotranspiracaoMmDia',
                 label: 'Evapotranspiração da cultura (ETc adotada)',
                 value: state.evapotranspiracaoMmDia,
                 suffix: 'mm/dia',
               ),
-            if (state.metodoEtc == MetodoEtcSulco.etoVezesKc)
+            if (state.metodoEtc == MetodoEtc.etoVezesKc)
               OptionalNumericCurveField(
                 name: 'etoMmDia',
                 label: 'Evapotranspiração de referência (ETo, mm/dia)',
@@ -214,7 +214,7 @@ class ClimaStep extends ConsumerWidget {
               ),
             StepField(
               name: 'precipitacaoEfetivaMmDia',
-              label: state.origemChuva == OrigemChuvaSulco.provavel
+              label: state.origemChuva == OrigemChuva.provavel
                   ? 'Precipitação provável (não é Pef)'
                   : 'Precipitação efetiva (Pef)',
               value: state.precipitacaoEfetivaMmDia,

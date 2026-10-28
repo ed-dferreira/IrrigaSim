@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/controlador_parametros_sulco.dart';
 
 import 'project_step_widgets.dart';
 import 'sulco_step.dart';
@@ -16,7 +16,7 @@ class AreaStep extends ConsumerWidget {
     required this.accent,
     required this.wide,
   });
-  final ParametersState state;
+  final EstadoParametrosSulco state;
   final Color accent;
   final bool wide;
 
@@ -87,7 +87,7 @@ class AreaStep extends ConsumerWidget {
       const SizedBox(height: 12),
       OutlinedButton.icon(
         onPressed: () =>
-            ref.read(parametersProvider.notifier).recomendarMaiorComprimento(),
+            ref.read(provedorParametrosSulco.notifier).recomendarMaiorComprimento(),
         icon: const Icon(AppIcons.recomendacao),
         label: const Text('Avaliar candidatos pela eficiência'),
       ),
@@ -109,14 +109,14 @@ class AreaStep extends ConsumerWidget {
 
 class SlopeRangeAlert extends StatelessWidget {
   const SlopeRangeAlert({super.key, required this.state});
-  final ParametersState state;
+  final EstadoParametrosSulco state;
 
   @override
   Widget build(BuildContext context) {
     final tipo = state.tipoSulco;
     if (tipo == null) return const SizedBox.shrink();
 
-    final info = TipoSulcoInfo.getInfo(tipo);
+    final info = TipoSulcoInfo.para(tipo);
     if (tipo == TipoSulco.sulcos_contorno &&
         state.decliveEncostaPercent == null) {
       return Text(
@@ -244,7 +244,7 @@ class PendingConfirmationsAlert extends StatelessWidget {
 
 class SlopeSummaryCard extends StatelessWidget {
   const SlopeSummaryCard({super.key, required this.state});
-  final ParametersState state;
+  final EstadoParametrosSulco state;
 
   @override
   Widget build(BuildContext context) {

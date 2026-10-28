@@ -29,7 +29,7 @@ class ProjectStore {
       'metodo': cenario.metodo.name,
       'base_comum': p.baseComumPara(cenario.metodo).toMap(),
       if (cenario.metodo == MetodoIrrigacao.sulco)
-        'entradas_projeto_sulco': p.entradasProjetoSulco?.toMap(),
+        'entradas_projeto_sulco': p.entradasProjeto?.toMap(),
       if (cenario.metodo == MetodoIrrigacao.faixa)
         'projeto_faixa': (p.projetoFaixa ?? BorderProject.fromLegacy(p))
             .toMap(),
@@ -163,7 +163,7 @@ class ProjectStore {
     );
     buffer.writeln('Manejo: ${p.manejoSulco.displayName}');
     if (cenario.metodo == MetodoIrrigacao.sulco) {
-      final entradas = p.entradasProjetoSulco;
+      final entradas = p.entradasProjeto;
       buffer.writeln(
         entradas == null
             ? 'Projeto legado: UCC, UPMP, Ds, raízes, f, ETo e origem da chuva ausentes.'
@@ -238,15 +238,15 @@ class ProjectStore {
     buffer.writeln('-' * 30);
     if (r.balancoSulco case final balance?) {
       buffer.writeln(
-        'Ea do slide (Lf/Lm): ${balance.eaSlide.toStringAsFixed(2)}%',
+        'Ea do slide (Lf/Lm): ${balance.eficienciaAplicacaoSlidePercentual.toStringAsFixed(2)}%',
       );
       buffer.writeln(
         'Ea integral (Lútil/Lm, domínio 0–L): '
-        '${balance.eaIntegral.toStringAsFixed(2)}%',
+        '${balance.eficienciaAplicacaoIntegralPercentual.toStringAsFixed(2)}%',
       );
       buffer.writeln(
-        'Balanço integral: Pp=${balance.ppIntegral.toStringAsFixed(2)}%; '
-        'Pe=${balance.peIntegral.toStringAsFixed(2)}%; '
+        'Balanço integral: Pp=${balance.perdaPercolacaoIntegralPercentual.toStringAsFixed(2)}%; '
+        'Pe=${balance.perdaEscoamentoIntegralPercentual.toStringAsFixed(2)}%; '
         'déficit=${balance.deficitMm.toStringAsFixed(2)} mm.',
       );
     } else {

@@ -1,13 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/irrigation_project.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/services/advance_curve_model.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/services/depth_performance.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/services/flow_management.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/services/infiltration_model.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/ensaios_sulco.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/modelo_curva_avanco.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/desempenho_lamina.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/manejo_vazao.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/modelo_infiltracao.dart';
 import 'package:irrigasim/shared/irrigacao/services/lamina_requerida.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/services/opportunity_time.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/services/run_furrow_simulation.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/tempo_oportunidade.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/simulador_sulcos.dart';
 
 /// Valores de referência do §56 do documento.
 ///
@@ -66,7 +66,7 @@ void main() {
 
   group('ISSUE-016 — Caso milho §56: vazão não erosiva', () {
     test('q = 1,5 L/s reprovado por erosão (§56.3)', () {
-      final resultado = RunFurrowSimulation()(
+      final resultado = SimuladorSulcos()(
         const IrrigationParameters(
           comprimento: 200,
           declividade: 0.005,
@@ -86,9 +86,9 @@ void main() {
       expect(resultado.alertaVazaoExcedida!, contains('ultrapassa'));
     });
 
-    test('qmax calculada para textura média via RunFurrowSimulation (§56.3)', () {
-      // RunFurrowSimulation usa FlowManagement: qmax = C / S0^a (textura média)
-      final resultado = RunFurrowSimulation()(
+    test('qmax calculada para textura média via SimuladorSulcos (§56.3)', () {
+      // SimuladorSulcos usa ManejoVazao: qmax = C / S0^a (textura média)
+      final resultado = SimuladorSulcos()(
         const IrrigationParameters(
           comprimento: 200,
           declividade: 0.005,
@@ -112,10 +112,10 @@ void main() {
       );
     });
 
-    test('qmax por FlowManagement usa equação por textura (§30)', () {
-      // FlowManagement: qmax = C / S0^a (S0 em %)
+    test('qmax por ManejoVazao usa equação por textura (§30)', () {
+      // ManejoVazao: qmax = C / S0^a (S0 em %)
       // Textura média: C=0.613, a=0.733, S0=0.5%
-      final erosao = FlowManagement.calcularVazaoMaxima(
+      final erosao = ManejoVazao.calcularVazaoMaxima(
         declividadePercent: 0.5,
         textura: TexturaSolo.media,
       );
@@ -131,7 +131,7 @@ void main() {
     setUp(() {
       // §56.9: valores de referência usam vazão de 1 L/s (não erosiva)
       // A vazão de 1,5 L/s é apenas para o teste de flag de erosão
-      resultado = RunFurrowSimulation()(
+      resultado = SimuladorSulcos()(
         const IrrigationParameters(
           comprimento: 200,
           declividade: 0.005,
@@ -170,14 +170,14 @@ void main() {
 
     test('Ea integral recalculada do perfil de 0 a L', () {
       expect(
-        resultado.balancoSulco!.eaIntegral,
+        resultado.balancoSulco!.eficienciaAplicacaoIntegralPercentual,
         closeTo(57.272687212695466, 0.002),
       );
     });
 
     test('balanço físico: Ea integral + Pp integral + Pe integral = 100%', () {
       final soma =
-          resultado.balancoSulco!.eaIntegral +
+          resultado.balancoSulco!.eficienciaAplicacaoIntegralPercentual +
           resultado.perdaPercolacao +
           resultado.perdaEscoamento;
       expect(soma, closeTo(100, 1e-8));
@@ -200,50 +200,50 @@ void main() {
       // §19: ensaio entrada/saída com Qentrada=1 L/s, 100m, 1m espaçamento
       // VI(mm/h) = (Qentrada - Qsaida) * 36
       // Resultado esperado: K≈35.2, n≈-0.311
-      final parametros = InfiltrationModel.ajustarCurva([
+      final parametros = ModeloInfiltracao.ajustarCurva([
         // Dados convertidos de L/s para mm/h: VI = (1 - Qs) * 36
-        const PontoInfiltracaoMedido(tempoMin: 2, volumeMm: 29.16),
-        const PontoInfiltracaoMedido(tempoMin: 9, volumeMm: 18.00),
-        const PontoInfiltracaoMedido(tempoMin: 19, volumeMm: 13.32),
-        const PontoInfiltracaoMedido(tempoMin: 29, volumeMm: 12.24),
-        const PontoInfiltracaoMedido(tempoMin: 49, volumeMm: 10.44),
-        const PontoInfiltracaoMedido(tempoMin: 64, volumeMm: 9.72),
-        const PontoInfiltracaoMedido(tempoMin: 79, volumeMm: 9.00),
-        const PontoInfiltracaoMedido(tempoMin: 89, volumeMm: 8.64),
-        const PontoInfiltracaoMedido(tempoMin: 101, volumeMm: 8.28),
-        const PontoInfiltracaoMedido(tempoMin: 119, volumeMm: 7.92),
-        const PontoInfiltracaoMedido(tempoMin: 149, volumeMm: 7.92),
+        const PontoInfiltracaoMedido(tempoMin: 2, taxaMmHora: 29.16),
+        const PontoInfiltracaoMedido(tempoMin: 9, taxaMmHora: 18.00),
+        const PontoInfiltracaoMedido(tempoMin: 19, taxaMmHora: 13.32),
+        const PontoInfiltracaoMedido(tempoMin: 29, taxaMmHora: 12.24),
+        const PontoInfiltracaoMedido(tempoMin: 49, taxaMmHora: 10.44),
+        const PontoInfiltracaoMedido(tempoMin: 64, taxaMmHora: 9.72),
+        const PontoInfiltracaoMedido(tempoMin: 79, taxaMmHora: 9.00),
+        const PontoInfiltracaoMedido(tempoMin: 89, taxaMmHora: 8.64),
+        const PontoInfiltracaoMedido(tempoMin: 101, taxaMmHora: 8.28),
+        const PontoInfiltracaoMedido(tempoMin: 119, taxaMmHora: 7.92),
+        const PontoInfiltracaoMedido(tempoMin: 149, taxaMmHora: 7.92),
       ]);
 
       // K ≈ 35.2 (mm/h)
-      expect(parametros.k, closeTo(35.2, 1.0));
+      expect(parametros.coeficiente, closeTo(35.2, 1.0));
       // n ≈ -0.311
-      expect(parametros.n, closeTo(-0.311, 0.05));
+      expect(parametros.expoente, closeTo(-0.311, 0.05));
       // K positivo
-      expect(parametros.k, greaterThan(0));
+      expect(parametros.coeficiente, greaterThan(0));
       // n negativo (infiltração decrescente)
-      expect(parametros.n, lessThan(0));
+      expect(parametros.expoente, lessThan(0));
     });
 
     test('infiltração acumulada é crescente', () {
-      final parametros = InfiltrationModel.ajustarCurva([
-        const PontoInfiltracaoMedido(tempoMin: 2, volumeMm: 29.16),
-        const PontoInfiltracaoMedido(tempoMin: 9, volumeMm: 18.00),
-        const PontoInfiltracaoMedido(tempoMin: 19, volumeMm: 13.32),
-        const PontoInfiltracaoMedido(tempoMin: 49, volumeMm: 10.44),
-        const PontoInfiltracaoMedido(tempoMin: 79, volumeMm: 9.00),
-        const PontoInfiltracaoMedido(tempoMin: 149, volumeMm: 7.92),
+      final parametros = ModeloInfiltracao.ajustarCurva([
+        const PontoInfiltracaoMedido(tempoMin: 2, taxaMmHora: 29.16),
+        const PontoInfiltracaoMedido(tempoMin: 9, taxaMmHora: 18.00),
+        const PontoInfiltracaoMedido(tempoMin: 19, taxaMmHora: 13.32),
+        const PontoInfiltracaoMedido(tempoMin: 49, taxaMmHora: 10.44),
+        const PontoInfiltracaoMedido(tempoMin: 79, taxaMmHora: 9.00),
+        const PontoInfiltracaoMedido(tempoMin: 149, taxaMmHora: 7.92),
       ]);
 
-      final i10 = InfiltrationModel.infiltracaoAcumulada(
+      final i10 = ModeloInfiltracao.infiltracaoAcumulada(
         tempoMin: 10,
         parametros: parametros,
       );
-      final i40 = InfiltrationModel.infiltracaoAcumulada(
+      final i40 = ModeloInfiltracao.infiltracaoAcumulada(
         tempoMin: 40,
         parametros: parametros,
       );
-      final i80 = InfiltrationModel.infiltracaoAcumulada(
+      final i80 = ModeloInfiltracao.infiltracaoAcumulada(
         tempoMin: 80,
         parametros: parametros,
       );
@@ -257,16 +257,16 @@ void main() {
       // n+1 = 0.689
       // K/(60*(n+1)) = 35.2/(60*0.689) ≈ 0.851
       // I(60min) ≈ 0.851 * 60^0.689 ≈ 0.851 * 14.77 ≈ 12.57 mm
-      final parametros = InfiltrationModel.ajustarCurva([
-        const PontoInfiltracaoMedido(tempoMin: 2, volumeMm: 29.16),
-        const PontoInfiltracaoMedido(tempoMin: 9, volumeMm: 18.00),
-        const PontoInfiltracaoMedido(tempoMin: 19, volumeMm: 13.32),
-        const PontoInfiltracaoMedido(tempoMin: 49, volumeMm: 10.44),
-        const PontoInfiltracaoMedido(tempoMin: 79, volumeMm: 9.00),
-        const PontoInfiltracaoMedido(tempoMin: 149, volumeMm: 7.92),
+      final parametros = ModeloInfiltracao.ajustarCurva([
+        const PontoInfiltracaoMedido(tempoMin: 2, taxaMmHora: 29.16),
+        const PontoInfiltracaoMedido(tempoMin: 9, taxaMmHora: 18.00),
+        const PontoInfiltracaoMedido(tempoMin: 19, taxaMmHora: 13.32),
+        const PontoInfiltracaoMedido(tempoMin: 49, taxaMmHora: 10.44),
+        const PontoInfiltracaoMedido(tempoMin: 79, taxaMmHora: 9.00),
+        const PontoInfiltracaoMedido(tempoMin: 149, taxaMmHora: 7.92),
       ]);
 
-      final i60 = InfiltrationModel.infiltracaoAcumulada(
+      final i60 = ModeloInfiltracao.infiltracaoAcumulada(
         tempoMin: 60,
         parametros: parametros,
       );
@@ -279,36 +279,36 @@ void main() {
 
   group('ISSUE-016 — Caso milho §56: avanço', () {
     test('ajuste dois pontos com dados §56.5', () {
-      final resultado = AdvanceCurveModel.ajustarDoisPontos(
+      final resultado = ModeloCurvaAvanco.ajustarDoisPontos(
         distanciaM: 200,
         tempoMin: 90,
         distanciaMetadeM: 100,
         tempoMetadeMin: 35,
         pontos: const [
-          PontoEnsaio(distanciaM: 100, tempoMin: 35),
-          PontoEnsaio(distanciaM: 200, tempoMin: 90),
+          PontoEnsaioAvanco(distanciaM: 100, tempoMin: 35),
+          PontoEnsaioAvanco(distanciaM: 200, tempoMin: 90),
         ],
       );
 
       // b = [ln(35) - ln(90)] / ln(0.5) ≈ 1.3626
-      expect(resultado.b, closeTo(1.3626, 0.01));
+      expect(resultado.expoente, closeTo(1.3626, 0.01));
       // k = 90 / 200^1.3626 ≈ 0.0659
-      expect(resultado.k, closeTo(0.0659, 0.001));
+      expect(resultado.coeficiente, closeTo(0.0659, 0.001));
     });
 
     test('tempo de avanço no final do sulco (§56.6)', () {
-      final curva = AdvanceCurveModel.ajustarDoisPontos(
+      final curva = ModeloCurvaAvanco.ajustarDoisPontos(
         distanciaM: 200,
         tempoMin: 90,
         distanciaMetadeM: 100,
         tempoMetadeMin: 35,
         pontos: const [
-          PontoEnsaio(distanciaM: 100, tempoMin: 35),
-          PontoEnsaio(distanciaM: 200, tempoMin: 90),
+          PontoEnsaioAvanco(distanciaM: 100, tempoMin: 35),
+          PontoEnsaioAvanco(distanciaM: 200, tempoMin: 90),
         ],
       );
 
-      final tempoFinal = AdvanceCurveModel.tempoAvanco(
+      final tempoFinal = ModeloCurvaAvanco.tempoAvanco(
         distanciaM: 200,
         parametros: curva,
       );
@@ -316,18 +316,18 @@ void main() {
     });
 
     test('distância em 53 min (§56.7)', () {
-      final curva = AdvanceCurveModel.ajustarDoisPontos(
+      final curva = ModeloCurvaAvanco.ajustarDoisPontos(
         distanciaM: 200,
         tempoMin: 90,
         distanciaMetadeM: 100,
         tempoMetadeMin: 35,
         pontos: const [
-          PontoEnsaio(distanciaM: 100, tempoMin: 35),
-          PontoEnsaio(distanciaM: 200, tempoMin: 90),
+          PontoEnsaioAvanco(distanciaM: 100, tempoMin: 35),
+          PontoEnsaioAvanco(distanciaM: 200, tempoMin: 90),
         ],
       );
 
-      final distancia = AdvanceCurveModel.distanciaEmTempo(
+      final distancia = ModeloCurvaAvanco.distanciaEmTempo(
         tempoMin: 53,
         parametros: curva,
       );
@@ -339,7 +339,7 @@ void main() {
 
   group('ISSUE-016 — Caso milho §56: comparação 100m vs 200m', () {
     test('100m: Ea < 200m (menor tempo de oportunidade)', () {
-      final r100 = RunFurrowSimulation()(
+      final r100 = SimuladorSulcos()(
         const IrrigationParameters(
           comprimento: 100,
           declividade: 0.005,
@@ -360,7 +360,7 @@ void main() {
     });
 
     test('200m: Ea ≈ 57% (§56.9)', () {
-      final resultado = RunFurrowSimulation()(
+      final resultado = SimuladorSulcos()(
         const IrrigationParameters(
           comprimento: 200,
           declividade: 0.005,
@@ -380,7 +380,7 @@ void main() {
     });
 
     test('200m produz maior Ea que 100m (mesma vazão)', () {
-      final r100 = RunFurrowSimulation()(
+      final r100 = SimuladorSulcos()(
         const IrrigationParameters(
           comprimento: 100,
           declividade: 0.005,
@@ -396,7 +396,7 @@ void main() {
         ),
       );
 
-      final r200 = RunFurrowSimulation()(
+      final r200 = SimuladorSulcos()(
         const IrrigationParameters(
           comprimento: 200,
           declividade: 0.005,
@@ -418,7 +418,7 @@ void main() {
 
   group('ISSUE-016 — Caso milho §56: redução de vazão', () {
     test('redução para 0,75 L/s melhora Ea (§56.10)', () {
-      final resultadoReduzido = RunFurrowSimulation()(
+      final resultadoReduzido = SimuladorSulcos()(
         const IrrigationParameters(
           comprimento: 200,
           declividade: 0.005,
@@ -438,7 +438,7 @@ void main() {
       expect(resultadoReduzido.alertaVazaoExcedida, isNull);
 
       // Ea deve ser melhor que com vazão de 1.5 L/s
-      final resultadoOriginal = RunFurrowSimulation()(
+      final resultadoOriginal = SimuladorSulcos()(
         const IrrigationParameters(
           comprimento: 200,
           declividade: 0.005,
@@ -461,7 +461,7 @@ void main() {
     });
 
     test('vazão reduzida ≤ vazão original', () {
-      final qReduzida = FlowManagement.calcularVazaoReduzida(
+      final qReduzida = ManejoVazao.calcularVazaoReduzida(
         f0MmH: 4,
         comprimentoM: 200,
         espacamentoM: 0.9,
@@ -474,25 +474,25 @@ void main() {
 
   group('ISSUE-016 — Caso milho §56: tempo de oportunidade', () {
     test('To > 0 no final do sulco (§56.8)', () {
-      final curva = AdvanceCurveModel.ajustarDoisPontos(
+      final curva = ModeloCurvaAvanco.ajustarDoisPontos(
         distanciaM: 200,
         tempoMin: 90,
         distanciaMetadeM: 100,
         tempoMetadeMin: 35,
         pontos: const [
-          PontoEnsaio(distanciaM: 100, tempoMin: 35),
-          PontoEnsaio(distanciaM: 200, tempoMin: 90),
+          PontoEnsaioAvanco(distanciaM: 100, tempoMin: 35),
+          PontoEnsaioAvanco(distanciaM: 200, tempoMin: 90),
         ],
       );
 
-      final pontosAvanco = AdvanceCurveModel.gerarCurva(
+      final pontosAvanco = ModeloCurvaAvanco.gerarCurva(
         comprimentoM: 200,
         parametros: curva,
         amostras: 10,
       );
 
       final tempoCorte = 130.0 + 90.0; // To + Tx no final
-      final pontosOportunidade = OpportunityTime.calcularPontos(
+      final pontosOportunidade = TempoOportunidade.calcularPontos(
         tempoCorteMin: tempoCorte,
         pontosAvanco: pontosAvanco,
       );
@@ -510,7 +510,7 @@ void main() {
     test('cálculo de sulco funciona sem largura/profundidade do sulco', () {
       // O cálculo de sulco não requer largura/profundidade do sulco
       // apenas espaçamento entre sulcos
-      final resultado = RunFurrowSimulation()(
+      final resultado = SimuladorSulcos()(
         const IrrigationParameters(
           comprimento: 200,
           declividade: 0.005,
@@ -537,37 +537,43 @@ void main() {
       'parâmetros de infiltração do caso milho não misturados com outros',
       () {
         // Ensaio §19: VI em mm/h com dados de entrada/saída
-        final parametrosEnsaio19 = InfiltrationModel.ajustarCurva([
-          const PontoInfiltracaoMedido(tempoMin: 2, volumeMm: 29.16),
-          const PontoInfiltracaoMedido(tempoMin: 9, volumeMm: 18.00),
-          const PontoInfiltracaoMedido(tempoMin: 19, volumeMm: 13.32),
-          const PontoInfiltracaoMedido(tempoMin: 49, volumeMm: 10.44),
-          const PontoInfiltracaoMedido(tempoMin: 79, volumeMm: 9.00),
-          const PontoInfiltracaoMedido(tempoMin: 149, volumeMm: 7.92),
+        final parametrosEnsaio19 = ModeloInfiltracao.ajustarCurva([
+          const PontoInfiltracaoMedido(tempoMin: 2, taxaMmHora: 29.16),
+          const PontoInfiltracaoMedido(tempoMin: 9, taxaMmHora: 18.00),
+          const PontoInfiltracaoMedido(tempoMin: 19, taxaMmHora: 13.32),
+          const PontoInfiltracaoMedido(tempoMin: 49, taxaMmHora: 10.44),
+          const PontoInfiltracaoMedido(tempoMin: 79, taxaMmHora: 9.00),
+          const PontoInfiltracaoMedido(tempoMin: 149, taxaMmHora: 7.92),
         ]);
 
         // Outro ensaio hipotético com parâmetros diferentes
-        final parametrosOutro = InfiltrationModel.ajustarCurva([
-          const PontoInfiltracaoMedido(tempoMin: 5, volumeMm: 40.0),
-          const PontoInfiltracaoMedido(tempoMin: 15, volumeMm: 30.0),
-          const PontoInfiltracaoMedido(tempoMin: 30, volumeMm: 22.0),
-          const PontoInfiltracaoMedido(tempoMin: 60, volumeMm: 16.0),
+        final parametrosOutro = ModeloInfiltracao.ajustarCurva([
+          const PontoInfiltracaoMedido(tempoMin: 5, taxaMmHora: 40.0),
+          const PontoInfiltracaoMedido(tempoMin: 15, taxaMmHora: 30.0),
+          const PontoInfiltracaoMedido(tempoMin: 30, taxaMmHora: 22.0),
+          const PontoInfiltracaoMedido(tempoMin: 60, taxaMmHora: 16.0),
         ]);
 
         // Os parâmetros devem ser diferentes (ensaios distintos)
-        expect(parametrosEnsaio19.k, isNot(closeTo(parametrosOutro.k, 1.0)));
-        expect(parametrosEnsaio19.n, isNot(closeTo(parametrosOutro.n, 0.01)));
+        expect(
+          parametrosEnsaio19.coeficiente,
+          isNot(closeTo(parametrosOutro.coeficiente, 1.0)),
+        );
+        expect(
+          parametrosEnsaio19.expoente,
+          isNot(closeTo(parametrosOutro.expoente, 0.01)),
+        );
 
         // Cada um deve ter sua própria unidade
-        expect(parametrosEnsaio19.unidadeK, isNotEmpty);
-        expect(parametrosOutro.unidadeK, isNotEmpty);
+        expect(parametrosEnsaio19.unidadeCoeficiente, isNotEmpty);
+        expect(parametrosOutro.unidadeCoeficiente, isNotEmpty);
       },
     );
   });
 
   group('ISSUE-016 — Caso milho §56: desempenho', () {
     test('classificações de Ea, CUC, DU', () {
-      final resultado = RunFurrowSimulation()(
+      final resultado = SimuladorSulcos()(
         const IrrigationParameters(
           comprimento: 200,
           declividade: 0.005,
@@ -614,7 +620,7 @@ void main() {
     });
 
     test('perda por percolação e escoamento são não negativas', () {
-      final resultado = RunFurrowSimulation()(
+      final resultado = SimuladorSulcos()(
         const IrrigationParameters(
           comprimento: 200,
           declividade: 0.005,
@@ -635,7 +641,7 @@ void main() {
     });
 
     test('resumo textual contém informações', () {
-      final resultado = RunFurrowSimulation()(
+      final resultado = SimuladorSulcos()(
         const IrrigationParameters(
           comprimento: 200,
           declividade: 0.005,
@@ -694,7 +700,7 @@ void main() {
         classificacaoDu: 'Bom',
       );
 
-      final diagnosticos = DepthPerformance.diagnosticar(
+      final diagnosticos = DesempenhoLamina.diagnosticar(
         desempenho: desempenho,
       );
       expect(diagnosticos, isNotEmpty);

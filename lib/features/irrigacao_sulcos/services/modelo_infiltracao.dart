@@ -3,74 +3,79 @@ import 'dart:math';
 import 'package:irrigasim/shared/irrigacao/services/units_service.dart';
 
 /// Origem dos parâmetros de infiltração.
-enum OrigemParametros { ensaio, modelo, valorInformado }
+enum OrigemParametrosInfiltracao { ensaio, modelo, valorInformado }
 
 /// Resultado do ajuste da curva de infiltração.
-class InfiltrationParameters {
-  final double k;
-  final double n;
+class ParametrosInfiltracao {
+  final double coeficiente;
+  final double expoente;
   final double baseLog;
   final double? r2;
-  final OrigemParametros origem;
-  final String unidadeK;
+  final OrigemParametrosInfiltracao origem;
+  final String unidadeCoeficiente;
 
-  const InfiltrationParameters({
-    required this.k,
-    required this.n,
+  const ParametrosInfiltracao({
+    required this.coeficiente,
+    required this.expoente,
     this.baseLog = 10,
     this.r2,
     required this.origem,
-    required this.unidadeK,
+    required this.unidadeCoeficiente,
   });
 
+  /// As chaves `k`, `n` e `unidade_k` são parte do formato persistido.
   Map<String, dynamic> toMap() {
     return {
-      'k': k,
-      'n': n,
+      'k': coeficiente,
+      'n': expoente,
       'base_log': baseLog,
       'r2': r2,
       'origem': origem.name,
-      'unidade_k': unidadeK,
+      'unidade_k': unidadeCoeficiente,
     };
   }
 
-  factory InfiltrationParameters.fromMap(Map<String, dynamic> map) {
-    return InfiltrationParameters(
-      k: (map['k'] as num?)?.toDouble() ?? 0,
-      n: (map['n'] as num?)?.toDouble() ?? 0,
+  factory ParametrosInfiltracao.fromMap(Map<String, dynamic> map) {
+    return ParametrosInfiltracao(
+      coeficiente: (map['k'] as num?)?.toDouble() ?? 0,
+      expoente: (map['n'] as num?)?.toDouble() ?? 0,
       baseLog: (map['base_log'] as num?)?.toDouble() ?? 10,
       r2: (map['r2'] as num?)?.toDouble(),
-      origem: OrigemParametros.values.firstWhere(
+      origem: OrigemParametrosInfiltracao.values.firstWhere(
         (o) => o.name == map['origem'],
-        orElse: () => OrigemParametros.valorInformado,
+        orElse: () => OrigemParametrosInfiltracao.valorInformado,
       ),
-      unidadeK: map['unidade_k'] as String? ?? 'mm/h',
+      unidadeCoeficiente: map['unidade_k'] as String? ?? 'mm/h',
     );
   }
 
   @override
   String toString() =>
-      'InfiltrationParameters(k=$k, n=$n, base=$baseLog, origem=$origem)';
+      'ParametrosInfiltracao(coeficiente=$coeficiente, expoente=$expoente, '
+      'base=$baseLog, origem=$origem)';
 }
 
 /// Ponto de infiltração medido em ensaio.
 class PontoInfiltracaoMedido {
   final double tempoMin;
-  final double volumeMm;
+
+  /// Taxa de infiltração instantânea, em mm/h.
+  final double taxaMmHora;
 
   const PontoInfiltracaoMedido({
     required this.tempoMin,
-    required this.volumeMm,
+    required this.taxaMmHora,
   });
 
+  /// A chave `volume_mm` é parte do formato persistido.
   Map<String, dynamic> toMap() {
-    return {'tempo_min': tempoMin, 'volume_mm': volumeMm};
+    return {'tempo_min': tempoMin, 'volume_mm': taxaMmHora};
   }
 
   factory PontoInfiltracaoMedido.fromMap(Map<String, dynamic> map) {
     return PontoInfiltracaoMedido(
       tempoMin: (map['tempo_min'] as num?)?.toDouble() ?? 0,
-      volumeMm: (map['volume_mm'] as num?)?.toDouble() ?? 0,
+      taxaMmHora: (map['volume_mm'] as num?)?.toDouble() ?? 0,
     );
   }
 }
@@ -82,8 +87,8 @@ class PontoInfiltracaoMedido {
 /// - Infiltração acumulada: `I = [K / (60 * (n+1))] * T^(n+1)`
 ///
 /// Referências: §25 do documento de implementação.
-class InfiltrationModel {
-  const InfiltrationModel._();
+class ModeloInfiltracao {
+  const ModeloInfiltracao._();
 
   /// Ajusta a curva de infiltração a partir de pontos medidos usando
   /// regressão logarítmica (base 10).
@@ -94,17 +99,17 @@ class InfiltrationModel {
   /// Exclui pontos com T=0 da regressão.
   ///
   /// Retorna os parâmetros K, n e o coeficiente R².
-  static InfiltrationParameters ajustarCurva(
+  static ParametrosInfiltracao ajustarCurva(
     List<PontoInfiltracaoMedido> pontos,
   ) {
     final invalidos = pontos.where(
       (p) =>
           !p.tempoMin.isFinite ||
-          !p.volumeMm.isFinite ||
+          !p.taxaMmHora.isFinite ||
           p.tempoMin < 0 ||
-          p.volumeMm < 0 ||
-          (p.tempoMin == 0 && p.volumeMm != 0) ||
-          (p.tempoMin > 0 && p.volumeMm <= 0),
+          p.taxaMmHora < 0 ||
+          (p.tempoMin == 0 && p.taxaMmHora != 0) ||
+          (p.tempoMin > 0 && p.taxaMmHora <= 0),
     );
     if (invalidos.isNotEmpty) {
       throw ArgumentError(
@@ -115,7 +120,7 @@ class InfiltrationModel {
 
     // O ponto inicial (0, 0) é preservado no ensaio, mas não tem logaritmo.
     final validos = pontos
-        .where((p) => p.tempoMin > 0 && p.volumeMm > 0)
+        .where((p) => p.tempoMin > 0 && p.taxaMmHora > 0)
         .toList();
 
     if (validos.length < 2) {
@@ -137,22 +142,22 @@ class InfiltrationModel {
     // Regressão linear em escala log10
     // log10(VI) = log10(K) + n * log10(T)
     // y = a + b * x
-    final n = validos.length;
+    final quantidade = validos.length;
     double somaX = 0, somaY = 0, somaXY = 0, somaX2 = 0;
 
     for (final p in validos) {
       final logT = log(p.tempoMin) / ln10; // log10
-      final logVI = log(p.volumeMm) / ln10; // log10
+      final logVI = log(p.taxaMmHora) / ln10; // log10
       somaX += logT;
       somaY += logVI;
       somaXY += logT * logVI;
       somaX2 += logT * logT;
     }
 
-    final mediaX = somaX / n;
-    final mediaY = somaY / n;
+    final mediaX = somaX / quantidade;
+    final mediaY = somaY / quantidade;
 
-    final denominador = somaX2 - n * mediaX * mediaX;
+    final denominador = somaX2 - quantidade * mediaX * mediaX;
     if (denominador.abs() < 1e-15) {
       throw ArgumentError(
         'Denominador da regressão é zero. Verifique os pontos do ensaio.',
@@ -160,30 +165,35 @@ class InfiltrationModel {
     }
 
     // n (coeficiente angular) = slope
-    final nCalc = (somaXY - n * mediaX * mediaY) / denominador;
+    final expoente = (somaXY - quantidade * mediaX * mediaY) / denominador;
 
     // log10(K) = intercept
-    final logK = mediaY - nCalc * mediaX;
-    final k = pow(10, logK).toDouble();
+    final logK = mediaY - expoente * mediaX;
+    final coeficiente = pow(10, logK).toDouble();
+    if (!coeficiente.isFinite || coeficiente <= 0) {
+      throw ArgumentError(
+        'O ajuste resultou em coeficiente K fora do domínio numérico.',
+      );
+    }
 
     // Coeficiente de determinação R²
     double ssRes = 0, ssTot = 0;
     for (final p in validos) {
       final logT = log(p.tempoMin) / ln10;
-      final logVI = log(p.volumeMm) / ln10;
-      final predito = logK + nCalc * logT;
+      final logVI = log(p.taxaMmHora) / ln10;
+      final predito = logK + expoente * logT;
       ssRes += (logVI - predito) * (logVI - predito);
       ssTot += (logVI - mediaY) * (logVI - mediaY);
     }
     final r2 = ssTot > 0 ? 1 - (ssRes / ssTot) : 0.0;
 
-    return InfiltrationParameters(
-      k: k,
-      n: nCalc,
+    return ParametrosInfiltracao(
+      coeficiente: coeficiente,
+      expoente: expoente,
       baseLog: 10,
       r2: r2,
-      origem: OrigemParametros.ensaio,
-      unidadeK: 'mm/h',
+      origem: OrigemParametrosInfiltracao.ensaio,
+      unidadeCoeficiente: 'mm/h',
     );
   }
 
@@ -193,11 +203,13 @@ class InfiltrationModel {
   ///
   /// [tempoMin] — Tempo em minutos.
   /// [parametros] — Parâmetros K e n da curva.
-  static double vi({
+  static double taxaInfiltracao({
     required double tempoMin,
-    required InfiltrationParameters parametros,
+    required ParametrosInfiltracao parametros,
   }) {
-    if (!parametros.k.isFinite || !parametros.n.isFinite || parametros.k <= 0) {
+    if (!parametros.coeficiente.isFinite ||
+        !parametros.expoente.isFinite ||
+        parametros.coeficiente <= 0) {
       throw const FormatException(
         'VI exige coeficiente positivo e expoente finito.',
       );
@@ -207,13 +219,13 @@ class InfiltrationModel {
         'Tempo de infiltração fora do domínio (T ≥ 0).',
       );
     }
-    if (tempoMin == 0 && parametros.n < 0) {
+    if (tempoMin == 0 && parametros.expoente < 0) {
       throw const FormatException(
         'VI singular em T = 0 para expoente negativo.',
       );
     }
-    if (tempoMin == 0 && parametros.n > 0) return 0;
-    return parametros.k * pow(tempoMin, parametros.n);
+    if (tempoMin == 0 && parametros.expoente > 0) return 0;
+    return parametros.coeficiente * pow(tempoMin, parametros.expoente);
   }
 
   /// Calcula a infiltração acumulada em um dado tempo.
@@ -225,36 +237,28 @@ class InfiltrationModel {
   /// IMPORTANTE: n+1 não pode ser zero.
   static double infiltracaoAcumulada({
     required double tempoMin,
-    required InfiltrationParameters parametros,
+    required ParametrosInfiltracao parametros,
   }) {
     if (!tempoMin.isFinite || tempoMin < 0) {
       throw const FormatException(
         'Tempo de infiltração fora do domínio (T ≥ 0).',
       );
     }
-    if (!parametros.k.isFinite ||
-        !parametros.n.isFinite ||
-        parametros.k <= 0 ||
-        parametros.n <= -1) {
+    if (!parametros.coeficiente.isFinite ||
+        !parametros.expoente.isFinite ||
+        parametros.coeficiente <= 0 ||
+        parametros.expoente <= -1) {
       throw const FormatException(
         'Curva de infiltração acumulada fora do domínio (K > 0, n > −1).',
       );
     }
     if (tempoMin == 0) return 0;
 
-    final nMais1 = parametros.n + 1;
+    final expoenteAcumulado = parametros.expoente + 1;
     // I = [K / (60 * (n+1))] * T^(n+1)
     // Fator 60 converte K de mm/h para mm/min
-    return (parametros.k / (60 * nMais1)) * pow(tempoMin, nMais1);
-  }
-
-  /// Alias semântico de [vi]. VI já é a taxa instantânea em mm/h; não deve
-  /// ser derivada novamente.
-  static double taxaInfiltracao({
-    required double tempoMin,
-    required InfiltrationParameters parametros,
-  }) {
-    return vi(tempoMin: tempoMin, parametros: parametros);
+    return (parametros.coeficiente / (60 * expoenteAcumulado)) *
+        pow(tempoMin, expoenteAcumulado);
   }
 
   /// Calcula VI a partir de ensaio de entrada/saída.
@@ -287,14 +291,14 @@ class InfiltrationModel {
   }
 
   /// Valida um conjunto de parâmetros de infiltração.
-  static List<String> validarParametros(InfiltrationParameters parametros) {
+  static List<String> validarParametros(ParametrosInfiltracao parametros) {
     final erros = <String>[];
 
-    if (parametros.k <= 0) {
-      erros.add('K deve ser positivo (${parametros.k})');
+    if (parametros.coeficiente <= 0) {
+      erros.add('K deve ser positivo (${parametros.coeficiente})');
     }
-    if (parametros.n <= -1) {
-      erros.add('n deve ser maior que -1 (n=${parametros.n})');
+    if (parametros.expoente <= -1) {
+      erros.add('n deve ser maior que -1 (n=${parametros.expoente})');
     }
     if (parametros.baseLog <= 0 || parametros.baseLog == 1) {
       erros.add('Base do logaritmo inválida (${parametros.baseLog})');
@@ -314,9 +318,9 @@ class InfiltrationModel {
     final invalidos = pontos.where(
       (p) =>
           !p.tempoMin.isFinite ||
-          !p.volumeMm.isFinite ||
+          !p.taxaMmHora.isFinite ||
           p.tempoMin < 0 ||
-          p.volumeMm < 0,
+          p.taxaMmHora < 0,
     );
     if (invalidos.isNotEmpty) {
       erros.add(

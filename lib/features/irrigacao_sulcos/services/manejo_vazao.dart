@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/field_measurements.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
 
 /// Parâmetros da fórmula qmax = C / S0^a por textura do solo.
 class ParametrosErosao {
@@ -62,8 +62,8 @@ class VazaoReduzidaResultado {
 /// Gerencia vazão não erosiva e redução de vazão.
 ///
 /// Referências: §30 e §43 do documento de implementação.
-class FlowManagement {
-  const FlowManagement._();
+class ManejoVazao {
+  const ManejoVazao._();
 
   /// Tabela de parâmetros C e a por textura do solo (§30.2).
   ///
@@ -91,11 +91,10 @@ class FlowManagement {
       throw ArgumentError('Declividade deve ser maior que zero');
     }
 
-    final params =
-        _parametrosErosao[textura] ?? const ParametrosErosao(c: 0.631, a: 0.35);
+    final params = _parametrosErosao[textura]!;
 
     // qmax = C / S0^a  (§30: S0 em %)
-    var qmax = params.c / pow(declividadePercent, params.a);
+    final qmax = params.c / pow(declividadePercent, params.a);
 
     // Fórmula simplificada: qmax = 0.631 / S0
     final qmaxSimplificada = 0.631 / declividadePercent;

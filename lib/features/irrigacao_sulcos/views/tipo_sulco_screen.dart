@@ -6,14 +6,14 @@ import 'package:irrigasim/app/theme/app_colors.dart';
 import 'package:irrigasim/app/theme/app_text_styles.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/tabela_corrugados.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/controlador_parametros_sulco.dart';
 
 class TipoSulcoScreen extends ConsumerWidget {
   const TipoSulcoScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tipoSelecionado = ref.watch(parametersProvider).tipoSulco;
+    final tipoSelecionado = ref.watch(provedorParametrosSulco).tipoSulco;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Tipo de Sulco')),
@@ -58,7 +58,7 @@ class TipoSulcoScreen extends ConsumerWidget {
   }
 
   void _open(BuildContext context, WidgetRef ref, TipoSulco tipo) {
-    ref.read(parametersProvider.notifier).setTipoSulco(tipo);
+    ref.read(provedorParametrosSulco.notifier).definirTipoSulco(tipo);
     context.push(AppRoutes.sulcosProjeto);
   }
 
@@ -187,7 +187,7 @@ class _TipoSulcoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final info = TipoSulcoInfo.getInfo(tipo);
+    final info = TipoSulcoInfo.para(tipo);
 
     return Semantics(
       label: 'Tipo de sulco: ${tipo.displayName}. ${tipo.descricao}',

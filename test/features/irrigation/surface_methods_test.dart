@@ -6,7 +6,7 @@ import 'package:irrigasim/features/irrigacao_inundacao/services/basin_reference_
 import 'package:irrigasim/features/irrigacao_inundacao/services/basin_planning.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/services/rice_volumes_service.dart';
 import 'package:irrigasim/features/irrigacao_faixas/services/run_border_simulation.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/services/run_furrow_simulation.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/simulador_sulcos.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/services/run_permanent_basin_simulation.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/viewmodels/basin_simulation_coordinator.dart';
 
@@ -35,19 +35,19 @@ void main() {
   }
 
   test('sulco calcula limite não erosivo e fecha o balanço', () {
-    final result = RunFurrowSimulation()(base());
+    final result = SimuladorSulcos()(base());
 
     expect(result.metricas['Vazão máxima não erosiva'], isPositive);
     expect(result.metricas['Tempo de aplicação calculado'], greaterThan(60));
     expectPhysicalBalance(
-      result.balancoSulco!.eaIntegral,
+      result.balancoSulco!.eficienciaAplicacaoIntegralPercentual,
       result.perdaPercolacao,
       result.perdaEscoamento,
     );
   });
 
   test('sulco reproduz as fórmulas da planilha de referência', () {
-    final result = RunFurrowSimulation()(
+    final result = SimuladorSulcos()(
       base().copyWith(
         comprimento: 200,
         declividade: 0.005,

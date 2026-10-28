@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/shared/cenarios/models/cenario_salvo.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/field_measurements.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
 import 'package:irrigasim/shared/irrigacao/services/operational_planning.dart';
 import 'package:irrigasim/shared/cenarios/services/project_store.dart';
 
@@ -36,7 +36,7 @@ void main() {
         espacamentoFileirasM: 0.9,
         espacamentoPlantasM: 0.25,
         larguraSulcoM: 0.25,
-        metodoCurvaAvanco: MetodoCurvaAvanco.minimosQuadrados,
+        metodoCurvaAvanco: MetodoAjusteAvanco.minimosQuadrados,
         usarEnsaioAvanco: true,
         medicoesAvanco: [
           MedicaoAvanco(distanciaM: 0, tempoMin: 0),
@@ -119,7 +119,7 @@ void main() {
       expect(restored.parametros.profundidadeSulcoM, isNull);
       expect(
         restored.parametros.metodoCurvaAvanco,
-        MetodoCurvaAvanco.minimosQuadrados,
+        MetodoAjusteAvanco.minimosQuadrados,
       );
       expect(restored.parametros.medicoesAvanco, hasLength(3));
       expect(restored.parametros.usarEnsaioAvanco, isTrue);

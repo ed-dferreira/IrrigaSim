@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/field_measurements.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/curva_infiltracao_sulco.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/curva_infiltracao.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/controlador_parametros_sulco.dart';
 
 import 'project_step_widgets.dart';
 import 'avanco_step.dart';
@@ -18,7 +18,7 @@ class SoloStep extends ConsumerWidget {
     required this.accent,
     required this.wide,
   });
-  final ParametersState state;
+  final EstadoParametrosSulco state;
   final Color accent;
   final bool wide;
 
@@ -37,7 +37,7 @@ class SoloStep extends ConsumerWidget {
               .toList(),
           selected: {state.texturaSolo},
           onSelectionChanged: (value) =>
-              ref.read(parametersProvider.notifier).setTexturaSolo(value.first),
+              ref.read(provedorParametrosSulco.notifier).definirTexturaSolo(value.first),
         ),
       ),
       const SizedBox(height: 16),
@@ -83,46 +83,44 @@ class SoloStep extends ConsumerWidget {
             if (state.origemCurvaInfiltracao ==
                 OrigemCurvaInfiltracao.equacaoAcumuladaInformada) ...[
               if (state.entradasSulco.curvaInfiltracao case final curva?) ...[
-                DropdownButtonFormField<TipoCurvaInfiltracaoSulco>(
+                DropdownButtonFormField<TipoCurvaInfiltracao>(
                   initialValue: curva.tipo,
                   decoration: const InputDecoration(
                     labelText: 'Lei de infiltração informada',
                   ),
                   items: const [
                     DropdownMenuItem(
-                      value: TipoCurvaInfiltracaoSulco.acumulada,
+                      value: TipoCurvaInfiltracao.acumulada,
                       child: Text('Acumulada I = K·T^a'),
                     ),
                     DropdownMenuItem(
-                      value: TipoCurvaInfiltracaoSulco.taxa,
+                      value: TipoCurvaInfiltracao.taxa,
                       child: Text('Taxa VI = K·T^n'),
                     ),
                   ],
                   onChanged: (value) {
                     if (value != null) {
                       ref
-                          .read(parametersProvider.notifier)
+                          .read(provedorParametrosSulco.notifier)
                           .configurarCurvaInfiltracao(tipo: value);
                     }
                   },
                 ),
                 const SizedBox(height: 12),
-                DropdownButtonFormField<BaseInfiltracaoSulco>(
+                DropdownButtonFormField<BaseInfiltracao>(
                   initialValue: curva.base,
                   decoration: const InputDecoration(labelText: 'Base da curva'),
                   items: [
                     DropdownMenuItem(
-                      value: BaseInfiltracaoSulco.milimetros,
+                      value: BaseInfiltracao.milimetros,
                       child: Text(
-                        curva.tipo == TipoCurvaInfiltracaoSulco.taxa
-                            ? 'mm/h'
-                            : 'mm',
+                        curva.tipo == TipoCurvaInfiltracao.taxa ? 'mm/h' : 'mm',
                       ),
                     ),
                     DropdownMenuItem(
-                      value: BaseInfiltracaoSulco.litrosPorMetro,
+                      value: BaseInfiltracao.litrosPorMetro,
                       child: Text(
-                        curva.tipo == TipoCurvaInfiltracaoSulco.taxa
+                        curva.tipo == TipoCurvaInfiltracao.taxa
                             ? 'L/min/m'
                             : 'L/m',
                       ),
@@ -131,7 +129,7 @@ class SoloStep extends ConsumerWidget {
                   onChanged: (value) {
                     if (value != null) {
                       ref
-                          .read(parametersProvider.notifier)
+                          .read(provedorParametrosSulco.notifier)
                           .configurarCurvaInfiltracao(base: value);
                     }
                   },
@@ -140,7 +138,7 @@ class SoloStep extends ConsumerWidget {
               ] else
                 OutlinedButton(
                   onPressed: () => ref
-                      .read(parametersProvider.notifier)
+                      .read(provedorParametrosSulco.notifier)
                       .configurarCurvaInfiltracao(),
                   child: const Text(
                     'Informar origem e unidades da curva legada',
@@ -154,9 +152,9 @@ class SoloStep extends ConsumerWidget {
                         OrigemCurvaInfiltracao.equacaoAcumuladaInformada &&
                     (state.entradasSulco.curvaInfiltracao == null ||
                         (state.entradasSulco.curvaInfiltracao!.tipo ==
-                                TipoCurvaInfiltracaoSulco.acumulada &&
+                                TipoCurvaInfiltracao.acumulada &&
                             state.entradasSulco.curvaInfiltracao!.base ==
-                                BaseInfiltracaoSulco.milimetros))) ...[
+                                BaseInfiltracao.milimetros))) ...[
                   StepField(
                     name: 'k',
                     label: 'Coeficiente acumulado aI',
@@ -174,9 +172,9 @@ class SoloStep extends ConsumerWidget {
                         OrigemCurvaInfiltracao.equacaoAcumuladaInformada &&
                     state.entradasSulco.curvaInfiltracao != null &&
                     (state.entradasSulco.curvaInfiltracao!.tipo !=
-                            TipoCurvaInfiltracaoSulco.acumulada ||
+                            TipoCurvaInfiltracao.acumulada ||
                         state.entradasSulco.curvaInfiltracao!.base !=
-                            BaseInfiltracaoSulco.milimetros)) ...[
+                            BaseInfiltracao.milimetros)) ...[
                   StepField(
                     name: 'curvaCoeficiente',
                     label: 'Coeficiente K da curva',
@@ -197,7 +195,7 @@ class SoloStep extends ConsumerWidget {
             if (state.origemCurvaInfiltracao ==
                 OrigemCurvaInfiltracao.equacaoAcumuladaInformada) ...[
               if (state.entradasSulco.curvaInfiltracao case final curva?) ...[
-                if (curva.base == BaseInfiltracaoSulco.litrosPorMetro)
+                if (curva.base == BaseInfiltracao.litrosPorMetro)
                   OptionalNumericCurveField(
                     label: 'E medido para converter L/m em mm (m)',
                     value: curva.espacamentoConversaoM,
@@ -229,8 +227,8 @@ class SoloStep extends ConsumerWidget {
                     );
                     if (data != null && context.mounted) {
                       ref
-                          .read(parametersProvider.notifier)
-                          .setDataCurvaInfiltracao(data);
+                          .read(provedorParametrosSulco.notifier)
+                          .definirDataCurvaInfiltracao(data);
                     }
                   },
                   child: Text(
@@ -264,8 +262,8 @@ class SoloStep extends ConsumerWidget {
               ],
               selected: {state.origemCurvaInfiltracao},
               onSelectionChanged: (value) => ref
-                  .read(parametersProvider.notifier)
-                  .setOrigemCurvaInfiltracao(value.first),
+                  .read(provedorParametrosSulco.notifier)
+                  .definirOrigemCurvaInfiltracao(value.first),
             ),
             if (state.origemCurvaInfiltracao ==
                 OrigemCurvaInfiltracao.ensaioEntradaSaida) ...[
@@ -291,8 +289,8 @@ class SoloStep extends ConsumerWidget {
               EntradaSaidaEditor(
                 pontos: state.medicoesEntradaSaida,
                 onChanged: ref
-                    .read(parametersProvider.notifier)
-                    .setMedicoesEntradaSaida,
+                    .read(provedorParametrosSulco.notifier)
+                    .definirMedicoesEntradaSaida,
               ),
               Text(
                 'Informe as vazões totais do trecho ensaiado. Se o dado estiver '

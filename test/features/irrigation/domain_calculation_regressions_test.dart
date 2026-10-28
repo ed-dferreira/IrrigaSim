@@ -2,28 +2,29 @@ import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/irrigation_project.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/field_measurements.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/ensaios_sulco.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/geometria_sulco.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/services/advance_curve_model.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/services/depth_performance.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/services/flow_management.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/services/infiltration_model.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/modelo_curva_avanco.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/desempenho_lamina.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/manejo_vazao.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/modelo_infiltracao.dart';
 import 'package:irrigasim/shared/irrigacao/services/lamina_requerida.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/services/length_selector.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/seletor_comprimento.dart';
 import 'package:irrigasim/shared/irrigacao/services/operational_planning.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/services/opportunity_time.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/services/run_furrow_simulation.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/tempo_oportunidade.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/simulador_sulcos.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/controlador_parametros_sulco.dart';
 
 void main() {
   group('documented domain regressions', () {
     test(
       'controller calculates corn IRN and irrigation interval from demand',
       () {
-        final controller = ParametersController();
+        final controller = ControladorParametrosSulco();
 
-        controller.updateField(campo: 'evapotranspiracaoMmDia', valor: '4');
+        controller.atualizarCampo(campo: 'evapotranspiracaoMmDia', valor: '4');
 
         expect(controller.state.laminaRequerida, closeTo(42, 1e-9));
         expect(
@@ -34,10 +35,10 @@ void main() {
     );
 
     test('controller recalculates irrigation interval when Pef changes', () {
-      final controller = ParametersController();
-      controller.updateField(campo: 'evapotranspiracaoMmDia', valor: '4');
+      final controller = ControladorParametrosSulco();
+      controller.atualizarCampo(campo: 'evapotranspiracaoMmDia', valor: '4');
 
-      controller.updateField(campo: 'precipitacaoEfetivaMmDia', valor: '1');
+      controller.atualizarCampo(campo: 'precipitacaoEfetivaMmDia', valor: '1');
 
       expect(
         controller.state.laminaRequeridaResultado?.demandaLiquidaMmDia,
@@ -50,16 +51,16 @@ void main() {
     });
 
     test('uses the documented C/a table and applies 1.1 only to Qr', () {
-      final qmax = FlowManagement.calcularVazaoMaxima(
+      final qmax = ManejoVazao.calcularVazaoMaxima(
         declividadePercent: 0.5,
         textura: TexturaSolo.media,
       );
-      final withoutFactor = FlowManagement.calcularVazaoReduzida(
+      final withoutFactor = ManejoVazao.calcularVazaoReduzida(
         f0MmH: 7.9,
         comprimentoM: 200,
         espacamentoM: 1,
       );
-      final withFactor = FlowManagement.calcularVazaoReduzida(
+      final withFactor = ManejoVazao.calcularVazaoReduzida(
         f0MmH: 7.9,
         comprimentoM: 200,
         espacamentoM: 1,
@@ -72,8 +73,8 @@ void main() {
     });
 
     test('derives cutoff from final opportunity time', () {
-      final points = const [AdvancePoint(0, 0), AdvancePoint(200, 90)];
-      final result = OpportunityTime.calcularTempoIrrigacao(
+      final points = const [PontoAvanco(0, 0), PontoAvanco(200, 90)];
+      final result = TempoOportunidade.calcularTempoIrrigacao(
         tempoOportunidadeMin: 130,
         tempoAvancoMin: 90,
         pontosAvanco: points,
@@ -83,7 +84,7 @@ void main() {
       expect(result.pontos.last.tempoCorteMin, 220);
       expect(result.pontos.last.tempoMin, 130);
       expect(
-        () => OpportunityTime.calcularPonto(
+        () => TempoOportunidade.calcularPonto(
           tempoCorteMin: 20,
           tempoAvancoMin: 25,
         ),
@@ -92,7 +93,7 @@ void main() {
     });
 
     test('performance uses Lf for Ea and direct Pe/Pp formulas', () {
-      final result = DepthPerformance.calcularDesempenho(
+      final result = DesempenhoLamina.calcularDesempenho(
         perfilInfiltrado: const [31.2, 30],
         laminaRequerida: 30,
         laminaAplicada: 60,
@@ -103,7 +104,7 @@ void main() {
       expect(result.perdaPercolacao, closeTo(1, 1e-9));
       expect(result.perdaEscoamento, closeTo(49, 1e-9));
       expect(
-        () => DepthPerformance.laminaComReducao(
+        () => DesempenhoLamina.laminaComReducao(
           tempoTotalMin: 60,
           tempoReducaoMin: 61,
           vazaoInicialLs: 1,
@@ -126,23 +127,23 @@ void main() {
     });
 
     test('two-point source example requires an actual half distance', () {
-      final curve = AdvanceCurveModel.ajustarDoisPontos(
+      final curve = ModeloCurvaAvanco.ajustarDoisPontos(
         distanciaM: 120,
         tempoMin: 58,
         distanciaMetadeM: 60,
         tempoMetadeMin: 22,
         pontos: const [
-          PontoEnsaio(distanciaM: 0, tempoMin: 0),
-          PontoEnsaio(distanciaM: 60, tempoMin: 22),
-          PontoEnsaio(distanciaM: 120, tempoMin: 58),
+          PontoEnsaioAvanco(distanciaM: 0, tempoMin: 0),
+          PontoEnsaioAvanco(distanciaM: 60, tempoMin: 22),
+          PontoEnsaioAvanco(distanciaM: 120, tempoMin: 58),
         ],
       );
 
-      expect(curve.b, closeTo(1.3985493764902743, 1e-12));
-      expect(curve.k, closeTo(0.07171175618605942, 1e-12));
+      expect(curve.expoente, closeTo(1.3985493764902743, 1e-12));
+      expect(curve.coeficiente, closeTo(0.07171175618605942, 1e-12));
       expect(curve.pontosOriginais.first.distanciaM, 0);
       expect(
-        () => AdvanceCurveModel.ajustarDoisPontos(
+        () => ModeloCurvaAvanco.ajustarDoisPontos(
           distanciaM: 120,
           tempoMin: 58,
           distanciaMetadeM: 50,
@@ -154,18 +155,18 @@ void main() {
     });
 
     test('two-point field method interpolates the unmeasured middle stake', () {
-      final curve = AdvanceCurveModel.ajustarDoisPontosPorEstacas(const [
-        PontoEnsaio(distanciaM: 0, tempoMin: 0),
-        PontoEnsaio(distanciaM: 50, tempoMin: 20),
-        PontoEnsaio(distanciaM: 150, tempoMin: 60),
-        PontoEnsaio(distanciaM: 200, tempoMin: 90),
+      final curve = ModeloCurvaAvanco.ajustarDoisPontosPorEstacas(const [
+        PontoEnsaioAvanco(distanciaM: 0, tempoMin: 0),
+        PontoEnsaioAvanco(distanciaM: 50, tempoMin: 20),
+        PontoEnsaioAvanco(distanciaM: 150, tempoMin: 60),
+        PontoEnsaioAvanco(distanciaM: 200, tempoMin: 90),
       ]);
 
       expect(
-        AdvanceCurveModel.tempoAvanco(distanciaM: 100, parametros: curve),
+        ModeloCurvaAvanco.tempoAvanco(distanciaM: 100, parametros: curve),
         closeTo(40, 1e-9),
       );
-      expect(curve.k, greaterThan(0));
+      expect(curve.coeficiente, greaterThan(0));
     });
 
     test(
@@ -173,33 +174,33 @@ void main() {
       () {
         const k = .095;
         const b = 1.3;
-        final curve = AdvanceCurveModel.ajustarDoisPontosPorEstacas([
-          PontoEnsaio(distanciaM: 50, tempoMin: k * math.pow(50, b)),
-          PontoEnsaio(distanciaM: 100, tempoMin: k * math.pow(100, b)),
+        final curve = ModeloCurvaAvanco.ajustarDoisPontosPorEstacas([
+          PontoEnsaioAvanco(distanciaM: 50, tempoMin: k * math.pow(50, b)),
+          PontoEnsaioAvanco(distanciaM: 100, tempoMin: k * math.pow(100, b)),
         ]);
 
-        expect(curve.k, closeTo(k, 1e-12));
-        expect(curve.b, closeTo(b, 1e-12));
+        expect(curve.coeficiente, closeTo(k, 1e-12));
+        expect(curve.expoente, closeTo(b, 1e-12));
       },
     );
 
     test('least-squares field method reproduces the stakeholder curve', () {
       final points = [25.0, 50.0, 75.0, 100.0]
           .map(
-            (distance) => PontoEnsaio(
+            (distance) => PontoEnsaioAvanco(
               distanciaM: distance,
               tempoMin: .011 * math.pow(distance, 1.65).toDouble(),
             ),
           )
           .toList();
-      final curve = AdvanceCurveModel.ajustarMinimosQuadrados(points);
+      final curve = ModeloCurvaAvanco.ajustarMinimosQuadrados(points);
 
-      expect(curve.k, closeTo(.011, 1e-12));
-      expect(curve.b, closeTo(1.65, 1e-12));
+      expect(curve.coeficiente, closeTo(.011, 1e-12));
+      expect(curve.expoente, closeTo(1.65, 1e-12));
     });
 
     test('estimated advance accepts direct k and b parameters', () {
-      final result = RunFurrowSimulation()(
+      final result = SimuladorSulcos()(
         const IrrigationParameters(
           comprimento: 200,
           declividade: .005,
@@ -230,18 +231,18 @@ void main() {
 
     test('advance regression ignores only the measured origin before logs', () {
       const observations = [
-        PontoEnsaio(distanciaM: 0, tempoMin: 0),
-        PontoEnsaio(distanciaM: 25, tempoMin: 10),
-        PontoEnsaio(distanciaM: 50, tempoMin: 22),
-        PontoEnsaio(distanciaM: 100, tempoMin: 48),
+        PontoEnsaioAvanco(distanciaM: 0, tempoMin: 0),
+        PontoEnsaioAvanco(distanciaM: 25, tempoMin: 10),
+        PontoEnsaioAvanco(distanciaM: 50, tempoMin: 22),
+        PontoEnsaioAvanco(distanciaM: 100, tempoMin: 48),
       ];
-      final curve = AdvanceCurveModel.ajustarMinimosQuadrados(observations);
+      final curve = ModeloCurvaAvanco.ajustarMinimosQuadrados(observations);
 
       expect(curve.pontosOriginais, observations);
-      expect(curve.k, greaterThan(0));
-      expect(curve.b, greaterThan(0));
+      expect(curve.coeficiente, greaterThan(0));
+      expect(curve.expoente, greaterThan(0));
       expect(
-        AdvanceCurveModel.tempoAvanco(distanciaM: 100, parametros: curve),
+        ModeloCurvaAvanco.tempoAvanco(distanciaM: 100, parametros: curve),
         closeTo(48, 5),
       );
     });
@@ -249,18 +250,18 @@ void main() {
     test(
       'controller sends the measured regression curve to furrow simulation',
       () async {
-        final controller = ParametersController();
-        controller.setOrigemAvanco(OrigemAvanco.ensaio);
-        controller.setMetodoCurvaAvanco(MetodoCurvaAvanco.minimosQuadrados);
-        controller.updateField(campo: 'vazaoEnsaioAvancoLs', valor: '1');
-        controller.setCondicoesEnsaioAvanco(
+        final controller = ControladorParametrosSulco();
+        controller.definirOrigemAvanco(OrigemAvanco.ensaio);
+        controller.definirMetodoCurvaAvanco(MetodoAjusteAvanco.minimosQuadrados);
+        controller.atualizarCampo(campo: 'vazaoEnsaioAvancoLs', valor: '1');
+        controller.definirCondicoesEnsaioAvanco(
           'Solo médio, seção em V e orientação ensaiada',
         );
-        controller.setPontosEnsaioAvanco(const [
-          PontoEnsaio(distanciaM: 0, tempoMin: 0),
-          PontoEnsaio(distanciaM: 50, tempoMin: 20),
-          PontoEnsaio(distanciaM: 100, tempoMin: 43),
-          PontoEnsaio(distanciaM: 200, tempoMin: 95),
+        controller.definirPontosEnsaioAvanco(const [
+          PontoEnsaioAvanco(distanciaM: 0, tempoMin: 0),
+          PontoEnsaioAvanco(distanciaM: 50, tempoMin: 20),
+          PontoEnsaioAvanco(distanciaM: 100, tempoMin: 43),
+          PontoEnsaioAvanco(distanciaM: 200, tempoMin: 95),
         ]);
 
         await controller.executarSimulacao();
@@ -273,7 +274,7 @@ void main() {
     test(
       'controller attaches typed parcel planning to furrow results',
       () async {
-        final controller = ParametersController();
+        final controller = ControladorParametrosSulco();
 
         await controller.executarSimulacao();
 
@@ -289,10 +290,10 @@ void main() {
     test(
       'estimated curve fields drive the controller simulation parameters',
       () {
-        final controller = ParametersController();
-        controller.updateField(campo: 'coeficienteAvancoK', valor: '.095');
-        controller.updateField(campo: 'expoenteAvancoB', valor: '1.3');
-        final params = controller.state.toIrrigationParameters();
+        final controller = ControladorParametrosSulco();
+        controller.atualizarCampo(campo: 'coeficienteAvancoK', valor: '.095');
+        controller.atualizarCampo(campo: 'expoenteAvancoB', valor: '1.3');
+        final params = controller.state.paraParametrosIrrigacao();
 
         expect(params.coeficienteAvancoK, .095);
         expect(params.expoenteAvancoB, 1.3);
@@ -313,7 +314,7 @@ void main() {
           vazaoSaidaLs: 1 - vi / 40,
         );
       });
-      final result = RunFurrowSimulation()(
+      final result = SimuladorSulcos()(
         IrrigationParameters(
           comprimento: 200,
           declividade: .005,
@@ -366,8 +367,8 @@ void main() {
             MedicaoRecessao(distanciaM: 200, instanteRecessaoMin: 270),
           ],
         );
-        final measured = RunFurrowSimulation()(base);
-        final simplified = RunFurrowSimulation()(
+        final measured = SimuladorSulcos()(base);
+        final simplified = SimuladorSulcos()(
           base.copyWith(
             hipoteseRecessao: HipoteseRecessao.desprezada,
             medicoesRecessao: const [],
@@ -380,7 +381,7 @@ void main() {
         );
         expect(measured.tempoOportunidadeFinalMin, 180);
         expect(
-          () => RunFurrowSimulation()(
+          () => SimuladorSulcos()(
             base.copyWith(
               medicoesRecessao: const [
                 MedicaoRecessao(distanciaM: 0, instanteRecessaoMin: 30),
@@ -394,16 +395,16 @@ void main() {
     );
 
     test('VI is a rate and is not differentiated a second time', () {
-      const parameters = InfiltrationParameters(
-        k: 35.203016822389664,
-        n: -0.31077526032565167,
-        origem: OrigemParametros.ensaio,
-        unidadeK: 'mm/h',
+      const parameters = ParametrosInfiltracao(
+        coeficiente: 35.203016822389664,
+        expoente: -0.31077526032565167,
+        origem: OrigemParametrosInfiltracao.ensaio,
+        unidadeCoeficiente: 'mm/h',
       );
       expect(
-        InfiltrationModel.taxaInfiltracao(tempoMin: 60, parametros: parameters),
+        ModeloInfiltracao.taxaInfiltracao(tempoMin: 60, parametros: parameters),
         closeTo(
-          InfiltrationModel.vi(tempoMin: 60, parametros: parameters),
+          parameters.coeficiente * math.pow(60, parameters.expoente),
           1e-12,
         ),
       );
@@ -412,19 +413,19 @@ void main() {
     test(
       'does not select a rejected length and validates operational inputs',
       () {
-        const advance = AdvanceCurveResult(
-          k: .1,
-          b: 1.2,
+        const advance = ResultadoCurvaAvanco(
+          coeficiente: .1,
+          expoente: 1.2,
           metodo: MetodoAjusteAvanco.doisPontos,
           pontosOriginais: [],
         );
-        const infiltration = InfiltrationParameters(
-          k: 35,
-          n: -.3,
-          origem: OrigemParametros.ensaio,
-          unidadeK: 'mm/h',
+        const infiltration = ParametrosInfiltracao(
+          coeficiente: 35,
+          expoente: -.3,
+          origem: OrigemParametrosInfiltracao.ensaio,
+          unidadeCoeficiente: 'mm/h',
         );
-        final selection = LengthSelector.selecionar(
+        final selection = SeletorComprimento.selecionar(
           comprimentosCandidatos: const [100, 200],
           parametrosAvanco: advance,
           parametrosInfiltracao: infiltration,
@@ -453,7 +454,7 @@ void main() {
     );
 
     test('furrow reduction uses Ta at qi and To at qr', () {
-      final result = RunFurrowSimulation()(
+      final result = SimuladorSulcos()(
         const IrrigationParameters(
           comprimento: 200,
           declividade: .005,
@@ -497,7 +498,7 @@ void main() {
           TipoSulco.sulcos_em_zigue_zague,
         ]) {
           expect(
-            () => RunFurrowSimulation()(base.copyWith(tipoSulco: tipo)),
+            () => SimuladorSulcos()(base.copyWith(tipoSulco: tipo)),
             throwsFormatException,
             reason: tipo.displayName,
           );
@@ -506,19 +507,19 @@ void main() {
     );
 
     test('length selector uses mm dimension and type slope constraints', () {
-      const advance = AdvanceCurveResult(
-        k: .1,
-        b: 1.2,
+      const advance = ResultadoCurvaAvanco(
+        coeficiente: .1,
+        expoente: 1.2,
         metodo: MetodoAjusteAvanco.doisPontos,
         pontosOriginais: [],
       );
-      const infiltration = InfiltrationParameters(
-        k: 60,
-        n: 0,
-        origem: OrigemParametros.valorInformado,
-        unidadeK: 'mm/h',
+      const infiltration = ParametrosInfiltracao(
+        coeficiente: 60,
+        expoente: 0,
+        origem: OrigemParametrosInfiltracao.valorInformado,
+        unidadeCoeficiente: 'mm/h',
       );
-      final valid = LengthSelector.selecionar(
+      final valid = SeletorComprimento.selecionar(
         comprimentosCandidatos: const [100],
         parametrosAvanco: advance,
         parametrosInfiltracao: infiltration,
@@ -530,7 +531,7 @@ void main() {
       expect(valid.comprimentoEscolhidoM, 100);
       expect(valid.avaliacoes.single.eficienciaEstimada, 100);
 
-      final unsupported = LengthSelector.selecionar(
+      final unsupported = SeletorComprimento.selecionar(
         comprimentosCandidatos: const [100],
         parametrosAvanco: advance,
         parametrosInfiltracao: infiltration,
@@ -589,7 +590,7 @@ void main() {
     });
 
     test('reduction delay extends the initial-flow period after advance', () {
-      final result = RunFurrowSimulation()(
+      final result = SimuladorSulcos()(
         const IrrigationParameters(
           comprimento: 200,
           declividade: .005,
@@ -622,7 +623,7 @@ void main() {
     test(
       'furrow reports conduction efficiency and spatial adequacy degree',
       () {
-        final result = RunFurrowSimulation()(
+        final result = SimuladorSulcos()(
           const IrrigationParameters(
             comprimento: 200,
             declividade: .005,
@@ -663,7 +664,7 @@ void main() {
     );
 
     test('furrow conduction efficiency is 100 percent without losses', () {
-      final result = RunFurrowSimulation()(
+      final result = SimuladorSulcos()(
         const IrrigationParameters(
           comprimento: 200,
           declividade: .005,
@@ -697,7 +698,7 @@ void main() {
         tempoAvancoFinalMin: 90,
       );
 
-      final estimated = RunFurrowSimulation()(
+      final estimated = SimuladorSulcos()(
         base.copyWith(manejoSulco: ManejoSulco.reduzida, vazaoReduzidaLs: 0),
       );
       expect(
@@ -705,13 +706,11 @@ void main() {
         greaterThan(0),
       );
       expect(
-        () => RunFurrowSimulation()(
-          base.copyWith(manejoSulco: ManejoSulco.surtir),
-        ),
+        () => SimuladorSulcos()(base.copyWith(manejoSulco: ManejoSulco.surtir)),
         throwsFormatException,
       );
       expect(
-        () => RunFurrowSimulation()(
+        () => SimuladorSulcos()(
           base.copyWith(
             manejoSulco: ManejoSulco.reduzida,
             vazaoReduzidaLs: .5,
@@ -732,10 +731,10 @@ void main() {
         throwsArgumentError,
       );
       expect(
-        () => InfiltrationModel.ajustarCurva(const [
-          PontoInfiltracaoMedido(tempoMin: 0, volumeMm: 0),
-          PontoInfiltracaoMedido(tempoMin: 10, volumeMm: 0),
-          PontoInfiltracaoMedido(tempoMin: 20, volumeMm: 5),
+        () => ModeloInfiltracao.ajustarCurva(const [
+          PontoInfiltracaoMedido(tempoMin: 0, taxaMmHora: 0),
+          PontoInfiltracaoMedido(tempoMin: 10, taxaMmHora: 0),
+          PontoInfiltracaoMedido(tempoMin: 20, taxaMmHora: 5),
         ]),
         throwsArgumentError,
       );

@@ -2,8 +2,8 @@ import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart'
 import 'package:irrigasim/features/irrigacao_faixas/models/border_project.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/basin_project.dart';
 
-import 'package:irrigasim/features/irrigacao_sulcos/models/field_measurements.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/entradas_projeto_sulco.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/entradas_projeto.dart';
 
 enum MetodoIrrigacao { sulco, faixa, inundacao }
 
@@ -79,7 +79,7 @@ extension MetodoIrrigacaoExtension on MetodoIrrigacao {
 
 class IrrigationParameters {
   /// Contrato versionado de sulcos; null indica cenário legado sem essas entradas.
-  final EntradasProjetoSulco? entradasProjetoSulco;
+  final EntradasProjeto? entradasProjeto;
   final BorderProject? projetoFaixa;
 
   /// Contrato versionado de inundação; null indica cenário legado sem o
@@ -127,7 +127,7 @@ class IrrigationParameters {
   final bool fator11Vib;
   final double? vazaoEnsaioAvancoLs;
   final String? condicoesEnsaioAvanco;
-  final EnsaioErosaoSulco? ensaioErosao;
+  final EnsaioErosao? ensaioErosao;
   final double tempoMudancaMin;
   final double cicloSurtirMin;
   final double jornadaDiariaH;
@@ -141,7 +141,7 @@ class IrrigationParameters {
   final double espacamentoPlantasM;
   final double? larguraSulcoM;
   final double? profundidadeSulcoM;
-  final MetodoCurvaAvanco metodoCurvaAvanco;
+  final MetodoAjusteAvanco metodoCurvaAvanco;
   final bool usarEnsaioAvanco;
   final List<MedicaoAvanco> medicoesAvanco;
   final OrigemCurvaInfiltracao origemCurvaInfiltracao;
@@ -152,7 +152,7 @@ class IrrigationParameters {
   final List<MedicaoRecessao> medicoesRecessao;
 
   const IrrigationParameters({
-    this.entradasProjetoSulco,
+    this.entradasProjeto,
     this.projetoFaixa,
     this.projetoInundacao,
     required this.comprimento,
@@ -206,7 +206,7 @@ class IrrigationParameters {
     this.espacamentoPlantasM = 0.15,
     this.larguraSulcoM,
     this.profundidadeSulcoM,
-    this.metodoCurvaAvanco = MetodoCurvaAvanco.doisPontos,
+    this.metodoCurvaAvanco = MetodoAjusteAvanco.doisPontos,
     this.usarEnsaioAvanco = false,
     this.medicoesAvanco = const [],
     this.origemCurvaInfiltracao =
@@ -219,7 +219,7 @@ class IrrigationParameters {
   });
 
   IrrigationParameters copyWith({
-    EntradasProjetoSulco? entradasProjetoSulco,
+    EntradasProjeto? entradasProjeto,
     bool clearEntradasProjetoSulco = false,
     BorderProject? projetoFaixa,
     BasinProject? projetoInundacao,
@@ -261,7 +261,7 @@ class IrrigationParameters {
     bool? fator11Vib,
     double? vazaoEnsaioAvancoLs,
     String? condicoesEnsaioAvanco,
-    EnsaioErosaoSulco? ensaioErosao,
+    EnsaioErosao? ensaioErosao,
     bool clearEnsaioErosao = false,
     double? tempoMudancaMin,
     double? cicloSurtirMin,
@@ -276,7 +276,7 @@ class IrrigationParameters {
     double? espacamentoPlantasM,
     double? larguraSulcoM,
     double? profundidadeSulcoM,
-    MetodoCurvaAvanco? metodoCurvaAvanco,
+    MetodoAjusteAvanco? metodoCurvaAvanco,
     bool? usarEnsaioAvanco,
     List<MedicaoAvanco>? medicoesAvanco,
     OrigemCurvaInfiltracao? origemCurvaInfiltracao,
@@ -287,9 +287,9 @@ class IrrigationParameters {
     List<MedicaoRecessao>? medicoesRecessao,
   }) {
     return IrrigationParameters(
-      entradasProjetoSulco: clearEntradasProjetoSulco
+      entradasProjeto: clearEntradasProjetoSulco
           ? null
-          : entradasProjetoSulco ?? this.entradasProjetoSulco,
+          : entradasProjeto ?? this.entradasProjeto,
       projetoFaixa: projetoFaixa ?? this.projetoFaixa,
       projetoInundacao: clearProjetoInundacao
           ? null

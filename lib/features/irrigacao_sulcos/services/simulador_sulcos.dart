@@ -3,27 +3,27 @@ import 'dart:math';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/field_measurements.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/indicadores_balanco_sulco.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/irrigation_project.dart'
-    show MetodoAjusteAvanco, PontoEnsaio;
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/indicadores_balanco.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/ensaios_sulco.dart'
+    show PontoEnsaioAvanco;
 
-import 'advance_curve_model.dart';
-import 'infiltration_model.dart';
+import 'modelo_curva_avanco.dart';
+import 'modelo_infiltracao.dart';
 
-import 'flow_management.dart';
+import 'manejo_vazao.dart';
 
 import 'package:irrigasim/shared/irrigacao/services/performance_indicators.dart';
 import 'package:irrigasim/shared/irrigacao/services/surface_irrigation_math.dart';
 
-class RunFurrowSimulation {
+class SimuladorSulcos {
   SimulationResult call(
     IrrigationParameters params, {
-    AdvanceCurveResult? advanceCurve,
+    ResultadoCurvaAvanco? advanceCurve,
   }) {
     if (params.origemCurvaInfiltracao ==
             OrigemCurvaInfiltracao.equacaoAcumuladaInformada &&
-        params.entradasProjetoSulco?.curvaInfiltracao == null) {
+        params.entradasProjeto?.curvaInfiltracao == null) {
       _validate(params);
     }
     final calculationParams = _parametersWithSelectedInfiltration(params);
@@ -41,10 +41,10 @@ class RunFurrowSimulation {
     final selectedAdvanceCurve =
         advanceCurve ?? _fitAdvanceFromMeasurements(calculationParams);
     if (selectedAdvanceCurve != null &&
-        (!selectedAdvanceCurve.k.isFinite ||
-            !selectedAdvanceCurve.b.isFinite ||
-            selectedAdvanceCurve.k <= 0 ||
-            selectedAdvanceCurve.b <= 0)) {
+        (!selectedAdvanceCurve.coeficiente.isFinite ||
+            !selectedAdvanceCurve.expoente.isFinite ||
+            selectedAdvanceCurve.coeficiente <= 0 ||
+            selectedAdvanceCurve.expoente <= 0)) {
       throw const FormatException(
         'A curva de avanço deve ter coeficientes finitos e positivos.',
       );
@@ -56,16 +56,16 @@ class RunFurrowSimulation {
             endTimeMin: calculationParams.tempoAvancoFinalMin,
           )
         : AdvanceCurve(
-            coefficient: selectedAdvanceCurve.k,
-            exponent: selectedAdvanceCurve.b,
+            coefficient: selectedAdvanceCurve.coeficiente,
+            exponent: selectedAdvanceCurve.expoente,
             rSquared: selectedAdvanceCurve.r2,
             points:
-                AdvanceCurveModel.gerarCurva(
+                ModeloCurvaAvanco.gerarCurva(
                       comprimentoM: calculationParams.comprimento,
                       parametros: selectedAdvanceCurve,
                     )
                     .map(
-                      (point) => PontoGrafico(point.distanciaM, point.tempoMin),
+                      (point) => PontoGrafico(point.tempoMin, point.distanciaM),
                     )
                     .toList(),
           );
@@ -107,7 +107,7 @@ class RunFurrowSimulation {
   IrrigationParameters _parametersWithSelectedInfiltration(
     IrrigationParameters params,
   ) {
-    final curve = params.entradasProjetoSulco?.curvaInfiltracao;
+    final curve = params.entradasProjeto?.curvaInfiltracao;
     if (curve != null) {
       if (params.origemCurvaInfiltracao !=
           OrigemCurvaInfiltracao.equacaoAcumuladaInformada) {
@@ -115,8 +115,8 @@ class RunFurrowSimulation {
           'Selecione apenas uma curva de infiltração: ensaio entrada/saída ou equação tipada.',
         );
       }
-      final converted = curve.acumuladaMm();
-      return params.copyWith(k: converted.k, a: converted.a);
+      final converted = curve.parametrosAcumulados();
+      return params.copyWith(k: converted.coeficiente, a: converted.expoente);
     }
     if (params.origemCurvaInfiltracao ==
         OrigemCurvaInfiltracao.equacaoAcumuladaInformada) {
@@ -151,27 +151,29 @@ class RunFurrowSimulation {
     final viPoints = params.medicoesEntradaSaida.map((point) {
       return PontoInfiltracaoMedido(
         tempoMin: point.tempoMin,
-        volumeMm: InfiltrationModel.viEnsaioSaida(
+        taxaMmHora: ModeloInfiltracao.viEnsaioSaida(
           qEntradaLs: point.vazaoEntradaLs,
           qSaidaLs: point.vazaoSaidaLs,
           areaM2: areaM2,
         ),
       );
     }).toList();
-    final rateCurve = InfiltrationModel.ajustarCurva(viPoints);
-    final accumulatedExponent = rateCurve.n + 1;
+    final rateCurve = ModeloInfiltracao.ajustarCurva(viPoints);
+    final accumulatedExponent = rateCurve.expoente + 1;
     if (accumulatedExponent <= 0) {
       throw const FormatException(
         'A curva de taxa não pode ser integrada: n deve ser maior que −1.',
       );
     }
     return params.copyWith(
-      k: rateCurve.k / (60 * accumulatedExponent),
+      k: rateCurve.coeficiente / (60 * accumulatedExponent),
       a: accumulatedExponent,
     );
   }
 
-  AdvanceCurveResult? _fitAdvanceFromMeasurements(IrrigationParameters params) {
+  ResultadoCurvaAvanco? _fitAdvanceFromMeasurements(
+    IrrigationParameters params,
+  ) {
     if (params.usarEnsaioAvanco) {
       if (params.medicoesAvanco.isEmpty) {
         throw const FormatException(
@@ -180,16 +182,16 @@ class RunFurrowSimulation {
       }
       final points = params.medicoesAvanco
           .map(
-            (point) => PontoEnsaio(
+            (point) => PontoEnsaioAvanco(
               distanciaM: point.distanciaM,
               tempoMin: point.tempoMin,
             ),
           )
           .toList();
-      if (params.metodoCurvaAvanco == MetodoCurvaAvanco.minimosQuadrados) {
-        return AdvanceCurveModel.ajustarMinimosQuadrados(points);
+      if (params.metodoCurvaAvanco == MetodoAjusteAvanco.minimosQuadrados) {
+        return ModeloCurvaAvanco.ajustarMinimosQuadrados(points);
       }
-      return AdvanceCurveModel.ajustarDoisPontosPorEstacas(points);
+      return ModeloCurvaAvanco.ajustarDoisPontosPorEstacas(points);
     }
     final k = params.coeficienteAvancoK;
     final b = params.expoenteAvancoB;
@@ -204,9 +206,9 @@ class RunFurrowSimulation {
         'Informe coeficiente k e expoente b positivos para a curva Tx = k·xᵇ.',
       );
     }
-    return AdvanceCurveResult(
-      k: k,
-      b: b,
+    return ResultadoCurvaAvanco(
+      coeficiente: k,
+      expoente: b,
       metodo: MetodoAjusteAvanco.doisPontos,
       pontosOriginais: const [],
     );
@@ -269,21 +271,21 @@ class RunFurrowSimulation {
     final reductionEstimate = switch (origem) {
       OrigemVazaoReduzida.informada => null,
       OrigemVazaoReduzida.taxaFinalDaCurva =>
-        FlowManagement.estimarVazaoReduzidaDaCurva(
+        ManejoVazao.estimarVazaoReduzidaDaCurva(
           coeficienteAcumuladoMmMinA: params.k,
           expoenteAcumulado: params.a,
           oportunidadeFinalMin: opportunityMin,
           comprimentoM: params.comprimento,
           espacamentoM: params.larguraOuEspacamento,
         ),
-      OrigemVazaoReduzida.vib => FlowManagement.calcularVazaoReduzida(
+      OrigemVazaoReduzida.vib => ManejoVazao.calcularVazaoReduzida(
         f0MmH: params.vib * 60000, // vib legado: m/min → mm/h
         comprimentoM: params.comprimento,
         espacamentoM: params.larguraOuEspacamento,
         fator11: params.fator11Vib ? 1.1 : 1.0,
       ),
       OrigemVazaoReduzida.somatorioEspacial =>
-        FlowManagement.estimarSomatorioEspacial(
+        ManejoVazao.estimarSomatorioEspacial(
           estacas: params.medicoesAvanco,
           comprimentoM: params.comprimento,
           espacamentoM: params.larguraOuEspacamento,
@@ -321,7 +323,7 @@ class RunFurrowSimulation {
         params.medicoesAvanco.first.distanciaM == 0 &&
         params.medicoesAvanco.last.distanciaM == params.comprimento &&
         instanteMudanca > params.medicoesAvanco.last.tempoMin) {
-      demandaEspacialLs = FlowManagement.estimarSomatorioEspacial(
+      demandaEspacialLs = ManejoVazao.estimarSomatorioEspacial(
         estacas: params.medicoesAvanco,
         comprimentoM: params.comprimento,
         espacamentoM: params.larguraOuEspacamento,
@@ -484,7 +486,7 @@ class RunFurrowSimulation {
     final applicationEfficiency = finalDepthM / appliedDepthM * 100;
     final distributionEfficiency =
         finalDepthM / ((initialDepthM + finalDepthM) / 2) * 100;
-    final ppSlide =
+    final perdaPercolacaoSlidePercentual =
         (balance.meanInfiltratedDepthM - requiredDepthM) / appliedDepthM * 100;
     final cuc = PerformanceIndicators.calcularCuc(profile).clamp(0, 100);
     final du = PerformanceIndicators.calcularDu(profile).clamp(0, 100);
@@ -503,18 +505,20 @@ class RunFurrowSimulation {
     final runoffDepthM = balance.runoffDepthM;
     final deficitMm = balance.deficitDepthM * 1000;
     final indicadores = IndicadoresBalancoSulco(
-      eaSlide: applicationEfficiency,
-      ppSlide: ppSlide < 0 ? null : ppSlide,
-      eaIntegral: balance.applicationEfficiency,
-      ppIntegral: balance.deepPercolationPercent,
-      peIntegral: balance.runoffPercent,
-      laminaInfiltradaMm: balance.meanInfiltratedDepthM * 1000,
+      eficienciaAplicacaoSlidePercentual: applicationEfficiency,
+      perdaPercolacaoSlidePercentual: perdaPercolacaoSlidePercentual < 0
+          ? null
+          : perdaPercolacaoSlidePercentual,
+      eficienciaAplicacaoIntegralPercentual: balance.applicationEfficiency,
+      perdaPercolacaoIntegralPercentual: balance.deepPercolationPercent,
+      perdaEscoamentoIntegralPercentual: balance.runoffPercent,
+      laminaMediaInfiltradaMm: balance.meanInfiltratedDepthM * 1000,
       laminaUtilMm: usefulDepthM * 1000,
       laminaPercoladaMm: percolatedDepthM * 1000,
       laminaEscoadaMm: runoffDepthM * 1000,
       deficitMm: deficitMm,
     );
-    final typedCurve = params.entradasProjetoSulco?.curvaInfiltracao;
+    final typedCurve = params.entradasProjeto?.curvaInfiltracao;
     final alertaInfiltracao = typedCurve?.avisoParaOportunidade(
       params.hipoteseRecessao == HipoteseRecessao.desprezada
           ? applicationTimeMin
@@ -575,12 +579,15 @@ class RunFurrowSimulation {
         'Eficiência de condução': conductionEfficiency,
         'Grau de adequação': adequacyDegree,
         'Resíduo do balanço': balance.residualPercent,
-        'Ea slide (Lf/Lm)': indicadores.eaSlide,
-        if (indicadores.ppSlide != null)
-          'Pp slide (Lmi−IRN)/Lm': indicadores.ppSlide!,
-        'Ea integral (Lútil/Lm)': indicadores.eaIntegral,
-        'Pp integral (Lpercolada/Lm)': indicadores.ppIntegral,
-        'Pe integral (Lm−Lmi)/Lm': indicadores.peIntegral,
+        'Ea slide (Lf/Lm)': indicadores.eficienciaAplicacaoSlidePercentual,
+        if (indicadores.perdaPercolacaoSlidePercentual != null)
+          'Pp slide (Lmi−IRN)/Lm': indicadores.perdaPercolacaoSlidePercentual!,
+        'Ea integral (Lútil/Lm)':
+            indicadores.eficienciaAplicacaoIntegralPercentual,
+        'Pp integral (Lpercolada/Lm)':
+            indicadores.perdaPercolacaoIntegralPercentual,
+        'Pe integral (Lm−Lmi)/Lm':
+            indicadores.perdaEscoamentoIntegralPercentual,
         'Declividade longitudinal': params.declividade,
         'Balanço - Aproveitado': balance.applicationEfficiency,
         'Balanço - Percolação': balance.deepPercolationPercent,
@@ -604,8 +611,8 @@ class RunFurrowSimulation {
           if (typedCurve.espacamentoConversaoM != null)
             'E usado na conversão de infiltração':
                 typedCurve.espacamentoConversaoM!,
-          if (typedCurve.cruzamentoVibMin() != null)
-            'VI cruza VIB em': typedCurve.cruzamentoVibMin()!,
+          if (typedCurve.tempoCruzamentoVibMin() != null)
+            'VI cruza VIB em': typedCurve.tempoCruzamentoVibMin()!,
         },
         ...metricasAdicionais,
       },
@@ -686,7 +693,7 @@ class RunFurrowSimulation {
     double slopePercent,
     TexturaSolo textura,
   ) {
-    final resultado = FlowManagement.calcularVazaoMaxima(
+    final resultado = ManejoVazao.calcularVazaoMaxima(
       declividadePercent: slopePercent,
       textura: textura,
     );
@@ -762,11 +769,13 @@ class RunFurrowSimulation {
           'A vazão do ensaio de avanço difere da vazão de projeto; a curva não pode ser reutilizada sem novo ensaio.',
         );
       }
-      final errors = AdvanceCurveModel.validarPontos(
+      final errors = ModeloCurvaAvanco.validarPontos(
         params.medicoesAvanco
             .map(
-              (p) =>
-                  PontoEnsaio(distanciaM: p.distanciaM, tempoMin: p.tempoMin),
+              (p) => PontoEnsaioAvanco(
+                distanciaM: p.distanciaM,
+                tempoMin: p.tempoMin,
+              ),
             )
             .toList(),
       );

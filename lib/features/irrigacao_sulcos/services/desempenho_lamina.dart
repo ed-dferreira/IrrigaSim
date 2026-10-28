@@ -103,8 +103,8 @@ class DesempenhoResultado {
 /// Calcula lâminas e parâmetros de desempenho.
 ///
 /// Referências: §38 e §45 do documento de implementação.
-class DepthPerformance {
-  const DepthPerformance._();
+class DesempenhoLamina {
+  const DesempenhoLamina._();
 
   /// Calcula a lâmina aplicada com vazão constante.
   ///
@@ -196,11 +196,14 @@ class DepthPerformance {
   /// [perfilInfiltrado] — Lâmina infiltrada por estaca (mm)
   /// [laminaRequerida] — Lâmina requerida (mm)
   /// [laminaAplicada] — Lâmina aplicada (mm)
+  /// [eficienciaConducaoPercentual] — Eficiência de condução efetiva (%), 100
+  /// quando não há perda informada
   /// [limites] — Limites para classificação
   static DesempenhoResultado calcularDesempenho({
     required List<double> perfilInfiltrado,
     required double laminaRequerida,
     required double laminaAplicada,
+    double eficienciaConducaoPercentual = 100,
     LimitesDesempenho limites = LimitesDesempenho.defaults,
   }) {
     if (perfilInfiltrado.isEmpty) {
@@ -211,6 +214,13 @@ class DepthPerformance {
         perfilInfiltrado.any((lamina) => lamina < 0)) {
       throw ArgumentError(
         'Lâminas infiltradas e requerida devem ser não negativas; lâmina aplicada deve ser positiva',
+      );
+    }
+    if (!eficienciaConducaoPercentual.isFinite ||
+        eficienciaConducaoPercentual < 0 ||
+        eficienciaConducaoPercentual > 100) {
+      throw ArgumentError(
+        'A eficiência de condução deve estar entre 0 e 100%.',
       );
     }
 
@@ -229,8 +239,7 @@ class DepthPerformance {
         : 0.0;
 
     // Eficiência de condução (Ec) = Va / Vd * 100
-    // Simplificação: assume perda de condução zero se não informada
-    final eficienciaConducao = 100.0;
+    final eficienciaConducao = eficienciaConducaoPercentual;
 
     // Eficiência de adequação (GA) = lâmina infiltrada útil / lâmina requerida * 100
     final laminaUtil =

@@ -2,11 +2,11 @@ import 'irrigacao_comum.dart';
 
 import 'package:irrigasim/features/irrigacao_faixas/models/border_project.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/irrigation_project.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/projeto_sulco.dart';
 
 /// Projeções de leitura: os projetos originais continuam sendo a fonte dos
 /// cálculos e da persistência. Nenhum dado ausente é substituído por padrão.
-extension BaseProjetoSulcos on IrrigationProject {
+extension BaseProjetoSulcos on ProjetoSulco {
   BaseIrrigacao get baseComum => BaseIrrigacao(
     identificacao: IdentificacaoIrrigacao.superficie(SistemaSuperficie.sulcos),
     area: CaracterizacaoArea(
@@ -38,7 +38,7 @@ extension BaseProjetoSulcos on IrrigationProject {
                     .map(
                       (p) => MedicaoInfiltracaoComum(
                         tempoMin: p.tempoMin,
-                        laminaAcumuladaMm: p.volumeInfiltradoMm,
+                        laminaAcumuladaMm: p.laminaAcumuladaMm,
                       ),
                     )
                     .toList() ??
@@ -95,7 +95,7 @@ extension BaseProjetoFaixas on BorderProject {
   );
 }
 
-/// Cenários rápidos usam IrrigationParameters em vez de IrrigationProject.
+/// Cenários rápidos usam IrrigationParameters em vez de ProjetoSulco.
 /// A identificação vem do método escolhido, nunca de um padrão implícito.
 extension BaseParametrosSuperficie on IrrigationParameters {
   BaseIrrigacao baseComumPara(MetodoIrrigacao metodo) {

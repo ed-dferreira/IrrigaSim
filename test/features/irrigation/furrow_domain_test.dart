@@ -1,13 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/field_measurements.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/irrigation_project.dart'
-    show FormaSulco, GeometriaSulco, PontoEnsaio;
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/ensaios_sulco.dart'
+    show PontoEnsaioAvanco;
+import 'package:irrigasim/features/irrigacao_sulcos/models/geometria_sulco.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/tabela_corrugados.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/services/advance_curve_model.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/services/infiltration_model.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/services/run_furrow_simulation.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/modelo_curva_avanco.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/modelo_infiltracao.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/simulador_sulcos.dart';
 
 void main() {
   const base = IrrigationParameters(
@@ -24,7 +25,7 @@ void main() {
 
   test('ensaio ativo vazio e coeficiente não finito não usam estimativa', () {
     expect(
-      () => RunFurrowSimulation()(base.copyWith(usarEnsaioAvanco: true)),
+      () => SimuladorSulcos()(base.copyWith(usarEnsaioAvanco: true)),
       throwsA(
         isA<FormatException>().having(
           (e) => e.message,
@@ -34,7 +35,7 @@ void main() {
       ),
     );
     expect(
-      () => RunFurrowSimulation()(base.copyWith(k: double.nan)),
+      () => SimuladorSulcos()(base.copyWith(k: double.nan)),
       throwsA(
         isA<FormatException>().having(
           (e) => e.message,
@@ -46,23 +47,23 @@ void main() {
   });
 
   test('tempos repetidos não representam avanço estrito', () {
-    final errors = AdvanceCurveModel.validarPontos(const [
-      PontoEnsaio(distanciaM: 0, tempoMin: 0),
-      PontoEnsaio(distanciaM: 50, tempoMin: 30),
-      PontoEnsaio(distanciaM: 100, tempoMin: 30),
+    final errors = ModeloCurvaAvanco.validarPontos(const [
+      PontoEnsaioAvanco(distanciaM: 0, tempoMin: 0),
+      PontoEnsaioAvanco(distanciaM: 50, tempoMin: 30),
+      PontoEnsaioAvanco(distanciaM: 100, tempoMin: 30),
     ]);
     expect(errors.join(' '), contains('Tempo de avanço'));
   });
 
   test('taxa singular em zero e tempo negativo são condições distintas', () {
-    const curve = InfiltrationParameters(
-      k: 36,
-      n: -0.32,
-      origem: OrigemParametros.valorInformado,
-      unidadeK: 'mm/h·min^0,32',
+    const curve = ParametrosInfiltracao(
+      coeficiente: 36,
+      expoente: -0.32,
+      origem: OrigemParametrosInfiltracao.valorInformado,
+      unidadeCoeficiente: 'mm/h·min^0,32',
     );
     expect(
-      () => InfiltrationModel.vi(tempoMin: 0, parametros: curve),
+      () => ModeloInfiltracao.taxaInfiltracao(tempoMin: 0, parametros: curve),
       throwsA(
         isA<FormatException>().having(
           (e) => e.message,
@@ -72,7 +73,7 @@ void main() {
       ),
     );
     expect(
-      () => InfiltrationModel.vi(tempoMin: -1, parametros: curve),
+      () => ModeloInfiltracao.taxaInfiltracao(tempoMin: -1, parametros: curve),
       throwsA(
         isA<FormatException>().having(
           (e) => e.message,
@@ -82,7 +83,7 @@ void main() {
       ),
     );
     expect(
-      () => InfiltrationModel.infiltracaoAcumulada(
+      () => ModeloInfiltracao.infiltracaoAcumulada(
         tempoMin: -1,
         parametros: curve,
       ),
@@ -91,7 +92,7 @@ void main() {
   });
 
   test('ensaio curto é sinalizado como extrapolação', () {
-    final result = RunFurrowSimulation()(
+    final result = SimuladorSulcos()(
       base.copyWith(
         usarEnsaioAvanco: true,
         vazaoEnsaioAvancoLs: 1,
@@ -107,7 +108,7 @@ void main() {
   });
 
   test('redução 110+110 min / 1+0,75 L/s usa apenas volume condicionado', () {
-    final result = RunFurrowSimulation()(
+    final result = SimuladorSulcos()(
       base.copyWith(
         comprimento: 200,
         larguraOuEspacamento: .9,
@@ -126,12 +127,12 @@ void main() {
 
   test('declive ausente não é classificado como fora e E usa raiz', () {
     expect(
-      TipoSulcoInfo.getInfo(TipoSulco.sulcos_em_zigue_zague).declividade
+      TipoSulcoInfo.para(TipoSulco.sulcos_em_zigue_zague).declividade
           .classificar(1),
       FaixaDeclividade.naoInformada,
     );
     expect(
-      TipoSulcoInfo.getInfo(TipoSulco.sulcos_contorno)
+      TipoSulcoInfo.para(TipoSulco.sulcos_contorno)
           .declividade
           .faixaUsavelLabel,
       'Não informado',

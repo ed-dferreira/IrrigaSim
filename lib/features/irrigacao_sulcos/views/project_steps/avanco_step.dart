@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
 import 'package:irrigasim/core/widgets/calculated_field.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/irrigation_project.dart'
-    show PontoEnsaio;
-import 'package:irrigasim/features/irrigacao_sulcos/models/field_measurements.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/ensaios_sulco.dart'
+    show PontoEnsaioAvanco;
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/controlador_parametros_sulco.dart';
 
 import 'project_step_widgets.dart';
 
@@ -20,7 +20,7 @@ class OrigemAvancoStep extends ConsumerWidget {
     required this.accent,
     required this.wide,
   });
-  final ParametersState state;
+  final EstadoParametrosSulco state;
   final Color accent;
   final bool wide;
 
@@ -49,8 +49,8 @@ class OrigemAvancoStep extends ConsumerWidget {
           ],
           selected: {state.origemAvanco},
           onSelectionChanged: (origem) => ref
-              .read(parametersProvider.notifier)
-              .setOrigemAvanco(origem.first),
+              .read(provedorParametrosSulco.notifier)
+              .definirOrigemAvanco(origem.first),
         ),
         const SizedBox(height: 16),
         StepFieldGrid(
@@ -102,8 +102,8 @@ class OrigemAvancoStep extends ConsumerWidget {
           TextFormField(
             initialValue: state.condicoesEnsaioAvanco,
             onChanged: ref
-                .read(parametersProvider.notifier)
-                .setCondicoesEnsaioAvanco,
+                .read(provedorParametrosSulco.notifier)
+                .definirCondicoesEnsaioAvanco,
             decoration: const InputDecoration(
               labelText: 'Solo, seção e orientação ensaiados',
               helperText:
@@ -111,21 +111,21 @@ class OrigemAvancoStep extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 10),
-          SegmentedButton<MetodoCurvaAvanco>(
+          SegmentedButton<MetodoAjusteAvanco>(
             segments: const [
               ButtonSegment(
-                value: MetodoCurvaAvanco.doisPontos,
+                value: MetodoAjusteAvanco.doisPontos,
                 label: Text('Dois pontos'),
               ),
               ButtonSegment(
-                value: MetodoCurvaAvanco.minimosQuadrados,
+                value: MetodoAjusteAvanco.minimosQuadrados,
                 label: Text('Mínimos quadrados'),
               ),
             ],
             selected: {state.metodoCurvaAvanco},
             onSelectionChanged: (value) => ref
-                .read(parametersProvider.notifier)
-                .setMetodoCurvaAvanco(value.first),
+                .read(provedorParametrosSulco.notifier)
+                .definirMetodoCurvaAvanco(value.first),
           ),
           const SizedBox(height: 10),
           PontosAvancoEditor(
@@ -133,17 +133,17 @@ class OrigemAvancoStep extends ConsumerWidget {
             comprimentoM: state.comprimento,
             metodo: state.metodoCurvaAvanco,
             onChanged: ref
-                .read(parametersProvider.notifier)
-                .setPontosEnsaioAvanco,
+                .read(provedorParametrosSulco.notifier)
+                .definirPontosEnsaioAvanco,
           ),
         ],
         const SizedBox(height: 16),
         OutlinedButton(
           onPressed: () => ref
-              .read(parametersProvider.notifier)
-              .setEnsaioErosao(
+              .read(provedorParametrosSulco.notifier)
+              .definirEnsaioErosao(
                 state.ensaioErosao == null
-                    ? EnsaioErosaoSulco(
+                    ? EnsaioErosao(
                         vazaoLs: state.vazao,
                         condicoes: '',
                         erosaoObservada: false,
@@ -162,9 +162,9 @@ class OrigemAvancoStep extends ConsumerWidget {
             initialValue: ensaio.vazaoLs.toString(),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             onChanged: (value) => ref
-                .read(parametersProvider.notifier)
-                .setEnsaioErosao(
-                  EnsaioErosaoSulco(
+                .read(provedorParametrosSulco.notifier)
+                .definirEnsaioErosao(
+                  EnsaioErosao(
                     vazaoLs:
                         double.tryParse(value.replaceAll(',', '.')) ??
                         double.nan,
@@ -180,9 +180,9 @@ class OrigemAvancoStep extends ConsumerWidget {
           TextFormField(
             initialValue: ensaio.condicoes,
             onChanged: (value) => ref
-                .read(parametersProvider.notifier)
-                .setEnsaioErosao(
-                  EnsaioErosaoSulco(
+                .read(provedorParametrosSulco.notifier)
+                .definirEnsaioErosao(
+                  EnsaioErosao(
                     vazaoLs: state.ensaioErosao!.vazaoLs,
                     condicoes: value,
                     erosaoObservada: state.ensaioErosao!.erosaoObservada,
@@ -197,9 +197,9 @@ class OrigemAvancoStep extends ConsumerWidget {
             title: const Text('Erosão observada em campo'),
             value: ensaio.erosaoObservada,
             onChanged: (value) => ref
-                .read(parametersProvider.notifier)
-                .setEnsaioErosao(
-                  EnsaioErosaoSulco(
+                .read(provedorParametrosSulco.notifier)
+                .definirEnsaioErosao(
+                  EnsaioErosao(
                     vazaoLs: state.ensaioErosao!.vazaoLs,
                     condicoes: state.ensaioErosao!.condicoes,
                     erosaoObservada: value,
@@ -221,8 +221,8 @@ class OrigemAvancoStep extends ConsumerWidget {
           ],
           selected: {state.hipoteseRecessao},
           onSelectionChanged: (value) => ref
-              .read(parametersProvider.notifier)
-              .setHipoteseRecessao(value.first),
+              .read(provedorParametrosSulco.notifier)
+              .definirHipoteseRecessao(value.first),
         ),
         if (state.hipoteseRecessao == HipoteseRecessao.desprezada)
           Padding(
@@ -238,8 +238,8 @@ class OrigemAvancoStep extends ConsumerWidget {
           RecessaoEditor(
             pontos: state.medicoesRecessao,
             onChanged: ref
-                .read(parametersProvider.notifier)
-                .setMedicoesRecessao,
+                .read(provedorParametrosSulco.notifier)
+                .definirMedicoesRecessao,
           ),
           Text(
             'Informe instantes absolutos desde o início da aplicação. '
@@ -262,10 +262,10 @@ class PontosAvancoEditor extends StatefulWidget {
     required this.onChanged,
   });
 
-  final List<PontoEnsaio> pontos;
+  final List<PontoEnsaioAvanco> pontos;
   final double comprimentoM;
-  final MetodoCurvaAvanco metodo;
-  final ValueChanged<List<PontoEnsaio>> onChanged;
+  final MetodoAjusteAvanco metodo;
+  final ValueChanged<List<PontoEnsaioAvanco>> onChanged;
 
   @override
   State<PontosAvancoEditor> createState() => PontosAvancoEditorState();
@@ -276,7 +276,7 @@ class PontosAvancoEditorState extends State<PontosAvancoEditor> {
   late final TextEditingController _spacingController;
   late final TextEditingController _timesController;
 
-  List<PontoEnsaio> get _positivePoints => widget.pontos
+  List<PontoEnsaioAvanco> get _positivePoints => widget.pontos
       .where((point) => point.distanciaM > 0 && point.tempoMin > 0)
       .toList();
 
@@ -316,12 +316,14 @@ class PontosAvancoEditorState extends State<PontosAvancoEditor> {
         .where((item) => item.trim().isNotEmpty)
         .map((item) => double.tryParse(item.trim().replaceAll(',', '.')))
         .toList();
-    final points = <PontoEnsaio>[const PontoEnsaio(distanciaM: 0, tempoMin: 0)];
+    final points = <PontoEnsaioAvanco>[
+      const PontoEnsaioAvanco(distanciaM: 0, tempoMin: 0),
+    ];
     for (var index = 0; index < count && index < times.length; index++) {
       final time = times[index];
       if (time == null) continue;
       points.add(
-        PontoEnsaio(distanciaM: (index + 1) * spacing, tempoMin: time),
+        PontoEnsaioAvanco(distanciaM: (index + 1) * spacing, tempoMin: time),
       );
     }
     widget.onChanged(points);
@@ -377,7 +379,7 @@ class PontosAvancoEditorState extends State<PontosAvancoEditor> {
       ),
       const SizedBox(height: 8),
       Text(
-        widget.metodo == MetodoCurvaAvanco.doisPontos
+        widget.metodo == MetodoAjusteAvanco.doisPontos
             ? 'Usa o último tempo medido e o tempo na metade do ensaio. Se não houver estaca exatamente no meio, o tempo intermediário é interpolado entre as estacas vizinhas.'
             : 'A regressão log-log usa todas as estacas com distância e tempo positivos; a origem é preservada nos dados, mas excluída dos logaritmos.',
         style: Theme.of(context).textTheme.bodySmall,

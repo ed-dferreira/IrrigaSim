@@ -4,5 +4,5 @@
 library;
 
 export 'routes.dart';
-export 'viewmodels/parameters_controller.dart';
-export 'viewmodels/parameters_state.dart';
+export 'viewmodels/controlador_parametros_sulco.dart';
+export 'viewmodels/estado_parametros_sulco.dart';

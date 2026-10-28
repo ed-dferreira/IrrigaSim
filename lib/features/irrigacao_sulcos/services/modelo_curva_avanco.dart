@@ -1,37 +1,39 @@
 import 'dart:math';
 
-import 'package:irrigasim/features/irrigacao_sulcos/models/irrigation_project.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/ensaios_sulco.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
 
 /// Resultado do ajuste da curva de avanço.
-class AdvanceCurveResult {
-  final double k;
-  final double b;
+class ResultadoCurvaAvanco {
+  final double coeficiente;
+  final double expoente;
   final MetodoAjusteAvanco metodo;
   final double? r2;
-  final List<PontoEnsaio> pontosOriginais;
+  final List<PontoEnsaioAvanco> pontosOriginais;
 
-  const AdvanceCurveResult({
-    required this.k,
-    required this.b,
+  const ResultadoCurvaAvanco({
+    required this.coeficiente,
+    required this.expoente,
     required this.metodo,
     this.r2,
     required this.pontosOriginais,
   });
 
+  /// As chaves `k` e `b` são parte do formato persistido.
   Map<String, dynamic> toMap() {
     return {
-      'k': k,
-      'b': b,
+      'k': coeficiente,
+      'b': expoente,
       'metodo': metodo.name,
       'r2': r2,
       'pontos_originais': pontosOriginais.map((p) => p.toMap()).toList(),
     };
   }
 
-  factory AdvanceCurveResult.fromMap(Map<String, dynamic> map) {
-    return AdvanceCurveResult(
-      k: (map['k'] as num?)?.toDouble() ?? 0,
-      b: (map['b'] as num?)?.toDouble() ?? 0,
+  factory ResultadoCurvaAvanco.fromMap(Map<String, dynamic> map) {
+    return ResultadoCurvaAvanco(
+      coeficiente: (map['k'] as num?)?.toDouble() ?? 0,
+      expoente: (map['b'] as num?)?.toDouble() ?? 0,
       metodo: MetodoAjusteAvanco.values.firstWhere(
         (m) => m.name == map['metodo'],
         orElse: () => MetodoAjusteAvanco.doisPontos,
@@ -39,7 +41,7 @@ class AdvanceCurveResult {
       r2: (map['r2'] as num?)?.toDouble(),
       pontosOriginais:
           (map['pontos_originais'] as List<dynamic>?)
-              ?.map((p) => PontoEnsaio.fromMap(p as Map<String, dynamic>))
+              ?.map((p) => PontoEnsaioAvanco.fromMap(p as Map<String, dynamic>))
               .toList() ??
           [],
     );
@@ -54,8 +56,8 @@ class AdvanceCurveResult {
 /// - Tx = tempo de avanço (min)
 /// - x = distância (m)
 /// - k, b = parâmetros da curva
-class AdvanceCurveModel {
-  const AdvanceCurveModel._();
+class ModeloCurvaAvanco {
+  const ModeloCurvaAvanco._();
 
   /// Ajusta a curva de avanço pelo método dos dois pontos.
   ///
@@ -70,12 +72,12 @@ class AdvanceCurveModel {
   /// [distanciaMetadeM] — Distância do segundo ponto (metade da primeira)
   /// [tempoMetadeMin] — Tempo na metade da distância (min)
   /// [pontos] — Todos os pontos medidos (para preservar)
-  static AdvanceCurveResult ajustarDoisPontos({
+  static ResultadoCurvaAvanco ajustarDoisPontos({
     required double distanciaM,
     required double tempoMin,
     required double distanciaMetadeM,
     required double tempoMetadeMin,
-    required List<PontoEnsaio> pontos,
+    required List<PontoEnsaioAvanco> pontos,
   }) {
     // Validações §6
     if (distanciaM <= 0) {
@@ -119,9 +121,9 @@ class AdvanceCurveModel {
     // k = Tx / x^b
     final k = tempoMin / pow(distanciaM, b);
 
-    return AdvanceCurveResult(
-      k: k,
-      b: b,
+    return ResultadoCurvaAvanco(
+      coeficiente: k,
+      expoente: b,
       metodo: MetodoAjusteAvanco.doisPontos,
       pontosOriginais: pontos,
     );
@@ -130,8 +132,8 @@ class AdvanceCurveModel {
   /// Ajusta dois pontos usando o tempo final medido e o tempo no ponto médio.
   /// Se a distância média não tiver observação, interpola linearmente entre
   /// as duas estacas medidas que a delimitam.
-  static AdvanceCurveResult ajustarDoisPontosPorEstacas(
-    List<PontoEnsaio> pontos,
+  static ResultadoCurvaAvanco ajustarDoisPontosPorEstacas(
+    List<PontoEnsaioAvanco> pontos,
   ) {
     final erros = validarPontos(pontos);
     if (erros.isNotEmpty) throw ArgumentError(erros.join('; '));
@@ -151,7 +153,7 @@ class AdvanceCurveModel {
       if (originais.every(
         (point) => point.distanciaM != 0 || point.tempoMin != 0,
       ))
-        const PontoEnsaio(distanciaM: 0, tempoMin: 0),
+        const PontoEnsaioAvanco(distanciaM: 0, tempoMin: 0),
       ...originais,
     ];
     double? tempoMetade;
@@ -195,7 +197,9 @@ class AdvanceCurveModel {
   /// Equação: `ln(T) = ln(k) + b * ln(x)`
   ///
   /// [pontos] — Lista de pontos medidos (distância > 0, tempo > 0)
-  static AdvanceCurveResult ajustarMinimosQuadrados(List<PontoEnsaio> pontos) {
+  static ResultadoCurvaAvanco ajustarMinimosQuadrados(
+    List<PontoEnsaioAvanco> pontos,
+  ) {
     final erros = validarPontos(pontos);
     if (erros.isNotEmpty) {
       throw ArgumentError(erros.join('; '));
@@ -254,9 +258,9 @@ class AdvanceCurveModel {
     }
     final r2 = ssTot > 0 ? 1 - (ssRes / ssTot) : 0.0;
 
-    return AdvanceCurveResult(
-      k: k,
-      b: b,
+    return ResultadoCurvaAvanco(
+      coeficiente: k,
+      expoente: b,
       metodo: MetodoAjusteAvanco.minimosQuadrados,
       r2: r2,
       pontosOriginais: pontos,
@@ -268,10 +272,10 @@ class AdvanceCurveModel {
   /// Equação: `Tx = k * x^b`
   static double tempoAvanco({
     required double distanciaM,
-    required AdvanceCurveResult parametros,
+    required ResultadoCurvaAvanco parametros,
   }) {
     if (distanciaM <= 0) return 0;
-    return parametros.k * pow(distanciaM, parametros.b);
+    return parametros.coeficiente * pow(distanciaM, parametros.expoente);
   }
 
   /// Calcula a distância alcançada em um determinado tempo.
@@ -279,31 +283,43 @@ class AdvanceCurveModel {
   /// Equação inversa: `x = (T / k)^(1/b)`
   static double distanciaEmTempo({
     required double tempoMin,
-    required AdvanceCurveResult parametros,
+    required ResultadoCurvaAvanco parametros,
   }) {
-    if (tempoMin <= 0 || parametros.k <= 0 || parametros.b == 0) return 0;
-    return pow(tempoMin / parametros.k, 1 / parametros.b).toDouble();
+    if (tempoMin <= 0 ||
+        parametros.coeficiente <= 0 ||
+        parametros.expoente == 0)
+      return 0;
+    return pow(
+      tempoMin / parametros.coeficiente,
+      1 / parametros.expoente,
+    ).toDouble();
   }
 
   /// Gera pontos para a curva de avanço (para gráficos).
-  static List<AdvancePoint> gerarCurva({
+  static List<PontoAvanco> gerarCurva({
     required double comprimentoM,
-    required AdvanceCurveResult parametros,
+    required ResultadoCurvaAvanco parametros,
     int amostras = 20,
   }) {
-    final pontos = <AdvancePoint>[];
+    if (!comprimentoM.isFinite || comprimentoM <= 0) {
+      throw ArgumentError('O comprimento da curva deve ser positivo.');
+    }
+    if (amostras <= 0) {
+      throw ArgumentError('O número de amostras deve ser positivo.');
+    }
+    final pontos = <PontoAvanco>[];
     for (var i = 0; i <= amostras; i++) {
       final distancia = comprimentoM * i / amostras;
       final tempo = distancia == 0
           ? 0.0
-          : parametros.k * pow(distancia, parametros.b);
-      pontos.add(AdvancePoint(distancia, tempo));
+          : parametros.coeficiente * pow(distancia, parametros.expoente);
+      pontos.add(PontoAvanco(distancia, tempo));
     }
     return pontos;
   }
 
   /// Valida os pontos de ensaio de avanço.
-  static List<String> validarPontos(List<PontoEnsaio> pontos) {
+  static List<String> validarPontos(List<PontoEnsaioAvanco> pontos) {
     final erros = <String>[];
 
     if (pontos.length < 2) {
@@ -359,30 +375,32 @@ class AdvanceCurveModel {
 
   /// Verifica se dois conjuntos de parâmetros são compatíveis.
   static bool saoCompativeis(
-    AdvanceCurveResult a,
-    AdvanceCurveResult b, {
+    ResultadoCurvaAvanco a,
+    ResultadoCurvaAvanco b, {
     double toleranciaK = 0.1,
     double toleranciaB = 0.1,
   }) {
-    final diffK = (a.k - b.k).abs() / max(a.k, 0.0001);
-    final diffB = (a.b - b.b).abs() / max(a.b.abs(), 0.0001);
+    final diffK =
+        (a.coeficiente - b.coeficiente).abs() / max(a.coeficiente, 0.0001);
+    final diffB =
+        (a.expoente - b.expoente).abs() / max(a.expoente.abs(), 0.0001);
     return diffK < toleranciaK && diffB < toleranciaB;
   }
 }
 
 /// Ponto na curva de avanço (distância, tempo).
-class AdvancePoint {
+class PontoAvanco {
   final double distanciaM;
   final double tempoMin;
 
-  const AdvancePoint(this.distanciaM, this.tempoMin);
+  const PontoAvanco(this.distanciaM, this.tempoMin);
 
   Map<String, dynamic> toMap() {
     return {'distancia_m': distanciaM, 'tempo_min': tempoMin};
   }
 
-  factory AdvancePoint.fromMap(Map<String, dynamic> map) {
-    return AdvancePoint(
+  factory PontoAvanco.fromMap(Map<String, dynamic> map) {
+    return PontoAvanco(
       (map['distancia_m'] as num?)?.toDouble() ?? 0,
       (map['tempo_min'] as num?)?.toDouble() ?? 0,
     );

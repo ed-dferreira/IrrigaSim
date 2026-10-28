@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/irrigation_project_components.dart';
 import 'package:irrigasim/shared/irrigacao/services/lamina_requerida.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/controlador_parametros_sulco.dart';
 
 // ──────────────────────── Navigation Buttons ────────────────────────
 
@@ -150,8 +150,8 @@ class StepField extends ConsumerWidget {
         ],
         decoration: InputDecoration(suffixText: suffix, helperText: helper),
         onChanged: (text) => ref
-            .read(parametersProvider.notifier)
-            .updateField(campo: name, valor: text),
+            .read(provedorParametrosSulco.notifier)
+            .atualizarCampo(campo: name, valor: text),
         validator: (text) {
           if (optional && (text == null || text.trim().isEmpty)) {
             return null;
@@ -200,7 +200,7 @@ class StepStringField extends ConsumerWidget {
         initialValue: value,
         decoration: InputDecoration(helperText: helper),
         onChanged: (text) =>
-            ref.read(parametersProvider.notifier).setNomeCultura(text),
+            ref.read(provedorParametrosSulco.notifier).definirNomeCultura(text),
       ),
     ],
   );
@@ -298,8 +298,8 @@ class OptionalNumericCurveField extends ConsumerWidget {
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       decoration: InputDecoration(labelText: label),
       onChanged: (text) => ref
-          .read(parametersProvider.notifier)
-          .updateField(campo: name, valor: text),
+          .read(provedorParametrosSulco.notifier)
+          .atualizarCampo(campo: name, valor: text),
     ),
   );
 }

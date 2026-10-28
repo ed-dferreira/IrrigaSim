@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/controlador_parametros_sulco.dart';
 import 'package:irrigasim/shared/cenarios/providers/scenario_providers.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/charts/advance_chart.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/charts/infiltration_chart.dart';
@@ -21,7 +21,7 @@ class RecommendationBanner extends StatelessWidget {
     required this.state,
     required this.result,
   });
-  final ParametersState state;
+  final EstadoParametrosSulco state;
   final SimulationResult result;
 
   @override
@@ -29,7 +29,9 @@ class RecommendationBanner extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     final good =
         result.alertaVazaoExcedida == null &&
-        (result.balancoSulco?.eaIntegral ?? result.eficiencia) >= 85 &&
+        (result.balancoSulco?.eficienciaAplicacaoIntegralPercentual ??
+                result.eficiencia) >=
+            85 &&
         result.cuc >= 80 &&
         result.du >= 65;
 
@@ -76,7 +78,7 @@ class RecommendationBanner extends StatelessWidget {
                 Text(
                   'Sulco: L = ${state.comprimento.toStringAsFixed(0)} m, '
                   'Q = ${state.vazao.toStringAsFixed(2)} L/s por ${(result.tempoFornecimentoMin ?? state.tempoAplicacao).toStringAsFixed(0)} min. '
-                  '${result.balancoSulco == null ? 'Ea' : 'Ea integral'} = ${(result.balancoSulco?.eaIntegral ?? result.eficiencia).toStringAsFixed(1)}%, CUC = ${result.cuc.toStringAsFixed(1)}%.\n$message',
+                  '${result.balancoSulco == null ? 'Ea' : 'Ea integral'} = ${(result.balancoSulco?.eficienciaAplicacaoIntegralPercentual ?? result.eficiencia).toStringAsFixed(1)}%, CUC = ${result.cuc.toStringAsFixed(1)}%.\n$message',
                   style: Theme.of(context).textTheme.bodyMedium
                       ?.copyWith(color: foreground),
                 ),
@@ -100,7 +102,7 @@ class KpiGrid extends StatelessWidget {
     final items = [
       (
         result.balancoSulco == null ? 'Eficiência Ea' : 'Ea integral',
-        '${(result.balancoSulco?.eaIntegral ?? result.eficiencia).toStringAsFixed(1)}%',
+        '${(result.balancoSulco?.eficienciaAplicacaoIntegralPercentual ?? result.eficiencia).toStringAsFixed(1)}%',
         result.classificacaoEaIntegral,
       ),
       (

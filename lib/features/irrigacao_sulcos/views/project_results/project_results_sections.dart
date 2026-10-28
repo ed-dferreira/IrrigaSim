@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/controlador_parametros_sulco.dart';
 import 'package:irrigasim/shared/irrigacao/services/operational_planning.dart';
 
 import 'project_results_widgets.dart';
@@ -81,7 +81,7 @@ class FurrowDetailsSection extends StatelessWidget {
     required this.state,
     required this.result,
   });
-  final ParametersState state;
+  final EstadoParametrosSulco state;
   final SimulationResult result;
 
   @override
@@ -327,7 +327,7 @@ class SaveCard extends StatelessWidget {
     required this.onNameChanged,
     required this.onSave,
   });
-  final ParametersState state;
+  final EstadoParametrosSulco state;
   final bool saving;
   final ValueChanged<String> onNameChanged;
   final VoidCallback onSave;

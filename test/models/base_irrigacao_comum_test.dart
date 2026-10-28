@@ -6,48 +6,50 @@ import 'package:irrigasim/features/irrigacao_faixas/models/border_measurements.d
 import 'package:irrigasim/features/irrigacao_faixas/models/border_project.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/basin_project.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/field_measurements.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/irrigation_project.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/ensaios_sulco.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/geometria_sulco.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/projeto_sulco.dart';
 
 void main() {
   test('sulcos: solo, clima, ensaios e unidades sobrevivem ao mapa', () {
-    final project = IrrigationProject(
+    final project = ProjetoSulco(
       id: 's',
       versaoCalculo: '1',
-      area: const Area(
+      area: const AreaProjeto(
         comprimentoM: 200,
         larguraM: 90,
         declividadePercentual: 0.5,
       ),
       geometria: const GeometriaSulco(forma: FormaSulco.v, espacamentoM: .9),
-      solo: const Solo(
+      solo: const SoloProjeto(
         textura: TexturaSolo.media,
         uccPercentual: 30,
         upmpPercentual: 15,
         densidadeGcm3: 1.4,
-        vibMmH: 7,
+        vibMmHora: 7,
       ),
-      cultura: const Cultura(
+      cultura: const CulturaProjeto(
         nome: 'Milho',
         espacamentoFileirasM: .9,
         espacamentoPlantasM: .25,
         profundidadeRaizesM: .4,
       ),
-      clima: const Clima(
+      clima: const ClimaProjeto(
         etoMmDia: 5,
         etcMmDia: 4,
         precipitacaoEfetivaMmDia: 1,
         demandaLiquidaMmDia: 3,
       ),
       ensaioAvanco: const EnsaioAvanco(
-        pontos: [PontoEnsaio(distanciaM: 100, tempoMin: 30)],
+        pontos: [PontoEnsaioAvanco(distanciaM: 100, tempoMin: 30)],
         metodo: MetodoAjusteAvanco.doisPontos,
       ),
       ensaioInfiltracao: const EnsaioInfiltracao(
         configuracao: ConfiguracaoEnsaioInfiltracao(unidadeVolume: 'mm'),
-        pontos: [PontoInfiltracao(tempoMin: 30, volumeInfiltradoMm: 12)],
+        pontos: [PontoInfiltracao(tempoMin: 30, laminaAcumuladaMm: 12)],
       ),
-      operacao: const ParametrosOperacao(vazaoInicialLs: 1, jornadaDiariaH: 12),
+      operacao: const OperacaoSulco(vazaoInicialLs: 1, jornadaDiariaH: 12),
     );
     final base = BaseIrrigacao.fromMap(project.baseComum.toMap());
     expect(base.identificacao.sistema, 'sulcos');

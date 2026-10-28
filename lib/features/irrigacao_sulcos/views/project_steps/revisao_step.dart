@@ -1,18 +1,18 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:irrigasim/shared/irrigacao/models/comum/clima_demanda.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/field_measurements.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/entradas_projeto_sulco.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/controlador_parametros_sulco.dart';
 
 // ──────────────────────── Step 7: Revisão ────────────────────────
 
 class RevisaoStep extends StatelessWidget {
   const RevisaoStep({super.key, required this.state, required this.accent});
-  final ParametersState state;
+  final EstadoParametrosSulco state;
   final Color accent;
 
   @override
@@ -139,7 +139,7 @@ class RevisaoStep extends StatelessWidget {
     );
   }
 
-  List<ReviewSection> _buildSections(ParametersState state) {
+  List<ReviewSection> _buildSections(EstadoParametrosSulco state) {
     final lamina = state.laminaRequeridaResultado;
     return [
       ReviewSection(
@@ -217,7 +217,7 @@ class RevisaoStep extends StatelessWidget {
             'Evapotranspiração (ETc)',
             '${state.evapotranspiracaoCulturaMmDia.toStringAsFixed(1)} mm/dia',
           ),
-          if (state.metodoEtc == MetodoEtcSulco.blaneyCriddle &&
+          if (state.metodoEtc == MetodoEtc.blaneyCriddle &&
               state.etoBlaneyCriddle != null)
             ReviewRow(
               'ETo estimada (Blaney–Criddle)',
@@ -300,7 +300,7 @@ class RevisaoStep extends StatelessWidget {
           ] else ...[
             ReviewRow(
               'Método de ajuste',
-              state.metodoCurvaAvanco == MetodoCurvaAvanco.doisPontos
+              state.metodoCurvaAvanco == MetodoAjusteAvanco.doisPontos
                   ? 'Dois pontos com interpolação do meio'
                   : 'Mínimos quadrados log-log',
             ),

@@ -1,14 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/irrigation_project.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/curva_infiltracao_sulco.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/services/advance_curve_model.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/proveniencia_dado.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/ensaios_sulco.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/modelo_curva_avanco.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/controlador_parametros_sulco.dart';
 
 void main() {
   group('planejamento de comprimento e avanço', () {
     test('seleciona o maior comprimento viável em incrementos de 50 m', () {
-      final controller = ParametersController();
-      controller.updateField(campo: 'comprimentoMaximoTerrenoM', valor: '300');
+      final controller = ControladorParametrosSulco();
+      controller.atualizarCampo(campo: 'comprimentoMaximoTerrenoM', valor: '300');
 
       controller.recomendarMaiorComprimento();
 
@@ -22,32 +22,32 @@ void main() {
     test(
       'valida estacas e interpola o ponto médio para o método de dois pontos',
       () {
-        final controller = ParametersController();
-        controller.setOrigemAvanco(OrigemAvanco.ensaio);
-        controller.updateField(campo: 'vazaoEnsaioAvancoLs', valor: '1');
-        controller.setCondicoesEnsaioAvanco(
+        final controller = ControladorParametrosSulco();
+        controller.definirOrigemAvanco(OrigemAvanco.ensaio);
+        controller.atualizarCampo(campo: 'vazaoEnsaioAvancoLs', valor: '1');
+        controller.definirCondicoesEnsaioAvanco(
           'Solo médio, seção em V e orientação ensaiada',
         );
-        controller.setPontosEnsaioAvanco(const [
-          PontoEnsaio(distanciaM: 0, tempoMin: 0),
-          PontoEnsaio(distanciaM: 50, tempoMin: 20),
-          PontoEnsaio(distanciaM: 150, tempoMin: 60),
-          PontoEnsaio(distanciaM: 200, tempoMin: 90),
+        controller.definirPontosEnsaioAvanco(const [
+          PontoEnsaioAvanco(distanciaM: 0, tempoMin: 0),
+          PontoEnsaioAvanco(distanciaM: 50, tempoMin: 20),
+          PontoEnsaioAvanco(distanciaM: 150, tempoMin: 60),
+          PontoEnsaioAvanco(distanciaM: 200, tempoMin: 90),
         ]);
 
         expect(controller.validarEnsaio(), isNull);
-        final result = AdvanceCurveModel.ajustarDoisPontosPorEstacas(
+        final result = ModeloCurvaAvanco.ajustarDoisPontosPorEstacas(
           controller.state.pontosEnsaioAvanco,
         );
         expect(
-          AdvanceCurveModel.tempoAvanco(distanciaM: 100, parametros: result),
+          ModeloCurvaAvanco.tempoAvanco(distanciaM: 100, parametros: result),
           closeTo(40, 1e-9),
         );
       },
     );
 
     test('dimensiona comprimento por Criddle com curva de avanço estimada', () {
-      final controller = ParametersController();
+      final controller = ControladorParametrosSulco();
 
       controller.dimensionarComprimentoCriddle();
 
@@ -59,7 +59,7 @@ void main() {
         closeTo(state.tempoAplicacao / 4, 1e-8),
       );
       expect(state.comprimento, greaterThan(0));
-      expect(state.origemGeometria, ProvenienciaSulco.calculado);
+      expect(state.provenienciaGeometria, ProvenienciaDado.calculado);
       expect(
         state.comprimento,
         lessThanOrEqualTo(state.comprimentoMaximoTerrenoM),
@@ -67,17 +67,17 @@ void main() {
     });
 
     test('dimensiona pela curva ajustada e rejeita falta de cobertura', () {
-      final controller = ParametersController();
-      controller.updateField(campo: 'comprimentoMaximoTerrenoM', valor: '200');
-      controller.setOrigemAvanco(OrigemAvanco.ensaio);
-      controller.updateField(campo: 'vazaoEnsaioAvancoLs', valor: '1');
-      controller.setCondicoesEnsaioAvanco('Solo, seção e orientação do ensaio');
-      controller.setPontosEnsaioAvanco(const [
-        PontoEnsaio(distanciaM: 0, tempoMin: 0),
-        PontoEnsaio(distanciaM: 50, tempoMin: 20),
-        PontoEnsaio(distanciaM: 100, tempoMin: 40),
-        PontoEnsaio(distanciaM: 150, tempoMin: 60),
-        PontoEnsaio(distanciaM: 200, tempoMin: 90),
+      final controller = ControladorParametrosSulco();
+      controller.atualizarCampo(campo: 'comprimentoMaximoTerrenoM', valor: '200');
+      controller.definirOrigemAvanco(OrigemAvanco.ensaio);
+      controller.atualizarCampo(campo: 'vazaoEnsaioAvancoLs', valor: '1');
+      controller.definirCondicoesEnsaioAvanco('Solo, seção e orientação do ensaio');
+      controller.definirPontosEnsaioAvanco(const [
+        PontoEnsaioAvanco(distanciaM: 0, tempoMin: 0),
+        PontoEnsaioAvanco(distanciaM: 50, tempoMin: 20),
+        PontoEnsaioAvanco(distanciaM: 100, tempoMin: 40),
+        PontoEnsaioAvanco(distanciaM: 150, tempoMin: 60),
+        PontoEnsaioAvanco(distanciaM: 200, tempoMin: 90),
       ]);
 
       controller.dimensionarComprimentoCriddle();
@@ -89,8 +89,8 @@ void main() {
       );
       expect(controller.state.comprimento, lessThanOrEqualTo(200));
 
-      controller.updateField(campo: 'k', valor: '0.05');
-      controller.updateField(campo: 'a', valor: '0.5');
+      controller.atualizarCampo(campo: 'k', valor: '0.05');
+      controller.atualizarCampo(campo: 'a', valor: '0.5');
       controller.dimensionarComprimentoCriddle();
       expect(
         controller.state.mensagemPlanejamento,

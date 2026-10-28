@@ -1,7 +1,7 @@
 import 'package:irrigasim/shared/irrigacao/services/operational_planning.dart';
 import 'package:irrigasim/features/irrigacao_faixas/models/border_result.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/basin_annexes.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/indicadores_balanco_sulco.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/indicadores_balanco.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/services/basin_planning.dart';
 
 class PontoGrafico {
@@ -197,8 +197,9 @@ class SimulationResult {
   );
 
   String get classificacaoEa => _classificarEa(eficiencia);
-  String get classificacaoEaIntegral =>
-      _classificarEa(balancoSulco?.eaIntegral ?? eficiencia);
+  String get classificacaoEaIntegral => _classificarEa(
+    balancoSulco?.eficienciaAplicacaoIntegralPercentual ?? eficiencia,
+  );
   String get classificacaoCuc => _classificarCuc(cuc);
   String get classificacaoDu => _classificarDu(du);
 
