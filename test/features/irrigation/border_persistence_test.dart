@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/shared/cenarios/models/cenario_salvo.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_numeric.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_agronomy.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_project.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_result.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_numerico.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_agronomia.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigacao_faixas/services/run_border_simulation.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/executar_simulacao_faixa.dart';
 
 void main() {
   const project = BorderProject.ilustrativo;
@@ -44,7 +44,7 @@ void main() {
         espacamentoFileirasM: .8,
         espacamentoPlantasM: .2,
         profundidadeRaizesCm: 100,
-        fracaoDisponivel: .55,
+        fracaoAguaDisponivel: .55,
       ),
     );
     final loaded = BorderProject.fromMap(projectWithCrop.toMap());
@@ -53,7 +53,7 @@ void main() {
     expect(loaded.agronomia?.espacamentoFileirasM, .8);
     expect(loaded.agronomia?.espacamentoPlantasM, .2);
     expect(loaded.agronomia?.profundidadeRaizesCm, 100);
-    expect(loaded.agronomia?.fracaoDisponivel, .55);
+    expect(loaded.agronomia?.fracaoAguaDisponivel, .55);
   });
 
   test(
@@ -64,7 +64,11 @@ void main() {
         periodoDias: 7,
         janelaFornecimentoHorasDia: 8,
         alternativas: [
-          const BorderAlternativeRecord(400, 2.5, null, 'Oferta insuficiente'),
+          const BorderAlternativeRecord(
+            comprimentoM: 400,
+            vazaoLsM: 2.5,
+            motivoRejeicao: 'Oferta insuficiente',
+          ),
         ],
       );
       final loaded = BorderProject.fromMap(changed.toMap());
@@ -179,11 +183,10 @@ void main() {
 
   test('alternativa rejeitada preserva texto e código no cenário', () {
     const record = BorderAlternativeRecord(
-      400,
-      2.5,
-      null,
-      'Oferta de água insuficiente',
-      BorderStatus.foraDoDominio,
+      comprimentoM: 400,
+      vazaoLsM: 2.5,
+      motivoRejeicao: 'Oferta de água insuficiente',
+      status: BorderStatus.foraDoDominio,
     );
     final loaded = BorderProject.fromMap(
       BorderProject.ilustrativo.copyWith(alternativas: const [record]).toMap(),

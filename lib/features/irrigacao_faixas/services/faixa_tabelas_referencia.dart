@@ -1,5 +1,5 @@
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_result.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
 
 class MarrSuggestion {
   final TexturaSolo textura;
@@ -88,7 +88,8 @@ class BorderReferenceTables {
     MarrSuggestion(TexturaSolo.fina, 1.5, 4, '2–4', '50–100', '5–6', '100'),
     MarrSuggestion(TexturaSolo.media, 1, 4, '1–4', '25–75', '5–6', '100–300'),
   ];
-  List<MarrSuggestion> suggest(TexturaSolo textura, double declivePercent) =>
+  /// Linhas da tabela Marr (§4) que atendem à textura e declive informados.
+  List<MarrSuggestion> sugestoesMarr(TexturaSolo textura, double declivePercent) =>
       marr
           .where(
             (row) =>

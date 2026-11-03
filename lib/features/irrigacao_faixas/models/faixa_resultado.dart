@@ -1,6 +1,6 @@
 import 'package:irrigasim/shared/irrigacao/models/validacao_superficie.dart';
 
-import 'border_numeric.dart';
+import 'faixa_numerico.dart';
 
 // Reexporta os tipos compartilhados para preservar os imports existentes
 // durante a migração; o conteúdo canônico vive em shared/irrigacao.
@@ -51,30 +51,33 @@ class BorderProfilePoint {
 }
 
 class BorderConvergenceHistory {
-  final List<double> opportunityMin, advanceExponent, recessionEndMin;
+  /// Valores por iteração de t0 (oportunidade), r (expoente de avanço) e td
+  /// (fim da depleção). As chaves de persistência permanecem em inglês para
+  /// preservar cenários e CSVs já salvos.
+  final List<double> oportunidadeMin, expoenteAvanco, recessaoFinalMin;
   const BorderConvergenceHistory({
-    this.opportunityMin = const [],
-    this.advanceExponent = const [],
-    this.recessionEndMin = const [],
+    this.oportunidadeMin = const [],
+    this.expoenteAvanco = const [],
+    this.recessaoFinalMin = const [],
   });
   Map<String, dynamic> toMap() => {
-    'opportunityMin': opportunityMin,
-    'advanceExponent': advanceExponent,
-    'recessionEndMin': recessionEndMin,
+    'opportunityMin': oportunidadeMin,
+    'advanceExponent': expoenteAvanco,
+    'recessionEndMin': recessaoFinalMin,
   };
   factory BorderConvergenceHistory.fromMap(Map<String, dynamic> map) =>
       BorderConvergenceHistory(
-        opportunityMin:
+        oportunidadeMin:
             (map['opportunityMin'] as List?)
                 ?.map((value) => (value as num).toDouble())
                 .toList() ??
             const [],
-        advanceExponent:
+        expoenteAvanco:
             (map['advanceExponent'] as List?)
                 ?.map((value) => (value as num).toDouble())
                 .toList() ??
             const [],
-        recessionEndMin:
+        recessaoFinalMin:
             (map['recessionEndMin'] as List?)
                 ?.map((value) => (value as num).toDouble())
                 .toList() ??
@@ -351,10 +354,17 @@ class BorderResult {
           .toList();
 
   final double t0Min, taMetadeMin, taFinalMin, tiMin, tdMin, trFinalMin;
+
+  /// Profundidade de entrada y0, expoente de avanço r, fator de forma σz e
+  /// vazão residual Qf = Q0 − VIM·L (§3.2 e §8).
   final double y0M, r, sigmaZ, qfM3MinM, residualOportunidadeM;
   final double residualAvancoM3M, residualRecessaoMin;
   final double volumeEntradaM3M, volumeUtilM3M, volumePercoladoM3M;
   final double volumeEscoadoM3M, volumeDeficitM3M;
+
+  /// Eficiências e perdas em % (§6.2, itens l e n): Ea = eficiência de
+  /// aplicação, Er = eficiência de armazenamento, Pp = perdas por
+  /// percolação e Pe = perdas por escoamento.
   final double ea, er, pp, pe;
   final double comprimentoAdequadoM, volumeAdequadoM3M, volumeDeficitarioM3M;
   final double infiltracaoFinalM;

@@ -1,5 +1,5 @@
 // Agronomia da bacia/tabuleiro de inundação (Fase 6 do plano de cultura e
-// clima). Espelha lib/models/faixas/border_agronomy.dart: campos imutáveis,
+// clima). Espelha lib/models/faixas/faixa_agronomia.dart: campos imutáveis,
 // atualização pontual via withValue e IRN delegado a
 // [LaminaRequeridaCalculator] com a mesma convenção de faixas
 // (demanda líquida = ETc − Pef, informada pelo projeto).

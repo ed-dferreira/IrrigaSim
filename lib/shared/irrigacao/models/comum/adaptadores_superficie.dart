@@ -1,6 +1,6 @@
 import 'irrigacao_comum.dart';
 
-import 'package:irrigasim/features/irrigacao_faixas/models/border_project.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/projeto_sulco.dart';
 
@@ -70,7 +70,7 @@ extension BaseProjetoFaixas on BorderProject {
       profundidadeRaizesM: agronomia?.profundidadeRaizesCm == null
           ? null
           : agronomia!.profundidadeRaizesCm! / 100,
-      fracaoAguaDisponivel: agronomia?.fracaoDisponivel,
+      fracaoAguaDisponivel: agronomia?.fracaoAguaDisponivel,
       etcMmDia: agronomia?.evapotranspiracaoMmDia,
       precipitacaoEfetivaMmDia: agronomia?.precipitacaoEfetivaMmDia,
       vazaoDisponivelLs: vazaoDisponivelLs,

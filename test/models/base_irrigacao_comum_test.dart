@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/shared/irrigacao/models/comum/adaptadores_superficie.dart';
 import 'package:irrigasim/shared/irrigacao/models/comum/irrigacao_comum.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_agronomy.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_measurements.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_project.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_agronomia.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_medicoes.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/basin_project.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/ensaios_sulco.dart';

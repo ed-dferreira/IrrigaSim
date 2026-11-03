@@ -1,7 +1,7 @@
-import 'package:irrigasim/features/irrigacao_faixas/models/border_project.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_result.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
 
-import 'border_field_trial.dart';
+import 'faixa_ensaio_campo.dart';
 
 String _escaped(String text) =>
     text.contains(RegExp('[;"\n]')) ? '"${text.replaceAll('"', '""')}"' : text;
@@ -22,12 +22,9 @@ String borderTrialCsv(
         '${notice.pagina ?? ''}',
   'q0;${p.vazaoUnitariaLsM};L/s/m',
   'corte_medido;${p.corteEnsaioMin ?? ''};min',
-  'data_ensaio;${p.dataEnsaioIso ?? 'não registrada'};AAAA-MM-DD',
-  'referencia_relogio_ensaio;${_escaped(p.referenciaRelogioEnsaio ?? 'não registrada')};',
-  'observacoes_ensaio;${_escaped(p.observacoesEnsaio ?? 'nenhuma')};',
-  'p;${r.advance.p};m/min^r',
-  'r;${r.advance.r};',
-  'rmse;${r.advance.rmseMin};min',
+  'p;${r.avanco.p};m/min^r',
+  'r;${r.avanco.r};',
+  'rmse;${r.avanco.rmseMin};min',
   'entrada;${r.entradaM3M ?? ''};m3/m',
   'util;${r.utilM3M ?? ''};m3/m',
   'percolado;${r.percoladoM3M ?? ''};m3/m',
@@ -39,15 +36,15 @@ String borderTrialCsv(
   'Pe;${r.escoadoM3M == null || r.entradaM3M == null ? '' : 100 * r.escoadoM3M! / r.entradaM3M!};%',
   '',
   'estaca_x_m;avanco_medido_min;recessao_medido_min',
-  for (final s in r.advance.stakes)
+  for (final s in r.avanco.stakes)
     '${s.xM};${s.avancoMin};${s.recessaoMin ?? ''}',
   '',
   'residuo_avanco_por_estaca;x_m;avanco_medido_min;avanco_ajustado_min;residuo_min',
-  for (final s in r.advance.stakes.skip(1))
-    '${s.xM};${s.avancoMin};${r.advance.arrival(s.xM)};${r.advance.arrival(s.xM) - s.avancoMin}',
+  for (final s in r.avanco.stakes.skip(1))
+    '${s.xM};${s.avancoMin};${r.avanco.arrival(s.xM)};${r.avanco.arrival(s.xM) - s.avancoMin}',
   '',
   'x_m;avanco_ajustado_min;recessao_interpolada_min;infiltracao_m',
-  for (final v in r.profile)
+  for (final v in r.perfil)
     '${v.xM};${v.avancoMin};${v.recessaoMin};${v.infiltracaoM}',
   if (simulacao != null) ...[
     '',
@@ -128,9 +125,9 @@ String borderCsv(BorderProject p, BorderResult r) {
     'num_versao_expoentes;${numerico.versaoExpoentesRecessao};',
     'num_metodo_integracao;${numerico.metodoIntegracao};',
     for (final iteracao in <(String, List<double>)>[
-      ('t0_min', r.convergencia.opportunityMin),
-      ('r', r.convergencia.advanceExponent),
-      ('td_min', r.convergencia.recessionEndMin),
+      ('t0_min', r.convergencia.oportunidadeMin),
+      ('r', r.convergencia.expoenteAvanco),
+      ('td_min', r.convergencia.recessaoFinalMin),
     ])
       for (var i = 0; i < iteracao.$2.length; i++)
         'convergencia_${iteracao.$1};${iteracao.$2[i]};iteracao ${i + 1}',
@@ -328,7 +325,7 @@ String borderCsv(BorderProject p, BorderResult r) {
       ),
       (
         'fracaoDisponivel',
-        p.agronomia?.fracaoDisponivel,
+        p.agronomia?.fracaoAguaDisponivel,
         'fração',
         'informada',
       ),

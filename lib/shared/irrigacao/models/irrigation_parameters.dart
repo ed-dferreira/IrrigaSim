@@ -1,5 +1,5 @@
 import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_project.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/basin_project.dart';
 
 import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';

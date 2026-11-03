@@ -10,7 +10,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_result.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/services/basin_reference_math.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/services/basin_reference_tables.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/services/rice_volumes_service.dart';

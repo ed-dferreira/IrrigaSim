@@ -1,8 +1,8 @@
 import 'dart:math' as math;
 
-import 'package:irrigasim/features/irrigacao_faixas/models/border_numeric.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_project.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_result.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_numerico.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
 
 class BorderHydraulics {
   const BorderHydraulics();
@@ -516,9 +516,9 @@ class BorderHydraulics {
       avisos: avisos,
       numerico: numerico,
       convergencia: BorderConvergenceHistory(
-        opportunityMin: historyT0,
-        advanceExponent: historyR,
-        recessionEndMin: historyTd,
+        oportunidadeMin: historyT0,
+        expoenteAvanco: historyR,
+        recessaoFinalMin: historyTd,
       ),
     );
   }

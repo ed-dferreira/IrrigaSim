@@ -2,7 +2,11 @@ import 'package:irrigasim/shared/irrigacao/services/lamina_requerida.dart';
 
 class BorderAgronomy {
   final double? uccPercentual, upmpPercentual, densidadeGcm3;
-  final double? profundidadeRaizesCm, fracaoDisponivel;
+
+  /// Fração de água disponível (0 a 1). As chaves de persistência e de edição
+  /// dinâmica continuam usando 'fracaoDisponivel' para manter compatibilidade
+  /// com projetos e telas já salvos.
+  final double? profundidadeRaizesCm, fracaoAguaDisponivel;
   final double? kc, espacamentoFileirasM, espacamentoPlantasM;
   final double? evapotranspiracaoMmDia, precipitacaoEfetivaMmDia;
 
@@ -11,7 +15,7 @@ class BorderAgronomy {
     this.upmpPercentual,
     this.densidadeGcm3,
     this.profundidadeRaizesCm,
-    this.fracaoDisponivel,
+    this.fracaoAguaDisponivel,
     this.kc,
     this.espacamentoFileirasM,
     this.espacamentoPlantasM,
@@ -24,7 +28,7 @@ class BorderAgronomy {
         upmpPercentual == null ||
         densidadeGcm3 == null ||
         profundidadeRaizesCm == null ||
-        fracaoDisponivel == null ||
+        fracaoAguaDisponivel == null ||
         evapotranspiracaoMmDia == null ||
         precipitacaoEfetivaMmDia == null) {
       return null;
@@ -35,7 +39,7 @@ class BorderAgronomy {
         upmpPercentual: upmpPercentual!,
         densidadeGcm3: densidadeGcm3!,
         profundidadeRaizesCm: profundidadeRaizesCm!,
-        fracaoAguaDisponivel: fracaoDisponivel!,
+        fracaoAguaDisponivel: fracaoAguaDisponivel!,
         demandaLiquidaMmDia:
             evapotranspiracaoMmDia! - precipitacaoEfetivaMmDia!,
         etcMmDia: evapotranspiracaoMmDia!,
@@ -53,7 +57,9 @@ class BorderAgronomy {
     profundidadeRaizesCm: field == 'profundidadeRaizesCm'
         ? value
         : profundidadeRaizesCm,
-    fracaoDisponivel: field == 'fracaoDisponivel' ? value : fracaoDisponivel,
+    fracaoAguaDisponivel: field == 'fracaoDisponivel'
+        ? value
+        : fracaoAguaDisponivel,
     kc: field == 'kc' ? value : kc,
     espacamentoFileirasM: field == 'espacamentoFileirasM'
         ? value
@@ -74,7 +80,7 @@ class BorderAgronomy {
     'upmpPercentual': upmpPercentual,
     'densidadeGcm3': densidadeGcm3,
     'profundidadeRaizesCm': profundidadeRaizesCm,
-    'fracaoDisponivel': fracaoDisponivel,
+    'fracaoDisponivel': fracaoAguaDisponivel,
     'kc': kc,
     'espacamentoFileirasM': espacamentoFileirasM,
     'espacamentoPlantasM': espacamentoPlantasM,
@@ -89,7 +95,7 @@ class BorderAgronomy {
       upmpPercentual: n('upmpPercentual'),
       densidadeGcm3: n('densidadeGcm3'),
       profundidadeRaizesCm: n('profundidadeRaizesCm'),
-      fracaoDisponivel: n('fracaoDisponivel'),
+      fracaoAguaDisponivel: n('fracaoDisponivel'),
       kc: n('kc'),
       espacamentoFileirasM: n('espacamentoFileirasM'),
       espacamentoPlantasM: n('espacamentoPlantasM'),

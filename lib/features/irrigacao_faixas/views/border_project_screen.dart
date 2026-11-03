@@ -7,13 +7,13 @@ import 'package:irrigasim/shared/cenarios/providers/scenario_providers.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
 import 'package:irrigasim/app/theme/app_colors.dart';
 import 'package:irrigasim/shared/irrigacao/models/comum/crop_presets.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_project.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_measurements.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_medicoes.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigacao_faixas/services/border_field_trial.dart';
-import 'package:irrigasim/features/irrigacao_faixas/services/border_hydraulics.dart';
-import 'package:irrigasim/features/irrigacao_faixas/services/border_csv.dart';
-import 'package:irrigasim/features/irrigacao_faixas/services/border_reference_tables.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/faixa_ensaio_campo.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/faixa_hidraulica.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/faixa_csv.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/faixa_tabelas_referencia.dart';
 import 'package:irrigasim/features/irrigacao_faixas/viewmodels/border_project_controller.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/auditable_widgets.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/irrigation_project_components.dart';
@@ -27,7 +27,7 @@ CropPreset? _selectedBorderCropPreset(BorderProject project) =>
       rows: project.agronomia?.espacamentoFileirasM,
       plants: project.agronomia?.espacamentoPlantasM,
       roots: project.agronomia?.profundidadeRaizesCm,
-      fraction: project.agronomia?.fracaoDisponivel,
+      fraction: project.agronomia?.fracaoAguaDisponivel,
     );
 
 class BorderProjectScreen extends ConsumerStatefulWidget {
@@ -584,7 +584,7 @@ class _BorderProjectScreenState extends ConsumerState<BorderProjectScreen> {
         ),
       ),
       if (p.textura != null) ...[
-        for (final row in const BorderReferenceTables().suggest(
+        for (final row in const BorderReferenceTables().sugestoesMarr(
           p.textura!,
           (p.declividadeLongitudinal ?? 0) * 100,
         ))
@@ -855,7 +855,7 @@ class _BorderProjectScreenState extends ConsumerState<BorderProjectScreen> {
                         child: _number(
                           'fracaoDisponivel',
                           'Fração de água disponível',
-                          p.agronomia?.fracaoDisponivel,
+                          p.agronomia?.fracaoAguaDisponivel,
                           '',
                           resetKey: _cropPresetRevision,
                         ),
@@ -1045,7 +1045,7 @@ class _BorderProjectScreenState extends ConsumerState<BorderProjectScreen> {
             ? null
             : () {
                 try {
-                  final measured = const BorderFieldTrial().evaluate(
+                  final measured = const BorderFieldTrial().avaliar(
                     p,
                     p.estacas,
                     cutoffMin: p.corteEnsaioMin,
@@ -1072,12 +1072,12 @@ class _BorderProjectScreenState extends ConsumerState<BorderProjectScreen> {
           simulated: ref.watch(borderTrialSimulationProvider),
         ),
         Text(
-          'Avanço medido ajustado: p=${_fmt(trial.advance.p)} m/minʳ, r=${_fmt(trial.advance.r)}, erro=${_fmt(trial.advance.rmseMin)} min',
+          'Avanço medido ajustado: p=${_fmt(trial.avanco.p)} m/minʳ, r=${_fmt(trial.avanco.r)}, erro=${_fmt(trial.avanco.rmseMin)} min',
         ),
         Text(
-          trial.profile.isEmpty
+          trial.perfil.isEmpty
               ? 'Recessão medida ausente: só o ajuste de avanço está disponível.'
-              : 'Perfil interpolado em ${trial.profile.length} posições. '
+              : 'Perfil interpolado em ${trial.perfil.length} posições. '
                     'Er: ${_fmt(100 * trial.utilM3M! / (p.irnEfetivaMm! / 1000 * p.comprimentoM!))}%'
                     '${trial.ea == null ? '; Ea, Pp e Pe pendentes de corte e q0 do ensaio.' : '; Ea: ${_fmt(trial.ea)}%, Pp: ${_fmt(100 * trial.percoladoM3M! / trial.entradaM3M!)}%, Pe: ${_fmt(100 * trial.escoadoM3M! / trial.entradaM3M!)}%.'}',
         ),
@@ -1283,7 +1283,7 @@ class _BorderProjectScreenState extends ConsumerState<BorderProjectScreen> {
           ),
           _review(
             'Cultura e raízes',
-            '${p.cultura ?? 'Não informada'} · Pr ${_fmt(p.agronomia?.profundidadeRaizesCm)} cm · fração disponível ${_fmt(p.agronomia?.fracaoDisponivel)}',
+            '${p.cultura ?? 'Não informada'} · Pr ${_fmt(p.agronomia?.profundidadeRaizesCm)} cm · fração disponível ${_fmt(p.agronomia?.fracaoAguaDisponivel)}',
           ),
           _review(
             'Parâmetros da cultura',

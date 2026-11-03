@@ -555,9 +555,9 @@ shared/irrigacao/models/validacao_superficie.dart
 Depois:
 
 - `shared/irrigacao/models/validacao_superficie.dart` não importa nenhuma feature;
-- `features/irrigacao_faixas/models/border_result.dart` importa o compartilhado;
+- `features/irrigacao_faixas/models/faixa_resultado.dart` importa o compartilhado;
 - `features/irrigacao_inundacao/models/basin_project.dart` importa o compartilhado;
-- `basin_results_screen.dart` deixa de importar `models/faixas/border_result.dart`.
+- `basin_results_screen.dart` deixa de importar `models/faixas/faixa_resultado.dart`.
 
 **Criar:**
 
@@ -1102,14 +1102,14 @@ export 'package:irrigasim/views/perfil/perfil_screen.dart';
 
 Assim, `app/app.dart` e outras telas passam a importar o barrel e não precisam mudar quando a feature mover os arquivos.
 
-**Na branch da feature**, ao mover `models/faixas/border_project.dart`:
+**Na branch da feature**, ao mover `models/faixas/faixa_projeto.dart`:
 
-1. mover o arquivo para `features/irrigacao_faixas/models/border_project.dart`;
+1. mover o arquivo para `features/irrigacao_faixas/models/faixa_projeto.dart`;
 2. atualizar o barrel `features/irrigacao_faixas/irrigacao_faixas.dart` para o novo caminho;
 3. deixar um shim no caminho antigo:
    ```dart
-   // lib/models/faixas/border_project.dart (shim temporário)
-   export 'package:irrigasim/features/irrigacao_faixas/models/border_project.dart';
+   // lib/models/faixas/faixa_projeto.dart (shim temporário)
+   export 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
    ```
 4. não editar `shared/` nesta branch.
 

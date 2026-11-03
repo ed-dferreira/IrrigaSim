@@ -4,7 +4,7 @@
 // cenários v1 sem fabricar dado ausente (G4).
 import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/shared/irrigacao/models/comum/clima_demanda.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_result.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/basin_agronomy.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/basin_project.dart';
 import 'package:irrigasim/shared/irrigacao/services/lamina_requerida.dart';

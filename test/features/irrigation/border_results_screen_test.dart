@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_project.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_result.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
 import 'package:irrigasim/shared/cenarios/services/scenario_service.dart';
 import 'package:irrigasim/shared/cenarios/persistence/local_scenario_store.dart';
 import 'package:irrigasim/shared/cenarios/providers/scenario_providers.dart';
 import 'package:irrigasim/features/irrigacao_faixas/viewmodels/border_project_controller.dart';
 import 'package:irrigasim/features/irrigacao_faixas/views/border_results_screen.dart';
-import 'package:irrigasim/features/irrigacao_faixas/services/border_csv.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/faixa_csv.dart';
 
 void main() {
   test('os oito status canônicos têm texto e ícone próprios na tela', () {

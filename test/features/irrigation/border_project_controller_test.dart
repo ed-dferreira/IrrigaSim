@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_project.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
 import 'package:irrigasim/features/irrigacao_faixas/viewmodels/border_project_controller.dart';
 
 void main() {

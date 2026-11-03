@@ -5,7 +5,7 @@ import 'package:irrigasim/features/irrigacao_inundacao/services/run_basin_simula
 import 'package:irrigasim/features/irrigacao_inundacao/services/basin_reference_math.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/services/basin_planning.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/services/rice_volumes_service.dart';
-import 'package:irrigasim/features/irrigacao_faixas/services/run_border_simulation.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/executar_simulacao_faixa.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/services/simulador_sulcos.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/services/run_permanent_basin_simulation.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/viewmodels/basin_simulation_coordinator.dart';

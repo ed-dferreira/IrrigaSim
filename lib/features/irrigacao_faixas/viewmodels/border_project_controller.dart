@@ -1,15 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_project.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_agronomy.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_result.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_agronomia.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
-import 'package:irrigasim/features/irrigacao_faixas/services/run_border_simulation.dart';
-import 'package:irrigasim/features/irrigacao_faixas/services/border_planning.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_measurements.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/executar_simulacao_faixa.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/faixa_planejamento.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_medicoes.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigacao_faixas/services/border_field_trial.dart';
-import 'package:irrigasim/features/irrigacao_faixas/services/border_hydraulics.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/faixa_ensaio_campo.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/faixa_hidraulica.dart';
 
 class BorderScenarioComparison {
   final BorderResult primeira, terceira;
@@ -257,7 +257,7 @@ Future<BorderAlternatives> buscarAlternativas(
 
 BorderAlternatives _buscarAlternativas(
   (BorderProject, double, double, double, String) input,
-) => const BorderPlanning().explore(
+) => const BorderPlanning().explorar(
   input.$1,
   menorLsM: input.$2,
   maiorLsM: input.$3,

@@ -1,6 +1,6 @@
 import 'simulation_result.dart';
 
-import 'package:irrigasim/features/irrigacao_faixas/models/border_result.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/basin_annexes.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/indicadores_balanco.dart';
 

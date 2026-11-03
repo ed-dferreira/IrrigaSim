@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'border_result.dart';
+import 'faixa_resultado.dart';
 
 class BorderStake {
   final double xM, avancoMin;

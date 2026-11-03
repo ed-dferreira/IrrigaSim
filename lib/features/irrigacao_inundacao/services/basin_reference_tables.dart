@@ -1,11 +1,11 @@
 // Tabelas de referência da Aula 8 — Irrigação por Inundação (UNIPAMPA).
-// Padrão de lib/services/simulation/faixas/border_reference_tables.dart:
+// Padrão de lib/features/irrigacao_faixas/services/faixa_tabelas_referencia.dart:
 // dados transcritos do pacote docs/Pacote_Inundacao, com status explícito
 // para células sob revisão e preservação literal do fator das fórmulas.
 //
 // Páginas: 16 (guia de área por vazão), 17 (Henderson), 38 (Booher) e o
 // "Exemplo da Aula 8" das pp. 63, 73 e 84. A tabela Booher das faixas
-// (p. 26, border_reference_tables.dart) não é alterada por este arquivo.
+// (p. 26, faixa_tabelas_referencia.dart) não é alterada por este arquivo.
 //
 // Paridade: os valores abaixo são lidos de dados_extraidos.json e
 // conferidos por inundacao_reference_golden_test.dart.

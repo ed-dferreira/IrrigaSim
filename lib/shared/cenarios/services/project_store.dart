@@ -3,7 +3,7 @@ import 'package:irrigasim/shared/irrigacao/models/comum/adaptadores_superficie.d
 
 import '../models/cenario_salvo.dart';
 
-import 'package:irrigasim/features/irrigacao_faixas/models/border_project.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/basin_project.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result_model.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart';

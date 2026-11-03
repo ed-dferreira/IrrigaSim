@@ -1,20 +1,21 @@
 import 'dart:math' as math;
 
-import 'package:irrigasim/features/irrigacao_faixas/models/border_project.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_result.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
 
-import 'border_hydraulics.dart';
+import 'faixa_hidraulica.dart';
 
 class BorderGeometry {
+  /// Verificação geométrica §1–2: D = St·W, Dmáx = 0,4 hn e Lmáx = Dmáx/|St|.
   final double desnivelM;
   final double? limiteDesnivelM, larguraMaximaM;
   final bool? diqueSuficiente;
-  const BorderGeometry(
-    this.desnivelM,
+  const BorderGeometry({
+    required this.desnivelM,
     this.limiteDesnivelM,
     this.larguraMaximaM,
     this.diqueSuficiente,
-  );
+  });
 }
 
 class BorderCandidate {
@@ -25,14 +26,14 @@ class BorderCandidate {
 
   /// Código canônico da exclusão; null quando a candidata ficou viável.
   final BorderStatus? status;
-  const BorderCandidate(
-    this.comprimentoM,
-    this.vazaoLsM,
-    this.resultado,
-    this.motivoRejeicao, [
+  const BorderCandidate({
+    required this.comprimentoM,
+    required this.vazaoLsM,
+    required this.resultado,
+    required this.motivoRejeicao,
     this.status,
     this.larguraM = 0,
-  ]);
+  });
 }
 
 class BorderAlternatives {
@@ -40,9 +41,9 @@ class BorderAlternatives {
   final BorderCandidate? melhor;
   final double menorLsM, maiorLsM, passoLsM;
   final String objetivo;
-  const BorderAlternatives(
-    this.candidatos,
-    this.melhor, {
+  const BorderAlternatives({
+    required this.candidatos,
+    required this.melhor,
     this.menorLsM = 0,
     this.maiorLsM = 0,
     this.passoLsM = 0,
@@ -51,11 +52,11 @@ class BorderAlternatives {
   List<BorderAlternativeRecord> toRecords({BorderCandidate? selected}) =>
       candidatos
           .map(
-            (c) => BorderAlternativeRecord.withMetrics(
-              c.comprimentoM,
-              c.vazaoLsM,
-              c.resultado?.ea,
-              c.motivoRejeicao,
+            (c) => BorderAlternativeRecord(
+              comprimentoM: c.comprimentoM,
+              vazaoLsM: c.vazaoLsM,
+              eficienciaPercentual: c.resultado?.ea,
+              motivoRejeicao: c.motivoRejeicao,
               status: c.status,
               erPercentual: c.resultado?.er,
               ppPercentual: c.resultado?.pp,
@@ -72,6 +73,7 @@ class BorderAlternatives {
 }
 
 class BorderOperation {
+  /// Resultado do dimensionamento de parcelas §17: TIP, NPD, APP, W0 e NTF.
   final double tempoParcelaMin,
       parcelasDiaBruto,
       areaParcelaM2,
@@ -82,28 +84,28 @@ class BorderOperation {
   final List<int> gruposPorDia;
   final List<String> agenda;
   final List<double> vazoesPorGrupoLs;
-  const BorderOperation(
-    this.tempoParcelaMin,
-    this.parcelasDiaBruto,
-    this.areaParcelaM2,
-    this.larguraTeoricaM,
-    this.parcelasCompletasDia,
-    this.faixasTotais,
-    this.grupos,
-    this.ultimoLote,
-    this.vazaoSimultaneaLs,
-    this.atendePrazo,
-    this.atendeOferta,
-    this.gruposPorDia,
-    this.agenda,
-    this.vazoesPorGrupoLs,
-  );
+  const BorderOperation({
+    required this.tempoParcelaMin,
+    required this.parcelasDiaBruto,
+    required this.areaParcelaM2,
+    required this.larguraTeoricaM,
+    required this.parcelasCompletasDia,
+    required this.faixasTotais,
+    required this.grupos,
+    required this.ultimoLote,
+    required this.vazaoSimultaneaLs,
+    required this.atendePrazo,
+    required this.atendeOferta,
+    required this.gruposPorDia,
+    required this.agenda,
+    required this.vazoesPorGrupoLs,
+  });
 }
 
 class BorderPlanning {
   const BorderPlanning();
 
-  BorderGeometry geometry(BorderProject p, BorderResult r) {
+  BorderGeometry geometria(BorderProject p, BorderResult r) {
     final st = p.declividadeTransversal;
     if (st == null || !st.isFinite || p.larguraM == null) {
       throw const BorderModelException(
@@ -114,14 +116,14 @@ class BorderPlanning {
     }
     final hn = p.laminaSuperficialM;
     return BorderGeometry(
-      st.abs() * p.larguraM!,
-      hn == null ? null : .4 * hn,
-      hn == null || st == 0 ? null : .4 * hn / st.abs(),
-      p.alturaDiqueM == null ? null : r.y0M <= p.alturaDiqueM!,
+      desnivelM: st.abs() * p.larguraM!,
+      limiteDesnivelM: hn == null ? null : .4 * hn,
+      larguraMaximaM: hn == null || st == 0 ? null : .4 * hn / st.abs(),
+      diqueSuficiente: p.alturaDiqueM == null ? null : r.y0M <= p.alturaDiqueM!,
     );
   }
 
-  BorderAlternatives explore(
+  BorderAlternatives explorar(
     BorderProject p, {
     required double menorLsM,
     required double maiorLsM,
@@ -182,7 +184,7 @@ class BorderPlanning {
             reasonStatus = BorderStatus.entradaInvalida;
           } else {
             result = const BorderHydraulics().dimensionar(candidate);
-            final geo = geometry(candidate, result);
+            final geo = geometria(candidate, result);
             if (geo.larguraMaximaM != null &&
                 p.larguraM! > geo.larguraMaximaM!) {
               reason = 'Desnível transversal acima de 0,4 hn';
@@ -202,12 +204,12 @@ class BorderPlanning {
         }
         candidates.add(
           BorderCandidate(
-            length,
-            flow,
-            reason == null ? result : null,
-            reason,
-            reasonStatus,
-            p.larguraM!,
+            comprimentoM: length,
+            vazaoLsM: flow,
+            resultado: reason == null ? result : null,
+            motivoRejeicao: reason,
+            status: reasonStatus,
+            larguraM: p.larguraM!,
           ),
         );
       }
@@ -219,8 +221,8 @@ class BorderPlanning {
             : b.resultado!.er.compareTo(a.resultado!.er)),
       );
     return BorderAlternatives(
-      candidates,
-      viable.firstOrNull,
+      candidatos: candidates,
+      melhor: viable.firstOrNull,
       menorLsM: menorLsM,
       maiorLsM: maiorLsM,
       passoLsM: passoLsM,
@@ -228,7 +230,7 @@ class BorderPlanning {
     );
   }
 
-  BorderOperation operation(
+  BorderOperation operacao(
     BorderProject p,
     BorderResult r, {
     required int dias,
@@ -309,20 +311,20 @@ class BorderPlanning {
         p.vazaoDisponivelLs != null &&
         groupFlows.every((flow) => flow <= p.vazaoDisponivelLs!);
     return BorderOperation(
-      tip,
-      npd,
-      wt * lt / (npd * dias),
-      wt * lt / (npd * dias * simultaneas * p.comprimentoM!),
-      complete,
-      total,
-      groups,
-      total % simultaneas == 0 ? simultaneas : total % simultaneas,
-      q,
-      complete > 0 && remaining == 0 && atendeOferta,
-      atendeOferta,
-      groupsPerDay,
-      agenda,
-      groupFlows,
+      tempoParcelaMin: tip,
+      parcelasDiaBruto: npd,
+      areaParcelaM2: wt * lt / (npd * dias),
+      larguraTeoricaM: wt * lt / (npd * dias * simultaneas * p.comprimentoM!),
+      parcelasCompletasDia: complete,
+      faixasTotais: total,
+      grupos: groups,
+      ultimoLote: total % simultaneas == 0 ? simultaneas : total % simultaneas,
+      vazaoSimultaneaLs: q,
+      atendePrazo: complete > 0 && remaining == 0 && atendeOferta,
+      atendeOferta: atendeOferta,
+      gruposPorDia: groupsPerDay,
+      agenda: agenda,
+      vazoesPorGrupoLs: groupFlows,
     );
   }
 }

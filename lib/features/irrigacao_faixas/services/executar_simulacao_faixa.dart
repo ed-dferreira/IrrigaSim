@@ -1,8 +1,8 @@
-import 'package:irrigasim/features/irrigacao_faixas/models/border_project.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_result.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
-import 'package:irrigasim/features/irrigacao_faixas/services/border_hydraulics.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/faixa_hidraulica.dart';
 import 'package:irrigasim/shared/irrigacao/services/performance_indicators.dart';
 
 /// Adapter de compatibilidade para telas e cenários rápidos existentes.

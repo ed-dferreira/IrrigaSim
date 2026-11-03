@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_result.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_project.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigacao_faixas/services/border_planning.dart';
-import 'package:irrigasim/features/irrigacao_faixas/services/border_csv.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/faixa_planejamento.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/faixa_csv.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/terrain/terrain_view.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/auditable_widgets.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/irrigation_project_components.dart';
@@ -101,7 +101,7 @@ class BorderResultsScreen extends ConsumerWidget {
       );
     }
     final r = result!.borderResult!;
-    final geo = const BorderPlanning().geometry(project, r);
+    final geo = const BorderPlanning().geometria(project, r);
     final alternatives = projectOverride == null
         ? ref.watch(borderAlternativesProvider)
         : null;
@@ -556,7 +556,7 @@ class BorderResultsScreen extends ConsumerWidget {
                       Builder(
                         builder: (context) {
                           try {
-                            final op = const BorderPlanning().operation(
+                            final op = const BorderPlanning().operacao(
                               project,
                               r,
                               dias: project.periodoDias!,
@@ -944,7 +944,7 @@ BorderOperation? _operationForCharts(
     return null;
   }
   try {
-    return const BorderPlanning().operation(
+    return const BorderPlanning().operacao(
       project,
       r,
       dias: project.periodoDias!,

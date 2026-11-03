@@ -1,9 +1,9 @@
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 
-import 'border_agronomy.dart';
-import 'border_measurements.dart';
-import 'border_numeric.dart';
-import 'border_result.dart';
+import 'faixa_agronomia.dart';
+import 'faixa_medicoes.dart';
+import 'faixa_numerico.dart';
+import 'faixa_resultado.dart';
 
 enum CondicaoJusanteFaixa { aberta, fechada }
 
@@ -38,26 +38,12 @@ class BorderAlternativeRecord {
 
   /// Código canônico da rejeição (null para candidata viável/antiga).
   final BorderStatus? status;
-  const BorderAlternativeRecord(
-    this.comprimentoM,
-    this.vazaoLsM,
+
+  const BorderAlternativeRecord({
+    required this.comprimentoM,
+    required this.vazaoLsM,
     this.eficienciaPercentual,
-    this.motivoRejeicao, [
-    this.status,
-  ]) : erPercentual = null,
-       ppPercentual = null,
-       pePercentual = null,
-       demandaLs = null,
-       gradeMenorLsM = null,
-       gradeMaiorLsM = null,
-       gradePassoLsM = null,
-       objetivo = null,
-       selecionada = false;
-  const BorderAlternativeRecord.withMetrics(
-    this.comprimentoM,
-    this.vazaoLsM,
-    this.eficienciaPercentual,
-    this.motivoRejeicao, {
+    this.motivoRejeicao,
     this.status,
     this.erPercentual,
     this.ppPercentual,
@@ -69,6 +55,7 @@ class BorderAlternativeRecord {
     this.objetivo,
     this.selecionada = false,
   });
+
   Map<String, dynamic> toMap() => {
     'comprimentoM': comprimentoM,
     'vazaoLsM': vazaoLsM,
@@ -85,16 +72,16 @@ class BorderAlternativeRecord {
     'objetivo': objetivo,
     'selecionada': selecionada,
   };
+
   factory BorderAlternativeRecord.fromMap(Map<String, dynamic> data) =>
       BorderAlternativeRecord(
-        (data['comprimentoM'] as num).toDouble(),
-        (data['vazaoLsM'] as num).toDouble(),
-        (data['eficienciaPercentual'] as num?)?.toDouble(),
-        data['motivoRejeicao'] as String?,
-        data['status'] == null
+        comprimentoM: (data['comprimentoM'] as num).toDouble(),
+        vazaoLsM: (data['vazaoLsM'] as num).toDouble(),
+        eficienciaPercentual: (data['eficienciaPercentual'] as num?)?.toDouble(),
+        motivoRejeicao: data['motivoRejeicao'] as String?,
+        status: data['status'] == null
             ? null
             : BorderStatus.deNome(data['status'] as String?),
-      ).copyWithMetrics(
         erPercentual: (data['erPercentual'] as num?)?.toDouble(),
         ppPercentual: (data['ppPercentual'] as num?)?.toDouble(),
         pePercentual: (data['pePercentual'] as num?)?.toDouble(),
@@ -116,11 +103,11 @@ class BorderAlternativeRecord {
     double? gradePassoLsM,
     String? objetivo,
     bool? selecionada,
-  }) => BorderAlternativeRecord.withMetrics(
-    comprimentoM,
-    vazaoLsM,
-    eficienciaPercentual,
-    motivoRejeicao,
+  }) => BorderAlternativeRecord(
+    comprimentoM: comprimentoM,
+    vazaoLsM: vazaoLsM,
+    eficienciaPercentual: eficienciaPercentual,
+    motivoRejeicao: motivoRejeicao,
     status: status,
     erPercentual: erPercentual ?? this.erPercentual,
     ppPercentual: ppPercentual ?? this.ppPercentual,
@@ -278,8 +265,16 @@ class BorderProject {
 
   /// Primeiro impedimento do modelo com código canônico §10.3 e, quando a
   /// fonte dita a exigência, a página correspondente.
-  BorderNotice? get impedimento {
-    final optionalPositive = <(String, double?)>[
+  BorderNotice? get impedimento =>
+      _validarEntradasOpcionais() ??
+      _validarPerfilLongitudinal() ??
+      _validarCenariosDeIrrigacao() ??
+      _validarDimensoesESolo() ??
+      _validarConfiguracaoNumerica();
+
+  /// Campos opcionais: precisam ser finitos e positivos quando informados.
+  BorderNotice? _validarEntradasOpcionais() {
+    final opcionaisPositivos = <(String, double?)>[
       ('altura real do dique', alturaDiqueM),
       ('hn superficial', laminaSuperficialM),
       ('oferta de água Qt', vazaoDisponivelLs),
@@ -294,7 +289,7 @@ class BorderProject {
       ('ρ2 da F02', rho2F02),
       ('Vmax da F02', vmaxF02),
     ];
-    for (final entry in optionalPositive) {
+    for (final entry in opcionaisPositivos) {
       final value = entry.$2;
       if (value != null && (!value.isFinite || value <= 0)) {
         return BorderNotice(
@@ -357,55 +352,64 @@ class BorderProject {
         'Data do ensaio deve usar formato ISO (AAAA-MM-DD).',
       );
     }
-    if (perfilLongitudinal.isNotEmpty) {
-      if (declividadeLongitudinal == null ||
-          !declividadeLongitudinal!.isFinite ||
-          declividadeLongitudinal! <= 0) {
-        return const BorderNotice(
-          BorderStatus.entradaInvalida,
-          'Perfil topográfico longitudinal requer S0 médio positivo informado.',
-        );
-      }
-      if (comprimentoAreaM == null ||
-          perfilLongitudinal.length < 2 ||
-          perfilLongitudinal.first.xM != 0 ||
-          (perfilLongitudinal.last.xM - comprimentoAreaM!).abs() > 1e-6 ||
-          perfilLongitudinal.any(
-            (point) => !point.xM.isFinite || !point.cotaM.isFinite,
-          ) ||
-          List.generate(perfilLongitudinal.length - 1, (i) => i).any(
-            (i) => perfilLongitudinal[i + 1].xM <= perfilLongitudinal[i].xM,
-          )) {
-        return const BorderNotice(
-          BorderStatus.entradaInvalida,
-          'Perfil longitudinal requer estacas crescentes, iniciando em 0 e terminando no comprimento total da área.',
-        );
-      }
-      final directions = <int>{};
-      final segmentSlopes = <double>[];
-      for (var i = 0; i < perfilLongitudinal.length - 1; i++) {
-        final left = perfilLongitudinal[i], right = perfilLongitudinal[i + 1];
-        final delta = left.cotaM - right.cotaM;
-        directions.add(delta.sign.toInt());
-        segmentSlopes.add(delta.abs() / (right.xM - left.xM));
-      }
-      if (directions.length != 1 || directions.single == 0) {
-        return const BorderNotice(
-          BorderStatus.modeloNaoImplementado,
-          'Perfil com inversão de declive ou trecho plano não é representado pelo modelo de declive único.',
-          pagina: 'p. 12',
-        );
-      }
-      if (segmentSlopes.any(
-        (slope) => (slope - declividadeLongitudinal!).abs() > 1e-6,
-      )) {
-        return const BorderNotice(
-          BorderStatus.modeloNaoImplementado,
-          'Perfil longitudinal variável/terminal plano exige modelo por trechos; o motor usa S0 único.',
-          pagina: 'p. 12',
-        );
-      }
+    return null;
+  }
+
+  /// Perfil topográfico: estacas crescentes e declive único compatível com S0.
+  BorderNotice? _validarPerfilLongitudinal() {
+    if (perfilLongitudinal.isEmpty) return null;
+    if (declividadeLongitudinal == null ||
+        !declividadeLongitudinal!.isFinite ||
+        declividadeLongitudinal! <= 0) {
+      return const BorderNotice(
+        BorderStatus.entradaInvalida,
+        'Perfil topográfico longitudinal requer S0 médio positivo informado.',
+      );
     }
+    if (comprimentoAreaM == null ||
+        perfilLongitudinal.length < 2 ||
+        perfilLongitudinal.first.xM != 0 ||
+        (perfilLongitudinal.last.xM - comprimentoAreaM!).abs() > 1e-6 ||
+        perfilLongitudinal.any(
+          (point) => !point.xM.isFinite || !point.cotaM.isFinite,
+        ) ||
+        List.generate(perfilLongitudinal.length - 1, (i) => i).any(
+          (i) => perfilLongitudinal[i + 1].xM <= perfilLongitudinal[i].xM,
+        )) {
+      return const BorderNotice(
+        BorderStatus.entradaInvalida,
+        'Perfil longitudinal requer estacas crescentes, iniciando em 0 e terminando no comprimento total da área.',
+      );
+    }
+    final directions = <int>{};
+    final segmentSlopes = <double>[];
+    for (var i = 0; i < perfilLongitudinal.length - 1; i++) {
+      final left = perfilLongitudinal[i], right = perfilLongitudinal[i + 1];
+      final delta = left.cotaM - right.cotaM;
+      directions.add(delta.sign.toInt());
+      segmentSlopes.add(delta.abs() / (right.xM - left.xM));
+    }
+    if (directions.length != 1 || directions.single == 0) {
+      return const BorderNotice(
+        BorderStatus.modeloNaoImplementado,
+        'Perfil com inversão de declive ou trecho plano não é representado pelo modelo de declive único.',
+        pagina: 'p. 12',
+      );
+    }
+    if (segmentSlopes.any(
+      (slope) => (slope - declividadeLongitudinal!).abs() > 1e-6,
+    )) {
+      return const BorderNotice(
+        BorderStatus.modeloNaoImplementado,
+        'Perfil longitudinal variável/terminal plano exige modelo por trechos; o motor usa S0 único.',
+        pagina: 'p. 12',
+      );
+    }
+    return null;
+  }
+
+  /// Cenários e manejos suportados pelo motor (IRN, jusante, manejo, corte).
+  BorderNotice? _validarCenariosDeIrrigacao() {
     if (origemIrn == OrigemIrnFaixa.calculada && agronomia?.irnMm == null) {
       return const BorderNotice(
         BorderStatus.entradaInvalida,
@@ -442,6 +446,11 @@ class BorderProject {
         pagina: 'pp. 21, 28–29, 64',
       );
     }
+    return null;
+  }
+
+  /// Geometria da faixa e parâmetros de infiltração/avanço obrigatórios.
+  BorderNotice? _validarDimensoesESolo() {
     if (declividadeLongitudinal == null ||
         !declividadeLongitudinal!.isFinite ||
         declividadeLongitudinal! <= 0) {
@@ -492,16 +501,19 @@ class BorderProject {
         'Informe IRN, vazão unitária e rugosidade positivos.',
       );
     }
-    final numeroInvalido = numerico.impedimento;
-    if (numeroInvalido != null) {
-      return BorderNotice(
-        numerico.versaoExpoentesImplementada
-            ? BorderStatus.entradaInvalida
-            : BorderStatus.modeloNaoImplementado,
-        numeroInvalido,
-      );
-    }
     return null;
+  }
+
+  /// Grupo numérico declarado (tolerâncias, iterações, expoentes).
+  BorderNotice? _validarConfiguracaoNumerica() {
+    final numeroInvalido = numerico.impedimento;
+    if (numeroInvalido == null) return null;
+    return BorderNotice(
+      numerico.versaoExpoentesImplementada
+          ? BorderStatus.entradaInvalida
+          : BorderStatus.modeloNaoImplementado,
+      numeroInvalido,
+    );
   }
 
   String? get impedimentoModelo => impedimento?.mensagem;
@@ -816,6 +828,11 @@ class BorderProject {
     );
   }
 
+  /// Converte registros antigos (cenários salvos em IrrigationParameters).
+  ///
+  /// ⚠️ `IrrigationParameters.sigmaZ` é aqui tratado como o expoente inicial
+  /// de avanço `r` (§8: r₍ᵢ₎ ≈ 0,7), não como o fator de forma σz — a
+  /// nomenclatura legada é confusa, mas o valor alimenta `rInicial`.
   factory BorderProject.fromLegacy(IrrigationParameters params) =>
       BorderProject(
         versao: 0,
@@ -837,6 +854,8 @@ class BorderProject {
         tempoAplicacaoLegadoMin: params.tempoAplicacao,
       );
 
+  /// Reexporta os campos para compatibilidade com a API legada
+  /// (sigmaZ recebe o expoente inicial `r`, ver [fromLegacy]).
   IrrigationParameters toCompatParameters() => IrrigationParameters(
     projetoFaixa: this,
     comprimento: comprimentoM!,

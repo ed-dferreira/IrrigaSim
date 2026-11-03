@@ -1,6 +1,6 @@
 // Projeto de irrigação por inundação — contrato versionado (Fase 6 e
 // Fase 1 do plano de cultura/clima/operacao). Espelha
-// lib/models/faixas/border_project.dart: campos imutáveis, validação
+// lib/models/faixas/faixa_projeto.dart: campos imutáveis, validação
 // tipada ([BorderNotice]), serialização toMap/fromMap, migração fromLegacy e
 // ponte para [IrrigationParameters] (toCompatParameters). As regras G1–G9 do
 // plano docs/Plano_implementacao_inundacao.md e as lacunas G12–G16 do plano

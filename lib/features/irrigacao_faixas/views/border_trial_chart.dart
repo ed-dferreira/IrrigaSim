@@ -1,8 +1,8 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
-import 'package:irrigasim/features/irrigacao_faixas/services/border_field_trial.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_result.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/faixa_ensaio_campo.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
 
 class BorderTrialChart extends StatelessWidget {
   const BorderTrialChart({super.key, required this.trial, this.simulated});
@@ -13,21 +13,21 @@ class BorderTrialChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final maxX = trial.advance.stakes.last.xM;
+    final maxX = trial.avanco.stakes.last.xM;
     final maxY = <double>[
-      ...trial.profile.map((point) => point.avancoMin),
-      ...trial.profile.map((point) => point.recessaoMin),
-      for (var i = 0; i <= 100; i++) trial.advance.arrival(maxX * i / 100),
+      ...trial.perfil.map((point) => point.avancoMin),
+      ...trial.perfil.map((point) => point.recessaoMin),
+      for (var i = 0; i <= 100; i++) trial.avanco.arrival(maxX * i / 100),
       if (simulated != null)
         ...simulated!.perfil.map((point) => point.avancoMin),
     ].fold<double>(0, (a, b) => a > b ? a : b);
-    final measured = trial.advance.stakes;
+    final measured = trial.avanco.stakes;
     final residuals = measured
         .skip(1)
-        .map((stake) => trial.advance.arrival(stake.xM) - stake.avancoMin)
+        .map((stake) => trial.avanco.arrival(stake.xM) - stake.avancoMin)
         .toList();
     final hasMeasuredRecession =
-        trial.profile.isNotEmpty &&
+        trial.perfil.isNotEmpty &&
         measured.any((stake) => stake.recessaoMin != null);
     return Card(
       margin: EdgeInsets.zero,
@@ -48,13 +48,13 @@ class BorderTrialChart extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'RMSE do avanço: ${trial.advance.rmseMin.toStringAsFixed(2)} min',
+              'RMSE do avanço: ${trial.avanco.rmseMin.toStringAsFixed(2)} min',
             ),
             SizedBox(
               height: 240,
               child: Semantics(
                 label:
-                    'Gráfico de estacas medidas e curva ajustada de avanço. RMSE ${trial.advance.rmseMin.toStringAsFixed(2)} minutos.',
+                    'Gráfico de estacas medidas e curva ajustada de avanço. RMSE ${trial.avanco.rmseMin.toStringAsFixed(2)} minutos.',
                 child: ExcludeSemantics(
                   child: LineChart(
                     LineChartData(
@@ -84,7 +84,7 @@ class BorderTrialChart extends StatelessWidget {
                             for (var i = 0; i <= 100; i++)
                               FlSpot(
                                 maxX * i / 100,
-                                trial.advance.arrival(maxX * i / 100),
+                                trial.avanco.arrival(maxX * i / 100),
                               ),
                           ],
                           color: colors.primary,
@@ -94,7 +94,7 @@ class BorderTrialChart extends StatelessWidget {
                         if (hasMeasuredRecession)
                           LineChartBarData(
                             spots: [
-                              for (final point in trial.profile)
+                              for (final point in trial.perfil)
                                 FlSpot(point.xM, point.recessaoMin),
                             ],
                             color: colors.error,
@@ -177,7 +177,7 @@ class BorderTrialChart extends StatelessWidget {
             if (residuals.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(
-                'Resíduos por estaca (ajustado − medido), RMSE ${trial.advance.rmseMin.toStringAsFixed(2)} min',
+                'Resíduos por estaca (ajustado − medido), RMSE ${trial.avanco.rmseMin.toStringAsFixed(2)} min',
                 style: Theme.of(context).textTheme.labelLarge,
               ),
               SizedBox(

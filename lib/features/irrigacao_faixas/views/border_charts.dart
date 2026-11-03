@@ -2,10 +2,10 @@ import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_result.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_project.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
-import 'package:irrigasim/features/irrigacao_faixas/services/border_planning.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/faixa_planejamento.dart';
 
 class BorderCharts extends StatelessWidget {
   final BorderResult result;
@@ -751,9 +751,9 @@ Widget _convergenceChart(
   ColorScheme scheme,
 ) {
   final series = <(String, List<double>, Color)>[
-    ('t0', history.opportunityMin, scheme.primary),
-    ('r', history.advanceExponent, scheme.tertiary),
-    ('td', history.recessionEndMin, scheme.error),
+    ('t0', history.oportunidadeMin, scheme.primary),
+    ('r', history.expoenteAvanco, scheme.tertiary),
+    ('td', history.recessaoFinalMin, scheme.error),
   ].where((entry) => entry.$2.length > 1).toList();
   if (series.isEmpty) {
     return const Text(

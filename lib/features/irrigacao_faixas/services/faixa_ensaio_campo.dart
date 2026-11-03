@@ -1,24 +1,25 @@
 import 'dart:math' as math;
 
-import 'package:irrigasim/features/irrigacao_faixas/models/border_measurements.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_project.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/border_result.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_medicoes.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
 
-import 'border_hydraulics.dart';
+import 'faixa_hidraulica.dart';
 
 class BorderTrialResult {
-  final BorderMeasuredAdvance advance;
-  final List<BorderProfilePoint> profile;
+  /// Ensaio medido: ajuste do avanço e perfil interpolado entre estacas.
+  final BorderMeasuredAdvance avanco;
+  final List<BorderProfilePoint> perfil;
   final double? entradaM3M, utilM3M, percoladoM3M, escoadoM3M, deficitM3M;
   final List<BorderNotice> avisos;
-  const BorderTrialResult(
-    this.advance,
-    this.profile,
-    this.entradaM3M,
-    this.utilM3M,
-    this.percoladoM3M,
-    this.escoadoM3M,
-    this.deficitM3M, {
+  const BorderTrialResult({
+    required this.avanco,
+    required this.perfil,
+    required this.entradaM3M,
+    required this.utilM3M,
+    required this.percoladoM3M,
+    required this.escoadoM3M,
+    required this.deficitM3M,
     this.avisos = const [],
   });
   double? get ea => entradaM3M == null || utilM3M == null
@@ -32,7 +33,8 @@ class BorderTrialResult {
 class BorderFieldTrial {
   const BorderFieldTrial();
 
-  BorderMeasuredAdvance fit(List<BorderStake> points) {
+  /// Ajusta x = p·t^r (§6.1) por mínimos quadrados em escala logarítmica.
+  BorderMeasuredAdvance ajustar(List<BorderStake> points) {
     if (points.length < 3 ||
         points.first.xM != 0 ||
         points.first.avancoMin != 0) {
@@ -88,12 +90,13 @@ class BorderFieldTrial {
     return BorderMeasuredAdvance(List.unmodifiable(points), p, r, rmse);
   }
 
-  BorderTrialResult evaluate(
+  /// Avalia o ensaio: perfil τ/I, volumes por trapézios e Ea (§6.2–6.3).
+  BorderTrialResult avaliar(
     BorderProject project,
     List<BorderStake> stakes, {
     double? cutoffMin,
   }) {
-    final advance = fit(stakes);
+    final avanco = ajustar(stakes);
     if (project.comprimentoM == null ||
         stakes.last.xM != project.comprimentoM) {
       throw const BorderModelException(
@@ -137,13 +140,13 @@ class BorderFieldTrial {
     ];
     if (!recessionAvailable || !agronomiaDisponivel) {
       return BorderTrialResult(
-        advance,
-        const [],
-        null,
-        null,
-        null,
-        null,
-        null,
+        avanco: avanco,
+        perfil: const [],
+        entradaM3M: null,
+        utilM3M: null,
+        percoladoM3M: null,
+        escoadoM3M: null,
+        deficitM3M: null,
         avisos: avisos,
       );
     }
@@ -157,7 +160,7 @@ class BorderFieldTrial {
         pagina: 'pp. 47, 56',
       );
     }
-    final profile = <BorderProfilePoint>[];
+    final perfil = <BorderProfilePoint>[];
     final length = project.comprimentoM!;
     var interval = 0;
     for (var i = 0; i <= 400; i++) {
@@ -168,26 +171,26 @@ class BorderFieldTrial {
       final left = stakes[interval], right = stakes[interval + 1];
       final portion = (x - left.xM) / (right.xM - left.xM);
       // Avanço calculado pela curva ajustada; recessão interpolada entre estacas medidas.
-      final arrival = advance.arrival(x);
-      final recession =
+      final chegada = avanco.arrival(x);
+      final recessao =
           left.recessaoMin! +
           (right.recessaoMin! - left.recessaoMin!) * portion;
-      final opportunity = recession - arrival;
-      if (opportunity < 0 || !opportunity.isFinite) {
+      final oportunidade = recessao - chegada;
+      if (oportunidade < 0 || !oportunidade.isFinite) {
         throw const BorderModelException(
           BorderStatus.foraDoDominio,
           'Ensaio: oportunidade local negativa entre estacas.',
           pagina: 'pp. 45, 68',
         );
       }
-      profile.add(
+      perfil.add(
         BorderProfilePoint(
           x,
-          arrival,
-          recession,
-          opportunity,
+          chegada,
+          recessao,
+          oportunidade,
           BorderHydraulics.infiltracao(
-            opportunity,
+            oportunidade,
             project.k!,
             project.a!,
             project.vibMMin!,
@@ -195,7 +198,7 @@ class BorderFieldTrial {
         ),
       );
     }
-    double? input;
+    double? entrada;
     if (cutoffMin != null && project.vazaoUnitariaLsM != null) {
       if (!cutoffMin.isFinite ||
           cutoffMin <= 0 ||
@@ -205,12 +208,12 @@ class BorderFieldTrial {
           'Corte e vazão medidos devem ser positivos.',
         );
       }
-      input = cutoffMin * project.vazaoUnitariaLsM! * .06;
+      entrada = cutoffMin * project.vazaoUnitariaLsM! * .06;
     }
     final irn = project.irnEfetivaMm! / 1000;
-    var useful = 0.0, percolated = 0.0, deficit = 0.0;
-    for (var i = 1; i < profile.length; i++) {
-      final prev = profile[i - 1], curr = profile[i];
+    var util = 0.0, percolado = 0.0, deficit = 0.0;
+    for (var i = 1; i < perfil.length; i++) {
+      final prev = perfil[i - 1], curr = perfil[i];
       final z0 = prev.infiltracaoM, z1 = curr.infiltracaoM;
       final cross = (irn - z0) / (z1 - z0);
       final cuts = cross.isFinite && cross > 0 && cross < 1
@@ -219,13 +222,13 @@ class BorderFieldTrial {
       for (var j = 1; j < cuts.length; j++) {
         final a = cuts[j - 1], b = cuts[j], dx = (curr.xM - prev.xM) * (b - a);
         final za = z0 + (z1 - z0) * a, zb = z0 + (z1 - z0) * b;
-        useful += dx * (math.min(za, irn) + math.min(zb, irn)) / 2;
-        percolated += dx * (math.max(za - irn, 0) + math.max(zb - irn, 0)) / 2;
+        util += dx * (math.min(za, irn) + math.min(zb, irn)) / 2;
+        percolado += dx * (math.max(za - irn, 0) + math.max(zb - irn, 0)) / 2;
         deficit += dx * (math.max(irn - za, 0) + math.max(irn - zb, 0)) / 2;
       }
     }
-    final runoff = input == null ? null : input - useful - percolated;
-    if (runoff != null && runoff < -1e-7 * input!) {
+    final escoado = entrada == null ? null : entrada - util - percolado;
+    if (escoado != null && escoado < -1e-7 * entrada!) {
       throw const BorderModelException(
         BorderStatus.balancoInconsistente,
         'Balanço medido inconsistente.',
@@ -233,13 +236,13 @@ class BorderFieldTrial {
       );
     }
     return BorderTrialResult(
-      advance,
-      profile,
-      input,
-      useful,
-      percolated,
-      runoff,
-      deficit,
+      avanco: avanco,
+      perfil: perfil,
+      entradaM3M: entrada,
+      utilM3M: util,
+      percoladoM3M: percolado,
+      escoadoM3M: escoado,
+      deficitM3M: deficit,
       avisos: avisos,
     );
   }
