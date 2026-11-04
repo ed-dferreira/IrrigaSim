@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:irrigasim/shared/irrigacao/models/comum/clima_demanda.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
+import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/proveniencia_dado.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/coordenador_simulacao_sulcos.dart';
@@ -11,11 +12,12 @@ import 'package:irrigasim/shared/irrigacao/services/blaney_criddle.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/services/manejo_vazao.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/ensaios_sulco.dart'
     show PontoEnsaioAvanco;
-import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
+import 'package:irrigasim/shared/irrigacao/models/medicoes_campo.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/curva_infiltracao.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/services/modelo_curva_avanco.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/campos_parametros_sulco.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/estado_parametros_sulco.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/entradas_projeto.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/indicadores_balanco.dart';
 
 export 'estado_parametros_sulco.dart';
 
@@ -95,6 +97,12 @@ class ControladorParametrosSulco extends StateNotifier<EstadoParametrosSulco> {
   /// salvo, para que campos ausentes não herdem valores da sessão anterior.
   void resetar() {
     state = _recalcularLamina(const EstadoParametrosSulco());
+  }
+
+  /// Define diretamente o último resultado calculado — usado ao visualizar
+  /// um cenário salvo sem disparar novo cálculo.
+  void atribuirResultado(SimulationResult resultado) {
+    state = state.copyWith(resultado: resultado);
   }
 
   void definirTipoSulco(TipoSulco tipo) {

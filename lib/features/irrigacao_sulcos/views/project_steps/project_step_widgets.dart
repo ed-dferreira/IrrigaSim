@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:irrigasim/app/theme/app_icons.dart';
+import 'package:irrigasim/shared/irrigacao/widgets/irrigation_forms.dart';
+import 'package:irrigasim/shared/irrigacao/widgets/irrigation_input_fields.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/irrigation_project_components.dart';
 import 'package:irrigasim/shared/irrigacao/services/lamina_requerida.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/controlador_parametros_sulco.dart';
@@ -35,57 +35,17 @@ class StepNavigationButtons extends StatelessWidget {
   final VoidCallback onCalculate;
 
   @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final children = <Widget>[
-      if (!isFirst)
-        OutlinedButton.icon(
-          onPressed: onPrevious,
-          icon: const Icon(Icons.arrow_back_rounded, size: 18),
-          label: const Text('Voltar'),
-        ),
-      if (!isLast)
-        isConfirmed
-            ? Chip(
-                avatar: Icon(
-                  Icons.check_rounded,
-                  size: 16,
-                  color: colors.primary,
-                ),
-                label: const Text('Confirmada'),
-                backgroundColor: colors.primaryContainer,
-                side: BorderSide.none,
-              )
-            : OutlinedButton.icon(
-                onPressed: onConfirm,
-                icon: const Icon(Icons.check_circle_outline, size: 18),
-                label: const Text('Confirmar'),
-              ),
-      if (!isLast)
-        FilledButton.icon(
-          onPressed: onNext,
-          icon: const Icon(Icons.arrow_forward_rounded, size: 18),
-          label: const Text('Próximo'),
-        )
-      else
-        FilledButton.icon(
-          onPressed: executando || !canCalculate ? null : onCalculate,
-          icon: executando
-              ? const SizedBox.square(
-                  dimension: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(AppIcons.executarSimulacao),
-          label: Text(executando ? 'Calculando…' : 'Calcular projeto'),
-        ),
-    ];
-    return Wrap(
-      alignment: WrapAlignment.spaceBetween,
-      spacing: 8,
-      runSpacing: 8,
-      children: children,
-    );
-  }
+  Widget build(BuildContext context) => IrrigationStepNavigation(
+    isFirst: isFirst,
+    isLast: isLast,
+    isConfirmed: isConfirmed,
+    isBusy: executando,
+    canCalculate: canCalculate,
+    onPrevious: onPrevious,
+    onConfirm: onConfirm,
+    onNext: onNext,
+    onCalculate: onCalculate,
+  );
 }
 
 // ──────────────────────── Shared BentoCard ────────────────────────
@@ -137,43 +97,37 @@ class StepField extends ConsumerWidget {
   final bool optional;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      Text(label, style: Theme.of(context).textTheme.labelLarge),
-      const SizedBox(height: 6),
-      TextFormField(
-        initialValue: value == null ? '' : _format(value!),
-        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        inputFormatters: [
-          FilteringTextInputFormatter.allow(RegExp(r'[0-9,.-]')),
-        ],
-        decoration: InputDecoration(suffixText: suffix, helperText: helper),
-        onChanged: (text) => ref
-            .read(provedorParametrosSulco.notifier)
-            .atualizarCampo(campo: name, valor: text),
-        validator: (text) {
-          if (optional && (text == null || text.trim().isEmpty)) {
-            return null;
-          }
-          final number = double.tryParse((text ?? '').replaceAll(',', '.'));
-          if (number == null) return 'Informe um número válido';
-          if (allowZero ? number < 0 : number <= 0) {
-            return allowZero
-                ? 'Use zero ou um valor positivo'
-                : 'Use um valor maior que zero';
-          }
-          if ((name == 'a' || name == 'kc') && number > 1.4) {
-            return 'O valor máximo é 1,4';
-          }
-          if (name == 'periodoIrrigacaoDias' &&
-              number != number.truncateToDouble()) {
-            return 'Informe o período como número inteiro de dias';
-          }
-          return null;
-        },
-      ),
-    ],
+  Widget build(BuildContext context, WidgetRef ref) => IrrigationNumberField(
+    label: label,
+    value: value,
+    unit: suffix,
+    helper: helper,
+    allowZero: allowZero,
+    optional: optional,
+    fieldKey: ValueKey(name),
+    onChanged: (text) => ref
+        .read(provedorParametrosSulco.notifier)
+        .atualizarCampo(campo: name, valor: text),
+    validator: (text) {
+      if (optional && (text == null || text.trim().isEmpty)) {
+        return null;
+      }
+      final number = double.tryParse((text ?? '').replaceAll(',', '.'));
+      if (number == null) return 'Informe um número válido';
+      if (allowZero ? number < 0 : number <= 0) {
+        return allowZero
+            ? 'Use zero ou um valor positivo'
+            : 'Use um valor maior que zero';
+      }
+      if ((name == 'a' || name == 'kc') && number > 1.4) {
+        return 'O valor máximo é 1,4';
+      }
+      if (name == 'periodoIrrigacaoDias' &&
+          number != number.truncateToDouble()) {
+        return 'Informe o período como número inteiro de dias';
+      }
+      return null;
+    },
   );
 }
 
@@ -191,18 +145,14 @@ class StepStringField extends ConsumerWidget {
   final String? helper;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      Text(label, style: Theme.of(context).textTheme.labelLarge),
-      const SizedBox(height: 6),
-      TextFormField(
-        initialValue: value,
-        decoration: InputDecoration(helperText: helper),
-        onChanged: (text) =>
-            ref.read(provedorParametrosSulco.notifier).definirNomeCultura(text),
-      ),
-    ],
+  Widget build(BuildContext context, WidgetRef ref) => IrrigationLabeledField(
+    label: label,
+    child: TextFormField(
+      initialValue: value,
+      decoration: InputDecoration(helperText: helper),
+      onChanged: (text) =>
+          ref.read(provedorParametrosSulco.notifier).definirNomeCultura(text),
+    ),
   );
 }
 
@@ -212,23 +162,7 @@ class StepFieldGrid extends StatelessWidget {
   final bool wide;
 
   @override
-  Widget build(BuildContext context) {
-    if (!wide) {
-      return Column(
-        children: fields
-            .map(
-              (e) =>
-                  Padding(padding: const EdgeInsets.only(bottom: 12), child: e),
-            )
-            .toList(),
-      );
-    }
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: fields.map((e) => SizedBox(width: 300, child: e)).toList(),
-    );
-  }
+  Widget build(BuildContext context) => IrrigationFieldGrid(fields: fields);
 }
 
 class LaminaRequeridaCard extends StatelessWidget {
@@ -292,20 +226,19 @@ class OptionalNumericCurveField extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) => Padding(
     padding: const EdgeInsets.only(top: 12),
-    child: TextFormField(
-      key: ValueKey(name),
-      initialValue: value?.toString() ?? '',
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      decoration: InputDecoration(labelText: label),
-      onChanged: (text) => ref
-          .read(provedorParametrosSulco.notifier)
-          .atualizarCampo(campo: name, valor: text),
+    child: IrrigationLabeledField(
+      label: label,
+      child: TextFormField(
+        key: ValueKey(name),
+        initialValue: value?.toString() ?? '',
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        decoration: const InputDecoration(),
+        onChanged: (text) => ref
+            .read(provedorParametrosSulco.notifier)
+            .atualizarCampo(campo: name, valor: text),
+      ),
     ),
   );
 }
 
 // ──────────────────────── Helpers ────────────────────────
-
-String _format(double value) => value == value.roundToDouble()
-    ? value.toInt().toString()
-    : value.toString();

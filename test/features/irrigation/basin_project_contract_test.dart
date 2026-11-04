@@ -4,17 +4,20 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/shared/irrigacao/models/comum/clima_demanda.dart';
 import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
-import 'package:irrigasim/features/irrigacao_inundacao/models/basin_agronomy.dart';
-import 'package:irrigasim/features/irrigacao_inundacao/models/basin_project.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/models/agronomia_inundacao.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/models/projeto_inundacao.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
+import 'package:irrigasim/app/codecs.dart';
 
 void main() {
-  group('BasinProject serialização', () {
-    test('roundtrip toMap/fromMap preserva versão e campos-chave', () {
-      final project = BasinProject.exemploAula8Intermitente();
-      final loaded = BasinProject.fromMap(project.toMap());
+  setUpAll(registrarCodecs);
 
-      expect(loaded.versao, BasinProject.versaoAtual);
+  group('ProjetoInundacao serialização', () {
+    test('roundtrip toMap/fromMap preserva versão e campos-chave', () {
+      final project = ProjetoInundacao.exemploAula8Intermitente();
+      final loaded = ProjetoInundacao.fromMap(project.toMap());
+
+      expect(loaded.versao, ProjetoInundacao.versaoAtual);
       expect(loaded.regime, project.regime);
       expect(loaded.cenarioInfiltracao, project.cenarioInfiltracao);
       expect(loaded.comprimentoM, project.comprimentoM);
@@ -29,8 +32,8 @@ void main() {
     });
 
     test('roundtrip do regime permanente preserva parâmetros do arroz', () {
-      final project = BasinProject.exemploAula8Permanente();
-      final loaded = BasinProject.fromMap(project.toMap());
+      final project = ProjetoInundacao.exemploAula8Permanente();
+      final loaded = ProjetoInundacao.fromMap(project.toMap());
 
       expect(loaded.regime, TipoInundacao.permanente);
       expect(loaded.areaHectares, project.areaHectares);
@@ -43,7 +46,7 @@ void main() {
     });
 
     test('copyWith preserva campos não alterados e inteiros', () {
-      final project = BasinProject.exemploAula8Intermitente();
+      final project = ProjetoInundacao.exemploAula8Intermitente();
       final changed = project.copyWith(
         comprimentoM: 150,
         periodoDias: 7,
@@ -58,8 +61,8 @@ void main() {
     });
 
     test('toCompatParameters/fromLegacy são inversos nos campos comuns', () {
-      final project = BasinProject.exemploAula8Intermitente();
-      final restored = BasinProject.fromLegacy(project.toCompatParameters());
+      final project = ProjetoInundacao.exemploAula8Intermitente();
+      final restored = ProjetoInundacao.fromLegacy(project.toCompatParameters());
 
       expect(restored.regime, project.regime);
       expect(restored.comprimentoM, project.comprimentoM);
@@ -73,7 +76,7 @@ void main() {
 
   group('validação G1/G2/G9', () {
     test('exemplo da Aula 8 não tem impedimento bloqueante', () {
-      final notice = BasinProject.exemploAula8Intermitente().impedimento;
+      final notice = ProjetoInundacao.exemploAula8Intermitente().impedimento;
       expect(
         notice == null || !notice.status.bloqueia,
         isTrue,
@@ -84,7 +87,7 @@ void main() {
     test('G1: comprimento acima do limite da regra 2/3 é fora de domínio', () {
       // O preset da aula tem declividade 0; usa uma declividade real para
       // tornar a regra 2/3 aplicável e ultrapassa o comprimento máximo.
-      final base = BasinProject.exemploAula8Intermitente().copyWith(
+      final base = ProjetoInundacao.exemploAula8Intermitente().copyWith(
         declividade: 0.001,
       );
       final project = base.copyWith(
@@ -97,7 +100,7 @@ void main() {
     });
 
     test('G2: área do tabuleiro fora do intervalo bloqueia', () {
-      final project = BasinProject.exemploAula8Intermitente().copyWith(
+      final project = ProjetoInundacao.exemploAula8Intermitente().copyWith(
         comprimentoM: 300,
         larguraM: 200,
       );
@@ -107,7 +110,7 @@ void main() {
     });
 
     test('G2: altura da taipa fora do intervalo bloqueia com página', () {
-      final project = BasinProject.exemploAula8Intermitente().copyWith(
+      final project = ProjetoInundacao.exemploAula8Intermitente().copyWith(
         alturaDiqueM: 0.3,
       );
       final notice = project.impedimento!;
@@ -116,7 +119,7 @@ void main() {
     });
 
     test('G2: base da taipa fora do intervalo bloqueia', () {
-      final project = BasinProject.exemploAula8Intermitente().copyWith(
+      final project = ProjetoInundacao.exemploAula8Intermitente().copyWith(
         baseDiqueM: 0.2,
       );
       final notice = project.impedimento!;
@@ -125,7 +128,7 @@ void main() {
     });
 
     test('G2: margem livre fora do intervalo bloqueia', () {
-      final project = BasinProject.exemploAula8Intermitente().copyWith(
+      final project = ProjetoInundacao.exemploAula8Intermitente().copyWith(
         margemLivreM: 0.5,
       );
       final notice = project.impedimento!;
@@ -134,7 +137,7 @@ void main() {
     });
 
     test('G9: declividade >= 2% é fora de domínio na p. 20', () {
-      final project = BasinProject.exemploAula8Intermitente().copyWith(
+      final project = ProjetoInundacao.exemploAula8Intermitente().copyWith(
         declividade: 0.03,
       );
       final notice = project.impedimento!;
@@ -144,7 +147,7 @@ void main() {
     });
 
     test('vazão acima de Q0max gera aviso orientativo, não bloqueio', () {
-      final base = BasinProject.exemploAula8Intermitente();
+      final base = ProjetoInundacao.exemploAula8Intermitente();
       final q0max = base.q0MaxLsTotal!;
       final project = base.copyWith(vazaoTotalLs: q0max * 2);
       final notice = project.impedimento!;
@@ -155,7 +158,7 @@ void main() {
     });
 
     test('expoente a fora de (0,1) bloqueia', () {
-      final project = BasinProject.exemploAula8Intermitente().copyWith(a: 1.2);
+      final project = ProjetoInundacao.exemploAula8Intermitente().copyWith(a: 1.2);
       final notice = project.impedimento!;
       expect(notice.status, BorderStatus.entradaInvalida);
       expect(notice.mensagem, contains('(0,1)'));
@@ -166,7 +169,7 @@ void main() {
     test(
       'G12: intervalo menor que o turno de rega pela IRN vira aviso (p. 63)',
       () {
-        final project = BasinProject.exemploAula8Intermitente().copyWith(
+        final project = ProjetoInundacao.exemploAula8Intermitente().copyWith(
           intervaloDias: 3,
         );
         expect(project.turnoRegaIrnDias, closeTo(7, 1e-9));
@@ -180,14 +183,14 @@ void main() {
     );
 
     test('G12: intervalo cobrindo o turno não gera ressalva', () {
-      final project = BasinProject.exemploAula8Intermitente().copyWith(
+      final project = ProjetoInundacao.exemploAula8Intermitente().copyWith(
         intervaloDias: 14,
       );
       expect(project.impedimento, isNull);
     });
 
     test('G13: ETc igual a zero bloqueia', () {
-      final project = BasinProject.exemploAula8Intermitente().copyWith(
+      final project = ProjetoInundacao.exemploAula8Intermitente().copyWith(
         etIntermitenteMmDia: 0,
       );
       final notice = project.impedimento!;
@@ -197,7 +200,7 @@ void main() {
     });
 
     test('G13: precipitação efetiva acima da ETc bloqueia', () {
-      final project = BasinProject.exemploAula8Intermitente().copyWith(
+      final project = ProjetoInundacao.exemploAula8Intermitente().copyWith(
         precipitacaoEfetivaMmDia: 9,
       );
       expect(project.etcMmDia, 8);
@@ -207,9 +210,9 @@ void main() {
     });
 
     test('G14: IRN calculada sem insumos agronômicos bloqueia', () {
-      final project = BasinProject.exemploAula8Intermitente().copyWith(
-        origemIrn: OrigemIrnBasin.calculada,
-        agronomia: const BasinAgronomy(),
+      final project = ProjetoInundacao.exemploAula8Intermitente().copyWith(
+        origemIrn: OrigemIrnInundacao.calculada,
+        agronomia: const AgronomiaInundacao(),
       );
       expect(project.irnEfetivaMm, isNull);
       final notice = project.impedimento!;
@@ -218,22 +221,22 @@ void main() {
     });
 
     test('G14: informada prevalece e as origens sobrevivem ao roundtrip', () {
-      final project = BasinProject.exemploAula8Intermitente().copyWith(
+      final project = ProjetoInundacao.exemploAula8Intermitente().copyWith(
         laminaRequeridaMm: 50,
-        origemIrn: OrigemIrnBasin.informada,
+        origemIrn: OrigemIrnInundacao.informada,
         origemChuva: OrigemChuva.provavel,
       );
       expect(project.irnEfetivaMm, 50);
       expect(project.irnCalculadaMm, closeTo(56, 1e-9));
       expect(project.impedimento, isNull);
 
-      final loaded = BasinProject.fromMap(project.toMap());
-      expect(loaded.origemIrn, OrigemIrnBasin.informada);
+      final loaded = ProjetoInundacao.fromMap(project.toMap());
+      expect(loaded.origemIrn, OrigemIrnInundacao.informada);
       expect(loaded.origemChuva, OrigemChuva.provavel);
       expect(loaded.irnEfetivaMm, 50);
       expect(loaded.irnCalculadaMm, closeTo(56, 1e-9));
 
-      final calculada = project.copyWith(origemIrn: OrigemIrnBasin.calculada);
+      final calculada = project.copyWith(origemIrn: OrigemIrnInundacao.calculada);
       expect(calculada.irnEfetivaMm, closeTo(56, 1e-9));
       expect(
         calculada.impedimento?.status,
@@ -245,7 +248,7 @@ void main() {
 
   group('geometria derivada', () {
     test('área do tabuleiro e desnível seguem a geometria informada', () {
-      final project = BasinProject.exemploAula8Intermitente().copyWith(
+      final project = ProjetoInundacao.exemploAula8Intermitente().copyWith(
         comprimentoM: 100,
         larguraM: 2,
         declividade: 0.001,
@@ -255,7 +258,7 @@ void main() {
     });
 
     test('vazão aplicada usa Q0max quando nenhuma candidata é informada', () {
-      final project = BasinProject.exemploAula8Intermitente().copyWith(
+      final project = ProjetoInundacao.exemploAula8Intermitente().copyWith(
         vazaoTotalLs: null,
       );
       expect(project.vazaoAplicadaLs, project.q0MaxLsTotal);
@@ -264,14 +267,14 @@ void main() {
 
   group('campos da revisão', () {
     test('roundtrip preserva textura, cultura, Li/Lf e r inicial', () {
-      final project = BasinProject.exemploAula8Intermitente().copyWith(
+      final project = ProjetoInundacao.exemploAula8Intermitente().copyWith(
         texturaSolo: TexturaSolo.fina,
         cultura: 'Arroz irrigado',
         laminaInicialMm: 60,
         laminaFinalMm: 30,
         rInicial: 1.1,
       );
-      final loaded = BasinProject.fromMap(project.toMap());
+      final loaded = ProjetoInundacao.fromMap(project.toMap());
 
       expect(loaded.texturaSolo, TexturaSolo.fina);
       expect(loaded.cultura, 'Arroz irrigado');
@@ -283,19 +286,19 @@ void main() {
     });
 
     test('Lm usa (Li + Lf)/2 quando as lâminas são informadas (p. 34–35)', () {
-      final project = BasinProject.exemploAula8Intermitente().copyWith(
+      final project = ProjetoInundacao.exemploAula8Intermitente().copyWith(
         laminaInicialMm: 60,
         laminaFinalMm: 30,
       );
       expect(project.laminaMediaPlanaltoM, closeTo(0.045, 1e-12));
       expect(project.desnivelAdmissivelM, closeTo(0.03, 1e-12));
 
-      final semLiacLf = BasinProject.exemploAula8Intermitente();
+      final semLiacLf = ProjetoInundacao.exemploAula8Intermitente();
       expect(semLiacLf.laminaMediaPlanaltoM, closeTo(0.056, 1e-12));
     });
 
     test('G3: tabuleiro acima da área declarada vira aviso orientativo', () {
-      final project = BasinProject.exemploAula8Intermitente().copyWith(
+      final project = ProjetoInundacao.exemploAula8Intermitente().copyWith(
         comprimentoAreaM: 60,
         larguraAreaM: 50,
       );

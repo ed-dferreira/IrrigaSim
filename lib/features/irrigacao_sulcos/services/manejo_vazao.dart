@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
+import 'package:irrigasim/shared/irrigacao/models/medicoes_campo.dart';
 
 /// Parâmetros da fórmula qmax = C / S0^a por textura do solo.
 class ParametrosErosao {

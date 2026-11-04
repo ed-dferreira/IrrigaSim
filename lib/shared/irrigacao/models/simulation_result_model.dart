@@ -1,19 +1,24 @@
 import 'simulation_result.dart';
 
-import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
-import 'package:irrigasim/features/irrigacao_inundacao/models/basin_annexes.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/indicadores_balanco.dart';
-
 import 'package:irrigasim/shared/irrigacao/services/operational_planning.dart';
-import 'package:irrigasim/features/irrigacao_inundacao/services/basin_planning.dart';
+import 'package:irrigasim/shared/irrigacao/services/registro_codecs.dart';
 
 class SimulationResultModel {
   static Map<String, dynamic> toMap(SimulationResult result) {
+    final iniciais = registroCodecs.chavesAnexosIniciais;
+    final finais = registroCodecs.chavesAnexosFinais;
+    final conhecidas = {...iniciais, ...finais};
+    for (final chave in result.anexos.keys) {
+      if (!conhecidas.contains(chave)) {
+        throw StateError(
+          'Anexo "$chave" sem codec registrado em registrarCodecs().',
+        );
+      }
+    }
     return {
-      if (result.borderResult != null)
-        'resultadoFaixa': result.borderResult!.toMap(),
-      if (result.balancoSulco != null)
-        'balancoSulco': result.balancoSulco!.toMap(),
+      for (final chave in iniciais)
+        if (result.anexos[chave] != null)
+          chave: result.anexos[chave]!.toMap(),
       'eficiencia': result.eficiencia,
       'eficienciaRequerimento': result.eficienciaRequerimento,
       'cuc': result.cuc,
@@ -49,29 +54,15 @@ class SimulationResultModel {
       'hipoteseRecessao': result.hipoteseRecessao,
       'extrapolouAvanco': result.extrapolouAvanco,
       'planejamentoOperacional': result.planejamentoOperacional?.toMap(),
-      if (result.planejamentoParcelas != null)
-        'planejamentoParcelas': result.planejamentoParcelas!.toMap(),
-      if (result.selecaoVazao != null)
-        'selecaoVazao': result.selecaoVazao!.toMap(),
-      if (result.volumesArroz != null)
-        'volumesArroz': result.volumesArroz!.toMap(),
-      if (result.checagemOperacional != null)
-        'checagemOperacional': result.checagemOperacional!.toMap(),
+      for (final chave in finais)
+        if (result.anexos[chave] != null)
+          chave: result.anexos[chave]!.toMap(),
     };
   }
 
   static SimulationResult fromMap(Map<String, dynamic> map) {
     return SimulationResult(
-      borderResult: map['resultadoFaixa'] is Map
-          ? BorderResult.fromMap(
-              Map<String, dynamic>.from(map['resultadoFaixa'] as Map),
-            )
-          : null,
-      balancoSulco: map['balancoSulco'] is Map
-          ? IndicadoresBalancoSulco.fromMap(
-              Map<String, dynamic>.from(map['balancoSulco'] as Map),
-            )
-          : null,
+      anexos: registroCodecs.decodificarAnexos(map),
       eficiencia: (map['eficiencia'] as num).toDouble(),
       eficienciaRequerimento: (map['eficienciaRequerimento'] as num).toDouble(),
       cuc: (map['cuc'] as num).toDouble(),
@@ -134,18 +125,6 @@ class SimulationResultModel {
           ? PlanejamentoOperacionalResultado.fromMap(
               Map<String, dynamic>.from(map['planejamentoOperacional'] as Map),
             )
-          : null,
-      planejamentoParcelas: map['planejamentoParcelas'] is Map
-          ? BasinParcelasAnexo.fromMap(map['planejamentoParcelas'])
-          : null,
-      selecaoVazao: map['selecaoVazao'] is Map
-          ? BasinSelecaoVazaoAnexo.fromMap(map['selecaoVazao'])
-          : null,
-      volumesArroz: map['volumesArroz'] is Map
-          ? BasinVolumesAnexo.fromMap(map['volumesArroz'])
-          : null,
-      checagemOperacional: map['checagemOperacional'] is Map
-          ? BasinChecagemOperacional.fromMap(map['checagemOperacional'])
           : null,
     );
   }

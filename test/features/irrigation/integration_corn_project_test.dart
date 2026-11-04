@@ -8,6 +8,9 @@ import 'package:irrigasim/features/irrigacao_sulcos/services/modelo_infiltracao.
 import 'package:irrigasim/shared/irrigacao/services/lamina_requerida.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/services/tempo_oportunidade.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/services/simulador_sulcos.dart';
+import 'package:irrigasim/app/codecs.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/indicadores_balanco.dart';
+import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
 
 /// Valores de referência do §56 do documento.
 ///
@@ -17,6 +20,8 @@ import 'package:irrigasim/features/irrigacao_sulcos/services/simulador_sulcos.da
 /// Vazão = 1,5 L/s por sulco (reprovada por erosão)
 /// Vazão reduzida = 0,75 L/s
 void main() {
+  setUpAll(registrarCodecs);
+
   group('Projeto resolvido de milho — lâmina requerida e turno de rega', () {
     test('IRN = 42 mm (§56.1)', () {
       final resultado = LaminaRequeridaCalculator.calcular(
@@ -126,7 +131,7 @@ void main() {
   });
 
   group('ISSUE-016 — Caso milho §56: vazão constante 200m', () {
-    late dynamic resultado;
+    late SimulationResult resultado;
 
     setUp(() {
       // §56.9: valores de referência usam vazão de 1 L/s (não erosiva)

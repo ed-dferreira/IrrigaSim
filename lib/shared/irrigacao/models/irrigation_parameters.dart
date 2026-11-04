@@ -1,9 +1,6 @@
-import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
-import 'package:irrigasim/features/irrigacao_inundacao/models/basin_project.dart';
-
-import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/entradas_projeto.dart';
+import 'package:irrigasim/shared/irrigacao/models/comum/contratos_metodo.dart';
+import 'package:irrigasim/shared/irrigacao/models/medicoes_campo.dart';
+import 'package:irrigasim/shared/irrigacao/models/tipo_sulco.dart';
 
 enum MetodoIrrigacao { sulco, faixa, inundacao }
 
@@ -78,13 +75,9 @@ extension MetodoIrrigacaoExtension on MetodoIrrigacao {
 }
 
 class IrrigationParameters {
-  /// Contrato versionado de sulcos; null indica cenário legado sem essas entradas.
-  final EntradasProjeto? entradasProjeto;
-  final BorderProject? projetoFaixa;
-
-  /// Contrato versionado de inundação; null indica cenário legado sem o
-  /// projeto tipado (campos planos abaixo continuam válidos).
-  final BasinProject? projetoInundacao;
+  /// Projeto tipado do método; null indica cenário legado sem o contrato
+  /// versionado (os campos planos abaixo continuam válidos).
+  final ProjetoMetodo? projetoMetodo;
   final double comprimento;
   final double declividade;
   final double declividadeTransversal;
@@ -152,9 +145,7 @@ class IrrigationParameters {
   final List<MedicaoRecessao> medicoesRecessao;
 
   const IrrigationParameters({
-    this.entradasProjeto,
-    this.projetoFaixa,
-    this.projetoInundacao,
+    this.projetoMetodo,
     required this.comprimento,
     required this.declividade,
     this.declividadeTransversal = 0,
@@ -219,11 +210,8 @@ class IrrigationParameters {
   });
 
   IrrigationParameters copyWith({
-    EntradasProjeto? entradasProjeto,
-    bool clearEntradasProjetoSulco = false,
-    BorderProject? projetoFaixa,
-    BasinProject? projetoInundacao,
-    bool clearProjetoInundacao = false,
+    ProjetoMetodo? projetoMetodo,
+    bool clearProjetoMetodo = false,
     double? comprimento,
     double? declividade,
     double? declividadeTransversal,
@@ -287,13 +275,9 @@ class IrrigationParameters {
     List<MedicaoRecessao>? medicoesRecessao,
   }) {
     return IrrigationParameters(
-      entradasProjeto: clearEntradasProjetoSulco
+      projetoMetodo: clearProjetoMetodo
           ? null
-          : entradasProjeto ?? this.entradasProjeto,
-      projetoFaixa: projetoFaixa ?? this.projetoFaixa,
-      projetoInundacao: clearProjetoInundacao
-          ? null
-          : projetoInundacao ?? this.projetoInundacao,
+          : projetoMetodo ?? this.projetoMetodo,
       comprimento: comprimento ?? this.comprimento,
       declividade: declividade ?? this.declividade,
       declividadeTransversal:

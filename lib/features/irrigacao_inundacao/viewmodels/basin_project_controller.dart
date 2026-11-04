@@ -5,8 +5,8 @@
 // que resetam o resultado sempre que o projeto muda.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:irrigasim/shared/irrigacao/models/comum/clima_demanda.dart';
-import 'package:irrigasim/features/irrigacao_inundacao/models/basin_agronomy.dart';
-import 'package:irrigasim/features/irrigacao_inundacao/models/basin_project.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/models/agronomia_inundacao.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/models/projeto_inundacao.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/viewmodels/basin_simulation_coordinator.dart';
@@ -25,7 +25,7 @@ class BasinScenarioComparison {
 
 /// Compara os dois cenários de infiltração armazenados no projeto usando a
 /// mesma simulação do regime; lança [FormatException] quando falta dado.
-BasinScenarioComparison calcularComparacaoCenarios(BasinProject projeto) {
+BasinScenarioComparison calcularComparacaoCenarios(ProjetoInundacao projeto) {
   final primeira = projeto.dadosPrimeira;
   final terceira = projeto.dadosTerceira;
   final k1 = primeira?.k, a1 = primeira?.a, v1 = primeira?.vibMMin;
@@ -47,13 +47,13 @@ BasinScenarioComparison calcularComparacaoCenarios(BasinProject projeto) {
     );
   }
   final base = projeto.copyWith(
-    cenarioInfiltracao: CenarioInfiltracaoBasin.primeira,
+    cenarioInfiltracao: CenarioInfiltracaoInundacao.primeira,
     k: k1,
     a: a1,
     vibMMin: v1,
   );
   final outra = base.copyWith(
-    cenarioInfiltracao: CenarioInfiltracaoBasin.terceira,
+    cenarioInfiltracao: CenarioInfiltracaoInundacao.terceira,
     k: k3,
     a: a3,
     vibMMin: v3,
@@ -63,32 +63,32 @@ BasinScenarioComparison calcularComparacaoCenarios(BasinProject projeto) {
   return BasinScenarioComparison(primeira: r1, terceira: r2);
 }
 
-class BasinProjectController extends StateNotifier<BasinProject> {
-  BasinProjectController() : super(BasinProject.exemploAula8Intermitente());
+class BasinProjectController extends StateNotifier<ProjetoInundacao> {
+  BasinProjectController() : super(ProjetoInundacao.exemploAula8Intermitente());
 
-  void carregar(BasinProject projeto) => state = projeto;
+  void carregar(ProjetoInundacao projeto) => state = projeto;
 
   void setRegime(TipoInundacao regime) =>
       state = state.copyWith(regime: regime);
 
   /// Aplica o preset didático da Aula 8 do regime ativo (G5).
   void aplicarExemploAula8() => state = state.regime == TipoInundacao.permanente
-      ? BasinProject.exemploAula8Permanente()
-      : BasinProject.exemploAula8Intermitente();
+      ? ProjetoInundacao.exemploAula8Permanente()
+      : ProjetoInundacao.exemploAula8Intermitente();
 
-  void setCenarioInfiltracao(CenarioInfiltracaoBasin value) {
+  void setCenarioInfiltracao(CenarioInfiltracaoInundacao value) {
     var project = _rememberActiveInfiltration(state);
     final stored = switch (value) {
-      CenarioInfiltracaoBasin.primeira => project.dadosPrimeira,
-      CenarioInfiltracaoBasin.terceira => project.dadosTerceira,
-      CenarioInfiltracaoBasin.informado => null,
+      CenarioInfiltracaoInundacao.primeira => project.dadosPrimeira,
+      CenarioInfiltracaoInundacao.terceira => project.dadosTerceira,
+      CenarioInfiltracaoInundacao.informado => null,
     };
     final data = project.toMap()
       ..['cenario_infiltracao'] = value.name
       ..['k'] = stored?.k
       ..['a'] = stored?.a
       ..['vib_m_min'] = stored?.vibMMin;
-    state = BasinProject.fromMap(data);
+    state = ProjetoInundacao.fromMap(data);
   }
 
   /// Candidatas em L/s separadas por vírgula (p. 60). Texto inválido é
@@ -117,17 +117,17 @@ class BasinProjectController extends StateNotifier<BasinProject> {
     final trimmed = value.trim();
     final cultura = trimmed.isEmpty ? null : trimmed;
     final agronomia = state.agronomia;
-    state = BasinProject.fromMap({
+    state = ProjetoInundacao.fromMap({
       ...state.toMap(),
       'cultura': cultura,
       'agronomia': agronomia == null
           ? null
-          : BasinAgronomy.fromMap({...agronomia.toMap(), 'cultura': cultura})
+          : AgronomiaInundacao.fromMap({...agronomia.toMap(), 'cultura': cultura})
                 .toMap(),
     });
   }
 
-  /// Campos numéricos de BasinAgronomy editáveis pela etapa de Cultura.
+  /// Campos numéricos de AgronomiaInundacao editáveis pela etapa de Cultura.
   static const _camposAgronomia = {
     'kc',
     'uccPercentual',
@@ -141,16 +141,16 @@ class BasinProjectController extends StateNotifier<BasinProject> {
   /// (G4: ausente nunca vira zero). [setNumero] delega para cá.
   void setAgronomia(String campo, String texto) {
     if (!_camposAgronomia.contains(campo)) return;
-    final base = state.agronomia ?? const BasinAgronomy();
+    final base = state.agronomia ?? const AgronomiaInundacao();
     if (texto.trim().isEmpty) {
       state = state.copyWith(
-        agronomia: BasinAgronomy.fromMap({...base.toMap(), campo: null}),
+        agronomia: AgronomiaInundacao.fromMap({...base.toMap(), campo: null}),
       );
       return;
     }
     final value = double.tryParse(texto.replaceAll(',', '.'));
     if (value == null || !value.isFinite) return;
-    state = state.copyWith(agronomia: base.withValue(campo, value));
+    state = state.copyWith(agronomia: base.comValor(campo, value));
   }
 
   /// Método de estimação da ETc (etapa de Clima e demanda).
@@ -162,7 +162,7 @@ class BasinProjectController extends StateNotifier<BasinProject> {
       state = state.copyWith(origemChuva: value);
 
   /// Origem da IRN do balanço: informada prevalece (G14).
-  void setOrigemIrn(OrigemIrnBasin value) =>
+  void setOrigemIrn(OrigemIrnInundacao value) =>
       state = state.copyWith(origemIrn: value);
 
   /// Mês de referência do Blaney–Criddle (1–12); null limpa.
@@ -244,7 +244,7 @@ class BasinProjectController extends StateNotifier<BasinProject> {
     if (texto.trim().isEmpty) {
       final chave = _chavesMap[campo];
       if (chave != null) {
-        state = BasinProject.fromMap({...state.toMap(), chave: null});
+        state = ProjetoInundacao.fromMap({...state.toMap(), chave: null});
       } else if (campo == 'periodoDias') {
         state = state.copyWith(periodoDias: 10);
       } else if (campo == 'tabuleirosPorParcela') {
@@ -330,26 +330,26 @@ class BasinProjectController extends StateNotifier<BasinProject> {
     state = _rememberActiveInfiltration(state);
   }
 
-  BasinProject _rememberActiveInfiltration(BasinProject project) {
-    final values = BasinInfiltrationScenario(
+  ProjetoInundacao _rememberActiveInfiltration(ProjetoInundacao project) {
+    final values = DadosInfiltracao(
       k: project.k,
       a: project.a,
       vibMMin: project.vibMMin,
     );
     return switch (project.cenarioInfiltracao) {
-      CenarioInfiltracaoBasin.primeira => project.copyWith(
+      CenarioInfiltracaoInundacao.primeira => project.copyWith(
         dadosPrimeira: values,
       ),
-      CenarioInfiltracaoBasin.terceira => project.copyWith(
+      CenarioInfiltracaoInundacao.terceira => project.copyWith(
         dadosTerceira: values,
       ),
-      CenarioInfiltracaoBasin.informado => project,
+      CenarioInfiltracaoInundacao.informado => project,
     };
   }
 }
 
 final basinProjectProvider =
-    StateNotifierProvider<BasinProjectController, BasinProject>(
+    StateNotifierProvider<BasinProjectController, ProjetoInundacao>(
       (ref) => BasinProjectController(),
     );
 
@@ -365,5 +365,5 @@ final basinScenarioComparisonProvider = StateProvider<BasinScenarioComparison?>(
   },
 );
 
-SimulationResult calcularProjetoInundacao(BasinProject projeto) =>
+SimulationResult calcularProjetoInundacao(ProjetoInundacao projeto) =>
     const BasinSimulationCoordinator().executarProjeto(projeto);

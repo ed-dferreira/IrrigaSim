@@ -25,14 +25,11 @@ class KpiCard extends StatelessWidget {
     final effectiveColor = color ?? colorScheme.primary;
 
     return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Container(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      child: Padding(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: effectiveColor.withValues(alpha: 0.05),
-        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -46,7 +43,7 @@ class KpiCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     titulo,
-                    style: textTheme.labelMedium?.copyWith(
+                    style: textTheme.labelLarge?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
                     maxLines: 1,
@@ -62,7 +59,7 @@ class KpiCard extends StatelessWidget {
                 Flexible(
                   child: Text(
                     valor,
-                    style: textTheme.headlineMedium?.copyWith(
+                    style: textTheme.headlineSmall?.copyWith(
                       color: effectiveColor,
                       fontWeight: FontWeight.w700,
                     ),
@@ -70,14 +67,18 @@ class KpiCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const SizedBox(width: 4),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 2),
-                  child: Text(
-                    unidade,
-                    style: textTheme.bodySmall?.copyWith(color: effectiveColor),
+                if (unidade.isNotEmpty) ...[
+                  const SizedBox(width: 4),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 2),
+                    child: Text(
+                      unidade,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: effectiveColor,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
             if (subtitulo != null) ...[

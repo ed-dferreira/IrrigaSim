@@ -1,4 +1,6 @@
 import 'package:irrigasim/shared/irrigacao/models/comum/clima_demanda.dart';
+import 'package:irrigasim/shared/irrigacao/models/comum/contratos_metodo.dart';
+import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 
 import 'curva_infiltracao.dart';
 import 'proveniencia_dado.dart';
@@ -8,7 +10,7 @@ import 'proveniencia_dado.dart';
 /// Guarda apenas o que o usuário informou, não os resultados derivados.
 /// `null` significa ausente, inclusive ao migrar um cenário anterior à
 /// versão 1.
-class EntradasProjeto {
+class EntradasProjeto implements ProjetoMetodo {
   const EntradasProjeto({
     this.versao = 1,
     this.uccPercentual,
@@ -89,6 +91,7 @@ class EntradasProjeto {
       origemChuva != OrigemChuva.provavel;
 
   /// As chaves são parte do formato persistido e não devem ser renomeadas.
+  @override
   Map<String, dynamic> toMap() => {
     'versao': versao,
     'ucc_percentual': uccPercentual,
@@ -167,4 +170,11 @@ class EntradasProjeto {
           : null,
     );
   }
+}
+
+extension EntradasProjetoEmParametros on IrrigationParameters {
+  EntradasProjeto? get entradasProjeto => switch (projetoMetodo) {
+    final EntradasProjeto entradas => entradas,
+    _ => null,
+  };
 }

@@ -8,7 +8,7 @@ import 'package:irrigasim/shared/irrigacao/services/lamina_requerida.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/proveniencia_dado.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/curva_infiltracao.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/entradas_projeto.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
+import 'package:irrigasim/shared/irrigacao/models/medicoes_campo.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/ensaios_sulco.dart'
     show PontoEnsaioAvanco;
 import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart';
@@ -502,7 +502,7 @@ class EstadoParametrosSulco {
     final curva = projetoSulcoLegado ? null : entradasSulco.curvaInfiltracao;
     final convertida = curva?.parametrosAcumulados();
     return IrrigationParameters(
-      entradasProjeto: projetoSulcoLegado ? null : entradasSulco,
+      projetoMetodo: projetoSulcoLegado ? null : entradasSulco,
       comprimento: comprimento,
       declividade: declividade,
       declividadeTransversal: declividadeTransversal,

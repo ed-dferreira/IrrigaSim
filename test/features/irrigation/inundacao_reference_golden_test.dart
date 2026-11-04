@@ -11,9 +11,9 @@ import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
-import 'package:irrigasim/features/irrigacao_inundacao/services/basin_reference_math.dart';
-import 'package:irrigasim/features/irrigacao_inundacao/services/basin_reference_tables.dart';
-import 'package:irrigasim/features/irrigacao_inundacao/services/rice_volumes_service.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/services/nucleo_referencia_inundacao.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/services/tabelas_referencia_inundacao.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/services/volumes_arroz.dart';
 
 const pacote = 'docs/Pacote_Inundacao';
 const tolerancia = 1e-5;
@@ -89,7 +89,7 @@ void main() {
           irn: 0.056,
           vmax: 8,
         );
-        perto('Q0max (p. 54)', vazaoMaxima(8, 0.04, 200), d.q0M3MinM);
+        perto('Q0max (p. 54)', vazaoNaoErosivaMaxima(8, 0.04, 200), d.q0M3MinM);
         expect(d.tiMin, d.taMin);
         // S0 = y0/X auditável (G10) e resíduo do balanço < 1e-7 m³/m.
         perto('S0 = y0/L', d.s0, d.y0M / 200);
@@ -127,7 +127,7 @@ void main() {
       pacoteJson['arroz_pagina_84_parcial'] as Map,
     );
     final arroz = Map<String, dynamic>.from(dados['arroz'] as Map);
-    final service = const RiceVolumesService();
+    final service = const ServicoVolumesArroz();
 
     test('porosidade PT e umidade de saturação Us', () {
       final r = service.solucaoPagina84();
@@ -368,8 +368,8 @@ void main() {
 
     test('Newton ≡ bisseção (<1e-5 min)', () {
       final p = dimensionar(primeira);
-      final x = tempoNaDistancia(200, p.q0M3MinM, 0.04, primeira, p.r);
-      final newton = tempoNaDistanciaNewton(
+      final x = tempoAvancoNaDistancia(200, p.q0M3MinM, 0.04, primeira, p.r);
+      final newton = tempoAvancoNewtonRaphson(
         200,
         p.q0M3MinM,
         0.04,
@@ -379,8 +379,8 @@ void main() {
       perto('Newton = bisseção', newton, x);
       expect((newton - x).abs(), lessThan(1e-5));
       // Independência do chute inicial: outro ponto da curva.
-      final meio = tempoNaDistancia(100, p.q0M3MinM, 0.04, primeira, p.r);
-      final newtonMeio = tempoNaDistanciaNewton(
+      final meio = tempoAvancoNaDistancia(100, p.q0M3MinM, 0.04, primeira, p.r);
+      final newtonMeio = tempoAvancoNewtonRaphson(
         100,
         p.q0M3MinM,
         0.04,
@@ -413,7 +413,7 @@ void main() {
       rejeita('tempo negativo', () => primeira.acumulada(-1));
       rejeita(
         'vazão insuficiente',
-        () => tempoNaDistancia(200, 0.001, 0.04, primeira, 0.7),
+        () => tempoAvancoNaDistancia(200, 0.001, 0.04, primeira, 0.7),
       );
       rejeita('vazão erosiva', () => dimensionar(primeira, vazao: 2));
       rejeita('NaN', () => Infiltracao(double.nan, 0.47, 0.00011));
@@ -474,10 +474,10 @@ void main() {
         dados['tabela_pagina_16'] as Map,
       );
       expect(
-        BasinReferenceTables.guiaSolo.length,
+        TabelasReferencia.guiaSolo.length,
         (tabela['area_ha'] as Map).length,
       );
-      for (final row in BasinReferenceTables.guiaSolo) {
+      for (final row in TabelasReferencia.guiaSolo) {
         expect(
           row.areaHaBase,
           closeTo(numero(tabela['area_ha'][row.chaveJson]), 1e-12),
@@ -485,12 +485,12 @@ void main() {
         );
         expect(row.status, BorderStatus.avisoOrientativo);
       }
-      expect(numero(tabela['vazao_base_l_s']), BasinSoilGuideRow.vazaoBaseLs);
+      expect(numero(tabela['vazao_base_l_s']), LinhaGuiaSolo.vazaoBaseLs);
       expect(
-        const BasinReferenceTables().areaSugerida('franco_argiloso', 20),
+        const TabelasReferencia().areaSugerida('franco_argiloso', 20),
         closeTo(0.06, 1e-12),
       );
-      expect(const BasinReferenceTables().guia('vulcânico'), isNull);
+      expect(const TabelasReferencia().guia('vulcânico'), isNull);
     });
 
     test('Henderson p. 17 preserva o fator 100', () {
@@ -498,11 +498,11 @@ void main() {
         dados['henderson_pagina_17'] as Map,
       );
       expect(henderson['formula'], contains('100'));
-      expect(BasinHendersonReference.formula, contains('100'));
-      expect(BasinHendersonReference.area(1, 1), 100);
+      expect(ReferenciaHenderson.formula, contains('100'));
+      expect(ReferenciaHenderson.area(1, 1), 100);
       expect(henderson['natureza'], contains('fator 100 preservado'));
-      expect(BasinHendersonReference.natureza, contains('fator 100'));
-      expect(BasinHendersonReference.pagina, 17);
+      expect(ReferenciaHenderson.natureza, contains('fator 100'));
+      expect(ReferenciaHenderson.pagina, 17);
     });
 
     test('Booher p. 38: 49 células, 2 suspeitas (Ø30/7,5 e Ø30/10)', () {
@@ -514,9 +514,9 @@ void main() {
       final valores = (booher['vazao_l_s'] as List)
           .map((linha) => (linha as List).map(numero).toList())
           .toList();
-      expect(diametros, BasinReferenceTables.diametrosCm);
-      expect(cargas, BasinReferenceTables.cargasCm);
-      final tabela = const BasinReferenceTables();
+      expect(diametros, TabelasReferencia.diametrosCm);
+      expect(cargas, TabelasReferencia.cargasCm);
+      final tabela = const TabelasReferencia();
       var suspeitas = 0;
       for (var i = 0; i < diametros.length; i++) {
         for (var j = 0; j < cargas.length; j++) {
@@ -539,15 +539,15 @@ void main() {
         listadas
             .map((c) => (numero(c['diametro_cm']), numero(c['carga_cm'])))
             .toSet(),
-        basinBooherCelulasSuspeitas.toSet(),
+        celulasBooherSuspeitas.toSet(),
       );
       expect(tabela.booher(16, 10), isNull);
       expect(tabela.sugestao(15, 10), isNotNull);
-      expect(BasinBooherCell.pagina, 38);
+      expect(CelulaBooher.pagina, 38);
     });
 
     test('presets da Aula 8 (pp. 63, 73 e 84) batem com o JSON (G5)', () {
-      final p = BasinReferenceTables.intermitenteAula8;
+      final p = TabelasReferencia.intermitenteAula8;
       final primeira = Map<String, dynamic>.from(
         intermitente['primeira'] as Map,
       );
@@ -575,7 +575,7 @@ void main() {
         (intermitente['intervalo_disponibilidade_dias'] as num).toInt(),
       );
 
-      final c = BasinReferenceTables.continuaAula8;
+      final c = TabelasReferencia.continuaAula8;
       final continuaJson = Map<String, dynamic>.from(dados['continua'] as Map);
       expect(c.areaHa, numero(continuaJson['area_ha']));
       expect(c.dtaMmCm, numero(continuaJson['dta_mm_cm']));
@@ -587,7 +587,7 @@ void main() {
       expect(c.f, numero(continuaJson['f']));
       expect(c.profundidadeCamadaMm, numero(continuaJson['z_cm']) * 10);
 
-      final a = BasinReferenceTables.arrozAula8;
+      final a = TabelasReferencia.arrozAula8;
       final arroz = Map<String, dynamic>.from(dados['arroz'] as Map);
       expect(a.dsGcm3, numero(arroz['ds_g_cm3']));
       expect(a.dpGcm3, numero(arroz['dp_g_cm3']));
@@ -608,9 +608,9 @@ void main() {
       expect(a.tdDias, isNull);
       expect(a.trDias, isNull);
 
-      expect(BasinPresetIntermitente.pagina, 63);
-      expect(BasinPresetContinua.pagina, 73);
-      expect(BasinPresetArroz.pagina, 84);
+      expect(PredefinicaoIntermitente.pagina, 63);
+      expect(PredefinicaoContinua.pagina, 73);
+      expect(PredefinicaoArroz.pagina, 84);
       expect((dados['observacoes'] as List).length, 7);
     });
   });

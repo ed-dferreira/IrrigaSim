@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:irrigasim/app/theme/app_colors.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart';
+import 'package:irrigasim/shared/irrigacao/models/tipo_sulco.dart';
 
 class TerrainPainter extends CustomPainter {
   TerrainPainter({

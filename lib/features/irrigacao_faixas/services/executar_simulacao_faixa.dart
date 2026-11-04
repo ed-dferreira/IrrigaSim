@@ -19,7 +19,7 @@ class RunBorderSimulation {
     final depths = r.perfil.map((point) => point.infiltracaoM).toList();
     final mean = depths.reduce((a, b) => a + b) / depths.length;
     return SimulationResult(
-      borderResult: r,
+      anexos: {chaveAnexoResultadoFaixa: r},
       eficiencia: r.ea,
       eficienciaRequerimento: r.er,
       cuc: PerformanceIndicators.calcularCuc(depths).toDouble(),

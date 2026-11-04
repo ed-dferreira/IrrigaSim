@@ -2,18 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/app/theme/app_theme.dart';
-import 'package:irrigasim/shared/cenarios/models/cenario_salvo.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
+import 'package:irrigasim/features/cenarios/models/cenario_salvo.dart';
+import 'package:irrigasim/shared/irrigacao/models/medicoes_campo.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/ensaios_sulco.dart';
-import 'package:irrigasim/shared/cenarios/persistence/local_scenario_store.dart';
-import 'package:irrigasim/shared/cenarios/services/scenario_service.dart';
-import 'package:irrigasim/shared/cenarios/providers/scenario_providers.dart';
+import 'package:irrigasim/features/cenarios/persistence/local_scenario_store.dart';
+import 'package:irrigasim/features/cenarios/services/scenario_service.dart';
+import 'package:irrigasim/features/cenarios/providers/scenario_providers.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/controlador_parametros_sulco.dart';
-import 'package:irrigasim/shared/cenarios/controllers/salvar_cenario_controller.dart';
+import 'package:irrigasim/features/cenarios/controllers/salvar_cenario_controller.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/views/project_results_screen.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/views/project_screen.dart';
+import 'package:irrigasim/app/codecs.dart';
 
 void main() {
+  setUpAll(registrarCodecs);
+
   TestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets(
@@ -142,4 +145,65 @@ void main() {
     expect(find.textContaining('regressão log-log'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'resultado de sulcos permanece utilizável em tema escuro e texto ampliado',
+    (tester) async {
+      tester.view.physicalSize = const Size(1100, 2400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final parameters = ControladorParametrosSulco();
+      parameters.definirOrigemAvanco(OrigemAvanco.ensaio);
+      parameters.atualizarCampo(campo: 'vazaoEnsaioAvancoLs', valor: '1');
+      parameters.definirCondicoesEnsaioAvanco(
+        'Solo médio, seção em V e orientação ensaiada',
+      );
+      parameters.definirMetodoCurvaAvanco(MetodoAjusteAvanco.minimosQuadrados);
+      parameters.definirPontosEnsaioAvanco(const [
+        PontoEnsaioAvanco(distanciaM: 0, tempoMin: 0),
+        PontoEnsaioAvanco(distanciaM: 50, tempoMin: 20),
+        PontoEnsaioAvanco(distanciaM: 100, tempoMin: 43),
+        PontoEnsaioAvanco(distanciaM: 200, tempoMin: 95),
+      ]);
+      parameters.definirOrigemCurvaInfiltracao(
+        OrigemCurvaInfiltracao.ensaioEntradaSaida,
+      );
+      parameters.definirMedicoesEntradaSaida(const [
+        MedicaoEntradaSaida(tempoMin: 10, vazaoEntradaLs: 1, vazaoSaidaLs: .5),
+        MedicaoEntradaSaida(tempoMin: 20, vazaoEntradaLs: 1, vazaoSaidaLs: .6),
+        MedicaoEntradaSaida(tempoMin: 30, vazaoEntradaLs: 1, vazaoSaidaLs: .7),
+      ]);
+      await parameters.executarSimulacao();
+      expect(parameters.state.resultado, isNotNull);
+      final store = LocalScenarioStore();
+      addTearDown(store.dispose);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            provedorParametrosSulco.overrideWith((ref) => parameters),
+            resultsProvider.overrideWith(
+              (ref) => ResultsController(ScenarioService(store)),
+            ),
+            cenariosProvider.overrideWith(
+              (ref) => Stream.value(<CenarioSalvo>[]),
+            ),
+          ],
+          child: MediaQuery(
+            data: const MediaQueryData(textScaler: TextScaler.linear(1.8)),
+            child: MaterialApp(
+              theme: ThemeData(colorScheme: const ColorScheme.dark()),
+              home: const ProjectResultsScreen(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Aplicação e desempenho'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
 }

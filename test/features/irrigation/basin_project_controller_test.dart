@@ -4,7 +4,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/shared/irrigacao/models/comum/clima_demanda.dart';
-import 'package:irrigasim/features/irrigacao_inundacao/models/basin_project.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/models/projeto_inundacao.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/viewmodels/basin_project_controller.dart';
 
 void main() {
@@ -38,7 +38,7 @@ void main() {
 
     controller.setMetodoEtc(MetodoEtc.etoVezesKc);
     controller.setOrigemChuva(OrigemChuva.efetiva);
-    controller.setOrigemIrn(OrigemIrnBasin.calculada);
+    controller.setOrigemIrn(OrigemIrnInundacao.calculada);
     controller.setMesReferencia(10);
     controller.setNumero('etoMmDia', '6');
     controller.setNumero('temperaturaMediaC', '22');
@@ -47,7 +47,7 @@ void main() {
     final p = c.read(basinProjectProvider);
     expect(p.metodoEtc, MetodoEtc.etoVezesKc);
     expect(p.origemChuva, OrigemChuva.efetiva);
-    expect(p.origemIrn, OrigemIrnBasin.calculada);
+    expect(p.origemIrn, OrigemIrnInundacao.calculada);
     expect(p.mesReferencia, 10);
     expect(p.etoMmDia, 6);
     expect(p.temperaturaMediaC, 22);
@@ -91,7 +91,7 @@ void main() {
     expect(p.laminaRequeridaMm, 56);
     expect(p.etIntermitenteMmDia, 8);
     expect(p.metodoEtc, MetodoEtc.adotada);
-    expect(p.origemIrn, OrigemIrnBasin.informada);
+    expect(p.origemIrn, OrigemIrnInundacao.informada);
     expect(p.agronomia?.uccPercentual, 30);
     expect(p.agronomia?.upmpPercentual, 20);
     expect(p.agronomia?.densidadeGcm3, 1.4);

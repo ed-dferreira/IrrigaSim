@@ -4,16 +4,16 @@
 // resultado, com a página da fonte visível em cada seção e nas linhas.
 import 'package:flutter/material.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
-import 'package:irrigasim/features/irrigacao_inundacao/models/basin_project.dart';
-import 'package:irrigasim/features/irrigacao_inundacao/services/basin_planning.dart';
-import 'package:irrigasim/features/irrigacao_inundacao/services/basin_reference_tables.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/models/projeto_inundacao.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/services/planejamento_inundacao.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/services/tabelas_referencia_inundacao.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/auditable_widgets.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/irrigation_project_components.dart';
 
 class BasinReferencePanel extends StatelessWidget {
   const BasinReferencePanel({super.key, required this.projeto});
 
-  final BasinProject projeto;
+  final ProjetoInundacao projeto;
 
   String _fmt(double? value, {int casas = 4}) {
     if (value == null) return '—';
@@ -31,7 +31,7 @@ class BasinReferencePanel extends StatelessWidget {
     final vib = projeto.vibMMin;
     double? areaHenderson;
     if (vazao != null && vib != null && vazao > 0 && vib > 0) {
-      areaHenderson = BasinHendersonReference.area(
+      areaHenderson = ReferenciaHenderson.area(
         vazao * 3.6,
         vib * 60 * 1000,
       );
@@ -41,10 +41,10 @@ class BasinReferencePanel extends StatelessWidget {
       children: [
         IrrigationAuditSection(
           title: 'Guia de área por vazão',
-          pagina: '${BasinReferenceTables.paginaGuiaSolo}',
+          pagina: '${TabelasReferencia.paginaGuiaSolo}',
           icon: AppIcons.soloArgiloso,
           children: [
-            for (final row in BasinReferenceTables.guiaSolo)
+            for (final row in TabelasReferencia.guiaSolo)
               IrrigationAuditRow(
                 row.rotulo,
                 vazao == null
@@ -54,24 +54,24 @@ class BasinReferencePanel extends StatelessWidget {
                 detail:
                     'Orientativo; não substitui o dimensionamento hidráulico.',
                 isWarning: true,
-                pagina: '${BasinReferenceTables.paginaGuiaSolo}',
+                pagina: '${TabelasReferencia.paginaGuiaSolo}',
               ),
           ],
         ),
         IrrigationAuditSection(
           title: 'Henderson',
-          pagina: '${BasinReferenceTables.paginaHenderson}',
+          pagina: '${TabelasReferencia.paginaHenderson}',
           icon: AppIcons.projetoSolo,
           children: [
             IrrigationAuditRow(
               'Fórmula',
-              BasinHendersonReference.formula,
+              ReferenciaHenderson.formula,
               detail:
-                  'A em ${BasinHendersonReference.unidadeArea}, '
-                  'Q em ${BasinHendersonReference.unidadeVazao} e '
-                  'VIB em ${BasinHendersonReference.unidadeVib}; '
-                  '${BasinHendersonReference.natureza}.',
-              pagina: '${BasinReferenceTables.paginaHenderson}',
+                  'A em ${ReferenciaHenderson.unidadeArea}, '
+                  'Q em ${ReferenciaHenderson.unidadeVazao} e '
+                  'VIB em ${ReferenciaHenderson.unidadeVib}; '
+                  '${ReferenciaHenderson.natureza}.',
+              pagina: '${TabelasReferencia.paginaHenderson}',
             ),
             IrrigationAuditRow(
               'Área estimada',
@@ -82,13 +82,13 @@ class BasinReferencePanel extends StatelessWidget {
                   ? 'Informe a vazão total e a VIB para estimar a área.'
                   : 'Q = ${_fmt(vazao, casas: 1)} L/s · '
                         'VIB = ${_fmt(vib, casas: 6)} m/min.',
-              pagina: '${BasinReferenceTables.paginaHenderson}',
+              pagina: '${TabelasReferencia.paginaHenderson}',
             ),
           ],
         ),
         IrrigationAuditSection(
           title: 'Sifões e tubos de Booher',
-          pagina: '${BasinReferenceTables.paginaBooher}',
+          pagina: '${TabelasReferencia.paginaBooher}',
           icon: AppIcons.balancoHidrico,
           children: [
             Text(
@@ -115,12 +115,14 @@ class _BooherTable extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
-    final headers = BasinReferenceTables.cargasCm;
-    final diameters = BasinReferenceTables.diametrosCm;
-    final values = BasinReferenceTables.valoresLs;
+    final headers = TabelasReferencia.cargasCm;
+    final diameters = TabelasReferencia.diametrosCm;
+    final values = TabelasReferencia.valoresLs;
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: DataTable(
+        // Permite que a linha cresça com o texto ampliado (TextScaler 1.8).
+        dataRowMaxHeight: double.infinity,
         headingRowColor: WidgetStatePropertyAll(colors.surfaceContainerHigh),
         columns: [
           const DataColumn(label: Text('Ø (cm)')),
@@ -149,7 +151,7 @@ class _BooherTable extends StatelessWidget {
                           '${formatted(values[i][j], casas: 1)} L/s',
                           style: text.bodyMedium,
                         ),
-                        if (basinBooherCelulasSuspeitas.contains((
+                        if (celulasBooherSuspeitas.contains((
                           diameters[i],
                           headers[j],
                         )))
@@ -179,7 +181,7 @@ class BasinOperationalCheckSection extends StatelessWidget {
     this.icon,
   });
 
-  final BasinChecagemOperacional checagem;
+  final ChecagemOperacional checagem;
   final IconData? icon;
 
   @override

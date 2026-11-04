@@ -139,25 +139,31 @@ class WaterBalanceChart extends StatelessWidget {
                       : const Duration(milliseconds: 350),
                 ),
                 ExcludeSemantics(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '${aproveitado.toStringAsFixed(1)}%',
-                        style: Theme.of(context).textTheme.headlineSmall
-                            ?.copyWith(fontWeight: FontWeight.w700),
-                      ),
-                      Text(
-                        'Aproveitado',
-                        style: Theme.of(context).textTheme.labelSmall,
-                      ),
-                      if (aplicadaMm != null)
+                  // FittedBox keeps the texts written inside the center
+                  // of the pie even with enlarged text (TextScaler 1.8).
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.center,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
                         Text(
-                          '${aplicadaMm.toStringAsFixed(0)} mm aplicados',
-                          style: Theme.of(context).textTheme.labelSmall
-                              ?.copyWith(color: colors.onSurfaceVariant),
+                          '${aproveitado.toStringAsFixed(1)}%',
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(fontWeight: FontWeight.w700),
                         ),
-                    ],
+                        Text(
+                          'Aproveitado',
+                          style: Theme.of(context).textTheme.labelSmall,
+                        ),
+                        if (aplicadaMm != null)
+                          Text(
+                            '${aplicadaMm.toStringAsFixed(0)} mm aplicados',
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(color: colors.onSurfaceVariant),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
               ],

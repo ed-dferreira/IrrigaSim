@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../models/tamanho_fonte.dart';
 import '../viewmodels/perfil_controller.dart';
+import 'calculos_conteudo_section.dart';
 
 const _appVersion = '1.0.0';
 
@@ -96,6 +97,26 @@ class PerfilScreen extends ConsumerWidget {
                           );
                         },
                       ),
+                      const SizedBox(height: 28),
+                      Semantics(
+                        header: true,
+                        child: Text(
+                          'Cálculos',
+                          style: text.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Quais cálculos cada módulo de irrigação aplica na '
+                        'interface.',
+                        style: text.bodyMedium?.copyWith(
+                          color: colors.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      const CalculosConteudoSection(),
                     ],
                   ),
                 ),

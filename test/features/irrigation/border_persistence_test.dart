@@ -1,13 +1,16 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/shared/cenarios/models/cenario_salvo.dart';
+import 'package:irrigasim/features/cenarios/models/cenario_salvo.dart';
 import 'package:irrigasim/features/irrigacao_faixas/models/faixa_numerico.dart';
 import 'package:irrigasim/features/irrigacao_faixas/models/faixa_agronomia.dart';
 import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
 import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/features/irrigacao_faixas/services/executar_simulacao_faixa.dart';
+import 'package:irrigasim/app/codecs.dart';
 
 void main() {
+  setUpAll(registrarCodecs);
+
   const project = BorderProject.ilustrativo;
   final params = project.toCompatParameters();
   final result = const RunBorderSimulation()(params);

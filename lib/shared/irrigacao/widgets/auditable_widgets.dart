@@ -151,11 +151,11 @@ class IrrigationAuditRow extends StatelessWidget {
 class IrrigationFormulaCard extends StatelessWidget {
   const IrrigationFormulaCard({
     super.key,
-    required this.formula,
+    this.formula,
     required this.description,
     this.pagina,
   });
-  final String formula;
+  final String? formula;
   final String description;
 
   /// Página do material didático da fórmula (auditoria), ex.: '61'.
@@ -174,14 +174,16 @@ class IrrigationFormulaCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            formula,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              fontFamily: 'monospace',
+          if (formula != null) ...[
+            Text(
+              formula!,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                fontFamily: 'monospace',
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
+            const SizedBox(height: 4),
+          ],
           Text(
             pagina == null || pagina!.trim().isEmpty
                 ? description

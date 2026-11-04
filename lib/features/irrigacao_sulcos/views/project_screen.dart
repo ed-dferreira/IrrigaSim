@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:irrigasim/app/router/app_routes.dart';
-import 'package:irrigasim/shared/cenarios/providers/scenario_providers.dart';
+import 'package:irrigasim/features/cenarios/providers/scenario_providers.dart';
 import 'package:irrigasim/app/theme/app_colors.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/irrigation_project_components.dart';

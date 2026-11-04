@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart';
+import 'package:irrigasim/shared/irrigacao/models/tipo_sulco.dart';
 
 import 'terrain_painter.dart';
 

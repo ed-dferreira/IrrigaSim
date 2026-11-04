@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/ensaios_sulco.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/geometria_sulco.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
+import 'package:irrigasim/shared/irrigacao/models/medicoes_campo.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/services/modelo_curva_avanco.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/services/desempenho_lamina.dart';

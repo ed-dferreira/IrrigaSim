@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
+import 'package:irrigasim/shared/irrigacao/models/medicoes_campo.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/indicadores_balanco.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/ensaios_sulco.dart'
     show PontoEnsaioAvanco;
@@ -15,6 +15,7 @@ import 'manejo_vazao.dart';
 
 import 'package:irrigasim/shared/irrigacao/services/performance_indicators.dart';
 import 'package:irrigasim/shared/irrigacao/services/surface_irrigation_math.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/entradas_projeto.dart';
 
 class SimuladorSulcos {
   SimulationResult call(
@@ -527,7 +528,7 @@ class SimuladorSulcos {
     );
 
     return SimulationResult(
-      balancoSulco: indicadores,
+      anexos: {chaveAnexoBalancoSulco: indicadores},
       eficiencia: applicationEfficiency,
       eficienciaRequerimento: balance.requirementEfficiency,
       cuc: cuc.toDouble(),

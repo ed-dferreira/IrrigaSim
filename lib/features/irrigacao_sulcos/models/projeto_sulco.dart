@@ -1,3 +1,5 @@
+import 'package:irrigasim/shared/irrigacao/models/comum/contratos_metodo.dart';
+import 'package:irrigasim/shared/irrigacao/models/comum/irrigacao_comum.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 
 import 'ensaios_sulco.dart';
@@ -8,7 +10,7 @@ import 'resultados_sulco.dart';
 ///
 /// Reúne as entradas do usuário, os ensaios de campo e os resultados
 /// derivados. Os dados ausentes permanecem `null`; nada é inventado.
-class ProjetoSulco {
+class ProjetoSulco implements ProjetoMetodo {
   const ProjetoSulco({
     required this.id,
     required this.versaoCalculo,
@@ -71,6 +73,7 @@ class ProjetoSulco {
   );
 
   /// As chaves são parte do formato persistido e não devem ser renomeadas.
+  @override
   Map<String, dynamic> toMap() => {
     'id': id,
     'versao_calculo': versaoCalculo,
@@ -301,5 +304,52 @@ class OperacaoSulco {
     jornadaDiariaH: (map['jornada_diaria_h'] as num?)?.toDouble() ?? 24,
     perdasConducaoLs: (map['perdas_conducao_ls'] as num?)?.toDouble(),
     escoamentoReutilizado: map['escoamento_reutilizado'] as bool? ?? false,
+  );
+}
+
+extension BaseProjetoSulcos on ProjetoSulco {
+  BaseIrrigacao get baseComum => BaseIrrigacao(
+    identificacao: IdentificacaoIrrigacao.superficie(SistemaSuperficie.sulcos),
+    area: CaracterizacaoArea(
+      comprimentoM: area.comprimentoM,
+      larguraM: area.larguraM,
+      declividadePercentual: area.declividadePercentual,
+      texturaSolo: solo.textura.name,
+      cultura: cultura.nome,
+      uccPercentual: solo.uccPercentual,
+      upmpPercentual: solo.upmpPercentual,
+      densidadeGcm3: solo.densidadeGcm3,
+      profundidadeRaizesM: cultura.profundidadeRaizesM,
+      fracaoAguaDisponivel: cultura.fracaoAguaDisponivel,
+      etoMmDia: clima.etoMmDia,
+      etcMmDia: clima.etcMmDia,
+      precipitacaoEfetivaMmDia: clima.precipitacaoEfetivaMmDia,
+    ),
+    ensaio: ensaioAvanco == null && ensaioInfiltracao == null
+        ? null
+        : EnsaioComum(
+            data: ensaioAvanco?.data ?? ensaioInfiltracao?.data,
+            estacas:
+                ensaioAvanco?.pontos
+                    .map((p) => EstacaEnsaio(p.distanciaM, p.tempoMin))
+                    .toList() ??
+                const [],
+            medicoesInfiltracao:
+                ensaioInfiltracao?.pontos
+                    .map(
+                      (p) => MedicaoInfiltracaoComum(
+                        tempoMin: p.tempoMin,
+                        laminaAcumuladaMm: p.laminaAcumuladaMm,
+                      ),
+                    )
+                    .toList() ??
+                const [],
+            origemInfiltracao: ensaioInfiltracao == null
+                ? null
+                : 'ensaio_infiltracao_sulcos',
+            equacaoInfiltracao: ensaioInfiltracao?.parametros == null
+                ? null
+                : 'k·t^n (ver unidades no ensaio de sulcos)',
+          ),
   );
 }

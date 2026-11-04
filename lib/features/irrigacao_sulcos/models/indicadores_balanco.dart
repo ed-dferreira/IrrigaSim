@@ -1,8 +1,11 @@
+import 'package:irrigasim/shared/irrigacao/models/comum/contratos_metodo.dart';
+import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
+
 /// Indicadores didáticos da aula e balanço espacial no domínio `[0, L]`.
 ///
 /// As lâminas são médias por trapézios em estacas igualmente espaçadas, em mm.
 /// Os percentuais de eficiência e perda são expressos em %.
-class IndicadoresBalancoSulco {
+class IndicadoresBalancoSulco implements AnexoSimulacao {
   const IndicadoresBalancoSulco({
     required this.eficienciaAplicacaoSlidePercentual,
     required this.eficienciaAplicacaoIntegralPercentual,
@@ -42,6 +45,7 @@ class IndicadoresBalancoSulco {
   final double deficitMm;
 
   /// As chaves são parte do formato persistido e não devem ser renomeadas.
+  @override
   Map<String, dynamic> toMap() => {
     'eficiencia_aplicacao_slide_percentual': eficienciaAplicacaoSlidePercentual,
     'perda_percolacao_slide_percentual': perdaPercolacaoSlidePercentual,
@@ -104,4 +108,17 @@ class IndicadoresBalancoSulco {
       deficitMm: obrigatorio('deficit_mm', 'deficitMm'),
     );
   }
+}
+
+/// Chave persistida do balanço de sulcos (parte do JSON salvo).
+const chaveAnexoBalancoSulco = 'balancoSulco';
+
+extension BalancoSulcoEmSimulacao on SimulationResult {
+  IndicadoresBalancoSulco? get balancoSulco =>
+      anexos[chaveAnexoBalancoSulco] as IndicadoresBalancoSulco?;
+
+  String get classificacaoEaIntegral =>
+      SimulationResult.classificarEa(
+        balancoSulco?.eficienciaAplicacaoIntegralPercentual ?? eficiencia,
+      );
 }

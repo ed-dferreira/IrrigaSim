@@ -4,14 +4,17 @@ import 'package:irrigasim/shared/irrigacao/models/comum/irrigacao_comum.dart';
 import 'package:irrigasim/features/irrigacao_faixas/models/faixa_agronomia.dart';
 import 'package:irrigasim/features/irrigacao_faixas/models/faixa_medicoes.dart';
 import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
-import 'package:irrigasim/features/irrigacao_inundacao/models/basin_project.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/models/projeto_inundacao.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/ensaios_sulco.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
+import 'package:irrigasim/shared/irrigacao/models/medicoes_campo.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/geometria_sulco.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/projeto_sulco.dart';
+import 'package:irrigasim/app/codecs.dart';
 
 void main() {
+  setUpAll(registrarCodecs);
+
   test('sulcos: solo, clima, ensaios e unidades sobrevivem ao mapa', () {
     final project = ProjetoSulco(
       id: 's',
@@ -101,7 +104,7 @@ void main() {
         ],
       );
       final sulcos = p.baseComumPara(MetodoIrrigacao.sulco);
-      final inundacao = BasinProject.fromParameters(p);
+      final inundacao = ProjetoInundacao.fromParameters(p);
       expect(sulcos.ensaio!.estacas.single.recessaoMin, 120);
       expect(sulcos.ensaio!.medicoesInfiltracao.single.vazaoSaidaLs, 1);
       expect(inundacao.baseComum.identificacao.sistema, 'inundacao');

@@ -1,3 +1,5 @@
+import 'package:irrigasim/shared/irrigacao/models/comum/contratos_metodo.dart';
+import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
 import 'package:irrigasim/shared/irrigacao/models/validacao_superficie.dart';
 
 import 'faixa_numerico.dart';
@@ -103,7 +105,7 @@ class BorderVolumes {
 }
 
 /// Resultado hidráulico por metro de largura; volumes totais multiplicam W uma vez.
-class BorderResult {
+class BorderResult implements AnexoSimulacao {
   /// Selo do escopo realmente executado (F01–F32), com a versão dos expoentes
   /// da recessão adotada na p.43.
   static const versaoEquacoes = 'faixas-F01-F32-p43-v2';
@@ -417,6 +419,7 @@ class BorderResult {
   double get volumePercoladoTotalM3 => volumePercoladoM3M * larguraM;
   double get volumeEscoadoTotalM3 => volumeEscoadoM3M * larguraM;
 
+  @override
   Map<String, dynamic> toMap() => {
     'versaoEquacoes': versaoEquacoes,
     'paginasFonte': paginasFonte,
@@ -522,4 +525,12 @@ class BorderResult {
       }).toList(),
     );
   }
+}
+
+/// Chave persistida do resultado de faixa (parte do JSON salvo).
+const chaveAnexoResultadoFaixa = 'resultadoFaixa';
+
+extension ResultadoFaixaEmSimulacao on SimulationResult {
+  BorderResult? get borderResult =>
+      anexos[chaveAnexoResultadoFaixa] as BorderResult?;
 }

@@ -1,12 +1,15 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/shared/cenarios/models/cenario_salvo.dart';
+import 'package:irrigasim/features/cenarios/models/cenario_salvo.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
+import 'package:irrigasim/shared/irrigacao/models/medicoes_campo.dart';
 import 'package:irrigasim/shared/irrigacao/services/operational_planning.dart';
-import 'package:irrigasim/shared/cenarios/services/project_store.dart';
+import 'package:irrigasim/features/cenarios/services/project_store.dart';
+import 'package:irrigasim/app/codecs.dart';
 
 void main() {
+  setUpAll(registrarCodecs);
+
   test(
     'round-trips reduced-flow operation and optional furrow geometry',
     () async {

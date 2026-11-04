@@ -3,7 +3,7 @@ import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart'
 
 import 'faixa_ensaio_campo.dart';
 
-String _escaped(String text) =>
+String _escapar(String text) =>
     text.contains(RegExp('[;"\n]')) ? '"${text.replaceAll('"', '""')}"' : text;
 
 String borderTrialCsv(
@@ -15,10 +15,10 @@ String borderTrialCsv(
   'modelo;ensaio medido p.45 F08;',
   'status;${r.status.codigo};',
   'data_ensaio;${p.dataEnsaioIso ?? 'não registrada'};AAAA-MM-DD',
-  'referencia_relogio_ensaio;${_escaped(p.referenciaRelogioEnsaio ?? 'não registrada')};',
-  'observacoes_ensaio;${_escaped(p.observacoesEnsaio ?? 'nenhuma')};',
+  'referencia_relogio_ensaio;${_escapar(p.referenciaRelogioEnsaio ?? 'não registrada')};',
+  'observacoes_ensaio;${_escapar(p.observacoesEnsaio ?? 'nenhuma')};',
   for (final notice in r.avisos)
-    'aviso;${_escaped('[${notice.codigo}] ${notice.mensagem}')};'
+    'aviso;${_escapar('[${notice.codigo}] ${notice.mensagem}')};'
         '${notice.pagina ?? ''}',
   'q0;${p.vazaoUnitariaLsM};L/s/m',
   'corte_medido;${p.corteEnsaioMin ?? ''};min',
@@ -103,7 +103,7 @@ String borderCsv(BorderProject p, BorderResult r) {
     'etapa_busca;${p.alternativas.isEmpty ? 'não_executada' : 'alternativas_persistidas'};F26 não inferida do resultado hidráulico',
     'etapa_cronograma;pendente_ou_não_anexado;oferta e prazos não declarados executáveis por este CSV hidráulico',
     for (final notice in r.avisos)
-      'aviso;${_escaped('[${notice.codigo}] ${notice.mensagem}')};'
+      'aviso;${_escapar('[${notice.codigo}] ${notice.mensagem}')};'
           '${notice.pagina ?? ''}',
     // Proveniência por bloco e por fórmula executada (documento, página,
     // versão e origem medida/assumida/derivada).
@@ -113,9 +113,9 @@ String borderCsv(BorderProject p, BorderResult r) {
           !entry.key.startsWith('F27') &&
           !entry.key.startsWith('Tabelas'),
     ))
-      'bloco;${_escaped(bloco.key)};${bloco.value}',
+      'bloco;${_escapar(bloco.key)};${bloco.value}',
     for (final fonte in BorderResult.provenienciaHidraulicaExecutada)
-      'formula_${fonte.id};${_escaped(fonte.descricao)};'
+      'formula_${fonte.id};${_escapar(fonte.descricao)};'
           '${fonte.pagina} · ${fonte.versao} · ${fonte.origem.name}',
     // Grupo numérico declarado e usado nesta execução.
     'num_tolerancia_passo;${numerico.toleranciaPasso};min',
@@ -142,8 +142,8 @@ String borderCsv(BorderProject p, BorderResult r) {
     'orientacao_area;${p.orientacaoArea ?? 'não informada'};registro topográfico',
     'area_util;${p.areaUtilM2 ?? ''};m2',
     'data_ensaio;${p.dataEnsaioIso ?? 'não registrada'};AAAA-MM-DD',
-    'referencia_relogio_ensaio;${_escaped(p.referenciaRelogioEnsaio ?? 'não registrada')};',
-    'observacoes_ensaio;${_escaped(p.observacoesEnsaio ?? 'nenhuma')};',
+    'referencia_relogio_ensaio;${_escapar(p.referenciaRelogioEnsaio ?? 'não registrada')};',
+    'observacoes_ensaio;${_escapar(p.observacoesEnsaio ?? 'nenhuma')};',
     'perfil_longitudinal;${p.perfilLongitudinal.map((point) => '${point.xM}:${point.cotaM}').join('|')};x m:cota m',
     'proveniencia_entrada;perfilLongitudinal;${p.perfilLongitudinal.isEmpty ? 'não informado' : 'levantamento topográfico'};estações x:cota',
     'proveniencia_entrada;orientacaoArea;${p.orientacaoArea == null ? 'pendente' : 'informada'};descrição',
@@ -178,7 +178,7 @@ String borderCsv(BorderProject p, BorderResult r) {
     'corte_ensaio;${p.corteEnsaioMin};min',
     'corte_antecipado_referencia;${p.fracaoCortePlanejada?.toString() ?? 'não selecionado'};fração de L · motor não implementado quando selecionado',
     for (final alt in p.alternativas)
-      'alternativa;${_escaped('${alt.comprimentoM}|${alt.vazaoLsM}|${alt.eficienciaPercentual ?? ''}|${alt.erPercentual ?? ''}|${alt.ppPercentual ?? ''}|${alt.pePercentual ?? ''}|${alt.demandaLs ?? ''}|${alt.motivoRejeicao ?? ''}|${alt.status?.codigo ?? ''}|selecionada=${alt.selecionada}|qmin=${alt.gradeMenorLsM ?? ''}|qmax=${alt.gradeMaiorLsM ?? ''}|passo=${alt.gradePassoLsM ?? ''}|objetivo=${alt.objetivo ?? ''}')};L m|q0 L/s/m|Ea %|Er %|Pp %|Pe %|Q L/s|rejeição|status|escolha|grade',
+      'alternativa;${_escapar('${alt.comprimentoM}|${alt.vazaoLsM}|${alt.eficienciaPercentual ?? ''}|${alt.erPercentual ?? ''}|${alt.ppPercentual ?? ''}|${alt.pePercentual ?? ''}|${alt.demandaLs ?? ''}|${alt.motivoRejeicao ?? ''}|${alt.status?.codigo ?? ''}|selecionada=${alt.selecionada}|qmin=${alt.gradeMenorLsM ?? ''}|qmax=${alt.gradeMaiorLsM ?? ''}|passo=${alt.gradePassoLsM ?? ''}|objetivo=${alt.objetivo ?? ''}')};L m|q0 L/s/m|Ea %|Er %|Pp %|Pe %|Q L/s|rejeição|status|escolha|grade',
     'q0;${p.vazaoUnitariaLsM};L/s/m',
     'Qfaixa;${p.vazaoFaixaLs};L/s',
     'booher_diametro_selecionado;${p.dispositivoDiametroCm ?? ''};cm',

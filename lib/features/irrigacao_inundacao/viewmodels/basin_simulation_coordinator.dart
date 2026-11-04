@@ -3,34 +3,34 @@
 // seleção entre vazões candidatas (p. 60) e os volumes de água do arroz
 // (pp. 74–84), sempre preservando as lacunas de dados (G4) e converte erros
 // de domínio em FormatException amigável para a interface.
-import 'package:irrigasim/features/irrigacao_inundacao/models/basin_annexes.dart';
-import 'package:irrigasim/features/irrigacao_inundacao/models/basin_project.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/models/anexos_inundacao.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/models/projeto_inundacao.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
-import 'package:irrigasim/features/irrigacao_inundacao/services/basin_planning.dart';
-import 'package:irrigasim/features/irrigacao_inundacao/services/basin_reference_math.dart';
-import 'package:irrigasim/features/irrigacao_inundacao/services/rice_volumes_service.dart';
-import 'package:irrigasim/features/irrigacao_inundacao/services/run_basin_simulation.dart';
-import 'package:irrigasim/features/irrigacao_inundacao/services/run_permanent_basin_simulation.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/services/planejamento_inundacao.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/services/nucleo_referencia_inundacao.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/services/volumes_arroz.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/services/simulador_inundacao.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/services/simulador_inundacao_permanente.dart';
 
 /// Coordena os regimes intermitente e permanente da irrigação por inundação.
 class BasinSimulationCoordinator {
   const BasinSimulationCoordinator();
 
   SimulationResult executar(IrrigationParameters parametros) =>
-      executarProjeto(BasinProject.fromParameters(parametros));
+      executarProjeto(ProjetoInundacao.fromParameters(parametros));
 
-  SimulationResult executarProjeto(BasinProject projeto) {
+  SimulationResult executarProjeto(ProjetoInundacao projeto) {
     final params = projeto.toCompatParameters();
     var result = projeto.regime == TipoInundacao.permanente
-        ? RunPermanentBasinSimulation()(params)
-        : RunBasinSimulation()(params);
+        ? SimuladorInundacaoPermanente()(params)
+        : SimuladorInundacao()(params);
 
     final extras = <String, double>{};
     final unidades = <String, String>{};
-    BasinParcelasAnexo? parcelas;
-    BasinSelecaoVazaoAnexo? selecao;
-    BasinVolumesAnexo? volumes;
+    AnexoParcelas? parcelas;
+    AnexoSelecaoVazao? selecao;
+    AnexoVolumesArroz? volumes;
     var alertas = result.alertaInfiltracao;
 
     if (projeto.regime == TipoInundacao.intermitente) {
@@ -38,14 +38,14 @@ class BasinSimulationCoordinator {
       final ti = result.metricas['Tempo de oportunidade'];
       if (q0 != null && ti != null) {
         try {
-          final p = const BasinPlanning().planejarParcelasProjeto(
+          final p = const PlanejamentoInundacao().planejarParcelasProjeto(
             params,
             q0M3MinM: q0,
             tiMin: ti,
             tabuleirosPorParcela: projeto.tabuleirosPorParcela,
             areaTotalM2: projeto.areaTotalM2 ?? params.areaHectares * 10000,
           );
-          parcelas = BasinParcelasAnexo(
+          parcelas = AnexoParcelas(
             tppMin: p.tppMin,
             npdTeorico: p.npdTeorico,
             npdInteiro: p.npdInteiro,
@@ -114,8 +114,8 @@ class BasinSimulationCoordinator {
   /// total aplicada não pode superar a disponível e a geometria do tabuleiro
   /// precisa caber na área declarada. Sem os dados mínimos não há o que
   /// comparar e o resultado fica nulo.
-  BasinChecagemOperacional? _checagemOperacao(
-    BasinProject projeto,
+  ChecagemOperacional? _checagemOperacao(
+    ProjetoInundacao projeto,
     Map<String, double> extras,
     Map<String, String> unidades,
   ) {
@@ -134,7 +134,7 @@ class BasinSimulationCoordinator {
         areaDeclarada <= 0) {
       return null;
     }
-    final checagem = const BasinPlanning().checarOperacao(
+    final checagem = const PlanejamentoInundacao().checarOperacao(
       vazaoPlanejadaLs: planejada,
       vazaoDisponivelLs: disponivel,
       areaTabuleiroM2: areaTabuleiro,
@@ -151,8 +151,8 @@ class BasinSimulationCoordinator {
 
   /// Melhor vazão entre as candidatas explícitas em L/s (p. 60). A seleção
   /// informa; não substitui a vazão simulada e não afirma ótimo global.
-  BasinSelecaoVazaoAnexo? _selecionarVazao(
-    BasinProject projeto,
+  AnexoSelecaoVazao? _selecionarVazao(
+    ProjetoInundacao projeto,
     Map<String, double> extras,
     Map<String, String> unidades,
   ) {
@@ -181,12 +181,12 @@ class BasinSimulationCoordinator {
     final solo = Infiltracao(k, a, vib);
     var avaliadas = 0;
     var rejeitadas = 0;
-    BasinDimensioningResult? melhor;
+    ResultadoDimensionamento? melhor;
     double? melhorLs;
     for (final qLs in candidatas) {
       avaliadas++;
       final q0 = qLs * 60 / 1000 / largura;
-      BasinDimensioningResult atual;
+      ResultadoDimensionamento atual;
       try {
         atual = dimensionar(
           solo,
@@ -222,7 +222,7 @@ class BasinSimulationCoordinator {
     unidades['Q0 da vazão selecionada'] = 'm³/(min·m)';
     extras['Ea da vazão selecionada'] = melhor.eficienciaPercent;
     unidades['Ea da vazão selecionada'] = '%';
-    return BasinSelecaoVazaoAnexo(
+    return AnexoSelecaoVazao(
       vazaoEscolhidaLs: melhorLs,
       q0M3MinM: melhor.q0M3MinM,
       eficienciaPercent: melhor.eficienciaPercent,
@@ -233,8 +233,8 @@ class BasinSimulationCoordinator {
 
   /// Volumes do arroz (p. 84) quando o projeto traz os dados mínimos do
   /// enunciado; lacunas (Ua, massa do saco, área, Td, Tr) permanecem null.
-  BasinVolumesAnexo? _volumesArroz(
-    BasinProject projeto,
+  AnexoVolumesArroz? _volumesArroz(
+    ProjetoInundacao projeto,
     Map<String, double> extras,
     Map<String, String> unidades,
   ) {
@@ -254,9 +254,9 @@ class BasinSimulationCoordinator {
         periodo == null) {
       return null;
     }
-    final RiceVolumesResultado r;
+    final ResultadoVolumesArroz r;
     try {
-      r = const RiceVolumesService().calcular(
+      r = const ServicoVolumesArroz().calcular(
         ds: ds,
         dp: dp,
         uaGravimetrica: projeto.uaGravimetrica,
@@ -299,6 +299,6 @@ class BasinSimulationCoordinator {
     anexar('Arroz - matéria seca total', r.materiaSecaTotalKgHa, 'kg/ha');
     anexar('Arroz - Q1 formação', r.q1M3S, 'm³/s');
     anexar('Arroz - Q2 manutenção', r.q2M3S, 'm³/s');
-    return BasinVolumesAnexo(r);
+    return AnexoVolumesArroz(r);
   }
 }

@@ -1,13 +1,16 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/shared/cenarios/models/cenario_salvo.dart';
+import 'package:irrigasim/features/cenarios/models/cenario_salvo.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
-import 'package:irrigasim/shared/cenarios/services/project_store.dart';
+import 'package:irrigasim/shared/irrigacao/models/medicoes_campo.dart';
+import 'package:irrigasim/features/cenarios/services/project_store.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/services/manejo_vazao.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/services/simulador_sulcos.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/controlador_parametros_sulco.dart';
+import 'package:irrigasim/app/codecs.dart';
 
 void main() {
+  setUpAll(registrarCodecs);
+
   const conditions = 'Solo médio, seção V e orientação do projeto';
   const stakes = [
     MedicaoAvanco(distanciaM: 0, tempoMin: 0),

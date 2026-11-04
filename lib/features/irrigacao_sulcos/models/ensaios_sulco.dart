@@ -1,4 +1,4 @@
-import 'medicoes_campo.dart';
+import 'package:irrigasim/shared/irrigacao/models/medicoes_campo.dart';
 
 /// Estaca medida no ensaio de avanço.
 ///

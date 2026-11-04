@@ -1,3 +1,5 @@
+import 'package:irrigasim/shared/irrigacao/models/comum/contratos_metodo.dart';
+import 'package:irrigasim/shared/irrigacao/models/comum/irrigacao_comum.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 
 import 'faixa_agronomia.dart';
@@ -123,7 +125,7 @@ class BorderAlternativeRecord {
 
 /// Entradas de projeto; valores nulos representam dados ainda não informados.
 /// Comprimentos e lâminas em m (IRN em mm), tempos em min e q0 em L/s/m.
-class BorderProject {
+class BorderProject implements ProjetoMetodo {
   static const versaoAtual = 1;
 
   /// Segmentos do perfil longitudinal; o pacote de referência usa 2000.
@@ -636,6 +638,7 @@ class BorderProject {
     tempoAplicacaoLegadoMin: tempoAplicacaoLegadoMin,
   );
 
+  @override
   Map<String, dynamic> toMap() => {
     'versao': versao,
     'numerico': numerico.toMap(),
@@ -857,7 +860,7 @@ class BorderProject {
   /// Reexporta os campos para compatibilidade com a API legada
   /// (sigmaZ recebe o expoente inicial `r`, ver [fromLegacy]).
   IrrigationParameters toCompatParameters() => IrrigationParameters(
-    projetoFaixa: this,
+    projetoMetodo: this,
     comprimento: comprimentoM!,
     declividade: declividadeLongitudinal!,
     declividadeTransversal: declividadeTransversal ?? 0,
@@ -873,4 +876,53 @@ class BorderProject {
     vazaoDisponivelLps: vazaoDisponivelLs ?? 0,
     nomeCultura: cultura ?? '',
   );
+}
+
+extension BaseProjetoFaixas on BorderProject {
+  BaseIrrigacao get baseComum => BaseIrrigacao(
+    identificacao: IdentificacaoIrrigacao.superficie(SistemaSuperficie.faixas),
+    area: CaracterizacaoArea(
+      comprimentoM: comprimentoAreaM ?? comprimentoM,
+      larguraM: larguraAreaM ?? larguraM,
+      declividadePercentual: declividadeLongitudinal == null
+          ? null
+          : declividadeLongitudinal! * 100,
+      texturaSolo: textura?.name,
+      cultura: cultura,
+      uccPercentual: agronomia?.uccPercentual,
+      upmpPercentual: agronomia?.upmpPercentual,
+      densidadeGcm3: agronomia?.densidadeGcm3,
+      profundidadeRaizesM: agronomia?.profundidadeRaizesCm == null
+          ? null
+          : agronomia!.profundidadeRaizesCm! / 100,
+      fracaoAguaDisponivel: agronomia?.fracaoAguaDisponivel,
+      etcMmDia: agronomia?.evapotranspiracaoMmDia,
+      precipitacaoEfetivaMmDia: agronomia?.precipitacaoEfetivaMmDia,
+      vazaoDisponivelLs: vazaoDisponivelLs,
+    ),
+    ensaio: estacas.isEmpty && k == null && a == null
+        ? null
+        : EnsaioComum(
+            estacas: estacas
+                .map(
+                  (s) => EstacaEnsaio(
+                    s.xM,
+                    s.avancoMin,
+                    recessaoMin: s.recessaoMin,
+                  ),
+                )
+                .toList(),
+            origemInfiltracao: cenarioInfiltracao.name,
+            equacaoInfiltracao: k == null || a == null
+                ? null
+                : 'k·t^a + VIB·t (m; t em min)',
+          ),
+  );
+}
+
+extension ProjetoFaixaEmParametros on IrrigationParameters {
+  BorderProject? get projetoFaixa => switch (projetoMetodo) {
+    final BorderProject projeto => projeto,
+    _ => null,
+  };
 }

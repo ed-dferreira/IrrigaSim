@@ -1,8 +1,5 @@
+import 'package:irrigasim/shared/irrigacao/models/comum/contratos_metodo.dart';
 import 'package:irrigasim/shared/irrigacao/services/operational_planning.dart';
-import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
-import 'package:irrigasim/features/irrigacao_inundacao/models/basin_annexes.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/models/indicadores_balanco.dart';
-import 'package:irrigasim/features/irrigacao_inundacao/services/basin_planning.dart';
 
 class PontoGrafico {
   final double x;
@@ -11,8 +8,6 @@ class PontoGrafico {
 }
 
 class SimulationResult {
-  final BorderResult? borderResult;
-  final IndicadoresBalancoSulco? balancoSulco;
   final double eficiencia;
   final double eficienciaRequerimento;
   final double cuc;
@@ -52,19 +47,11 @@ class SimulationResult {
   final bool extrapolouAvanco;
   final PlanejamentoOperacionalResultado? planejamentoOperacional;
 
-  /// Anexos da inundação (Fase 6): planejamento em parcelas, seleção entre
-  /// vazões candidatas e volumes do arroz, nulos fora desse regime.
-  final BasinParcelasAnexo? planejamentoParcelas;
-  final BasinSelecaoVazaoAnexo? selecaoVazao;
-  final BasinVolumesAnexo? volumesArroz;
-
-  /// Checagem operacional obrigatória G3 (vazão e geometria), nula quando o
-  /// simulador do regime não a calculou.
-  final BasinChecagemOperacional? checagemOperacional;
+  /// Anexos tipados do método, indexados pela chave persistida e opacos para
+  /// o compartilhado (as features leem via extensões com os nomes antigos).
+  final Map<String, AnexoSimulacao> anexos;
 
   const SimulationResult({
-    this.borderResult,
-    this.balancoSulco,
     required this.eficiencia,
     required this.eficienciaRequerimento,
     required this.cuc,
@@ -96,17 +83,12 @@ class SimulationResult {
     this.hipoteseRecessao,
     this.extrapolouAvanco = false,
     this.planejamentoOperacional,
-    this.planejamentoParcelas,
-    this.selecaoVazao,
-    this.volumesArroz,
-    this.checagemOperacional,
+    this.anexos = const {},
   });
 
   SimulationResult comPlanejamentoOperacional(
     PlanejamentoOperacionalResultado planejamento,
   ) => SimulationResult(
-    borderResult: borderResult,
-    balancoSulco: balancoSulco,
     eficiencia: eficiencia,
     eficienciaRequerimento: eficienciaRequerimento,
     cuc: cuc,
@@ -138,72 +120,14 @@ class SimulationResult {
     hipoteseRecessao: hipoteseRecessao,
     extrapolouAvanco: extrapolouAvanco,
     planejamentoOperacional: planejamento,
-    planejamentoParcelas: planejamentoParcelas,
-    selecaoVazao: selecaoVazao,
-    volumesArroz: volumesArroz,
-    checagemOperacional: checagemOperacional,
+    anexos: anexos,
   );
 
-  /// Anexa os resultados tipados da inundação e mescla métricas extras,
-  /// preservando todos os campos já calculados pelo simulador do regime.
-  /// [alertaInfiltracao] substitui o alerta quando informado.
-  SimulationResult comAnexosInundacao({
-    BasinParcelasAnexo? parcelas,
-    BasinSelecaoVazaoAnexo? selecao,
-    BasinVolumesAnexo? volumes,
-    BasinChecagemOperacional? checagem,
-    Map<String, double> metricasExtras = const {},
-    Map<String, String> unidadesExtras = const {},
-    String? alertaInfiltracao,
-    String? alertaVazaoExcedida,
-  }) => SimulationResult(
-    borderResult: borderResult,
-    balancoSulco: balancoSulco,
-    eficiencia: eficiencia,
-    eficienciaRequerimento: eficienciaRequerimento,
-    cuc: cuc,
-    du: du,
-    laminaMedia: laminaMedia,
-    laminaRequerida: laminaRequerida,
-    tempoAvanco: tempoAvanco,
-    perdaPercolacao: perdaPercolacao,
-    perdaEscoamento: perdaEscoamento,
-    curvaAvanco: curvaAvanco,
-    curvaOportunidade: curvaOportunidade,
-    perfilLongitudinal: perfilLongitudinal,
-    resumoTextual: resumoTextual,
-    alertaVazaoExcedida: alertaVazaoExcedida ?? this.alertaVazaoExcedida,
-    alertaInfiltracao: alertaInfiltracao ?? this.alertaInfiltracao,
-    metricas: {...metricas, ...metricasExtras},
-    unidadesMetricas: {...unidadesMetricas, ...unidadesExtras},
-    tempoOportunidadeFinalMin: tempoOportunidadeFinalMin,
-    tempoFornecimentoMin: tempoFornecimentoMin,
-    laminainfiltradaInicioMm: laminainfiltradaInicioMm,
-    laminainfiltradaFinalMm: laminainfiltradaFinalMm,
-    laminainfiltradaMediaMm: laminainfiltradaMediaMm,
-    laminaAplicadaMediaMm: laminaAplicadaMediaMm,
-    eficienciaDistribuicaoEd: eficienciaDistribuicaoEd,
-    adequacaoUtilGa: adequacaoUtilGa,
-    origemCurvaAvanco: origemCurvaAvanco,
-    metodoCurvaAvanco: metodoCurvaAvanco,
-    origemCurvaInfiltracao: origemCurvaInfiltracao,
-    hipoteseRecessao: hipoteseRecessao,
-    extrapolouAvanco: extrapolouAvanco,
-    planejamentoOperacional: planejamentoOperacional,
-    planejamentoParcelas: parcelas ?? planejamentoParcelas,
-    selecaoVazao: selecao ?? selecaoVazao,
-    volumesArroz: volumes ?? volumesArroz,
-    checagemOperacional: checagem ?? checagemOperacional,
-  );
-
-  String get classificacaoEa => _classificarEa(eficiencia);
-  String get classificacaoEaIntegral => _classificarEa(
-    balancoSulco?.eficienciaAplicacaoIntegralPercentual ?? eficiencia,
-  );
+  String get classificacaoEa => classificarEa(eficiencia);
   String get classificacaoCuc => _classificarCuc(cuc);
   String get classificacaoDu => _classificarDu(du);
 
-  static String _classificarEa(double ea) {
+  static String classificarEa(double ea) {
     if (ea >= 85) return 'Excelente';
     if (ea >= 75) return 'Bom';
     if (ea >= 65) return 'Regular';

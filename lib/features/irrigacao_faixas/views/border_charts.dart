@@ -6,6 +6,7 @@ import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart'
 import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
 import 'package:irrigasim/app/theme/app_icons.dart';
 import 'package:irrigasim/features/irrigacao_faixas/services/faixa_planejamento.dart';
+import 'package:irrigasim/shared/irrigacao/widgets/irrigation_chart_section.dart';
 
 class BorderCharts extends StatelessWidget {
   final BorderResult result;
@@ -107,285 +108,224 @@ class BorderCharts extends StatelessWidget {
       if (operation != null) 5,
     ];
     final selected = availableTabs.contains(selectedIndex) ? selectedIndex : 0;
-    return Card(
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Icon(AppIcons.chart, color: scheme.primary, size: 20),
-                const SizedBox(width: 8),
-                Text(
-                  'Gráficos',
-                  style: Theme.of(context).textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.w700),
+    final children = <Widget>[
+      _chartSection(
+        context,
+        'Avanço e recessão',
+        AppIcons.curvaAvanco,
+        [
+          Semantics(
+            label:
+                'Curvas de avanço e recessão simuladas. Chegada ao final em ${result.taFinalMin.toStringAsFixed(1)} minutos; recessão final em ${result.trFinalMin.toStringAsFixed(1)} minutos.',
+            child: SizedBox(
+              height: 260,
+              child: ExcludeSemantics(
+                child: LineChart(
+                  LineChartData(
+                    minX: 0,
+                    maxX: maxX,
+                    minY: 0,
+                    maxY: maxTime * 1.05,
+                    titlesData: titles('Distância (m)', 'Tempo (min)'),
+                    lineBarsData: [
+                      line([
+                        for (final p in profile)
+                          FlSpot(p.xM, p.avancoMin),
+                      ], scheme.primary),
+                      line([
+                        for (final p in profile)
+                          FlSpot(p.xM, p.recessaoMin),
+                      ], scheme.tertiary),
+                    ],
+                  ),
+                  duration: MediaQuery.disableAnimationsOf(context)
+                      ? Duration.zero
+                      : const Duration(milliseconds: 300),
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 56,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: availableTabs.length,
-                separatorBuilder: (_, _) => const SizedBox(width: 8),
-                itemBuilder: (context, index) {
-                  final tab = availableTabs[index];
-                  final active = tab == selected;
-                  return Semantics(
-                    button: true,
-                    selected: active,
-                    label: 'Gráfico de ${allLabels[tab]}',
-                    child: InkWell(
-                      onTap: () => onTabSelected(tab),
-                      borderRadius: BorderRadius.circular(14),
-                      child: Container(
-                        constraints: const BoxConstraints(minHeight: 48),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: active
-                              ? scheme.primaryContainer
-                              : scheme.surfaceContainerHigh,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: active
-                                ? scheme.primary
-                                : scheme.outlineVariant,
-                            width: active ? 2 : 1,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              allIcons[tab],
-                              size: 18,
-                              color: active
-                                  ? scheme.primary
-                                  : scheme.onSurfaceVariant,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              allLabels[tab],
-                              style: Theme.of(context).textTheme.labelMedium
-                                  ?.copyWith(
-                                    color: active
-                                        ? scheme.primary
-                                        : scheme.onSurfaceVariant,
-                                  ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                },
               ),
             ),
-            const SizedBox(height: 16),
-            if (selected == 0)
-              _chartSection(
-                context,
-                'Avanço e recessão',
-                AppIcons.curvaAvanco,
-                [
-                  Semantics(
-                    label:
-                        'Curvas de avanço e recessão simuladas. Chegada ao final em ${result.taFinalMin.toStringAsFixed(1)} minutos; recessão final em ${result.trFinalMin.toStringAsFixed(1)} minutos.',
-                    child: SizedBox(
-                      height: 260,
-                      child: ExcludeSemantics(
-                        child: LineChart(
-                          LineChartData(
-                            minX: 0,
-                            maxX: maxX,
-                            minY: 0,
-                            maxY: maxTime * 1.05,
-                            titlesData: titles('Distância (m)', 'Tempo (min)'),
-                            lineBarsData: [
-                              line([
-                                for (final p in profile)
-                                  FlSpot(p.xM, p.avancoMin),
-                              ], scheme.primary),
-                              line([
-                                for (final p in profile)
-                                  FlSpot(p.xM, p.recessaoMin),
-                              ], scheme.tertiary),
-                            ],
-                          ),
-                          duration: MediaQuery.disableAnimationsOf(context)
-                              ? Duration.zero
-                              : const Duration(milliseconds: 300),
-                        ),
-                      ),
+          ),
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              Container(width: 14, height: 4, color: scheme.primary),
+              const SizedBox(width: 6),
+              const Text('Avanço'),
+              const SizedBox(width: 16),
+              Container(width: 14, height: 4, color: scheme.tertiary),
+              const SizedBox(width: 6),
+              const Text('Recessão'),
+            ],
+          ),
+        ],
+      ),
+      _chartSection(
+        context,
+        'Infiltração e IRN',
+        AppIcons.perfilInfiltracao,
+        [
+          Semantics(
+            label:
+                'Perfil longitudinal de infiltração comparado à IRN de ${irnMm.toStringAsFixed(1)} milímetros. Infiltração mínima ${(profile.map((p) => p.infiltracaoM * 1000).reduce(math.min)).toStringAsFixed(1)} milímetros.',
+            child: SizedBox(
+              height: 260,
+              child: ExcludeSemantics(
+                child: LineChart(
+                  LineChartData(
+                    minX: 0,
+                    maxX: maxX,
+                    minY: 0,
+                    maxY: maxDepth * 1.1,
+                    titlesData: titles(
+                      'Distância (m)',
+                      'Infiltração (mm)',
                     ),
-                  ),
-                  Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      Container(width: 14, height: 4, color: scheme.primary),
-                      const SizedBox(width: 6),
-                      const Text('Avanço'),
-                      const SizedBox(width: 16),
-                      Container(width: 14, height: 4, color: scheme.tertiary),
-                      const SizedBox(width: 6),
-                      const Text('Recessão'),
+                    lineBarsData: [
+                      line([
+                        for (final p in profile)
+                          FlSpot(p.xM, p.infiltracaoM * 1000),
+                      ], scheme.primary),
+                      line([
+                        FlSpot(0, irnMm),
+                        FlSpot(maxX, irnMm),
+                      ], scheme.error),
                     ],
                   ),
-                ],
-              )
-            else if (selected == 1)
-              _chartSection(
-                context,
-                'Infiltração e IRN',
-                AppIcons.perfilInfiltracao,
-                [
-                  Semantics(
-                    label:
-                        'Perfil longitudinal de infiltração comparado à IRN de ${irnMm.toStringAsFixed(1)} milímetros. Infiltração mínima ${(profile.map((p) => p.infiltracaoM * 1000).reduce(math.min)).toStringAsFixed(1)} milímetros.',
-                    child: SizedBox(
-                      height: 260,
-                      child: ExcludeSemantics(
-                        child: LineChart(
-                          LineChartData(
-                            minX: 0,
-                            maxX: maxX,
-                            minY: 0,
-                            maxY: maxDepth * 1.1,
-                            titlesData: titles(
-                              'Distância (m)',
-                              'Infiltração (mm)',
-                            ),
-                            lineBarsData: [
-                              line([
-                                for (final p in profile)
-                                  FlSpot(p.xM, p.infiltracaoM * 1000),
-                              ], scheme.primary),
-                              line([
-                                FlSpot(0, irnMm),
-                                FlSpot(maxX, irnMm),
-                              ], scheme.error),
-                            ],
-                          ),
-                          duration: MediaQuery.disableAnimationsOf(context)
-                              ? Duration.zero
-                              : const Duration(milliseconds: 300),
-                        ),
+                  duration: MediaQuery.disableAnimationsOf(context)
+                      ? Duration.zero
+                      : const Duration(milliseconds: 300),
+                ),
+              ),
+            ),
+          ),
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              Container(width: 14, height: 4, color: scheme.primary),
+              const SizedBox(width: 6),
+              const Text('Infiltração'),
+              const SizedBox(width: 16),
+              Container(width: 14, height: 4, color: scheme.error),
+              const SizedBox(width: 6),
+              const Text('IRN'),
+            ],
+          ),
+        ],
+      ),
+      _chartSection(
+        context,
+        'Volumes calculados',
+        AppIcons.balancoHidrico,
+        [
+          Semantics(
+            label:
+                'Volumes totais da faixa em metros cúbicos: útil ${result.volumeUtilTotalM3.toStringAsFixed(1)}, percolado ${result.volumePercoladoTotalM3.toStringAsFixed(1)}, escoado ${result.volumeEscoadoTotalM3.toStringAsFixed(1)}. Déficit de requerimento ${(result.volumeDeficitM3M * result.larguraM).toStringAsFixed(1)} metros cúbicos, apresentado separadamente porque não compõe a água aplicada.',
+            child: SizedBox(
+              height: 230,
+              child: ExcludeSemantics(
+                child: BarChart(
+                  BarChartData(
+                    barGroups: [
+                      _volumeBar(
+                        0,
+                        result.volumeUtilTotalM3,
+                        scheme.primary,
                       ),
-                    ),
-                  ),
-                  Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      Container(width: 14, height: 4, color: scheme.primary),
-                      const SizedBox(width: 6),
-                      const Text('Infiltração'),
-                      const SizedBox(width: 16),
-                      Container(width: 14, height: 4, color: scheme.error),
-                      const SizedBox(width: 6),
-                      const Text('IRN'),
+                      _volumeBar(
+                        1,
+                        result.volumePercoladoTotalM3,
+                        scheme.tertiary,
+                      ),
+                      _volumeBar(
+                        2,
+                        result.volumeEscoadoTotalM3,
+                        scheme.error,
+                      ),
+                      _volumeBar(
+                        3,
+                        result.volumeDeficitM3M * result.larguraM,
+                        scheme.secondary,
+                      ),
                     ],
+                    titlesData: _barTitles([
+                      'Útil',
+                      'Pp',
+                      'Pe',
+                      'Déficit',
+                    ], 'Volume (m³)'),
                   ),
-                ],
-              )
-            else if (selected == 2)
-              _chartSection(
-                context,
-                'Volumes calculados',
-                AppIcons.balancoHidrico,
-                [
-                  Semantics(
-                    label:
-                        'Volumes totais da faixa em metros cúbicos: útil ${result.volumeUtilTotalM3.toStringAsFixed(1)}, percolado ${result.volumePercoladoTotalM3.toStringAsFixed(1)}, escoado ${result.volumeEscoadoTotalM3.toStringAsFixed(1)}. Déficit de requerimento ${(result.volumeDeficitM3M * result.larguraM).toStringAsFixed(1)} metros cúbicos, apresentado separadamente porque não compõe a água aplicada.',
-                    child: SizedBox(
-                      height: 230,
-                      child: ExcludeSemantics(
-                        child: BarChart(
-                          BarChartData(
-                            barGroups: [
-                              _volumeBar(
-                                0,
-                                result.volumeUtilTotalM3,
-                                scheme.primary,
-                              ),
-                              _volumeBar(
-                                1,
-                                result.volumePercoladoTotalM3,
-                                scheme.tertiary,
-                              ),
-                              _volumeBar(
-                                2,
-                                result.volumeEscoadoTotalM3,
-                                scheme.error,
-                              ),
-                              _volumeBar(
-                                3,
-                                result.volumeDeficitM3M * result.larguraM,
-                                scheme.secondary,
-                              ),
-                            ],
-                            titlesData: _barTitles([
-                              'Útil',
-                              'Pp',
-                              'Pe',
-                              'Déficit',
-                            ], 'Volume (m³)'),
-                          ),
-                        ),
-                      ),
-                    ),
+                ),
+              ),
+            ),
+          ),
+          const Text(
+            'Déficit é uma diferença em relação à demanda; não é componente do balanço de água aplicada.',
+          ),
+        ],
+      ),
+      // O par de gráficos de VI ultrapassa a altura do shell quando há
+      // dois cenários empilhados; o conteúdo rola sem mudar os gráficos.
+      SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: scenarioProfiles == null
+              ? [
+                  _infiltrationVelocityChart(
+                    context,
+                    result,
+                    irnMm,
+                    project,
+                    scheme,
                   ),
-                  const Text(
-                    'Déficit é uma diferença em relação à demanda; não é componente do balanço de água aplicada.',
-                  ),
-                ],
-              )
-            else if (selected == 3)
-              scenarioProfiles == null
-                  ? _infiltrationVelocityChart(
+                ]
+              : [
+                  for (final scenario in scenarioProfiles!)
+                    _infiltrationVelocityChart(
                       context,
-                      result,
+                      scenario.$2,
                       irnMm,
-                      project,
+                      scenario.$3,
                       scheme,
-                    )
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        for (final scenario in scenarioProfiles!)
-                          _infiltrationVelocityChart(
-                            context,
-                            scenario.$2,
-                            irnMm,
-                            scenario.$3,
-                            scheme,
-                            scenarioName: scenario.$1,
-                          ),
-                      ],
-                    )
-            else if (selected == 4)
-              _efficiencyByFlowChart(
-                context,
-                alternatives,
-                project.alternativas,
-                scheme,
-              )
-            else
-              _operationChart(context, operation, scheme),
-          ],
+                      scenarioName: scenario.$1,
+                    ),
+                ],
         ),
       ),
+      if ((alternatives?.candidatos.isNotEmpty ?? false) ||
+          project.alternativas.isNotEmpty)
+        _efficiencyByFlowChart(
+          context,
+          alternatives,
+          project.alternativas,
+          scheme,
+        ),
+      if (operation != null) _operationChart(context, operation, scheme),
+    ];
+    final tabs = [
+      for (final tab in availableTabs)
+        IrrigationChartTab(
+          label: allLabels[tab],
+          icon: allIcons[tab],
+          semanticsLabel: 'Gráfico de ${allLabels[tab]}',
+        ),
+    ];
+    return IrrigationChartSection(
+      title: 'Gráficos',
+      tabs: tabs,
+      // Espaço suficiente para as legendas em texto ampliado.
+      height: 380,
+      selectedIndex: availableTabs.indexOf(selected),
+      // Mapeia a posição da aba de volta para o índice global (save.abaAtual).
+      onTabSelected: (index) {
+        if (index >= 0 && index < availableTabs.length) {
+          onTabSelected(availableTabs[index]);
+        }
+      },
+      children: children,
     );
   }
 }
