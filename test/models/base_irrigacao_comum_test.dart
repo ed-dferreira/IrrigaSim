@@ -1,53 +1,58 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/models/comum/adaptadores_superficie.dart';
-import 'package:irrigasim/models/comum/irrigacao_comum.dart';
-import 'package:irrigasim/models/faixas/border_agronomy.dart';
-import 'package:irrigasim/models/faixas/border_measurements.dart';
-import 'package:irrigasim/models/faixas/border_project.dart';
-import 'package:irrigasim/models/inundacao/basin_project.dart';
-import 'package:irrigasim/models/irrigation_parameters.dart';
-import 'package:irrigasim/models/sulcos/field_measurements.dart';
-import 'package:irrigasim/models/sulcos/irrigation_project.dart';
+import 'package:irrigasim/shared/irrigacao/models/comum/adaptadores_superficie.dart';
+import 'package:irrigasim/shared/irrigacao/models/comum/irrigacao_comum.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_agronomia.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_medicoes.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/models/projeto_inundacao.dart';
+import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/ensaios_sulco.dart';
+import 'package:irrigasim/shared/irrigacao/models/medicoes_campo.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/geometria_sulco.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/projeto_sulco.dart';
+import 'package:irrigasim/app/codecs.dart';
 
 void main() {
+  setUpAll(registrarCodecs);
+
   test('sulcos: solo, clima, ensaios e unidades sobrevivem ao mapa', () {
-    final project = IrrigationProject(
+    final project = ProjetoSulco(
       id: 's',
       versaoCalculo: '1',
-      area: const Area(
+      area: const AreaProjeto(
         comprimentoM: 200,
         larguraM: 90,
         declividadePercentual: 0.5,
       ),
       geometria: const GeometriaSulco(forma: FormaSulco.v, espacamentoM: .9),
-      solo: const Solo(
+      solo: const SoloProjeto(
         textura: TexturaSolo.media,
         uccPercentual: 30,
         upmpPercentual: 15,
         densidadeGcm3: 1.4,
-        vibMmH: 7,
+        vibMmHora: 7,
       ),
-      cultura: const Cultura(
+      cultura: const CulturaProjeto(
         nome: 'Milho',
         espacamentoFileirasM: .9,
         espacamentoPlantasM: .25,
         profundidadeRaizesM: .4,
       ),
-      clima: const Clima(
+      clima: const ClimaProjeto(
         etoMmDia: 5,
         etcMmDia: 4,
         precipitacaoEfetivaMmDia: 1,
         demandaLiquidaMmDia: 3,
       ),
       ensaioAvanco: const EnsaioAvanco(
-        pontos: [PontoEnsaio(distanciaM: 100, tempoMin: 30)],
+        pontos: [PontoEnsaioAvanco(distanciaM: 100, tempoMin: 30)],
         metodo: MetodoAjusteAvanco.doisPontos,
       ),
       ensaioInfiltracao: const EnsaioInfiltracao(
         configuracao: ConfiguracaoEnsaioInfiltracao(unidadeVolume: 'mm'),
-        pontos: [PontoInfiltracao(tempoMin: 30, volumeInfiltradoMm: 12)],
+        pontos: [PontoInfiltracao(tempoMin: 30, laminaAcumuladaMm: 12)],
       ),
-      operacao: const ParametrosOperacao(vazaoInicialLs: 1, jornadaDiariaH: 12),
+      operacao: const OperacaoSulco(vazaoInicialLs: 1, jornadaDiariaH: 12),
     );
     final base = BaseIrrigacao.fromMap(project.baseComum.toMap());
     expect(base.identificacao.sistema, 'sulcos');
@@ -99,7 +104,7 @@ void main() {
         ],
       );
       final sulcos = p.baseComumPara(MetodoIrrigacao.sulco);
-      final inundacao = BasinProject.fromParameters(p);
+      final inundacao = ProjetoInundacao.fromParameters(p);
       expect(sulcos.ensaio!.estacas.single.recessaoMin, 120);
       expect(sulcos.ensaio!.medicoesInfiltracao.single.vazaoSaidaLs, 1);
       expect(inundacao.baseComum.identificacao.sistema, 'inundacao');

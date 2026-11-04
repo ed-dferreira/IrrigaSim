@@ -2,17 +2,20 @@
 // (planejamento, seleção de vazão, volumes do arroz) atravessam o
 // CenarioSalvo e o exportarJson. Espelha border_persistence_test.dart.
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/models/cenarios/cenario_salvo.dart';
-import 'package:irrigasim/models/comum/clima_demanda.dart';
-import 'package:irrigasim/models/inundacao/basin_annexes.dart';
-import 'package:irrigasim/models/inundacao/basin_project.dart';
-import 'package:irrigasim/models/irrigation_parameters.dart';
-import 'package:irrigasim/models/simulation_result_model.dart';
-import 'package:irrigasim/services/persistence/project_store.dart';
-import 'package:irrigasim/viewmodels/inundacao/basin_simulation_coordinator.dart';
+import 'package:irrigasim/features/cenarios/models/cenario_salvo.dart';
+import 'package:irrigasim/shared/irrigacao/models/comum/clima_demanda.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/models/anexos_inundacao.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/models/projeto_inundacao.dart';
+import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
+import 'package:irrigasim/shared/irrigacao/models/simulation_result_model.dart';
+import 'package:irrigasim/features/cenarios/services/project_store.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/viewmodels/basin_simulation_coordinator.dart';
+import 'package:irrigasim/app/codecs.dart';
 
 void main() {
-  final project = BasinProject.exemploAula8Intermitente();
+  setUpAll(registrarCodecs);
+
+  final project = ProjetoInundacao.exemploAula8Intermitente();
   final result = const BasinSimulationCoordinator().executarProjeto(project);
   final params = project.toCompatParameters();
   final scenario = CenarioSalvo(
@@ -29,7 +32,7 @@ void main() {
     final loaded = CenarioSalvo.fromMap(scenario.toMap());
     final restored = loaded.parametros.projetoInundacao!;
 
-    expect(restored.versao, BasinProject.versaoAtual);
+    expect(restored.versao, ProjetoInundacao.versaoAtual);
     expect(restored.regime, project.regime);
     expect(restored.comprimentoM, project.comprimentoM);
     expect(restored.k, project.k);
@@ -55,7 +58,7 @@ void main() {
     expect(result.checagemOperacional, isNotNull);
     expect(result.checagemOperacional!.viavel, isTrue);
     // Permanente: volumes do arroz com lacunas da p. 84.
-    final permanente = BasinProject.exemploAula8Permanente();
+    final permanente = ProjetoInundacao.exemploAula8Permanente();
     final rPermanente = const BasinSimulationCoordinator().executarProjeto(
       permanente,
     );
@@ -113,21 +116,21 @@ void main() {
   });
 
   test('anexos isolados fazem roundtrip pelo mapa', () {
-    final parcelas = BasinParcelasAnexo.fromMap(
+    final parcelas = AnexoParcelas.fromMap(
       result.planejamentoParcelas!.toMap(),
     );
     expect(parcelas.tppMin, result.planejamentoParcelas!.tppMin);
     expect(parcelas.npdInteiro, result.planejamentoParcelas!.npdInteiro);
 
     // Seleção de vazão: exige candidatas explícitas no projeto (p. 60).
-    final comCandidatas = BasinProject.exemploAula8Intermitente().copyWith(
+    final comCandidatas = ProjetoInundacao.exemploAula8Intermitente().copyWith(
       candidatasVazaoLs: const [100, 150, 200],
     );
     final rSelecao = const BasinSimulationCoordinator().executarProjeto(
       comCandidatas,
     );
     expect(rSelecao.selecaoVazao, isNotNull);
-    final selecao = BasinSelecaoVazaoAnexo.fromMap(
+    final selecao = AnexoSelecaoVazao.fromMap(
       rSelecao.selecaoVazao!.toMap(),
     );
     expect(selecao.vazaoEscolhidaLs, rSelecao.selecaoVazao!.vazaoEscolhidaLs);
@@ -138,35 +141,35 @@ void main() {
     expect(selecao.eficienciaPercent, rSelecao.selecaoVazao!.eficienciaPercent);
 
     final volumesOrigem = const BasinSimulationCoordinator()
-        .executarProjeto(BasinProject.exemploAula8Permanente())
+        .executarProjeto(ProjetoInundacao.exemploAula8Permanente())
         .volumesArroz!;
-    final volumes = BasinVolumesAnexo.fromMap(volumesOrigem.toMap());
+    final volumes = AnexoVolumesArroz.fromMap(volumesOrigem.toMap());
     expect(volumes.pagina, volumesOrigem.pagina);
     expect(volumes.volumes.v2M3Ha, volumesOrigem.volumes.v2M3Ha);
   });
 
   test('roundtrip v2 preserva agronomia, método de ETc e origens', () {
-    final base = BasinProject.exemploAula8Intermitente();
+    final base = ProjetoInundacao.exemploAula8Intermitente();
     final projeto = base.copyWith(
-      agronomia: base.agronomia!.withValue('kc', 1.2),
+      agronomia: base.agronomia!.comValor('kc', 1.2),
       metodoEtc: MetodoEtc.etoVezesKc,
       etoMmDia: 7,
       origemChuva: OrigemChuva.observada,
       precipitacaoEfetivaMmDia: 1.5,
-      origemIrn: OrigemIrnBasin.calculada,
+      origemIrn: OrigemIrnInundacao.calculada,
       temperaturaMediaC: 24,
       latitudeGraus: -30.5,
       mesReferencia: 9,
     );
-    final loaded = BasinProject.fromMap(projeto.toMap());
+    final loaded = ProjetoInundacao.fromMap(projeto.toMap());
 
-    expect(loaded.versao, BasinProject.versaoAtual);
+    expect(loaded.versao, ProjetoInundacao.versaoAtual);
     expect(loaded.agronomia?.toMap(), projeto.agronomia?.toMap());
     expect(loaded.metodoEtc, MetodoEtc.etoVezesKc);
     expect(loaded.etoMmDia, 7);
     expect(loaded.origemChuva, OrigemChuva.observada);
     expect(loaded.precipitacaoEfetivaMmDia, 1.5);
-    expect(loaded.origemIrn, OrigemIrnBasin.calculada);
+    expect(loaded.origemIrn, OrigemIrnInundacao.calculada);
     expect(loaded.temperaturaMediaC, 24);
     expect(loaded.latitudeGraus, -30.5);
     expect(loaded.mesReferencia, 9);
@@ -175,7 +178,7 @@ void main() {
   });
 
   test('carga de mapa v1 sem campos de clima usa defaults conscientes', () {
-    final mapa = BasinProject.exemploAula8Intermitente().toMap()
+    final mapa = ProjetoInundacao.exemploAula8Intermitente().toMap()
       ..['versao'] = 1
       ..remove('agronomia')
       ..remove('metodo_etc')
@@ -186,13 +189,13 @@ void main() {
       ..remove('temperatura_media_c')
       ..remove('latitude_graus')
       ..remove('mes_referencia');
-    final loaded = BasinProject.fromMap(mapa);
+    final loaded = ProjetoInundacao.fromMap(mapa);
 
     expect(loaded.versao, 1, reason: 'carga v1 não é promovida para v2');
     expect(loaded.agronomia, isNull);
     expect(loaded.metodoEtc, MetodoEtc.adotada);
     expect(loaded.origemChuva, OrigemChuva.naoInformada);
-    expect(loaded.origemIrn, OrigemIrnBasin.informada);
+    expect(loaded.origemIrn, OrigemIrnInundacao.informada);
     expect(loaded.etoMmDia, isNull);
     expect(loaded.precipitacaoEfetivaMmDia, isNull);
     expect(loaded.temperaturaMediaC, isNull);
@@ -214,7 +217,7 @@ void main() {
     final json = await store.exportarJson(scenario);
     final projeto = json['projeto_inundacao'] as Map<String, dynamic>;
 
-    expect(projeto['versao'], BasinProject.versaoAtual);
+    expect(projeto['versao'], ProjetoInundacao.versaoAtual);
     expect(projeto['regime'], project.regime.name);
     expect(projeto['comprimento_m'], project.comprimentoM);
     expect(json['tipo_calculo'], 'irrigacao_inundacao');

@@ -1,11 +1,11 @@
-// Wizard de inundação (revisão das Fases 0–6): as etapas 1–9 distribuem os
+// Wizard de inundação (revisão das Fases 0–6): as etapas 1–8 distribuem os
 // campos do plano, o campo calculado I(t) reage ao tempo de contato e a
 // revisão traz o painel didático (pp. 16, 17 e 38) com G3.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/services/simulation/inundacao/basin_reference_math.dart';
-import 'package:irrigasim/views/irrigation/inundacao/basin_project_screen.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/services/nucleo_referencia_inundacao.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/views/basin_project_screen.dart';
 
 void main() {
   Future<void> abrirEtapa(
@@ -27,7 +27,7 @@ void main() {
     );
     expect(find.text('Projeto de inundação'), findsOneWidget);
     expect(find.text('1. Regime'), findsOneWidget);
-    expect(find.text('9. Revisão'), findsOneWidget);
+    expect(find.text('8. Revisão'), findsOneWidget);
     expect(find.textContaining('Cenário de infiltração ativo'), findsNothing);
 
     await abrirEtapa(tester, 2, 'Área e geometria');
@@ -36,7 +36,7 @@ void main() {
     expect(find.text('Evapotranspiração do intervalo (ETc)'), findsNothing);
     expect(find.text('Lâmina inicial Li (opcional)'), findsOneWidget);
     expect(find.text('Lâmina final Lf (opcional)'), findsOneWidget);
-    expect(find.text('Sugestão de área × vazão (p. 16)'), findsOneWidget);
+    expect(find.text('Sugestão de área × vazão'), findsOneWidget);
     expect(find.text('Vazão disponível na fonte'), findsNothing);
 
     await abrirEtapa(tester, 3, 'Tabuleiro e taipa');
@@ -48,7 +48,7 @@ void main() {
     expect(find.text('Tempo de contato t'), findsOneWidget);
     expect(find.text('Infiltração acumulada I(t)'), findsOneWidget);
     expect(find.text('Lâmina requerida (IRN)'), findsNothing); // etapa 6
-    expect(find.textContaining('pp. 53'), findsOneWidget);
+    expect(find.textContaining('k, a e VIB próprios'), findsOneWidget);
     expect(find.text('Primeira irrigação'), findsOneWidget);
 
     await abrirEtapa(tester, 5, 'Cultura e sistema radicular');
@@ -91,21 +91,14 @@ void main() {
     expect(find.text('Checagem operacional (G3)'), findsOneWidget);
     expect(find.text('Viável'), findsOneWidget);
 
-    await abrirEtapa(tester, 8, 'Planejamento');
-    expect(find.text('Auditoria F02'), findsNothing); // está em ExpansionTile
-    expect(find.textContaining('Auditoria F02'), findsOneWidget);
-    expect(find.text('Checagem operacional (G3)'), findsNothing); // G3 na 7
-    expect(find.textContaining('Volumes do arroz'), findsNothing);
-    expect(find.textContaining('Densidade do solo seco'), findsNothing);
-
-    await abrirEtapa(tester, 9, 'Revisão');
+    await abrirEtapa(tester, 8, 'Revisão');
     expect(find.text('Guia de área por vazão (p. 16)'), findsOneWidget);
     expect(find.text('Henderson (p. 17)'), findsOneWidget);
     expect(find.text('Sifões e tubos de Booher (p. 38)'), findsOneWidget);
     expect(find.text('Expoente r inicial'), findsOneWidget);
-    expect(find.text('Clima e demanda (p. 63)'), findsOneWidget); // seção nova
-    expect(find.text('Cultura e sistema radicular (p. 63)'), findsOneWidget);
-    // Confirmação obrigatória: sem as 8 etapas confirmadas o cálculo não abre.
+    expect(find.text('Clima e demanda'), findsOneWidget); // seção nova
+    expect(find.text('Cultura e sistema radicular'), findsOneWidget);
+    // Confirmação obrigatória: sem as 7 etapas confirmadas o cálculo não abre.
     expect(find.textContaining('Confirme as etapas pendentes'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -187,20 +180,13 @@ void main() {
     expect(find.text('Lâmina requerida (IRN)'), findsNothing);
     expect(find.textContaining('TR = DTA · Z · f / ETc'), findsOneWidget);
 
-    await abrirEtapa(tester, 8, 'Planejamento');
-    expect(find.textContaining('TR (turno de rega)'), findsOneWidget);
-    expect(find.textContaining('Qe (enchimento)'), findsOneWidget);
-    expect(find.textContaining('Qm (manutenção)'), findsOneWidget);
-    expect(find.textContaining('Densidade do solo seco'), findsNothing);
-    expect(find.textContaining('Volumes do arroz'), findsNothing);
-
-    await abrirEtapa(tester, 9, 'Revisão');
+    await abrirEtapa(tester, 8, 'Revisão');
     expect(find.textContaining('Volumes do arroz'), findsNothing);
     expect(find.textContaining('TR (turno de rega)'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('cenário troca para terceira irrigação e recarrega k (p. 63)', (
+  testWidgets('cenário troca para terceira irrigação e recarrega k', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -226,5 +212,19 @@ void main() {
     );
     expect(kField.controller.text, '0,0034');
     expect(tester.takeException(), isNull);
+  });
+
+  // A etapa Regime não mostra mais o cálculo vivo do regime ativo nem o
+  // botão do exemplo de referência.
+  testWidgets('etapa Regime sem cálculo do regime ativo sem exemplo', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: BasinProjectScreen())),
+    );
+    expect(find.text('Cálculo do regime ativo'), findsNothing);
+    expect(find.text('Preencher com o exemplo de referência'), findsNothing);
+    expect(find.text('Intermitente (sem circulação)'), findsOneWidget);
+    expect(find.text('Permanente (com circulação)'), findsOneWidget);
   });
 }

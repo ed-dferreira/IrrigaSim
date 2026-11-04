@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/views/irrigation/sulcos/project_screen.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/views/project_screen.dart';
 
 void main() {
   testWidgets('geometria e opção Criddle não extrapolam em tela estreita', (

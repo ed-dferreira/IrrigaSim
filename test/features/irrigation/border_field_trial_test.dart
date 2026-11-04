@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/models/faixas/border_measurements.dart';
-import 'package:irrigasim/models/faixas/border_project.dart';
-import 'package:irrigasim/models/faixas/border_result.dart';
-import 'package:irrigasim/services/simulation/faixas/border_csv.dart';
-import 'package:irrigasim/services/simulation/faixas/border_field_trial.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_medicoes.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/faixa_csv.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/faixa_ensaio_campo.dart';
 
 void main() {
   const trial = BorderFieldTrial();
@@ -14,7 +14,7 @@ void main() {
     BorderStake(60, 30, recessaoMin: 95),
   ];
   test('ajuste de campo não extrapola e preserva pontos', () {
-    final curve = trial.fit(stakes);
+    final curve = trial.ajustar(stakes);
     expect(curve.r, closeTo(1, 1e-8));
     expect(curve.rmseMin, closeTo(0, 1e-8));
     expect(curve.arrival(40), closeTo(20, 1e-8));
@@ -23,15 +23,15 @@ void main() {
   });
   test('ensaio sem corte não anuncia Ea, mas fornece perfil medido', () {
     final project = BorderProject.ilustrativo.copyWith(comprimentoM: 60);
-    final result = trial.evaluate(project, stakes);
+    final result = trial.avaliar(project, stakes);
     expect(result.ea, isNull);
-    expect(result.profile.length, 401);
-    final at15 = result.profile.firstWhere(
+    expect(result.perfil.length, 401);
+    final at15 = result.perfil.firstWhere(
       (point) => (point.xM - 15).abs() < 1e-8,
     );
     expect(at15.recessaoMin, closeTo(83.75, 1e-8));
     expect(at15.avancoMin, closeTo(7.5, 1e-8));
-    final withCut = trial.evaluate(project, stakes, cutoffMin: 30);
+    final withCut = trial.avaliar(project, stakes, cutoffMin: 30);
     expect(
       result.avisos.map((n) => n.status),
       contains(BorderStatus.avisoOrientativo),
@@ -46,7 +46,7 @@ void main() {
 
   test('avisos do ensaio carregam código canônico e página', () {
     final project = BorderProject.ilustrativo.copyWith(comprimentoM: 60);
-    final semRecessao = trial.evaluate(project, const [
+    final semRecessao = trial.avaliar(project, const [
       BorderStake(0, 0),
       BorderStake(20, 10),
       BorderStake(40, 20),
@@ -63,7 +63,7 @@ void main() {
       isTrue,
     );
 
-    final completo = trial.evaluate(project, const [
+    final completo = trial.avaliar(project, const [
       BorderStake(0, 0, recessaoMin: 80),
       BorderStake(20, 10, recessaoMin: 85),
       BorderStake(40, 20, recessaoMin: 90),
@@ -73,7 +73,7 @@ void main() {
     expect(completo.status, BorderStatus.validoNoModelo);
 
     expect(
-      () => trial.evaluate(project, const [
+      () => trial.avaliar(project, const [
         BorderStake(0, 0, recessaoMin: 80),
         BorderStake(20, 10, recessaoMin: 85),
         BorderStake(40, 20, recessaoMin: 90),
@@ -92,12 +92,12 @@ void main() {
     'estacas fora de 10–30 m geram aviso orientativo sem descartar o ensaio',
     () {
       final project = BorderProject.ilustrativo.copyWith(comprimentoM: 80);
-      final result = trial.evaluate(project, const [
+      final result = trial.avaliar(project, const [
         BorderStake(0, 0),
         BorderStake(40, 20),
         BorderStake(80, 40),
       ]);
-      expect(result.advance.stakes, hasLength(3));
+      expect(result.avanco.stakes, hasLength(3));
       expect(
         result.avisos.any((notice) => notice.mensagem.contains('10–30 m')),
         isTrue,

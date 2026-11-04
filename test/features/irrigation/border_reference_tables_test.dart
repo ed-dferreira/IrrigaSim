@@ -1,13 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/models/faixas/border_result.dart';
-import 'package:irrigasim/models/irrigation_parameters.dart';
-import 'package:irrigasim/services/simulation/faixas/border_reference_tables.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
+import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/faixa_tabelas_referencia.dart';
 
 void main() {
   const tables = BorderReferenceTables();
   test('limite compartilhado Marr apresenta duas sugestões sem infiltração inventada', () {
-    expect(tables.suggest(TexturaSolo.fina, .6).length, 2);
-    expect(tables.suggest(TexturaSolo.grossa, .6), isEmpty);
+    expect(tables.sugestoesMarr(TexturaSolo.fina, .6).length, 2);
+    expect(tables.sugestoesMarr(TexturaSolo.grossa, .6), isEmpty);
   });
   test('células Booher impressas suspeitas não são usadas automaticamente', () {
     expect(tables.booher(12.5, 10)!.impressoLs, 1.03);
@@ -43,7 +43,7 @@ void main() {
       expect(tables.sugestao(16, 10), isNull);
       // Marr é orientativa, nunca coeficiente de infiltração.
       expect(
-        tables.suggest(TexturaSolo.fina, .6).first.status,
+        tables.sugestoesMarr(TexturaSolo.fina, .6).first.status,
         BorderStatus.avisoOrientativo,
       );
     },

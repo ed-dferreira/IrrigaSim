@@ -6,17 +6,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/models/inundacao/basin_project.dart';
-import 'package:irrigasim/services/cenarios/scenario_service.dart';
-import 'package:irrigasim/services/persistence/local_scenario_store.dart';
-import 'package:irrigasim/viewmodels/inundacao/basin_simulation_coordinator.dart';
-import 'package:irrigasim/viewmodels/results_controller.dart';
-import 'package:irrigasim/views/irrigation/inundacao/basin_results_screen.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/models/projeto_inundacao.dart';
+import 'package:irrigasim/features/cenarios/services/scenario_service.dart';
+import 'package:irrigasim/features/cenarios/persistence/local_scenario_store.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/viewmodels/basin_simulation_coordinator.dart';
+import 'package:irrigasim/features/cenarios/controllers/salvar_cenario_controller.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/views/basin_results_screen.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  Future<void> pumpResultados(WidgetTester tester, BasinProject project) async {
+  Future<void> pumpResultados(WidgetTester tester, ProjetoInundacao project) async {
     tester.view.physicalSize = const Size(1100, 2400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -45,35 +45,35 @@ void main() {
   testWidgets('intermitente audita cultura, clima e a origem da IRN', (
     tester,
   ) async {
-    await pumpResultados(tester, BasinProject.exemploAula8Intermitente());
+    await pumpResultados(tester, ProjetoInundacao.exemploAula8Intermitente());
 
-    expect(find.text('Cultura e sistema radicular (p. 63)'), findsOneWidget);
-    expect(find.text('Clima e demanda (p. 63)'), findsOneWidget);
+    expect(find.text('Cultura e sistema radicular'), findsOneWidget);
+    expect(find.text('Clima e demanda'), findsOneWidget);
     expect(find.text('ETc adotada (digitação)'), findsOneWidget);
     expect(find.text('Efetiva adotada'), findsOneWidget);
-    expect(find.text('IRN efetiva (informada) (p. 63)'), findsOneWidget);
-    expect(find.text('TR = IRN / (ETc − Pef) (p. 63)'), findsOneWidget);
+    expect(find.text('IRN efetiva (informada)'), findsOneWidget);
+    expect(find.text('TR = IRN / (ETc − Pef)'), findsOneWidget);
     // IRN informada e calculada coincidem: o G14 só exibe as duas ao divergir.
-    expect(find.text('IRN informada (prevalece, G14) (p. 63)'), findsNothing);
-    expect(find.text('IRN calculada (auditoria, G14) (p. 63)'), findsNothing);
+    expect(find.text('IRN informada prevalece'), findsNothing);
+    expect(find.text('IRN calculada (auditoria)'), findsNothing);
     expect(find.text('Não aplicável'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
   testWidgets('permanente marca IRN como não aplicável (G8) e traz o TR '
       'contínuo', (tester) async {
-    await pumpResultados(tester, BasinProject.exemploAula8Permanente());
+    await pumpResultados(tester, ProjetoInundacao.exemploAula8Permanente());
 
     expect(find.text('IRN'), findsOneWidget);
     expect(find.text('Não aplicável'), findsOneWidget);
     expect(
       find.textContaining(
-        'O regime contínuo não usa a lâmina requerida intermitente (G8).',
+        'O regime contínuo não usa a lâmina requerida intermitente.',
       ),
       findsOneWidget,
     );
-    expect(find.text('TR (turno de rega contínuo) (p. 67)'), findsOneWidget);
-    expect(find.text('IRN efetiva (informada) (p. 63)'), findsNothing);
+    expect(find.text('TR (turno de rega contínuo)'), findsOneWidget);
+    expect(find.text('IRN efetiva (informada)'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -81,13 +81,51 @@ void main() {
     'entrada ausente vira "Não informado" e derivado "Não calculado"',
     (tester) async {
       // Carga de um mapa v1 sem agronomia nem ETc: nada disso vira zero (G4).
-      final mapa = BasinProject.exemploAula8Permanente().toMap()
+      final mapa = ProjetoInundacao.exemploAula8Permanente().toMap()
         ..remove('agronomia')
         ..remove('evapotranspiracao_mm_dia');
-      await pumpResultados(tester, BasinProject.fromMap(mapa));
+      await pumpResultados(tester, ProjetoInundacao.fromMap(mapa));
 
       expect(find.text('Não informado'), findsWidgets);
       expect(find.text('Não calculado'), findsWidgets);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'resultado de inundação permanece utilizável em tema escuro e texto ampliado',
+    (tester) async {
+      tester.view.physicalSize = const Size(1100, 2400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final store = LocalScenarioStore();
+      addTearDown(store.dispose);
+      final project = ProjetoInundacao.exemploAula8Intermitente();
+      final result = const BasinSimulationCoordinator().executarProjeto(
+        project,
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            resultsProvider.overrideWith(
+              (ref) => ResultsController(ScenarioService(store)),
+            ),
+          ],
+          child: MediaQuery(
+            data: const MediaQueryData(textScaler: TextScaler.linear(1.8)),
+            child: MaterialApp(
+              theme: ThemeData(colorScheme: const ColorScheme.dark()),
+              home: BasinResultsScreen(
+                projectOverride: project,
+                resultOverride: result,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Indicadores principais'), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );

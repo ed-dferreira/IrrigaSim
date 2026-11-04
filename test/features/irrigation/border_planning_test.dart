@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/models/faixas/border_project.dart';
-import 'package:irrigasim/models/faixas/border_measurements.dart';
-import 'package:irrigasim/models/faixas/border_result.dart';
-import 'package:irrigasim/services/simulation/faixas/border_hydraulics.dart';
-import 'package:irrigasim/services/simulation/faixas/border_planning.dart';
-import 'package:irrigasim/viewmodels/faixas/border_project_controller.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_medicoes.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/faixa_hidraulica.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/faixa_planejamento.dart';
+import 'package:irrigasim/features/irrigacao_faixas/viewmodels/border_project_controller.dart';
 
 void main() {
   const planning = BorderPlanning();
@@ -31,10 +31,10 @@ void main() {
 
   test('geometria usa hn superficial e St percentual convertido pela base', () {
     final r = const BorderHydraulics().dimensionar(base);
-    final geo = planning.geometry(base, r);
+    final geo = planning.geometria(base, r);
     expect(geo.limiteDesnivelM, closeTo(.04, 1e-10));
     expect(geo.larguraMaximaM, closeTo(8, 1e-10));
-    final level = planning.geometry(base.copyWith(desnivelTransversalM: 0), r);
+    final level = planning.geometria(base.copyWith(desnivelTransversalM: 0), r);
     expect(level.larguraMaximaM, isNull);
   });
 
@@ -145,7 +145,7 @@ void main() {
 
   test('cronograma contabiliza lote final parcial e compara oferta', () {
     final r = const BorderHydraulics().dimensionar(base);
-    final op = planning.operation(
+    final op = planning.operacao(
       base,
       r,
       dias: 7,
@@ -170,7 +170,7 @@ void main() {
       grid.candidatos.map((c) => c.comprimentoM).toSet(),
       containsAll([400, 200, 50]),
     );
-    final withRejections = planning.explore(ready, menorLsM: .5, maiorLsM: 4);
+    final withRejections = planning.explorar(ready, menorLsM: .5, maiorLsM: 4);
     expect(
       withRejections.candidatos.any((c) => c.motivoRejeicao != null),
       isTrue,
@@ -192,7 +192,7 @@ void main() {
     }
     expect(grid.melhor, isNotNull);
     expect(grid.toRecords().length, grid.candidatos.length);
-    final erGrid = planning.explore(
+    final erGrid = planning.explorar(
       ready,
       menorLsM: 2.5,
       maiorLsM: 3.5,

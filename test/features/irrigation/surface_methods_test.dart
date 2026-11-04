@@ -1,16 +1,17 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/models/inundacao/basin_project.dart';
-import 'package:irrigasim/models/irrigation_parameters.dart';
-import 'package:irrigasim/services/simulation/inundacao/run_basin_simulation.dart';
-import 'package:irrigasim/services/simulation/inundacao/basin_reference_math.dart';
-import 'package:irrigasim/services/simulation/inundacao/basin_planning.dart';
-import 'package:irrigasim/services/simulation/inundacao/rice_volumes_service.dart';
-import 'package:irrigasim/services/simulation/faixas/run_border_simulation.dart';
-import 'package:irrigasim/services/simulation/sulcos/run_furrow_simulation.dart';
-import 'package:irrigasim/services/simulation/inundacao/run_permanent_basin_simulation.dart';
-import 'package:irrigasim/viewmodels/inundacao/basin_simulation_coordinator.dart';
-import 'package:irrigasim/viewmodels/parameters_controller.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/models/projeto_inundacao.dart';
+import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/services/simulador_inundacao.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/services/nucleo_referencia_inundacao.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/services/planejamento_inundacao.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/services/volumes_arroz.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/executar_simulacao_faixa.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/services/simulador_sulcos.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/services/simulador_inundacao_permanente.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/viewmodels/basin_simulation_coordinator.dart';
+import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/indicadores_balanco.dart';
+import 'package:irrigasim/features/irrigacao_inundacao/models/anexos_inundacao.dart';
 
 void main() {
   IrrigationParameters base() => const IrrigationParameters(
@@ -36,31 +37,20 @@ void main() {
     expect(efficiency + percolation + runoff, closeTo(100, 0.01));
   }
 
-  test('a seleção do método não volta automaticamente para sulco', () {
-    final container = ProviderContainer();
-    addTearDown(container.dispose);
-
-    container
-        .read(parametersProvider.notifier)
-        .setMetodo(MetodoIrrigacao.faixa);
-
-    expect(container.read(parametersProvider).metodo, MetodoIrrigacao.faixa);
-  });
-
   test('sulco calcula limite não erosivo e fecha o balanço', () {
-    final result = RunFurrowSimulation()(base());
+    final result = SimuladorSulcos()(base());
 
     expect(result.metricas['Vazão máxima não erosiva'], isPositive);
     expect(result.metricas['Tempo de aplicação calculado'], greaterThan(60));
     expectPhysicalBalance(
-      result.balancoSulco!.eaIntegral,
+      result.balancoSulco!.eficienciaAplicacaoIntegralPercentual,
       result.perdaPercolacao,
       result.perdaEscoamento,
     );
   });
 
   test('sulco reproduz as fórmulas da planilha de referência', () {
-    final result = RunFurrowSimulation()(
+    final result = SimuladorSulcos()(
       base().copyWith(
         comprimento: 200,
         declividade: 0.005,
@@ -154,8 +144,8 @@ void main() {
   test('inundação intermitente reproduz o cenário da Aula 8 (Q0 = Q0max)', () {
     // Hidráulica por unidade de largura: a vazão total é distribuída pela
     // largura do tabuleiro (400 m) e reproduz Q0max da referência.
-    final q0Max = vazaoMaxima(8, 0.04, 200);
-    final result = RunBasinSimulation()(
+    final q0Max = vazaoNaoErosivaMaxima(8, 0.04, 200);
+    final result = SimuladorInundacao()(
       IrrigationParameters(
         comprimento: 200,
         declividade: 0,
@@ -190,8 +180,8 @@ void main() {
 
   test('inundação intermitente reproduz a 3ª irrigação da Aula 8', () {
     // Solo da terceira irrigação: k=0,0034, a=0,45, VIB=0,0001 (mesmo Q0max).
-    final q0Max = vazaoMaxima(8, 0.04, 200);
-    final result = RunBasinSimulation()(
+    final q0Max = vazaoNaoErosivaMaxima(8, 0.04, 200);
+    final result = SimuladorInundacao()(
       IrrigationParameters(
         comprimento: 200,
         declividade: 0,
@@ -224,8 +214,8 @@ void main() {
   });
 
   test('inundação alerta a vazão total acima de Q0max × largura', () {
-    final q0Max = vazaoMaxima(8, 0.04, 200);
-    final result = RunBasinSimulation()(
+    final q0Max = vazaoNaoErosivaMaxima(8, 0.04, 200);
+    final result = SimuladorInundacao()(
       IrrigationParameters(
         comprimento: 200,
         declividade: 0,
@@ -251,7 +241,7 @@ void main() {
 
   test('inundação rejeita vazão insuficiente com FormatException', () {
     expect(
-      () => RunBasinSimulation()(
+      () => SimuladorInundacao()(
         IrrigationParameters(
           comprimento: 200,
           declividade: 0,
@@ -270,7 +260,7 @@ void main() {
   });
 
   test('inundação permanente separa enchimento e manutenção', () {
-    final result = RunPermanentBasinSimulation()(
+    final result = SimuladorInundacaoPermanente()(
       base().copyWith(tipoInundacao: TipoInundacao.permanente),
     );
 
@@ -297,7 +287,7 @@ void main() {
 
   test('inundação permanente valida declividade < 2% (G9)', () {
     expect(
-      () => RunPermanentBasinSimulation()(
+      () => SimuladorInundacaoPermanente()(
         base().copyWith(
           tipoInundacao: TipoInundacao.permanente,
           declividade: 0.03,
@@ -308,7 +298,7 @@ void main() {
   });
 
   test('inundação permanente alerta geometria acima da área (G3)', () {
-    final result = RunPermanentBasinSimulation()(
+    final result = SimuladorInundacaoPermanente()(
       base().copyWith(
         tipoInundacao: TipoInundacao.permanente,
         comprimento: 400,
@@ -322,7 +312,7 @@ void main() {
   });
 
   test('volumes do arroz preservam lacunas da p. 84 e completam com dados', () {
-    const service = RiceVolumesService();
+    const service = ServicoVolumesArroz();
     final parcial = service.solucaoPagina84();
     expect(parcial.pt, closeTo(0.528301887, 1e-9));
     expect(parcial.us, closeTo(0.422641509, 1e-9));
@@ -363,12 +353,12 @@ void main() {
     expect(completo.dadosAusentes, isEmpty);
     // Conversão volumétrica → gravimétrica (p. 76).
     expect(
-      RiceVolumesService.umidadeGravimetrica(0.25, 1.25),
+      ServicoVolumesArroz.umidadeGravimetrica(0.25, 1.25),
       closeTo(0.2, 1e-12),
     );
     // Forma volumétrica equivalente de V1: (PT − u)·PCI·10000.
     expect(
-      RiceVolumesService.v1PorUmidadeVolumetrica(
+      ServicoVolumesArroz.v1PorUmidadeVolumetrica(
         pt: 0.5283018867924528,
         umidadeVolumetricaInicial: 0.25,
         pciM: 0.60,
@@ -380,7 +370,7 @@ void main() {
   test(
     'planejamento em parcelas reproduz o caso operacional de referência',
     () {
-      const planning = BasinPlanning();
+      const planning = PlanejamentoInundacao();
       final op = planning.planejarParcelas(
         areaTotalM2: 80000,
         comprimentoM: 200,
@@ -415,7 +405,7 @@ void main() {
   );
 
   test('checagem operacional G3 compara vazão e geometria', () {
-    const planning = BasinPlanning();
+    const planning = PlanejamentoInundacao();
     final ok = planning.checarOperacao(
       vazaoPlanejadaLs: 30,
       vazaoDisponivelLs: 36,
@@ -447,7 +437,7 @@ void main() {
 
   test('intermitente preenche a checagem operacional G3 na coordenação', () {
     final result = const BasinSimulationCoordinator().executarProjeto(
-      BasinProject.exemploAula8Intermitente(),
+      ProjetoInundacao.exemploAula8Intermitente(),
     );
 
     expect(result.checagemOperacional, isNotNull);
@@ -459,7 +449,7 @@ void main() {
 
   test('intermitente com vazão acima da disponível sinaliza G3', () {
     final result = const BasinSimulationCoordinator().executarProjeto(
-      BasinProject.exemploAula8Intermitente().copyWith(vazaoTotalLs: 900),
+      ProjetoInundacao.exemploAula8Intermitente().copyWith(vazaoTotalLs: 900),
     );
 
     expect(result.checagemOperacional, isNotNull);

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:irrigasim/services/perfil/preferencias_app.dart';
-import 'package:irrigasim/views/home/home_screen.dart';
+import 'package:irrigasim/features/perfil/services/preferencias_app.dart';
+import 'package:irrigasim/features/simulacao_guiada/views/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -32,9 +32,7 @@ void main() {
     addTearDown(router.dispose);
 
     await tester.pumpWidget(
-      ProviderScope(
-        child: MaterialApp.router(routerConfig: router),
-      ),
+      ProviderScope(child: MaterialApp.router(routerConfig: router)),
     );
     await tester.pumpAndSettle();
 

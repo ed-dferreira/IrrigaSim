@@ -13,6 +13,9 @@ analyzer:
   exclude:
     - build/**
     - docs/**
+    # Templates de referência de skills: citam AppColors e outros símbolos
+    # do projeto alvo de propósito e não devem ser compilados aqui.
+    - opencode/**
     - android/**
     - ios/**
     - web/**
