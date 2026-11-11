@@ -1,7 +1,7 @@
 import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
 import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
 
-import 'faixa_ensaio_campo.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/faixa_ensaio_campo.dart';
 
 String _escapar(String text) =>
     text.contains(RegExp('[;"\n]')) ? '"${text.replaceAll('"', '""')}"' : text;
@@ -134,11 +134,12 @@ String borderCsv(BorderProject p, BorderResult r) {
     'jusante;${p.jusante.name};',
     'cobertura;${p.cobertura.name};',
     'tipo_dique;${p.tipoDique ?? 'não informado'};registro construtivo',
-    'rho1_F02;${p.rho1F02 ?? ''};transcrito; fórmula não executada',
-    'rho2_F02;${p.rho2F02 ?? ''};transcrito; fórmula não executada',
-    'vmax_F02;${p.vmaxF02 ?? ''};${p.unidadeVmaxF02 ?? 'unidade não informada'}; fórmula bloqueada',
-    'status_F02;modelo_nao_implementado;Vmax/unidade/convenção insuficientes na fonte',
-    'formula_F02;[Vmax^rho2*n^2/(3600*S0*rho1)]^[1/(rho2-2)];bloqueada: Vmax e unidades/convenção não definidas',
+    'rho1_F02;${p.rho1F02 ?? ''};transcrito;',
+    'rho2_F02;${p.rho2F02 ?? ''};transcrito;',
+    'vmax_F02;${p.vmaxF02 ?? ''};${p.unidadeVmaxF02 ?? 'unidade não informada'};',
+    'status_F02;implementada;qmax alternativa calculada quando ρ1, ρ2 e Vmax informados',
+    'formula_F02;[Vmax^rho2*n^2/(3600*S0*rho1)]^[1/(rho2-2)];transcrita da fonte',
+    'qmax_F02;${r.qmaxF02M3MinM ?? ''};m3/min/m;',
     'orientacao_area;${p.orientacaoArea ?? 'não informada'};registro topográfico',
     'area_util;${p.areaUtilM2 ?? ''};m2',
     'data_ensaio;${p.dataEnsaioIso ?? 'não registrada'};AAAA-MM-DD',
@@ -250,20 +251,20 @@ String borderCsv(BorderProject p, BorderResult r) {
       (
         'rho1F02',
         p.rho1F02,
-        'não confirmada',
-        'informada apenas para auditoria F02',
+        'transcrito',
+        'usado na qmax alternativa F02',
       ),
       (
         'rho2F02',
         p.rho2F02,
-        'não confirmada',
-        'informada apenas para auditoria F02',
+        'transcrito',
+        'usado na qmax alternativa F02',
       ),
       (
         'vmaxF02',
         p.vmaxF02,
         p.unidadeVmaxF02 ?? 'unidade ausente',
-        'não usada; F02 bloqueada',
+        'usado na qmax alternativa F02',
       ),
       (
         'kPrimeira',

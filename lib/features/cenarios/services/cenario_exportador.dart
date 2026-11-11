@@ -1,9 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:share_plus/share_plus.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 
 import '../models/cenario_salvo.dart';
@@ -13,9 +16,12 @@ import 'project_store.dart';
 /// Exporta um cenário salvo como CSV ou PDF.
 ///
 /// O conteúdo dos dois formatos vem de `ProjectStore.secoesResumo`,
-/// garantindo consistência entre eles. Em plataformas nativas, o destino do
+/// garantindo consistência entre eles. Em plataformas desktop, o destino do
 /// arquivo é escolhido pela caixa de diálogo do sistema (`file_selector`);
-/// no navegador, o arquivo é baixado diretamente com o nome sugerido.
+/// no navegador, o arquivo é baixado diretamente com o nome sugerido; no
+/// Android e iOS — onde `file_selector` não oferece diálogo de gravação —
+/// o arquivo vai para um temporário e é entregue à folha de
+/// compartilhamento do sistema, de onde pode ser salvo em qualquer pasta.
 /// Retornar `null` significa que o usuário cancelou.
 class CenarioExportador {
   CenarioExportador({
@@ -45,10 +51,11 @@ class CenarioExportador {
     return _gravar(cenario, 'pdf', bytes);
   }
 
-  /// Grava `bytes` com o nome derivado do cenário e da extensão. Nas
-  /// plataformas nativas, pede o destino no diálogo do sistema e escreve ali;
-  /// no navegador não há diálogo — o download acontece direto com o nome
-  /// sugerido, então devolve o nome do arquivo.
+  /// Grava `bytes` com o nome derivado do cenário e da extensão. No
+  /// desktop, pede o destino no diálogo do sistema e escreve ali; no
+  /// navegador não há diálogo — o download acontece direto com o nome
+  /// sugerido; no Android/iOS, grava em temporário e abre a folha de
+  /// compartilhamento do sistema.
   Future<String?> _gravar(
     CenarioSalvo cenario,
     String extensao,
@@ -57,6 +64,26 @@ class CenarioExportador {
     final nome = _nomeArquivo(cenario, extensao);
     if (kIsWeb) {
       return gravarArquivo(nome, bytes);
+    }
+    if (Platform.isAndroid || Platform.isIOS) {
+      // file_selector não implementa getSaveLocation no Android/iOS: sem
+      // este atalho, o diálogo lançaria MissingPluginException.
+      final temporario = await getTemporaryDirectory();
+      final caminho = '${temporario.path}/$nome';
+      await gravarArquivo(caminho, bytes);
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [
+            XFile(
+              caminho,
+              mimeType: extensao == 'pdf' ? 'application/pdf' : 'text/csv',
+              name: nome,
+            ),
+          ],
+          subject: nome,
+        ),
+      );
+      return caminho;
     }
     final destino = await escolherDestino(nome, extensao);
     if (destino == null) return null;

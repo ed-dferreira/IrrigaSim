@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart';
-import 'package:irrigasim/shared/irrigacao/models/medicoes_campo.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/indicadores_balanco.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/ensaios_sulco.dart'
     show PontoEnsaioAvanco;
@@ -22,13 +22,13 @@ class SimuladorSulcos {
     IrrigationParameters params, {
     ResultadoCurvaAvanco? advanceCurve,
   }) {
-    if (params.origemCurvaInfiltracao ==
+    if (params.origemCurvaInfiltracaoResolvida ==
             OrigemCurvaInfiltracao.equacaoAcumuladaInformada &&
         params.entradasProjeto?.curvaInfiltracao == null) {
       _validate(params);
     }
     final calculationParams = _parametersWithSelectedInfiltration(params);
-    final tipo = calculationParams.tipoSulco ?? TipoSulco.sulcos_comuns;
+    final tipo = TipoSulco.deNome(calculationParams.tipoSulco) ?? TipoSulco.sulcos_comuns;
     if (!tipo.suportaEscoamentoTerminal) {
       throw FormatException(tipo.motivoSemSuporteTerminal);
     }
@@ -110,7 +110,7 @@ class SimuladorSulcos {
   ) {
     final curve = params.entradasProjeto?.curvaInfiltracao;
     if (curve != null) {
-      if (params.origemCurvaInfiltracao !=
+      if (params.origemCurvaInfiltracaoResolvida !=
           OrigemCurvaInfiltracao.equacaoAcumuladaInformada) {
         throw const FormatException(
           'Selecione apenas uma curva de infiltração: ensaio entrada/saída ou equação tipada.',
@@ -119,7 +119,7 @@ class SimuladorSulcos {
       final converted = curve.parametrosAcumulados();
       return params.copyWith(k: converted.coeficiente, a: converted.expoente);
     }
-    if (params.origemCurvaInfiltracao ==
+    if (params.origemCurvaInfiltracaoResolvida ==
         OrigemCurvaInfiltracao.equacaoAcumuladaInformada) {
       return params;
     }
@@ -128,13 +128,13 @@ class SimuladorSulcos {
         params.espacamentoEnsaioInfiltracaoM;
     if (!areaM2.isFinite ||
         areaM2 <= 0 ||
-        params.medicoesEntradaSaida.length < 2) {
+        params.medicoesEntradaSaidaResolvidas.length < 2) {
       throw const FormatException(
         'O ensaio de entrada/saída requer área positiva e pelo menos duas observações.',
       );
     }
     var previous = -1.0;
-    for (final point in params.medicoesEntradaSaida) {
+    for (final point in params.medicoesEntradaSaidaResolvidas) {
       if (!point.tempoMin.isFinite ||
           point.tempoMin <= previous ||
           point.tempoMin <= 0 ||
@@ -149,7 +149,7 @@ class SimuladorSulcos {
       }
       previous = point.tempoMin;
     }
-    final viPoints = params.medicoesEntradaSaida.map((point) {
+    final viPoints = params.medicoesEntradaSaidaResolvidas.map((point) {
       return PontoInfiltracaoMedido(
         tempoMin: point.tempoMin,
         taxaMmHora: ModeloInfiltracao.viEnsaioSaida(
@@ -176,12 +176,12 @@ class SimuladorSulcos {
     IrrigationParameters params,
   ) {
     if (params.usarEnsaioAvanco) {
-      if (params.medicoesAvanco.isEmpty) {
+      if (params.medicoesAvancoResolvidas.isEmpty) {
         throw const FormatException(
           'Ensaio de avanço ativo sem medições; informe estacas ou desative o ensaio.',
         );
       }
-      final points = params.medicoesAvanco
+      final points = params.medicoesAvancoResolvidas
           .map(
             (point) => PontoEnsaioAvanco(
               distanciaM: point.distanciaM,
@@ -189,7 +189,7 @@ class SimuladorSulcos {
             ),
           )
           .toList();
-      if (params.metodoCurvaAvanco == MetodoAjusteAvanco.minimosQuadrados) {
+      if (params.metodoCurvaAvancoResolvido == MetodoAjusteAvanco.minimosQuadrados) {
         return ModeloCurvaAvanco.ajustarMinimosQuadrados(points);
       }
       return ModeloCurvaAvanco.ajustarDoisPontosPorEstacas(points);
@@ -287,7 +287,7 @@ class SimuladorSulcos {
       ),
       OrigemVazaoReduzida.somatorioEspacial =>
         ManejoVazao.estimarSomatorioEspacial(
-          estacas: params.medicoesAvanco,
+          estacas: params.medicoesAvancoResolvidas,
           comprimentoM: params.comprimento,
           espacamentoM: params.larguraOuEspacamento,
           instanteMudancaMin: instanteMudanca,
@@ -321,11 +321,11 @@ class SimuladorSulcos {
     double? demandaEspacialLs;
     if (params.usarEnsaioAvanco &&
         origem != OrigemVazaoReduzida.somatorioEspacial &&
-        params.medicoesAvanco.first.distanciaM == 0 &&
-        params.medicoesAvanco.last.distanciaM == params.comprimento &&
-        instanteMudanca > params.medicoesAvanco.last.tempoMin) {
+        params.medicoesAvancoResolvidas.first.distanciaM == 0 &&
+        params.medicoesAvancoResolvidas.last.distanciaM == params.comprimento &&
+        instanteMudanca > params.medicoesAvancoResolvidas.last.tempoMin) {
       demandaEspacialLs = ManejoVazao.estimarSomatorioEspacial(
-        estacas: params.medicoesAvanco,
+        estacas: params.medicoesAvancoResolvidas,
         comprimentoM: params.comprimento,
         espacamentoM: params.larguraOuEspacamento,
         instanteMudancaMin: instanteMudanca,
@@ -401,7 +401,7 @@ class SimuladorSulcos {
       final distance = params.comprimento * i / 20;
       final advanceTime = advance.timeAt(distance);
       final localOpportunity =
-          params.hipoteseRecessao == HipoteseRecessao.medidaPorEstaca
+          params.hipoteseRecessaoResolvida == HipoteseRecessao.medidaPorEstaca
           ? _instanteRecessaoNaEstaca(params, distance) - advanceTime
           : applicationTimeMin - advanceTime;
       if (localOpportunity < 0) {
@@ -423,7 +423,7 @@ class SimuladorSulcos {
     double opportunityWithoutRecessionMin,
     double advanceTimeAtEndMin,
   ) {
-    if (params.hipoteseRecessao == HipoteseRecessao.desprezada) {
+    if (params.hipoteseRecessaoResolvida == HipoteseRecessao.desprezada) {
       return opportunityWithoutRecessionMin;
     }
     return _instanteRecessaoNaEstaca(params, params.comprimento) -
@@ -437,7 +437,7 @@ class SimuladorSulcos {
     IrrigationParameters params,
     double distanciaM,
   ) {
-    final points = params.medicoesRecessao;
+    final points = params.medicoesRecessaoResolvidas;
     if (points.length < 2 ||
         points.first.distanciaM > 0 ||
         points.last.distanciaM < params.comprimento) {
@@ -521,9 +521,9 @@ class SimuladorSulcos {
     );
     final typedCurve = params.entradasProjeto?.curvaInfiltracao;
     final alertaInfiltracao = typedCurve?.avisoParaOportunidade(
-      params.hipoteseRecessao == HipoteseRecessao.desprezada
+      params.hipoteseRecessaoResolvida == HipoteseRecessao.desprezada
           ? applicationTimeMin
-          : params.medicoesRecessao.first.instanteRecessaoMin,
+          : params.medicoesRecessaoResolvidas.first.instanteRecessaoMin,
       menorTempoMin: opportunityMin,
     );
 
@@ -543,7 +543,7 @@ class SimuladorSulcos {
         final distance = params.comprimento * index / 20;
         final advanceTime = advance.timeAt(distance);
         final opportunity =
-            params.hipoteseRecessao == HipoteseRecessao.medidaPorEstaca
+            params.hipoteseRecessaoResolvida == HipoteseRecessao.medidaPorEstaca
             ? _instanteRecessaoNaEstaca(params, distance) - advanceTime
             : applicationTimeMin - advanceTime;
         return PontoGrafico(distance, opportunity);
@@ -559,7 +559,7 @@ class SimuladorSulcos {
           'Tipo: ${tipo.displayName}. '
           'Manejo: ${params.manejoSulco.displayName}. '
           '${params.manejoSulco == ManejoSulco.reduzida ? 'Cenário condicionado à manutenção da cobertura após a redução; não prevê novo avanço ou escoamento hidráulico. ' : ''}'
-          'Recessão: ${params.hipoteseRecessao == HipoteseRecessao.desprezada ? 'desprezada' : 'medida por estaca'}.',
+          'Recessão: ${params.hipoteseRecessaoResolvida == HipoteseRecessao.desprezada ? 'desprezada' : 'medida por estaca'}.',
       metricas: {
         'Vazão por sulco': params.vazao,
         'Vazão máxima não erosiva': maximumFlowLps,
@@ -597,7 +597,7 @@ class SimuladorSulcos {
         'Lâmina percolada': percolatedDepthM * 1000,
         'Lâmina escoada': runoffDepthM * 1000,
         'Déficit de lâmina': deficitMm,
-        if (params.origemCurvaInfiltracao ==
+        if (params.origemCurvaInfiltracaoResolvida ==
             OrigemCurvaInfiltracao.ensaioEntradaSaida) ...{
           'Coeficiente VI ajustado': params.k * 60 * params.a,
           'Expoente VI ajustado': params.a - 1,
@@ -680,12 +680,12 @@ class SimuladorSulcos {
       eficienciaDistribuicaoEd: distributionEfficiency,
       adequacaoUtilGa: adequacyDegree,
       origemCurvaAvanco: !params.usarEnsaioAvanco ? 'estimativa' : 'ensaio',
-      metodoCurvaAvanco: params.metodoCurvaAvanco.name,
-      origemCurvaInfiltracao: params.origemCurvaInfiltracao.name,
-      hipoteseRecessao: params.hipoteseRecessao.name,
+      metodoCurvaAvanco: params.metodoCurvaAvancoResolvido.name,
+      origemCurvaInfiltracao: params.origemCurvaInfiltracaoResolvida.name,
+      hipoteseRecessao: params.hipoteseRecessaoResolvida.name,
       extrapolouAvanco:
           params.usarEnsaioAvanco &&
-          params.medicoesAvanco.last.distanciaM < params.comprimento,
+          params.medicoesAvancoResolvidas.last.distanciaM < params.comprimento,
     );
   }
 
@@ -752,7 +752,7 @@ class SimuladorSulcos {
       );
     }
     if (params.usarEnsaioAvanco) {
-      if (params.medicoesAvanco.isEmpty) {
+      if (params.medicoesAvancoResolvidas.isEmpty) {
         throw const FormatException(
           'Ensaio de avanço ativo sem medições; informe estacas ou desative o ensaio.',
         );
@@ -771,7 +771,7 @@ class SimuladorSulcos {
         );
       }
       final errors = ModeloCurvaAvanco.validarPontos(
-        params.medicoesAvanco
+        params.medicoesAvancoResolvidas
             .map(
               (p) => PontoEnsaioAvanco(
                 distanciaM: p.distanciaM,
@@ -784,7 +784,7 @@ class SimuladorSulcos {
         throw FormatException('Ensaio de avanço: ${errors.join('; ')}');
       }
     }
-    final erosion = params.ensaioErosao;
+    final erosion = params.ensaioErosaoResolvido;
     if (erosion != null) {
       if (!erosion.vazaoLs.isFinite ||
           erosion.vazaoLs <= 0 ||
@@ -836,15 +836,15 @@ class SimuladorSulcos {
         'O somatório espacial (F24, p.96) exige estacas de avanço medidas até o comprimento do sulco.',
       );
     }
-    if (params.origemCurvaInfiltracao ==
+    if (params.origemCurvaInfiltracaoResolvida ==
         OrigemCurvaInfiltracao.ensaioEntradaSaida) {
-      if (params.medicoesEntradaSaida.length < 2) {
+      if (params.medicoesEntradaSaidaResolvidas.length < 2) {
         throw const FormatException(
           'Ensaio de entrada/saída requer pelo menos duas medições.',
         );
       }
       var previous = -1.0;
-      for (final point in params.medicoesEntradaSaida) {
+      for (final point in params.medicoesEntradaSaidaResolvidas) {
         if (!point.tempoMin.isFinite ||
             point.tempoMin <= previous ||
             point.tempoMin <= 0 ||
@@ -865,8 +865,8 @@ class SimuladorSulcos {
         'Surtirção exige um modelo de infiltração calibrado e ainda não é calculada.',
       );
     }
-    if (params.hipoteseRecessao == HipoteseRecessao.medidaPorEstaca) {
-      final points = params.medicoesRecessao;
+    if (params.hipoteseRecessaoResolvida == HipoteseRecessao.medidaPorEstaca) {
+      final points = params.medicoesRecessaoResolvidas;
       if (points.length < 2 ||
           points.first.distanciaM != 0 ||
           points.last.distanciaM < params.comprimento) {

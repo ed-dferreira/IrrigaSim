@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:irrigasim/shared/irrigacao/models/comum/clima_demanda.dart';
-import 'package:irrigasim/app/theme/app_icons.dart';
+import 'package:irrigasim/shared/clima/models/clima_demanda.dart';
+import 'package:irrigasim/core/theme/app_icons.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/controlador_parametros_sulco.dart';
 
 import 'project_step_widgets.dart';

@@ -1,3 +1,5 @@
+import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
+
 /// Método de ajuste da curva de avanço `Tx = k · x^b`.
 ///
 /// Os nomes dos valores são persistidos nos cenários e não devem mudar.
@@ -129,3 +131,60 @@ class MedicaoRecessao {
     instanteRecessaoMin: (map['instante_recessao_min'] as num).toDouble(),
   );
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// Ponte com o modelo compartilhado
+//
+// IrrigationParameters (shared) guarda os ensaios como payload opaco e
+// neutro (strings e mapas), exatamente na forma persistida nos cenários.
+// As extensions abaixo decodificam esse payload para os tipos tipados
+// usados pelo método de sulcos e codificam de volta ao salvar.
+// ─────────────────────────────────────────────────────────────────────────
+
+/// Leitura tipada dos ensaios armazenados em IrrigationParameters.
+extension LeituraEnsaiosSulco on IrrigationParameters {
+  MetodoAjusteAvanco get metodoCurvaAvancoResolvido =>
+      MetodoAjusteAvanco.values.firstWhere(
+        (valor) => valor.name == metodoCurvaAvanco,
+        orElse: () => MetodoAjusteAvanco.doisPontos,
+      );
+
+  OrigemCurvaInfiltracao get origemCurvaInfiltracaoResolvida =>
+      OrigemCurvaInfiltracao.values.firstWhere(
+        (valor) => valor.name == origemCurvaInfiltracao,
+        orElse: () => OrigemCurvaInfiltracao.equacaoAcumuladaInformada,
+      );
+
+  HipoteseRecessao get hipoteseRecessaoResolvida =>
+      HipoteseRecessao.values.firstWhere(
+        (valor) => valor.name == hipoteseRecessao,
+        orElse: () => HipoteseRecessao.desprezada,
+      );
+
+  EnsaioErosao? get ensaioErosaoResolvido =>
+      ensaioErosao == null ? null : EnsaioErosao.fromMap(ensaioErosao!);
+
+  List<MedicaoAvanco> get medicoesAvancoResolvidas => [
+    for (final dado in medicoesAvanco)
+      MedicaoAvanco.fromMap(Map<String, dynamic>.from(dado)),
+  ];
+
+  List<MedicaoEntradaSaida> get medicoesEntradaSaidaResolvidas => [
+    for (final dado in medicoesEntradaSaida)
+      MedicaoEntradaSaida.fromMap(Map<String, dynamic>.from(dado)),
+  ];
+
+  List<MedicaoRecessao> get medicoesRecessaoResolvidas => [
+    for (final dado in medicoesRecessao)
+      MedicaoRecessao.fromMap(Map<String, dynamic>.from(dado)),
+  ];
+}
+
+/// Helpers para montar o payload opaco a partir dos tipos tipados.
+Map<String, Object?>? ensaioErosaoParaPayload(EnsaioErosao? ensaio) =>
+    ensaio?.toMap();
+
+List<Map<String, Object?>> medicoesParaPayload<T>(
+  List<T> medicoes,
+  Map<String, Object?> Function(T) paraMapa,
+) => [for (final medicao in medicoes) paraMapa(medicao)];

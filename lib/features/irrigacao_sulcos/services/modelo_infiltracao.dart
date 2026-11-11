@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:irrigasim/shared/irrigacao/services/units_service.dart';
+import 'package:irrigasim/shared/comum/services/units_service.dart';
 
 /// Origem dos parâmetros de infiltração.
 enum OrigemParametrosInfiltracao { ensaio, modelo, valorInformado }

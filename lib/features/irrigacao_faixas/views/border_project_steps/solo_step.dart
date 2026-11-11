@@ -15,7 +15,7 @@ List<Widget> soloStep(
   required double cargaBooherCm,
 }) => [
   const Text(
-    'A infiltração do solo controla o avanço e as perdas. Informe parâmetros medidos/estimados; a tabela Marr fornece sugestões geométricas e não substitui k, a ou VIB (Aula 7, pp. 11 e 20).',
+    'A infiltração do solo controla o avanço e as perdas. Informe parâmetros medidos/estimados; a tabela Marr fornece sugestões geométricas e não substitui k, a ou VIB.',
   ),
   fields.select<CenarioInfiltracaoFaixa>(
     'Cenário de infiltração',

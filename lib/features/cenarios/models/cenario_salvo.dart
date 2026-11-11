@@ -1,8 +1,6 @@
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
-import 'package:irrigasim/shared/irrigacao/models/medicoes_campo.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
-import 'package:irrigasim/shared/irrigacao/models/simulation_result_model.dart';
-import 'package:irrigasim/shared/irrigacao/models/tipo_sulco.dart';
+import 'package:irrigasim/features/cenarios/models/simulation_result_model.dart';
 import 'package:irrigasim/shared/irrigacao/services/registro_codecs.dart';
 
 class CenarioSalvo {
@@ -69,7 +67,7 @@ class CenarioSalvo {
         'manningN': parametros.manningN,
         'sigmaZ': parametros.sigmaZ,
         'texturaSolo': parametros.texturaSolo.name,
-        'tipoSulco': parametros.tipoSulco?.name,
+        'tipoSulco': parametros.tipoSulco,
         'tempoAvancoMetadeMin': parametros.tempoAvancoMetadeMin,
         'tempoAvancoFinalMin': parametros.tempoAvancoFinalMin,
         'coeficienteAvancoK': parametros.coeficienteAvancoK,
@@ -93,7 +91,7 @@ class CenarioSalvo {
         'fator11Vib': parametros.fator11Vib,
         'vazaoEnsaioAvancoLs': parametros.vazaoEnsaioAvancoLs,
         'condicoesEnsaioAvanco': parametros.condicoesEnsaioAvanco,
-        'ensaioErosao': parametros.ensaioErosao?.toMap(),
+        'ensaioErosao': parametros.ensaioErosao,
         'tempoMudancaMin': parametros.tempoMudancaMin,
         'cicloSurtirMin': parametros.cicloSurtirMin,
         'jornadaDiariaH': parametros.jornadaDiariaH,
@@ -107,22 +105,16 @@ class CenarioSalvo {
         'espacamentoPlantasM': parametros.espacamentoPlantasM,
         'larguraSulcoM': parametros.larguraSulcoM,
         'profundidadeSulcoM': parametros.profundidadeSulcoM,
-        'metodoCurvaAvanco': parametros.metodoCurvaAvanco.name,
+        'metodoCurvaAvanco': parametros.metodoCurvaAvanco,
         'usarEnsaioAvanco': parametros.usarEnsaioAvanco,
-        'medicoesAvanco': parametros.medicoesAvanco
-            .map((point) => point.toMap())
-            .toList(),
-        'origemCurvaInfiltracao': parametros.origemCurvaInfiltracao.name,
+        'medicoesAvanco': parametros.medicoesAvanco,
+        'origemCurvaInfiltracao': parametros.origemCurvaInfiltracao,
         'distanciaEnsaioInfiltracaoM': parametros.distanciaEnsaioInfiltracaoM,
         'espacamentoEnsaioInfiltracaoM':
             parametros.espacamentoEnsaioInfiltracaoM,
-        'medicoesEntradaSaida': parametros.medicoesEntradaSaida
-            .map((point) => point.toMap())
-            .toList(),
-        'hipoteseRecessao': parametros.hipoteseRecessao.name,
-        'medicoesRecessao': parametros.medicoesRecessao
-            .map((point) => point.toMap())
-            .toList(),
+        'medicoesEntradaSaida': parametros.medicoesEntradaSaida,
+        'hipoteseRecessao': parametros.hipoteseRecessao,
+        'medicoesRecessao': parametros.medicoesRecessao,
       },
       'resultado': SimulationResultModel.toMap(resultado),
       'dataCriacao': dataCriacao.toIso8601String(),
@@ -161,9 +153,7 @@ class CenarioSalvo {
         texturaSolo: TexturaSoloExtension.fromString(
           paramData['texturaSolo'] as String?,
         ),
-        tipoSulco: TipoSulco.values
-            .where((tipo) => tipo.name == paramData['tipoSulco'])
-            .firstOrNull,
+        tipoSulco: paramData['tipoSulco'] as String?,
         tempoAvancoMetadeMin:
             (paramData['tempoAvancoMetadeMin'] as num?)?.toDouble() ?? 20,
         tempoAvancoFinalMin:
@@ -213,9 +203,7 @@ class CenarioSalvo {
             ?.toDouble(),
         condicoesEnsaioAvanco: paramData['condicoesEnsaioAvanco'] as String?,
         ensaioErosao: paramData['ensaioErosao'] is Map
-            ? EnsaioErosao.fromMap(
-                Map<String, dynamic>.from(paramData['ensaioErosao'] as Map),
-              )
+            ? Map<String, Object?>.from(paramData['ensaioErosao'] as Map)
             : null,
         tempoMudancaMin:
             (paramData['tempoMudancaMin'] as num?)?.toDouble() ?? 0,
@@ -238,51 +226,35 @@ class CenarioSalvo {
         larguraSulcoM: (paramData['larguraSulcoM'] as num?)?.toDouble(),
         profundidadeSulcoM: (paramData['profundidadeSulcoM'] as num?)
             ?.toDouble(),
-        metodoCurvaAvanco: MetodoAjusteAvanco.values.firstWhere(
-          (value) => value.name == paramData['metodoCurvaAvanco'],
-          orElse: () => MetodoAjusteAvanco.doisPontos,
-        ),
+        metodoCurvaAvanco:
+            paramData['metodoCurvaAvanco'] as String? ?? 'doisPontos',
         usarEnsaioAvanco: paramData['usarEnsaioAvanco'] as bool? ?? false,
-        medicoesAvanco:
-            (paramData['medicoesAvanco'] as List<dynamic>?)
-                ?.map(
-                  (point) => MedicaoAvanco.fromMap(
-                    Map<String, dynamic>.from(point as Map),
-                  ),
-                )
-                .toList() ??
-            const [],
-        origemCurvaInfiltracao: OrigemCurvaInfiltracao.values.firstWhere(
-          (value) => value.name == paramData['origemCurvaInfiltracao'],
-          orElse: () => OrigemCurvaInfiltracao.equacaoAcumuladaInformada,
-        ),
+        medicoesAvanco: [
+          for (final dado
+              in (paramData['medicoesAvanco'] as List<dynamic>? ?? const []))
+            Map<String, Object?>.from(dado as Map),
+        ],
+        origemCurvaInfiltracao:
+            paramData['origemCurvaInfiltracao'] as String? ??
+            'equacaoAcumuladaInformada',
         distanciaEnsaioInfiltracaoM:
             (paramData['distanciaEnsaioInfiltracaoM'] as num?)?.toDouble() ?? 0,
         espacamentoEnsaioInfiltracaoM:
             (paramData['espacamentoEnsaioInfiltracaoM'] as num?)?.toDouble() ??
             0,
-        medicoesEntradaSaida:
-            (paramData['medicoesEntradaSaida'] as List<dynamic>?)
-                ?.map(
-                  (point) => MedicaoEntradaSaida.fromMap(
-                    Map<String, dynamic>.from(point as Map),
-                  ),
-                )
-                .toList() ??
-            const [],
-        hipoteseRecessao: HipoteseRecessao.values.firstWhere(
-          (value) => value.name == paramData['hipoteseRecessao'],
-          orElse: () => HipoteseRecessao.desprezada,
-        ),
-        medicoesRecessao:
-            (paramData['medicoesRecessao'] as List<dynamic>?)
-                ?.map(
-                  (point) => MedicaoRecessao.fromMap(
-                    Map<String, dynamic>.from(point as Map),
-                  ),
-                )
-                .toList() ??
-            const [],
+        medicoesEntradaSaida: [
+          for (final dado
+              in (paramData['medicoesEntradaSaida'] as List<dynamic>? ??
+                  const []))
+            Map<String, Object?>.from(dado as Map),
+        ],
+        hipoteseRecessao:
+            paramData['hipoteseRecessao'] as String? ?? 'desprezada',
+        medicoesRecessao: [
+          for (final dado
+              in (paramData['medicoesRecessao'] as List<dynamic>? ?? const []))
+            Map<String, Object?>.from(dado as Map),
+        ],
       ),
       resultado: SimulationResultModel.fromMap(
         map['resultado'] as Map<String, dynamic>,

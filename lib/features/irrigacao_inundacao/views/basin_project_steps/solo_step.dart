@@ -17,9 +17,9 @@ List<Widget> soloIntermitenteStep(
   required ValueChanged<double> onTempoInfiltracaoChanged,
 }) => [
   const Text(
-    'A infiltração controla o avanço e o tempo de contato. O material '
-    'traz os testes da primeira e da terceira irrigação como entradas do '
-    'modelo de referência, cada um com k, a e VIB próprios.',
+    'A infiltração controla o avanço e o tempo de contato. Os cenários '
+    'da primeira e da terceira irrigação servem de referência, cada um '
+    'com k, a e VIB próprios.',
   ),
   fields.select<CenarioInfiltracaoInundacao>(
     'Cenário de infiltração',
@@ -102,7 +102,6 @@ List<Widget> _infiltracaoCalculadaFields(
       label: 'Infiltração acumulada I(t)',
       value: _infiltracaoAcumuladaMm(project, tempoInfiltracaoMin)!,
       suffix: 'mm',
-      helper: 'I(t) = (k · t^a + VIB · t) · 1000, com t em minutos.',
     ),
 ];
 
@@ -134,9 +133,8 @@ List<Widget> soloPermanenteStep(
 ) => [
   const Text(
     'No regime contínuo os dados do solo sustentam o turno de rega e as '
-    'vazões Qe e Qm. O cenário de infiltração '
-    'k/a/VIB é dos testes da primeira e da terceira irrigação e '
-    'vale só para o regime intermitente. Porosidade, camada, DTA, fator de '
+    'vazões Qe e Qm. O cenário de infiltração k/a/VIB vale só para o '
+    'regime intermitente. Porosidade, camada, DTA, fator de '
     'disponibilidade e K0 ficam na etapa Cultura e sistema radicular.',
   ),
   fields.number(

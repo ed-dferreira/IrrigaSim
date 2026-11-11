@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:irrigasim/app/theme/app_icons.dart';
+import 'package:irrigasim/core/theme/app_icons.dart';
 
 /// Aba de um card de gráficos de irrigação.
 class IrrigationChartTab {

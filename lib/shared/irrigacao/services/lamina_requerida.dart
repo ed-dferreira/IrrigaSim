@@ -1,4 +1,4 @@
-import 'units_service.dart';
+import 'package:irrigasim/shared/comum/services/units_service.dart';
 
 /// Resultado do cálculo da lâmina requerida e turno de rega.
 class LaminaRequeridaResultado {

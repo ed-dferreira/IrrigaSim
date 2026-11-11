@@ -1,4 +1,4 @@
-import 'package:irrigasim/shared/irrigacao/models/comum/clima_demanda.dart';
+import 'package:irrigasim/shared/clima/models/clima_demanda.dart';
 import 'package:irrigasim/shared/irrigacao/models/comum/contratos_metodo.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 

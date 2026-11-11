@@ -1,13 +1,26 @@
 // Os nomes deste enum fazem parte do formato persistido dos cenários existentes.
 // ignore_for_file: constant_identifier_names
 
+import 'package:irrigasim/shared/irrigacao/models/traco_distribuicao.dart';
+
 enum TipoSulco {
   sulcos_comuns,
   sulcos_contorno,
   sulcos_corrugados,
   sulcos_nivel_tabuleiros,
   sulcos_nivel_fechados,
-  sulcos_em_zigue_zague,
+  sulcos_em_zigue_zague;
+
+  /// Lê o nome persistido no modelo compartilhado (`IrrigationParameters
+  /// .tipoSulco`, que guarda o nome do enum em formato neutro).
+  /// Nome nulo ou desconhecido resulta em null.
+  static TipoSulco? deNome(String? nome) {
+    if (nome == null) return null;
+    for (final tipo in values) {
+      if (tipo.name == nome) return tipo;
+    }
+    return null;
+  }
 }
 
 extension TipoSulcoExtension on TipoSulco {
@@ -54,4 +67,16 @@ extension TipoSulcoExtension on TipoSulco {
       orElse: () => TipoSulco.sulcos_comuns,
     );
   }
+}
+
+/// Ponte entre o tipo de sulco e o desenho de terreno neutro em shared.
+extension TipoSulcoTerreno on TipoSulco {
+  TracoDistribuicao get tracoTerreno => switch (this) {
+    TipoSulco.sulcos_comuns || TipoSulco.sulcos_corrugados =>
+      TracoDistribuicao.reta,
+    TipoSulco.sulcos_contorno => TracoDistribuicao.contorno,
+    TipoSulco.sulcos_em_zigue_zague => TracoDistribuicao.zigueZague,
+    TipoSulco.sulcos_nivel_tabuleiros => TracoDistribuicao.tabuleiro,
+    TipoSulco.sulcos_nivel_fechados => TracoDistribuicao.tabuleiroFechado,
+  };
 }

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../persistence/local_scenario_store.dart';
 import '../services/cenario_exportador.dart';
+import '../services/cenario_importador.dart';
 import '../services/cenarios_exemplo.dart';
 import '../services/project_store.dart';
 import '../services/scenario_service.dart';
@@ -30,6 +31,10 @@ final projectStoreProvider = Provider<ProjectStore>((ref) {
 
 final cenarioExportadorProvider = Provider<CenarioExportador>((ref) {
   return CenarioExportador(projectStore: ref.watch(projectStoreProvider));
+});
+
+final cenarioImportadorProvider = Provider<CenarioImportador>((ref) {
+  return CenarioImportador();
 });
 
 final cenariosProvider = StreamProvider.autoDispose<List<CenarioSalvo>>((ref) async* {

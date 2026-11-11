@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:irrigasim/app/router/app_routes.dart';
-import 'package:irrigasim/app/theme/app_colors.dart';
+import 'package:irrigasim/core/theme/app_colors.dart';
 import 'package:irrigasim/app/theme/app_text_styles.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/tabela_corrugados.dart';

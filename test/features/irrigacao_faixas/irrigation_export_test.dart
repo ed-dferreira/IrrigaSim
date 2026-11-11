@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/shared/irrigacao/widgets/irrigation_export.dart';
+import 'package:irrigasim/features/irrigacao_faixas/views/widgets/irrigation_export.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

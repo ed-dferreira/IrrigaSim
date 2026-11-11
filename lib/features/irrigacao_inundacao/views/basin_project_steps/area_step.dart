@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:irrigasim/app/theme/app_icons.dart';
+import 'package:irrigasim/core/theme/app_icons.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/projeto_inundacao.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/services/tabelas_referencia_inundacao.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/views/basin_project/basin_project_fields.dart';
@@ -65,36 +65,6 @@ List<Widget> areaStep(
       'mm',
       optional: true,
     ),
-  ],
-  if (project.areaTabuleiroM2 != null)
-    IrrigationFormulaCard(
-      formula:
-          'Área do tabuleiro = ${fields.format(project.comprimentoM)} × '
-          '${fields.format(project.larguraM)} = '
-          '${fields.format(project.areaTabuleiroM2)} m²',
-      description: 'O tabuleiro precisa caber entre 1 m² e 5 ha.',
-    ),
-  if (project.laminaMediaPlanaltoM != null &&
-      project.declividade != null) ...[
-    IrrigationFormulaCard(
-      formula:
-          'Lm = ${fields.format(project.laminaMediaPlanaltoM! * 100)} cm · '
-          'Δz admissível = 2/3 Lm = '
-          '${fields.format((project.desnivelAdmissivelM ?? 0) * 100)} cm · '
-          'Δz real = ${fields.format((project.desnivelRealM ?? 0) * 100)} cm',
-      description:
-          'Regra dos 2/3: o desnível real não pode superar 2/3 da '
-          'lâmina média no planalto.',
-    ),
-    if (project.comprimentoMaximoDesnivelM != null)
-      IrrigationFormulaCard(
-        formula:
-            'L máximo = (2/3 Lm) / S = '
-            '${fields.format(project.comprimentoMaximoDesnivelM)} m',
-        description:
-            'Exemplos do material: 0,25% → 40 m; 0,05% → 200 m, pela '
-            'direção avaliada.',
-      ),
   ],
   ..._guiaAreaFields(fields, project),
 ];

@@ -1,12 +1,13 @@
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/shared/irrigacao/models/comum/adaptadores_superficie.dart';
 import 'package:irrigasim/shared/irrigacao/services/registro_codecs.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
 
 import '../models/cenario_salvo.dart';
 
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
-import 'package:irrigasim/shared/irrigacao/models/simulation_result_model.dart';
-import 'package:irrigasim/shared/irrigacao/models/tipo_sulco.dart';
+import 'package:irrigasim/features/cenarios/models/simulation_result_model.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco.dart';
 
 class ProjectStore {
   ProjectStore({
@@ -60,7 +61,7 @@ class ProjectStore {
         'manning_n': p.manningN,
         'sigma_z': p.sigmaZ,
         'textura_solo': p.texturaSolo.name,
-        'tipo_sulco': p.tipoSulco?.name,
+        'tipo_sulco': p.tipoSulco,
         'area_hectares': p.areaHectares,
         'vazao_disponivel_l_s': p.vazaoDisponivelLps,
         'desnivel_transversal_m': p.declividadeTransversal,
@@ -72,21 +73,15 @@ class ProjectStore {
         'usar_ensaio_avanco': p.usarEnsaioAvanco,
         'vazao_ensaio_avanco_l_s': p.vazaoEnsaioAvancoLs,
         'condicoes_ensaio_avanco': p.condicoesEnsaioAvanco,
-        'ensaio_erosao': p.ensaioErosao?.toMap(),
-        'metodo_curva_avanco': p.metodoCurvaAvanco.name,
-        'medicoes_avanco': p.medicoesAvanco
-            .map((point) => point.toMap())
-            .toList(),
-        'origem_curva_infiltracao': p.origemCurvaInfiltracao.name,
+        'ensaio_erosao': p.ensaioErosao,
+        'metodo_curva_avanco': p.metodoCurvaAvanco,
+        'medicoes_avanco': p.medicoesAvanco,
+        'origem_curva_infiltracao': p.origemCurvaInfiltracao,
         'distancia_ensaio_infiltracao_m': p.distanciaEnsaioInfiltracaoM,
         'espacamento_ensaio_infiltracao_m': p.espacamentoEnsaioInfiltracaoM,
-        'medicoes_entrada_saida': p.medicoesEntradaSaida
-            .map((point) => point.toMap())
-            .toList(),
-        'hipotese_recessao': p.hipoteseRecessao.name,
-        'medicoes_recessao': p.medicoesRecessao
-            .map((point) => point.toMap())
-            .toList(),
+        'medicoes_entrada_saida': p.medicoesEntradaSaida,
+        'hipotese_recessao': p.hipoteseRecessao,
+        'medicoes_recessao': p.medicoesRecessao,
         'manejo_sulco': p.manejoSulco.name,
         'vazao_reduzida_l_s': p.vazaoReduzidaLs,
         'origem_vazao_reduzida': p.origemVazaoReduzida.name,
@@ -292,7 +287,7 @@ class ProjectStore {
     buffer.writeln('Vazão: ${p.vazao.toStringAsFixed(2)} L/s');
     buffer.writeln('Declividade longitudinal: ${p.declividade} m/m');
     buffer.writeln(
-      'Tipo de sulco: ${p.tipoSulco?.displayName ?? 'Não informado'}',
+      'Tipo de sulco: ${TipoSulco.deNome(p.tipoSulco)?.displayName ?? 'Não informado'}',
     );
     buffer.writeln('Área efetiva: ${p.areaHectares.toStringAsFixed(2)} ha');
     buffer.writeln('Período de irrigação: ${p.periodoIrrigacaoDias} dias');
@@ -334,22 +329,22 @@ class ProjectStore {
     buffer.writeln(
       'Origem do avanço: ${p.usarEnsaioAvanco ? 'ensaio' : 'estimativa'}',
     );
-    buffer.writeln('Método de avanço: ${p.metodoCurvaAvanco.name}');
+    buffer.writeln('Método de avanço: ${p.metodoCurvaAvanco}');
     if (p.usarEnsaioAvanco) {
       buffer.writeln('Vazão do ensaio de avanço: ${p.vazaoEnsaioAvancoLs} L/s');
       buffer.writeln(
         'Condições do ensaio: ${p.condicoesEnsaioAvanco ?? 'não informadas'}',
       );
     }
-    if (p.ensaioErosao case final ensaio?) {
+    if (p.ensaioErosaoResolvido case final ensaio?) {
       buffer.writeln(
         'Ensaio de erosão: ${ensaio.vazaoLs} L/s; '
         '${ensaio.erosaoObservada ? 'erosão observada' : 'erosão não observada'}; '
         '${ensaio.condicoes}.',
       );
     }
-    buffer.writeln('Origem da infiltração: ${p.origemCurvaInfiltracao.name}');
-    buffer.writeln('Hipótese de recessão: ${p.hipoteseRecessao.name}');
+    buffer.writeln('Origem da infiltração: ${p.origemCurvaInfiltracao}');
+    buffer.writeln('Hipótese de recessão: ${p.hipoteseRecessao}');
     buffer.writeln('');
     buffer.writeln('RESULTADOS');
     buffer.writeln('-' * 30);

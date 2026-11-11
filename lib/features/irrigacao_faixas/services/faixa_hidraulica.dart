@@ -19,6 +19,60 @@ class BorderHydraulics {
   static double hartLiteral(double slope, {bool coberturaTotal = false}) =>
       0.01059 * math.pow(slope, -0.75) * (coberturaTotal ? 2 : 1);
 
+  /// F02, transcrição literal do pacote (formulas_faixas.md §7, Passo 2):
+  /// qmax = (Vmax^ρ2·n²/(3600·S0·ρ1))^(1/(ρ2−2)).
+  /// Resultado na convenção m³/min/m do núcleo (a mesma de q0 e F05);
+  /// ρ1, ρ2 e Vmax derivam da fonte declarada pelo usuário.
+  static double vazaoMaximaM3MinM({
+    required double vmax,
+    required double rho1,
+    required double rho2,
+    required double n,
+    required double s0,
+  }) {
+    if ([vmax, rho1, rho2, n, s0].any((value) => !value.isFinite)) {
+      throw const FormatException('F02: parâmetros não finitos.');
+    }
+    if (rho2 <= 0 || (rho2 - 2).abs() < 1e-6) {
+      throw const FormatException(
+        'F02: ρ2 fora do domínio (ρ2 = 2 divide a forma transcrita).',
+      );
+    }
+    final base = (math.pow(vmax, rho2).toDouble() * n * n) / (3600 * s0 * rho1);
+    if (!base.isFinite || base <= 0) {
+      throw const FormatException('F02: base fora do domínio.');
+    }
+    final qmax = math.pow(base, 1 / (rho2 - 2)).toDouble();
+    if (!qmax.isFinite || qmax <= 0) {
+      throw const FormatException('F02: qmax fora do domínio.');
+    }
+    return qmax;
+  }
+
+  /// F02 no projeto: calculada apenas com o conjunto completo
+  /// ρ1, ρ2 e Vmax (tudo ou nada); parâmetros inválidos desabilitam F02.
+  static double? vazaoMaximaF02DoProjeto(BorderProject p) {
+    final s0 = p.declividadeLongitudinal, n = p.rugosidadeN;
+    if (p.vmaxF02 == null ||
+        p.rho1F02 == null ||
+        p.rho2F02 == null ||
+        s0 == null ||
+        n == null) {
+      return null;
+    }
+    try {
+      return vazaoMaximaM3MinM(
+        vmax: p.vmaxF02!,
+        rho1: p.rho1F02!,
+        rho2: p.rho2F02!,
+        n: n,
+        s0: s0,
+      );
+    } on FormatException {
+      return null;
+    }
+  }
+
   /// Raiz crescente, com bisseção salvaguardada. Nunca avalia derivada em zero.
   double _root(
     double Function(double) f,
@@ -227,6 +281,7 @@ class BorderHydraulics {
     final l = p.comprimentoM!, w = p.larguraM!, s = p.declividadeLongitudinal!;
     final n = p.rugosidadeN!, k = p.k!, a = p.a!, vib = p.vibMMin!;
     final q = paraM3MinM(p.vazaoUnitariaLsM!), irn = p.irnEfetivaMm! / 1000;
+    final qmaxF02 = vazaoMaximaF02DoProjeto(p);
     final segmentos = numerico.nSegmentos;
     final values = [l, w, s, n, k, a, vib, q, irn, p.rInicial ?? 0.7];
     if (values.any((v) => !v.isFinite)) {
@@ -437,6 +492,12 @@ class BorderHydraulics {
           'q0 abaixo da recomendação F03.',
           pagina: 'pp. 53–55',
         ),
+      if (qmaxF02 != null && q > qmaxF02)
+        const BorderNotice(
+          BorderStatus.avisoOrientativo,
+          'q0 acima da vazão máxima não erosiva F02.',
+          pagina: 'p. 53',
+        ),
       const BorderNotice(
         BorderStatus.avisoOrientativo,
         'Hart F01 é reprodução literal de unidade empírica por confirmar; F04 depende de qmax confirmado.',
@@ -506,6 +567,7 @@ class BorderHydraulics {
       volumeAdequadoM3M: volumes.infiltradoAdequadoM3M,
       volumeDeficitarioM3M: volumes.infiltradoDeficitarioM3M,
       infiltracaoFinalM: infiltracao(tr - ta, k, a, vib),
+      qmaxF02M3MinM: qmaxF02,
       ea: 100 * util / entrada,
       er: 100 * util / (irn * l),
       pp: 100 * perc / entrada,

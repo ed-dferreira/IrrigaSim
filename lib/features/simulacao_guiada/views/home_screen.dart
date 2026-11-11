@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:irrigasim/app/router/app_routes.dart';
-import 'package:irrigasim/app/theme/app_icons.dart';
+import 'package:irrigasim/core/theme/app_icons.dart';
 import 'package:irrigasim/features/perfil/perfil.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 
@@ -241,7 +241,7 @@ class _MethodsGrid extends StatelessWidget {
             _MethodCard(
               width: width,
               method: MetodoIrrigacao.inundacao,
-              title: 'Bacia',
+              title: 'Inundacao',
               description: 'Talhões nivelados com alagamento controlado',
               icon: AppIcons.inundacao,
               tone: _CardTone.tertiary,

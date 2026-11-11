@@ -1,14 +1,14 @@
 import 'dart:math' as math;
 
-import 'package:irrigasim/shared/irrigacao/models/comum/clima_demanda.dart';
+import 'package:irrigasim/shared/clima/models/clima_demanda.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
-import 'package:irrigasim/shared/irrigacao/services/blaney_criddle.dart';
+import 'package:irrigasim/shared/clima/services/blaney_criddle.dart';
 import 'package:irrigasim/shared/irrigacao/services/lamina_requerida.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/proveniencia_dado.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/curva_infiltracao.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/entradas_projeto.dart';
-import 'package:irrigasim/shared/irrigacao/models/medicoes_campo.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/ensaios_sulco.dart'
     show PontoEnsaioAvanco;
 import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart';
@@ -501,6 +501,10 @@ class EstadoParametrosSulco {
   IrrigationParameters paraParametrosIrrigacao() {
     final curva = projetoSulcoLegado ? null : entradasSulco.curvaInfiltracao;
     final convertida = curva?.parametrosAcumulados();
+    final medicoesAvancoDoEnsaio = [
+      for (final point in pontosEnsaioAvanco)
+        MedicaoAvanco(distanciaM: point.distanciaM, tempoMin: point.tempoMin),
+    ];
     return IrrigationParameters(
       projetoMetodo: projetoSulcoLegado ? null : entradasSulco,
       comprimento: comprimento,
@@ -516,7 +520,7 @@ class EstadoParametrosSulco {
       manningN: manningN,
       sigmaZ: sigmaZ,
       texturaSolo: texturaSolo,
-      tipoSulco: tipoSulco,
+      tipoSulco: tipoSulco?.name,
       tempoAvancoMetadeMin: tempoAvancoMetadeMin,
       tempoAvancoFinalMin: tempoAvancoFinalMin,
       coeficienteAvancoK: origemAvanco == OrigemAvanco.estimativa
@@ -537,7 +541,7 @@ class EstadoParametrosSulco {
       fator11Vib: fator11Vib,
       vazaoEnsaioAvancoLs: vazaoEnsaioAvancoLs,
       condicoesEnsaioAvanco: condicoesEnsaioAvanco,
-      ensaioErosao: ensaioErosao,
+      ensaioErosao: ensaioErosaoParaPayload(ensaioErosao),
       tempoMudancaMin: tempoMudancaMin,
       cicloSurtirMin: cicloSurtirMin,
       jornadaDiariaH: jornadaDiariaH,
@@ -551,22 +555,21 @@ class EstadoParametrosSulco {
       espacamentoPlantasM: espacamentoPlantasM,
       larguraSulcoM: larguraSulcoM,
       profundidadeSulcoM: profundidadeSulcoM,
-      metodoCurvaAvanco: metodoCurvaAvanco,
+      metodoCurvaAvanco: metodoCurvaAvanco.name,
       usarEnsaioAvanco: origemAvanco == OrigemAvanco.ensaio,
-      medicoesAvanco: pontosEnsaioAvanco
-          .map(
-            (point) => MedicaoAvanco(
-              distanciaM: point.distanciaM,
-              tempoMin: point.tempoMin,
-            ),
-          )
-          .toList(),
-      origemCurvaInfiltracao: origemCurvaInfiltracao,
+      medicoesAvanco: medicoesParaPayload(
+        medicoesAvancoDoEnsaio,
+        (m) => m.toMap(),
+      ),
+      origemCurvaInfiltracao: origemCurvaInfiltracao.name,
       distanciaEnsaioInfiltracaoM: distanciaEnsaioInfiltracaoM,
       espacamentoEnsaioInfiltracaoM: espacamentoEnsaioInfiltracaoM,
-      medicoesEntradaSaida: medicoesEntradaSaida,
-      hipoteseRecessao: hipoteseRecessao,
-      medicoesRecessao: medicoesRecessao,
+      medicoesEntradaSaida: medicoesParaPayload(
+        medicoesEntradaSaida,
+        (m) => m.toMap(),
+      ),
+      hipoteseRecessao: hipoteseRecessao.name,
+      medicoesRecessao: medicoesParaPayload(medicoesRecessao, (m) => m.toMap()),
     );
   }
 }

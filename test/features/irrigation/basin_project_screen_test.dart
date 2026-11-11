@@ -87,7 +87,7 @@ void main() {
     expect(find.text('Lâmina requerida (IRN)'), findsNothing);
     expect(find.text('Expoente r inicial'), findsOneWidget);
     expect(find.textContaining('Saldo de vazão'), findsOneWidget);
-    expect(find.textContaining('m³/(min·m)'), findsOneWidget);
+    expect(find.textContaining('m³/(min·m)'), findsNothing);
     expect(find.text('Checagem operacional (G3)'), findsOneWidget);
     expect(find.text('Viável'), findsOneWidget);
 

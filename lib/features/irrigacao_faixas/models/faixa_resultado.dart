@@ -371,6 +371,10 @@ class BorderResult implements AnexoSimulacao {
   final double comprimentoAdequadoM, volumeAdequadoM3M, volumeDeficitarioM3M;
   final double infiltracaoFinalM;
   final double larguraM;
+
+  /// Vazão máxima não erosiva alternativa (F02) calculada quando
+  /// ρ1, ρ2 e Vmax foram informados; nula caso contrário.
+  final double? qmaxF02M3MinM;
   final List<BorderProfilePoint> perfil;
   final BorderStatus status;
   final List<BorderNotice> avisos;
@@ -407,6 +411,7 @@ class BorderResult implements AnexoSimulacao {
     this.volumeDeficitarioM3M = 0,
     this.infiltracaoFinalM = 0,
     required this.larguraM,
+    this.qmaxF02M3MinM,
     required this.perfil,
     required this.status,
     required this.avisos,
@@ -451,6 +456,7 @@ class BorderResult implements AnexoSimulacao {
     'volumeDeficitarioM3M': volumeDeficitarioM3M,
     'infiltracaoFinalM': infiltracaoFinalM,
     'larguraM': larguraM,
+    'qmaxF02M3MinM': qmaxF02M3MinM,
     'numerico': numerico.toMap(),
     'convergencia': convergencia.toMap(),
     'avisos': avisos.map((notice) => notice.toMap()).toList(),
@@ -499,6 +505,7 @@ class BorderResult implements AnexoSimulacao {
           (map['volumeDeficitarioM3M'] as num?)?.toDouble() ?? 0,
       infiltracaoFinalM: (map['infiltracaoFinalM'] as num?)?.toDouble() ?? 0,
       larguraM: n('larguraM'),
+      qmaxF02M3MinM: (map['qmaxF02M3MinM'] as num?)?.toDouble(),
       status: BorderStatus.deNome(map['status'] as String?),
       numerico: map['numerico'] is Map
           ? BorderNumericConfig.fromMap(

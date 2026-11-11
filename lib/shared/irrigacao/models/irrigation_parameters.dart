@@ -1,6 +1,4 @@
 import 'package:irrigasim/shared/irrigacao/models/comum/contratos_metodo.dart';
-import 'package:irrigasim/shared/irrigacao/models/medicoes_campo.dart';
-import 'package:irrigasim/shared/irrigacao/models/tipo_sulco.dart';
 
 enum MetodoIrrigacao { sulco, faixa, inundacao }
 
@@ -94,7 +92,12 @@ class IrrigationParameters {
   final double manningN;
   final double sigmaZ;
   final TexturaSolo texturaSolo;
-  final TipoSulco? tipoSulco;
+
+  /// Nome do `TipoSulco` (ver features/irrigacao_sulcos/models/tipo_sulco.dart).
+  /// O valor é o nome do enum, exatamente como persistido nos cenários; o
+  /// modelo fica neutro em relação ao método e o sulcos faz o parsing
+  /// (`TipoSulco.deNome`).
+  final String? tipoSulco;
   final double tempoAvancoMetadeMin;
   final double tempoAvancoFinalMin;
   final double? coeficienteAvancoK;
@@ -120,7 +123,12 @@ class IrrigationParameters {
   final bool fator11Vib;
   final double? vazaoEnsaioAvancoLs;
   final String? condicoesEnsaioAvanco;
-  final EnsaioErosao? ensaioErosao;
+
+  /// Nome do `EnsaioErosao` codificado (ver
+  /// features/irrigacao_sulcos/models/medicoes_campo.dart). Payload opaco
+  /// mantido pelo compartilhado para persistência de cenários; o método de
+  /// sulcos é quem decodifica.
+  final Map<String, Object?>? ensaioErosao;
   final double tempoMudancaMin;
   final double cicloSurtirMin;
   final double jornadaDiariaH;
@@ -134,15 +142,28 @@ class IrrigationParameters {
   final double espacamentoPlantasM;
   final double? larguraSulcoM;
   final double? profundidadeSulcoM;
-  final MetodoAjusteAvanco metodoCurvaAvanco;
+
+  /// Nome do `MetodoAjusteAvanco` (payload opaco de sulcos; ver
+  /// medicoes_campo.dart).
+  final String metodoCurvaAvanco;
   final bool usarEnsaioAvanco;
-  final List<MedicaoAvanco> medicoesAvanco;
-  final OrigemCurvaInfiltracao origemCurvaInfiltracao;
+
+  /// `MedicaoAvanco.toMap()` de cada estaca (payload opaco de sulcos).
+  final List<Map<String, Object?>> medicoesAvanco;
+
+  /// Nome do `OrigemCurvaInfiltracao` (payload opaco de sulcos).
+  final String origemCurvaInfiltracao;
   final double distanciaEnsaioInfiltracaoM;
   final double espacamentoEnsaioInfiltracaoM;
-  final List<MedicaoEntradaSaida> medicoesEntradaSaida;
-  final HipoteseRecessao hipoteseRecessao;
-  final List<MedicaoRecessao> medicoesRecessao;
+
+  /// `MedicaoEntradaSaida.toMap()` de cada linha (payload opaco de sulcos).
+  final List<Map<String, Object?>> medicoesEntradaSaida;
+
+  /// Nome do `HipoteseRecessao` (payload opaco de sulcos).
+  final String hipoteseRecessao;
+
+  /// `MedicaoRecessao.toMap()` de cada estaca (payload opaco de sulcos).
+  final List<Map<String, Object?>> medicoesRecessao;
 
   const IrrigationParameters({
     this.projetoMetodo,
@@ -197,15 +218,14 @@ class IrrigationParameters {
     this.espacamentoPlantasM = 0.15,
     this.larguraSulcoM,
     this.profundidadeSulcoM,
-    this.metodoCurvaAvanco = MetodoAjusteAvanco.doisPontos,
+    this.metodoCurvaAvanco = 'doisPontos',
     this.usarEnsaioAvanco = false,
     this.medicoesAvanco = const [],
-    this.origemCurvaInfiltracao =
-        OrigemCurvaInfiltracao.equacaoAcumuladaInformada,
+    this.origemCurvaInfiltracao = 'equacaoAcumuladaInformada',
     this.distanciaEnsaioInfiltracaoM = 0,
     this.espacamentoEnsaioInfiltracaoM = 0,
     this.medicoesEntradaSaida = const [],
-    this.hipoteseRecessao = HipoteseRecessao.desprezada,
+    this.hipoteseRecessao = 'desprezada',
     this.medicoesRecessao = const [],
   });
 
@@ -225,7 +245,7 @@ class IrrigationParameters {
     double? manningN,
     double? sigmaZ,
     TexturaSolo? texturaSolo,
-    TipoSulco? tipoSulco,
+    String? tipoSulco,
     double? tempoAvancoMetadeMin,
     double? tempoAvancoFinalMin,
     double? coeficienteAvancoK,
@@ -249,7 +269,7 @@ class IrrigationParameters {
     bool? fator11Vib,
     double? vazaoEnsaioAvancoLs,
     String? condicoesEnsaioAvanco,
-    EnsaioErosao? ensaioErosao,
+    Map<String, Object?>? ensaioErosao,
     bool clearEnsaioErosao = false,
     double? tempoMudancaMin,
     double? cicloSurtirMin,
@@ -264,15 +284,15 @@ class IrrigationParameters {
     double? espacamentoPlantasM,
     double? larguraSulcoM,
     double? profundidadeSulcoM,
-    MetodoAjusteAvanco? metodoCurvaAvanco,
+    String? metodoCurvaAvanco,
     bool? usarEnsaioAvanco,
-    List<MedicaoAvanco>? medicoesAvanco,
-    OrigemCurvaInfiltracao? origemCurvaInfiltracao,
+    List<Map<String, Object?>>? medicoesAvanco,
+    String? origemCurvaInfiltracao,
     double? distanciaEnsaioInfiltracaoM,
     double? espacamentoEnsaioInfiltracaoM,
-    List<MedicaoEntradaSaida>? medicoesEntradaSaida,
-    HipoteseRecessao? hipoteseRecessao,
-    List<MedicaoRecessao>? medicoesRecessao,
+    List<Map<String, Object?>>? medicoesEntradaSaida,
+    String? hipoteseRecessao,
+    List<Map<String, Object?>>? medicoesRecessao,
   }) {
     return IrrigationParameters(
       projetoMetodo: clearProjetoMetodo

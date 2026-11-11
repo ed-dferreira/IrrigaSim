@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:irrigasim/features/irrigacao_sulcos/models/ensaios_sulco.dart';
-import 'package:irrigasim/shared/irrigacao/models/medicoes_campo.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
 
 /// Resultado do ajuste da curva de avanço.
 class ResultadoCurvaAvanco {

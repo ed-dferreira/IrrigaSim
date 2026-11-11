@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:irrigasim/app/theme/app_icons.dart';
+import 'package:irrigasim/core/theme/app_icons.dart';
 import 'package:irrigasim/features/irrigacao_faixas/models/faixa_medicoes.dart';
 import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
 import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
 import 'package:irrigasim/features/irrigacao_faixas/services/faixa_ensaio_campo.dart';
 import 'package:irrigasim/features/irrigacao_faixas/services/faixa_hidraulica.dart';
-import 'package:irrigasim/features/irrigacao_faixas/services/faixa_csv.dart';
+import 'package:irrigasim/features/cenarios/services/faixa_csv.dart';
 import 'package:irrigasim/features/irrigacao_faixas/viewmodels/border_project_controller.dart';
 import 'package:irrigasim/features/irrigacao_faixas/views/border_project/border_project_fields.dart';
 import 'package:irrigasim/features/irrigacao_faixas/views/border_trial_chart.dart';
@@ -26,12 +26,18 @@ List<Widget> avancoStep(
   fields.select<ManejoFaixa>(
     'Manejo',
     p.manejo,
-    ManejoFaixa.values,
+    [
+      ManejoFaixa.vazaoConstante,
+      // O material de faixas lista redução de vazão e reuso (pp. 49–50) sem
+      // equações; só o escoamento livre tem modelo. Opções sem modelo ficam
+      // visíveis apenas em cenários antigos carregados.
+      if (p.manejo != ManejoFaixa.vazaoConstante) p.manejo,
+    ],
     fields.controller.setManejo,
     (v) => switch (v) {
       ManejoFaixa.vazaoConstante => 'Vazão constante',
-      ManejoFaixa.vazaoReduzida => 'Vazão reduzida — não simulável',
-      ManejoFaixa.reuso => 'Reuso — não simulável',
+      ManejoFaixa.vazaoReduzida => 'Vazão reduzida — sem modelo no material',
+      ManejoFaixa.reuso => 'Reuso — sem modelo no material',
     },
   ),
   fields.number(
@@ -40,32 +46,32 @@ List<Widget> avancoStep(
     p.vazaoUnitariaLsM,
     'L/s/m',
   ),
-  const IrrigationAlertBanner(
-    message: 'F02 está registrada como fórmula da fonte, mas permanece bloqueada: Vmax e suas unidades/convenção não estão suficientemente definidos no pacote; entradas abaixo são apenas dados de auditoria e não calculam qmax.',
+  const Text(
+    'Com ρ1, ρ2 e Vmax completos, calcula a vazão máxima não erosiva e avisa quando q0 excede.',
   ),
   fields.number(
     'rho1F02',
-    'ρ1 transcrito (F02, opcional)',
+    'ρ1 (opcional)',
     p.rho1F02,
     '',
     optional: true,
   ),
   fields.number(
     'rho2F02',
-    'ρ2 transcrito (F02, opcional)',
+    'ρ2 (opcional)',
     p.rho2F02,
     '',
     optional: true,
   ),
   fields.number(
     'vmaxF02',
-    'Vmax informado para auditoria (F02, opcional)',
+    'Vmax (opcional)',
     p.vmaxF02,
     '',
     optional: true,
   ),
   IrrigationLabeledField(
-    label: 'Unidade declarada de Vmax (F02, não interpretada)',
+    label: 'Unidade de Vmax',
     child: TextFormField(
       initialValue: p.unidadeVmaxF02,
       decoration: const InputDecoration(
@@ -82,7 +88,7 @@ List<Widget> avancoStep(
     'O tempo de corte do dimensionamento é calculado. Para avaliar um ensaio medido, informe estacas; o corte abaixo só vale para esse ensaio.',
   ),
   IrrigationLabeledField(
-    label: 'Referência de corte antecipado (condicional, p.21)',
+    label: 'Referência de corte antecipado (condicional)',
     child: DropdownButtonFormField<double?>(
       initialValue: p.fracaoCortePlanejada,
       items: const [

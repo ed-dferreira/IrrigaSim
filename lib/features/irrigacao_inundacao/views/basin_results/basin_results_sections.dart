@@ -3,12 +3,10 @@
 // clima e demanda, operação por regime, anexos exclusivos do método e
 // métricas completas, com referência à Aula 8.
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:irrigasim/app/theme/app_icons.dart';
+import 'package:irrigasim/core/theme/app_icons.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/anexos_inundacao.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/projeto_inundacao.dart';
-import 'package:irrigasim/features/irrigacao_inundacao/viewmodels/basin_project_controller.dart';
-import 'package:irrigasim/shared/irrigacao/models/comum/clima_demanda.dart';
+import 'package:irrigasim/shared/clima/models/clima_demanda.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
 import 'package:irrigasim/shared/irrigacao/models/validacao_superficie.dart';
@@ -38,17 +36,13 @@ String textoStatusBasin(BorderStatus status) => switch (status) {
 };
 
 /// Seções auditáveis do resultado de inundação: dados e hipóteses, cultura,
-/// clima e demanda, operação por regime, planejamento, seleção de vazão,
-/// volumes do arroz, métricas completas e comparação de cenários. A seção
-/// "Salvar este projeto" permanece no orquestrador, junto da exportação.
+/// clima e demanda, operação por regime, planejamento, seleção de vazão e
+/// volumes do arroz. A seção "Salvar este projeto" permanece no orquestrador,
+/// junto da exportação.
 List<Widget> secoesResultadoBasin({
-  required BuildContext context,
-  required WidgetRef ref,
-  required bool podeCompararCenarios,
   required ProjetoInundacao project,
   required SimulationResult r,
 }) {
-  final text = Theme.of(context).textTheme;
   String m(String chave) {
     final v = r.metricas[chave];
     if (v == null) return '—';
@@ -518,37 +512,5 @@ List<Widget> secoesResultadoBasin({
       icon: AppIcons.relatorio,
       advanced: true,
     ),
-    if (podeCompararCenarios &&
-        project.regime == TipoInundacao.intermitente &&
-        (project.dadosPrimeira != null || project.dadosTerceira != null))
-      section(
-        'Comparar cenários de infiltração',
-        [
-          Text(
-            'Simula separadamente a primeira e a terceira '
-            'irrigação com k, a e VIB próprios, pelo mesmo '
-            'motor de simulação.',
-            style: text.bodyMedium,
-          ),
-          const SizedBox(height: 12),
-          FilledButton.tonalIcon(
-            onPressed: () {
-              try {
-                final c = calcularComparacaoCenarios(project);
-                ref.read(basinScenarioComparisonProvider.notifier).state =
-                    c;
-              } on FormatException catch (e) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text(e.message)));
-              }
-            },
-            icon: const Icon(AppIcons.comparar),
-            label: const Text('Comparar cenários'),
-          ),
-        ],
-        icon: AppIcons.comparar,
-        advanced: true,
-      ),
   ];
 }

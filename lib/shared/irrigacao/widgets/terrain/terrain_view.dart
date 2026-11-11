@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:irrigasim/app/theme/app_icons.dart';
-import 'package:irrigasim/shared/irrigacao/models/tipo_sulco.dart';
+import 'package:irrigasim/core/theme/app_icons.dart';
+import 'package:irrigasim/shared/irrigacao/models/traco_distribuicao.dart';
 
 import 'terrain_painter.dart';
 
@@ -11,7 +11,8 @@ class TerrainView extends StatelessWidget {
     required this.larguraM,
     required this.espacamentoSulcosM,
     required this.declividadePercentual,
-    this.tipoSulco,
+    this.traco,
+    this.tipoLabel,
     this.furrowColors,
     this.flowingIndex,
     this.showTitle = true,
@@ -22,7 +23,10 @@ class TerrainView extends StatelessWidget {
   final double larguraM;
   final double espacamentoSulcosM;
   final double declividadePercentual;
-  final TipoSulco? tipoSulco;
+  final TracoDistribuicao? traco;
+
+  /// Rótulo do tipo de distribuição exibido no título e na legenda.
+  final String? tipoLabel;
   final List<Color>? furrowColors;
   final int? flowingIndex;
   final bool showTitle;
@@ -34,7 +38,7 @@ class TerrainView extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final numSulcos = (larguraM / espacamentoSulcosM).floor().clamp(1, 20);
-    final tipoLabel = tipoSulco?.displayName;
+    final tipoLabel = this.tipoLabel;
 
     return Semantics(
       label:
@@ -79,7 +83,8 @@ class TerrainView extends StatelessWidget {
                         larguraM: larguraM,
                         espacamentoSulcosM: espacamentoSulcosM,
                         declividadePercentual: declividadePercentual,
-                        tipoSulco: tipoSulco,
+                        traco: traco,
+                        tipoLabel: tipoLabel,
                         furrowColors: furrowColors,
                         flowingIndex: flowingIndex,
                       ),
@@ -90,7 +95,7 @@ class TerrainView extends StatelessWidget {
                   _TerrainLegend(
                     numSulcos: numSulcos,
                     espacamento: espacamentoSulcosM,
-                    tipo: tipoSulco,
+                    tipoLabel: tipoLabel,
                     distributionName: distributionName,
                   ),
                 ],
@@ -107,12 +112,12 @@ class _TerrainLegend extends StatelessWidget {
   const _TerrainLegend({
     required this.numSulcos,
     required this.espacamento,
-    this.tipo,
+    this.tipoLabel,
     required this.distributionName,
   });
   final int numSulcos;
   final double espacamento;
-  final TipoSulco? tipo;
+  final String? tipoLabel;
   final String distributionName;
 
   @override
@@ -130,8 +135,8 @@ class _TerrainLegend extends StatelessWidget {
           color: colors.onSurfaceVariant,
           label: 'Espaçamento: ${espacamento.toStringAsFixed(2)} m',
         ),
-        if (tipo != null)
-          _LegendDot(color: colors.tertiary, label: tipo!.displayName),
+        if (tipoLabel != null)
+          _LegendDot(color: colors.tertiary, label: tipoLabel!),
       ],
     );
   }

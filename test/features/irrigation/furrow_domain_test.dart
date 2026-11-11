@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
-import 'package:irrigasim/shared/irrigacao/models/medicoes_campo.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/ensaios_sulco.dart'
     show PontoEnsaioAvanco;
 import 'package:irrigasim/features/irrigacao_sulcos/models/geometria_sulco.dart';
@@ -97,10 +97,10 @@ void main() {
         usarEnsaioAvanco: true,
         vazaoEnsaioAvancoLs: 1,
         condicoesEnsaioAvanco: 'Solo médio, seção em V, mesma orientação',
-        medicoesAvanco: const [
-          MedicaoAvanco(distanciaM: 0, tempoMin: 0),
-          MedicaoAvanco(distanciaM: 25, tempoMin: 10),
-          MedicaoAvanco(distanciaM: 50, tempoMin: 20),
+        medicoesAvanco: [
+          MedicaoAvanco(distanciaM: 0, tempoMin: 0).toMap(),
+          MedicaoAvanco(distanciaM: 25, tempoMin: 10).toMap(),
+          MedicaoAvanco(distanciaM: 50, tempoMin: 20).toMap(),
         ],
       ),
     );

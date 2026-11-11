@@ -9,7 +9,6 @@ import 'package:irrigasim/features/irrigacao_inundacao/viewmodels/basin_simulati
 import 'package:irrigasim/features/irrigacao_sulcos/models/entradas_projeto.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/coordenador_simulacao_sulcos.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
-import 'package:irrigasim/shared/irrigacao/models/tipo_sulco.dart';
 
 final _chaveExemplos = 'cenarios_exemplos_carregados_v1';
 Future<void>? _semeaduraAndamento;
@@ -147,7 +146,7 @@ class CenariosDeExemplo {
     vazao: 1,
     tempoAplicacao: 130,
     laminaRequerida: 42,
-    tipoSulco: TipoSulco.sulcos_comuns,
+    tipoSulco: 'sulcos_comuns',
     tempoAvancoMetadeMin: 35,
     tempoAvancoFinalMin: 90,
   );

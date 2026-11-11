@@ -6,7 +6,7 @@ import 'package:irrigasim/shared/irrigacao/widgets/auditable_widgets.dart';
 /// Etapa 5: clima, evapotranspiração e lâmina requerida.
 List<Widget> climaStep(BorderProjectFields fields, BorderProject p) => [
   const Text(
-    'A demanda da cultura e a precipitação efetiva definem a lâmina necessária. Use IRN informada ou calcule com os dados de solo e raízes (Aula 7, pp. 52 e 73).',
+    'A demanda da cultura e a precipitação efetiva definem a lâmina necessária. Use IRN informada ou calcule com os dados de solo e raízes.',
   ),
   fields.number(
     'evapotranspiracaoMmDia',

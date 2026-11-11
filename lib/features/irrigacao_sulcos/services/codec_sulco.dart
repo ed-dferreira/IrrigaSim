@@ -1,6 +1,7 @@
 import 'package:irrigasim/features/irrigacao_sulcos/models/curva_infiltracao.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/entradas_projeto.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/indicadores_balanco.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
 import 'package:irrigasim/shared/irrigacao/models/comum/contratos_metodo.dart';
 import 'package:irrigasim/shared/irrigacao/models/comum/irrigacao_comum.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
@@ -48,7 +49,8 @@ class CodecSulco extends CodecMetodo {
   @override
   BaseIrrigacao baseComum(IrrigationParameters base) {
     final recessao = {
-      for (final p in base.medicoesRecessao) p.distanciaM: p.instanteRecessaoMin,
+      for (final p in base.medicoesRecessaoResolvidas)
+        p.distanciaM: p.instanteRecessaoMin,
     };
     return BaseIrrigacao(
       identificacao: IdentificacaoIrrigacao.superficie(SistemaSuperficie.sulcos),
@@ -63,12 +65,12 @@ class CodecSulco extends CodecMetodo {
         vazaoDisponivelLs: base.vazaoDisponivelLps,
       ),
       ensaio:
-          base.medicoesAvanco.isEmpty &&
-              base.medicoesEntradaSaida.isEmpty &&
-              base.medicoesRecessao.isEmpty
+          base.medicoesAvancoResolvidas.isEmpty &&
+              base.medicoesEntradaSaidaResolvidas.isEmpty &&
+              base.medicoesRecessaoResolvidas.isEmpty
           ? null
           : EnsaioComum(
-              estacas: base.medicoesAvanco
+              estacas: base.medicoesAvancoResolvidas
                   .map(
                     (p) => EstacaEnsaio(
                       p.distanciaM,
@@ -77,7 +79,7 @@ class CodecSulco extends CodecMetodo {
                     ),
                   )
                   .toList(),
-              medicoesInfiltracao: base.medicoesEntradaSaida
+              medicoesInfiltracao: base.medicoesEntradaSaidaResolvidas
                   .map(
                     (p) => MedicaoInfiltracaoComum(
                       tempoMin: p.tempoMin,
@@ -86,7 +88,7 @@ class CodecSulco extends CodecMetodo {
                     ),
                   )
                   .toList(),
-              origemInfiltracao: base.origemCurvaInfiltracao.name,
+              origemInfiltracao: base.origemCurvaInfiltracaoResolvida.name,
             ),
     );
   }

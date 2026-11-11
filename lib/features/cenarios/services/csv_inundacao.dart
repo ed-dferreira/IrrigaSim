@@ -1,5 +1,5 @@
 // Exportação CSV do projeto e do resultado de inundação (Fase 6). Segue o
-// formato das faixas (lib/features/irrigacao_faixas/services/faixa_csv.dart):
+// formato das faixas (lib/features/cenarios/services/faixa_csv.dart):
 // separador ponto-e-vírgula, bloco campo;valor;unidade, e para o regime
 // intermitente o perfil hidráulico em 41 pontos (G7), com o mesmo cabeçalho
 // x_m;tempo_avanco_min;lamina_mm do pacote de referência.

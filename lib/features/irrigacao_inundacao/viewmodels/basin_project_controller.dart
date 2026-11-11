@@ -4,7 +4,7 @@
 // numérica por nome de campo, aplicação dos presets da Aula 8 (G5) e providers
 // que resetam o resultado sempre que o projeto muda.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:irrigasim/shared/irrigacao/models/comum/clima_demanda.dart';
+import 'package:irrigasim/shared/clima/models/clima_demanda.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/agronomia_inundacao.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/projeto_inundacao.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';

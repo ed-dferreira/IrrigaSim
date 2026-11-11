@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:irrigasim/app/router/app_routes.dart';
-import 'package:irrigasim/app/theme/app_icons.dart';
+import 'package:irrigasim/core/theme/app_icons.dart';
 import 'package:irrigasim/features/cenarios/models/cenario_salvo.dart';
 import 'package:irrigasim/features/cenarios/views/cenario_resultados_view.dart';
 import 'package:irrigasim/features/cenarios/views/comparacao_cenarios.dart';
@@ -16,6 +16,7 @@ import 'package:irrigasim/shared/irrigacao/widgets/irrigation_chart_section.dart
 import 'package:irrigasim/features/cenarios/providers/scenario_providers.dart';
 import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/entradas_projeto.dart';
+import 'package:uuid/uuid.dart';
 
 class CenariosScreen extends ConsumerStatefulWidget {
   const CenariosScreen({super.key});
@@ -30,6 +31,9 @@ class _CenariosScreenState extends ConsumerState<CenariosScreen> {
 
   /// Quando ativo, tocar em um card o seleciona para comparação.
   bool _modoComparacao = false;
+
+  /// Importação de CSV em andamento (controla o spinner do botão).
+  bool _importando = false;
 
   /// Cenários marcados para comparação, indexados por id. A comparação só
   /// aceita cenários do mesmo método (ex.: inundação com inundação).
@@ -129,6 +133,24 @@ class _CenariosScreenState extends ConsumerState<CenariosScreen> {
                               const SizedBox(width: 8),
                             ],
                             Tooltip(
+                              message: 'Importar cenário (CSV)',
+                              child: IconButton.outlined(
+                                onPressed: _importando
+                                    ? null
+                                    : _importarCenario,
+                                icon: _importando
+                                    ? const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : const Icon(AppIcons.importarCenario),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Tooltip(
                               message: 'Nova simulação',
                               child: IconButton.filled(
                                 onPressed: () => context.go(AppRoutes.home),
@@ -178,7 +200,10 @@ class _CenariosScreenState extends ConsumerState<CenariosScreen> {
             if (cenarios.isEmpty)
               SliverFillRemaining(
                 hasScrollBody: false,
-                child: _EmptyState(onCreate: () => context.go(AppRoutes.home)),
+                child: _EmptyState(
+                  onCreate: () => context.go(AppRoutes.home),
+                  onImport: _importarCenario,
+                ),
               )
             else if (filtered.isEmpty)
               SliverFillRemaining(
@@ -287,6 +312,65 @@ class _CenariosScreenState extends ConsumerState<CenariosScreen> {
       isScrollControlled: true,
       showDragHandle: true,
       builder: (context) => _ScenarioDetails(cenario: cenario),
+    );
+  }
+
+  /// Abre o seletor de arquivos, lê um CSV exportado pelo próprio app e
+  /// mostra a folha de revisão antes de salvar. Erros de formato viram
+  /// mensagem amigável no SnackBar.
+  Future<void> _importarCenario() async {
+    setState(() => _importando = true);
+    final importador = ref.read(cenarioImportadorProvider);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final importado = await importador.importarDoArquivo();
+      if (!mounted) return;
+      setState(() => _importando = false);
+      if (importado == null) return;
+      final salvo = await _mostrarRevisaoImportacao(importado);
+      if (salvo == null) return;
+      await _salvarImportado(salvo);
+    } on FormatException catch (erro) {
+      if (!mounted) return;
+      setState(() => _importando = false);
+      messenger.showSnackBar(
+        SnackBar(content: Text(erro.message)),
+      );
+    } catch (erro) {
+      if (!mounted) return;
+      setState(() => _importando = false);
+      messenger.showSnackBar(
+        SnackBar(content: Text('Não foi possível importar: $erro')),
+      );
+    }
+  }
+
+  /// Folha de revisão do cenário importado; devolve o cenário salvo ou
+  /// `null` se o usuário descartou.
+  Future<CenarioSalvo?> _mostrarRevisaoImportacao(CenarioSalvo importado) {
+    return showModalBottomSheet<CenarioSalvo>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (sheetContext) => _RevisaoImportacao(
+        cenario: importado,
+        onSalvar: (salvo) => Navigator.pop(sheetContext, salvo),
+      ),
+    );
+  }
+
+  /// Salva o cenário revisado com id e datas próprios.
+  Future<void> _salvarImportado(CenarioSalvo importado) async {
+    final agora = DateTime.now();
+    final salvo = importado.copyWith(
+      id: const Uuid().v4(),
+      dataCriacao: agora,
+      dataModificacao: agora,
+    );
+    await ref.read(scenarioServiceProvider).salvar(salvo);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('“${salvo.nome}” foi importado.')),
     );
   }
 }
@@ -836,25 +920,43 @@ class _ScenarioDetails extends StatelessWidget {
                     ),
                   ),
                 const SizedBox(height: 16),
-                _AcoesExportacao(cenario: cenario),
-                const SizedBox(height: 16),
-                FilledButton.icon(
-                  onPressed: () =>
-                      Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) =>
-                              CenarioResultadosView(cenario: cenario),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Tooltip(
+                        message:
+                            'Abre as entradas de '
+                            '${cenario.metodo.displayName.toLowerCase()} '
+                            'para editar e simular de novo',
+                        child: OutlinedButton.icon(
+                          onPressed: () => context.go(_rotaDoCenario(cenario)),
+                          icon: const Icon(Icons.edit_outlined),
+                          label: const Text('Editar'),
                         ),
                       ),
-                  icon: const Icon(AppIcons.visualizarCenario),
-                  label: const Text('Ver resultados completos'),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () =>
+                            Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) =>
+                                    CenarioResultadosView(cenario: cenario),
+                              ),
+                            ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: colors.primary,
+                          side: BorderSide(color: colors.primary),
+                        ),
+                        icon: const Icon(AppIcons.indicadores),
+                        label: const Text('Resultados'),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
-                OutlinedButton.icon(
-                  onPressed: () => context.go(_rotaDoCenario(cenario)),
-                  icon: const Icon(Icons.edit_outlined),
-                  label: Text(_abrirLabel(cenario.metodo)),
-                ),
+                const SizedBox(height: 16),
+                _AcoesExportacao(cenario: cenario),
               ],
             ),
           ),
@@ -1005,6 +1107,171 @@ class _AcoesExportacaoState extends ConsumerState<_AcoesExportacao> {
   }
 }
 
+/// Folha de revisão de um cenário importado de CSV: mostra os parâmetros
+/// reconstruídos e os indicadores-chave, e só grava com confirmação.
+/// Como o CSV resumido não traz curvas nem métricas adicionais, a revisão
+/// avisa que esses dados não fazem parte do arquivo.
+class _RevisaoImportacao extends StatefulWidget {
+  final CenarioSalvo cenario;
+  final ValueChanged<CenarioSalvo> onSalvar;
+  const _RevisaoImportacao({required this.cenario, required this.onSalvar});
+
+  @override
+  State<_RevisaoImportacao> createState() => _RevisaoImportacaoState();
+}
+
+class _RevisaoImportacaoState extends State<_RevisaoImportacao> {
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    final cenario = widget.cenario;
+    final p = cenario.parametros;
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 680),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Revisar cenário importado',
+                  style: text.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    _MethodBadge(label: cenario.metodo.displayName),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        cenario.nome,
+                        style: text.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _Kpi(
+                        label: 'Eficiência (Ea)',
+                        value: '${cenario.resultado.eficiencia.toStringAsFixed(1)}%',
+                        tone: colors.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _Kpi(
+                        label: 'Uniformidade (CUC)',
+                        value: '${cenario.resultado.cuc.toStringAsFixed(1)}%',
+                        tone: colors.secondary,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _Kpi(
+                        label: 'Distribuição (DU)',
+                        value: '${cenario.resultado.du.toStringAsFixed(1)}%',
+                        tone: colors.tertiary,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Card(
+                  color: colors.surfaceContainerHigh,
+                  child: Padding(
+                    padding: const EdgeInsets.all(18),
+                    child: Column(
+                      children: [
+                        _DetailRow(
+                          label: 'Comprimento',
+                          value: '${p.comprimento.toStringAsFixed(1)} m',
+                        ),
+                        _DetailRow(
+                          label: 'Declividade',
+                          value: '${p.declividade.toStringAsFixed(3)} m/m',
+                        ),
+                        _DetailRow(
+                          label: 'Espaçamento/largura',
+                          value:
+                              '${p.larguraOuEspacamento.toStringAsFixed(2)} m',
+                        ),
+                        _DetailRow(
+                          label: 'Vazão',
+                          value: '${p.vazao.toStringAsFixed(2)} L/s',
+                        ),
+                        _DetailRow(
+                          label: 'Tempo de aplicação',
+                          value: '${p.tempoAplicacao.toStringAsFixed(0)} min',
+                        ),
+                        _DetailRow(
+                          label: 'Lâmina requerida',
+                          value: '${p.laminaRequerida.toStringAsFixed(0)} mm',
+                        ),
+                        _DetailRow(
+                          label: 'Textura do solo',
+                          value: p.texturaSolo.displayName,
+                        ),
+                        _DetailRow(
+                          label: 'Manejo',
+                          value: p.manejoSulco.displayName,
+                          last: true,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'O CSV resumido não contém gráficos, métricas adicionais nem '
+                  'planejamento operacional — esses dados não são importados.',
+                  style: text.bodySmall?.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Descartar'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: _salvar,
+                        icon: const Icon(AppIcons.salvarCenario),
+                        label: const Text('Salvar cenário'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _salvar() {
+    widget.onSalvar(widget.cenario);
+  }
+}
+
 class _DetailRow extends StatelessWidget {
   final String label;
   final String value;
@@ -1041,7 +1308,8 @@ class _DetailRow extends StatelessWidget {
 
 class _EmptyState extends StatelessWidget {
   final VoidCallback onCreate;
-  const _EmptyState({required this.onCreate});
+  final VoidCallback onImport;
+  const _EmptyState({required this.onCreate, required this.onImport});
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
@@ -1084,6 +1352,12 @@ class _EmptyState extends StatelessWidget {
                 onPressed: onCreate,
                 icon: const Icon(AppIcons.criarNovaSimulacao),
                 label: const Text('Criar simulação'),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: onImport,
+                icon: const Icon(AppIcons.importarCenario),
+                label: const Text('Importar CSV'),
               ),
             ],
           ),
@@ -1167,12 +1441,6 @@ String _rotaDoCenario(CenarioSalvo cenario) {
   };
   return '$base?${AppRoutes.cenarioId}=${Uri.encodeQueryComponent(cenario.id)}';
 }
-
-String _abrirLabel(MetodoIrrigacao metodo) => switch (metodo) {
-  MetodoIrrigacao.sulco => 'Abrir entradas do sulco',
-  MetodoIrrigacao.faixa => 'Abrir entradas da faixa',
-  MetodoIrrigacao.inundacao => 'Abrir entradas da inundação',
-};
 
 String _formatDate(DateTime date) =>
     '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
