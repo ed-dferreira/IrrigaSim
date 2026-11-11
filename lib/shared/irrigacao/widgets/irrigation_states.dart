@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:irrigasim/app/theme/app_icons.dart';
+import 'package:irrigasim/core/theme/app_icons.dart';
 
 /// Estado vazio comum às telas de resultado de irrigação.
 class IrrigationEmptyResult extends StatelessWidget {

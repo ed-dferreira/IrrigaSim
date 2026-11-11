@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:irrigasim/app/theme/app_icons.dart';
+import 'package:irrigasim/core/theme/app_icons.dart';
 import 'package:irrigasim/features/cenarios/providers/scenario_providers.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/charts/scenario_comparison_chart.dart';

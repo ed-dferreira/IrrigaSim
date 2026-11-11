@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/features/cenarios/models/cenario_salvo.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
-import 'package:irrigasim/shared/irrigacao/models/medicoes_campo.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
 import 'package:irrigasim/features/cenarios/services/project_store.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/services/manejo_vazao.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/services/simulador_sulcos.dart';
@@ -25,6 +25,10 @@ void main() {
     MedicaoAvanco(distanciaM: 180, tempoMin: 79),
     MedicaoAvanco(distanciaM: 200, tempoMin: 90),
   ];
+
+  /// Payload opaco equivalente a `stakes` para `IrrigationParameters`.
+  final stakesPayload = [for (final estaca in stakes) estaca.toMap()];
+
   const base = IrrigationParameters(
     comprimento: 200,
     larguraOuEspacamento: .9,
@@ -42,11 +46,11 @@ void main() {
 
   test('erosão observada no campo prevalece sobre qmax empírico', () {
     final params = base.copyWith(
-      ensaioErosao: const EnsaioErosao(
+      ensaioErosao: EnsaioErosao(
         vazaoLs: 1,
         condicoes: conditions,
         erosaoObservada: true,
-      ),
+      ).toMap(),
     );
     expect(
       ManejoVazao.calcularVazaoMaxima(
@@ -68,11 +72,11 @@ void main() {
     expect(
       SimuladorSulcos()(
         params.copyWith(
-          ensaioErosao: const EnsaioErosao(
+          ensaioErosao: EnsaioErosao(
             vazaoLs: 1,
             condicoes: conditions,
             erosaoObservada: false,
-          ),
+          ).toMap(),
         ),
       ).alertaVazaoExcedida,
       isNull,
@@ -82,7 +86,7 @@ void main() {
   test('medição de avanço exige vazão e condições iguais às do projeto', () {
     final measured = base.copyWith(
       usarEnsaioAvanco: true,
-      medicoesAvanco: stakes,
+      medicoesAvanco: stakesPayload,
     );
     expect(() => SimuladorSulcos()(measured), throwsFormatException);
     expect(
@@ -148,7 +152,7 @@ void main() {
         manejoSulco: ManejoSulco.reduzida,
         origemVazaoReduzida: OrigemVazaoReduzida.somatorioEspacial,
         usarEnsaioAvanco: true,
-        medicoesAvanco: stakes,
+        medicoesAvanco: stakesPayload,
         vazaoEnsaioAvancoLs: 1,
         condicoesEnsaioAvanco: conditions,
         tempoMudancaMin: 20,
@@ -212,7 +216,7 @@ void main() {
             origemVazaoReduzida: OrigemVazaoReduzida.informada,
             vazaoReduzidaLs: .5,
             usarEnsaioAvanco: true,
-            medicoesAvanco: stakes,
+            medicoesAvanco: stakesPayload,
             vazaoEnsaioAvancoLs: 1,
             condicoesEnsaioAvanco: conditions,
             tempoMudancaMin: 20,
@@ -239,11 +243,11 @@ void main() {
         fator11Vib: true,
         vazaoEnsaioAvancoLs: 1,
         condicoesEnsaioAvanco: conditions,
-        ensaioErosao: const EnsaioErosao(
+        ensaioErosao: EnsaioErosao(
           vazaoLs: 1.5,
           condicoes: conditions,
           erosaoObservada: true,
-        ),
+        ).toMap(),
       );
       final now = DateTime(2026, 10, 6);
       final saved = CenarioSalvo(
@@ -258,8 +262,8 @@ void main() {
       final map = saved.toMap();
       final restored = CenarioSalvo.fromMap(map).parametros;
       expect(restored.origemVazaoReduzida, OrigemVazaoReduzida.informada);
-      expect(restored.ensaioErosao!.erosaoObservada, isTrue);
-      expect(restored.ensaioErosao!.condicoes, conditions);
+      expect(restored.ensaioErosaoResolvido!.erosaoObservada, isTrue);
+      expect(restored.ensaioErosaoResolvido!.condicoes, conditions);
       expect(restored.fator11Vib, isTrue);
       expect(restored.vazaoEnsaioAvancoLs, 1);
       final legacy = Map<String, dynamic>.from(map);
@@ -284,11 +288,11 @@ void main() {
       manejoSulco: ManejoSulco.reduzida,
       origemVazaoReduzida: OrigemVazaoReduzida.vib,
       fator11Vib: true,
-      ensaioErosao: const EnsaioErosao(
+      ensaioErosao: EnsaioErosao(
         vazaoLs: 1.5,
         condicoes: conditions,
         erosaoObservada: true,
-      ),
+      ).toMap(),
     );
     final result = SimuladorSulcos()(params);
     final saved = CenarioSalvo(

@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:irrigasim/app/theme/app_icons.dart';
+import 'package:irrigasim/core/theme/app_icons.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
-import 'package:irrigasim/features/irrigacao_sulcos/services/csv_sulco.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/controlador_parametros_sulco.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/irrigation_chart_section.dart';
-import 'package:irrigasim/shared/irrigacao/widgets/irrigation_export.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/irrigation_states.dart';
 import 'package:irrigasim/core/widgets/loading_widget.dart';
 import 'package:irrigasim/features/cenarios/controllers/salvar_cenario_controller.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/views/project_results/project_results_sections.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/views/project_results/project_results_widgets.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/views/project_results/save_card.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/terrain/terrain_view.dart';
 
 /// Tela de resultados do projeto de sulcos: orquestra banner, gráficos,
-/// seções auditáveis, exportação CSV e salvamento de cenário.
+/// seções auditáveis e salvamento de cenário.
 class ProjectResultsScreen extends ConsumerWidget {
   const ProjectResultsScreen({super.key});
 
@@ -80,16 +79,7 @@ class ProjectResultsScreen extends ConsumerWidget {
     final resultsState = ref.watch(resultsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Resultados do projeto'),
-        actions: [
-          IconButton(
-            tooltip: 'Exportar dados',
-            onPressed: () => _showExport(context, state, result),
-            icon: const Icon(AppIcons.exportarDados),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Resultados do projeto')),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 48),
         children: [
@@ -114,7 +104,8 @@ class ProjectResultsScreen extends ConsumerWidget {
                     larguraM: state.larguraOuEspacamento * 10,
                     espacamentoSulcosM: state.larguraOuEspacamento,
                     declividadePercentual: state.declividade * 100,
-                    tipoSulco: state.tipoSulco,
+                    traco: state.tipoSulco?.tracoTerreno,
+                    tipoLabel: state.tipoSulco?.displayName,
                   ),
                   const SizedBox(height: 20),
                   KpiGrid(result: result),
@@ -135,20 +126,6 @@ class ProjectResultsScreen extends ConsumerWidget {
           ),
         ],
       ),
-    );
-  }
-
-  void _showExport(
-    BuildContext context,
-    EstadoParametrosSulco state,
-    SimulationResult result,
-  ) {
-    showIrrigationExportSheet(
-      context,
-      title: 'Exportar dados em CSV',
-      description:
-          'O conteúdo inclui entradas, indicadores e séries dos gráficos.',
-      csv: csvSulco(state, result),
     );
   }
 

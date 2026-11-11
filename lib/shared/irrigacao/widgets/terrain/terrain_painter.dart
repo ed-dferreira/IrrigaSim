@@ -1,8 +1,8 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:irrigasim/app/theme/app_colors.dart';
-import 'package:irrigasim/shared/irrigacao/models/tipo_sulco.dart';
+import 'package:irrigasim/core/theme/app_colors.dart';
+import 'package:irrigasim/shared/irrigacao/models/traco_distribuicao.dart';
 
 class TerrainPainter extends CustomPainter {
   TerrainPainter({
@@ -10,7 +10,8 @@ class TerrainPainter extends CustomPainter {
     required this.larguraM,
     required this.espacamentoSulcosM,
     required this.declividadePercentual,
-    this.tipoSulco,
+    this.traco,
+    this.tipoLabel,
     this.furrowColors,
     this.flowingIndex,
   });
@@ -19,7 +20,8 @@ class TerrainPainter extends CustomPainter {
   final double larguraM;
   final double espacamentoSulcosM;
   final double declividadePercentual;
-  final TipoSulco? tipoSulco;
+  final TracoDistribuicao? traco;
+  final String? tipoLabel;
   final List<Color>? furrowColors;
   final int? flowingIndex;
 
@@ -86,10 +88,10 @@ class TerrainPainter extends CustomPainter {
 
     final colors =
         furrowColors ?? List.generate(numFurrows, (_) => AppColors.sulco);
-    final tipo = tipoSulco ?? TipoSulco.sulcos_comuns;
+    final tracoAtual = traco ?? TracoDistribuicao.reta;
 
-    switch (tipo) {
-      case TipoSulco.sulcos_em_zigue_zague:
+    switch (tracoAtual) {
+      case TracoDistribuicao.zigueZague:
         for (var i = 0; i < numFurrows; i++) {
           final y = rect.top + spacing * (i + 1);
           final color = colors[i % colors.length];
@@ -101,7 +103,7 @@ class TerrainPainter extends CustomPainter {
             canvas.drawPath(path, flowPaint);
           }
         }
-      case TipoSulco.sulcos_contorno:
+      case TracoDistribuicao.contorno:
         for (var i = 0; i < numFurrows; i++) {
           final y = rect.top + spacing * (i + 1);
           final color = colors[i % colors.length];
@@ -113,7 +115,7 @@ class TerrainPainter extends CustomPainter {
             canvas.drawPath(path, flowPaint);
           }
         }
-      case TipoSulco.sulcos_nivel_tabuleiros:
+      case TracoDistribuicao.tabuleiro:
         _drawBoardFurrows(
           canvas,
           rect,
@@ -123,7 +125,7 @@ class TerrainPainter extends CustomPainter {
           furrowPaint,
           closedEnds: false,
         );
-      case TipoSulco.sulcos_nivel_fechados:
+      case TracoDistribuicao.tabuleiroFechado:
         _drawBoardFurrows(
           canvas,
           rect,
@@ -133,8 +135,7 @@ class TerrainPainter extends CustomPainter {
           furrowPaint,
           closedEnds: true,
         );
-      case TipoSulco.sulcos_comuns:
-      case TipoSulco.sulcos_corrugados:
+      case TracoDistribuicao.reta:
         for (var i = 0; i < numFurrows; i++) {
           final y = rect.top + spacing * (i + 1);
           final color = colors[i % colors.length];
@@ -322,7 +323,7 @@ class TerrainPainter extends CustomPainter {
       text: TextSpan(
         text:
             '${comprimentoM.toStringAsFixed(0)} m × ${larguraM.toStringAsFixed(0)} m'
-            '${tipoSulco != null ? ' · ${tipoSulco!.displayName}' : ''}',
+            '${tipoLabel != null ? ' · $tipoLabel' : ''}',
         style: const TextStyle(
           color: AppColors.onSurface,
           fontSize: 12,
@@ -401,7 +402,8 @@ class TerrainPainter extends CustomPainter {
         oldDelegate.larguraM != larguraM ||
         oldDelegate.espacamentoSulcosM != espacamentoSulcosM ||
         oldDelegate.declividadePercentual != declividadePercentual ||
-        oldDelegate.tipoSulco != tipoSulco ||
+        oldDelegate.traco != traco ||
+        oldDelegate.tipoLabel != tipoLabel ||
         oldDelegate.flowingIndex != flowingIndex;
   }
 }

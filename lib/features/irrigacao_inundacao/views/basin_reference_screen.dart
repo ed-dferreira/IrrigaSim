@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:irrigasim/app/theme/app_icons.dart';
+import 'package:irrigasim/core/theme/app_icons.dart';
 import 'package:markdown/markdown.dart' show ExtensionSet;
 
 const assetResumoInundacao =

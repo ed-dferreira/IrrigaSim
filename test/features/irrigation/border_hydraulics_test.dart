@@ -74,8 +74,57 @@ void main() {
     }
   });
 
-  test('faixa em nível, fechada e dados inválidos não executam', () {
+  test('F02: qmax alternativa transcrita, comparação com q0 e ausência parcial', () {
+    // F02: qmax = (Vmax^ρ2·n²/(3600·S0·ρ1))^(1/(ρ2−2)).
+    // vmax=10, ρ1=2, ρ2=3, n=.04, S0=.001 → (10³·.0016/(3600·.001·2))^1 = 1.6/7.2.
+    const base = BorderProject(
+      comprimentoM: 400,
+      larguraM: 10,
+      desnivelLongitudinalM: .4,
+      baseLongitudinalM: 400,
+      desnivelTransversalM: 0,
+      baseTransversalM: 10,
+      rugosidadeN: .04,
+      vazaoUnitariaLsM: 10 / 3,
+      irnMm: 56,
+      k: .0035,
+      a: .47,
+      vibMMin: .00011,
+    );
+    final comF02 = solver.dimensionar(
+      base.copyWith(rho1F02: 2, rho2F02: 3, vmaxF02: 10),
+    );
+    expect(comF02.qmaxF02M3MinM, closeTo(1.6 / 7.2, .00001));
     expect(
+      comF02.avisos.map((notice) => notice.mensagem),
+      isNot(contains(contains('F02'))),
+    );
+    // q0 acima da qmax F02 gera aviso orientativo.
+    final q0Acima = solver.dimensionar(
+      base.copyWith(rho1F02: 400, rho2F02: 3, vmaxF02: 10),
+    );
+    expect(
+      q0Acima.avisos.where(
+        (notice) => notice.mensagem.contains('máxima não erosiva F02'),
+      ),
+      isNotEmpty,
+    );
+    // Entradas parciais não computam F02.
+    final semF02 = solver.dimensionar(base);
+    expect(semF02.qmaxF02M3MinM, isNull);
+    final parcial = solver.dimensionar(base.copyWith(rho1F02: 2, rho2F02: 3));
+    expect(parcial.qmaxF02M3MinM, isNull);
+    expect(parcial.avisos, semF02.avisos);
+    // ρ2 = 2 fora do domínio (divide a forma transcrita por zero).
+    expect(
+      () => BorderHydraulics.vazaoMaximaM3MinM(
+        vmax: 10, rho1: 2, rho2: 2, n: .04, s0: .001,
+      ),
+      throwsFormatException,
+    );
+  });
+
+  test('faixa em nível, fechada e dados inválidos não executam', () {    expect(
       () => solver.dimensionar(
         BorderProject.ilustrativo.copyWith(desnivelLongitudinalM: 0),
       ),

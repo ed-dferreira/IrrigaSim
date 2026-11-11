@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:irrigasim/app/theme/app_icons.dart';
+import 'package:irrigasim/core/theme/app_icons.dart';
 import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
 import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
 import 'package:irrigasim/features/irrigacao_faixas/services/faixa_planejamento.dart';
@@ -149,6 +149,13 @@ List<Widget> secoesResultadoFaixa({
       ),
       row('q0', '${f(project.vazaoUnitariaLsM!)} L/s/m'),
       row('Qfaixa', '${f(project.vazaoFaixaLs!)} L/s'),
+      row(
+        'qmax F02',
+        r.qmaxF02M3MinM == null
+            ? 'Não informada (requer ρ1, ρ2 e Vmax)'
+            : '${f(r.qmaxF02M3MinM!)} m³/min/m',
+        detail: 'Vazão máxima não erosiva alternativa.',
+      ),
       row(
         'IRN (${project.origemIrn.name})',
         '${f(project.irnEfetivaMm!)} mm',

@@ -1,4 +1,4 @@
-import 'package:irrigasim/app/theme/app_colors.dart';
+import 'package:irrigasim/core/theme/app_colors.dart';
 import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/irrigation_kpi.dart';
 

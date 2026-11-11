@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/shared/irrigacao/models/comum/clima_demanda.dart';
+import 'package:irrigasim/shared/clima/models/clima_demanda.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/proveniencia_dado.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/curva_infiltracao.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/entradas_projeto.dart';

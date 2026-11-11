@@ -8,56 +8,85 @@ e um barrel público `<feature>.dart`).
 
 ```text
 lib/
-├── main.dart
-├── app/                            # composition root: app, rotas canônicas, tema
-│   ├── app.dart
+├── main.dart                       # registrarCodecs() + PreferenciasApp.init()
+├── app/                            # composition root
+│   ├── app.dart                    # MaterialApp.router + tema/densidade via perfil
+│   ├── codecs.dart                 # registra os codecs dos 3 métodos (ordem fixa)
 │   ├── router/
 │   │   ├── app_router.dart         # único lugar que conhece todas as features
 │   │   └── app_routes.dart         # caminhos canônicos + query params
-│   └── theme/
-├── core/                           # infraestrutura genérica (shell, widgets base)
-│   ├── navigation/
-│   └── widgets/
-├── shared/                         # contratos e código genuinamente compartilhado
-│   ├── irrigacao/
-│   │   ├── models/                 # IrrigationParameters, SimulationResult, comum/
-│   │   ├── services/               # Kostiakov-Lewis, Blaney-Criddle, indicadores…
-│   │   └── widgets/                # charts/, terrain/, componentes reutilizados
-│   └── cenarios/                   # CenarioSalvo, ScenarioService, stores, providers
+│   └── theme/                      # AppTheme, AppTextStyles, AppAnimations
+├── core/                           # infraestrutura genérica
+│   ├── navigation/main_shell.dart  # shell com abas (StatefulShellRoute)
+│   ├── theme/                      # AppColors, AppIcons (tokens compartilhados)
+│   └── widgets/                    # botão, campo, KPI, estados de loading/erro…
+├── shared/                         # conceitos agronômicos e código compartilhado
+│   ├── clima/                      # demanda climática, Blaney-Criddle
+│   ├── comum/                      # UnitsService (conversões centralizadas)
+│   ├── cultura/                    # CropPreset (predefinições de cultura)
+│   └── irrigacao/
+│       ├── models/                 # IrrigationParameters, SimulationResult e
+│       │                           # comum/: contratos dos métodos
+│       │                           # (ProjetoMetodo, AnexoSimulacao, CodecMetodo),
+│       │                           # adaptadores e identificação de irrigação
+│       ├── services/               # Kostiakov-Lewis, lâmina requerida,
+│       │                           # indicadores de performance, planejamento
+│       │                           # operacional, registro_codecs (registry)
+│       └── widgets/                # charts/, terrain/, formulários, KPIs
 └── features/
-    ├── irrigacao_sulcos/
+    ├── irrigacao_sulcos/           # tipo de sulco, projeto, ensaios, resultados
     ├── irrigacao_faixas/
     ├── irrigacao_inundacao/
-    ├── cenarios/
-    ├── perfil/
+    ├── cenarios/                   # salva/carrega/exporta/importa/compara;
+    │                               # CenarioSalvo, SimulationResultModel,
+    │                               # project_store, providers, CSVs por método
+    ├── perfil/                     # preferências (tema, fonte, alto contraste)
     └── simulacao_guiada/           # só encaminha: home → escolha do método → rota
 ```
 
 ## Regras de dependência
 
 1. `app/router/app_router.dart` é o **único** arquivo que conhece todas as
-   features; cada feature expõe suas rotas em `routes.dart`.
-2. Uma feature **não** importa `views/` nem `viewmodels/` de outra feature.
-3. Uma feature de método (sulcos/faixas/inundacao) **não** importa outra
+   features; cada feature expõe suas rotas em `routes.dart`. As rotas de método
+   são **subrotas do fluxo guiado** (`children` da rota `/home`) para preservar
+   deep links — os caminhos em `routes.dart` são relativos, os absolutos ficam
+   em `AppRoutes`. Navegue sempre via `AppRoutes`, nunca com strings soltas.
+2. Fora da própria feature, importe apenas o barrel `<feature>.dart` (API
+   pública). Exceção única: `features/cenarios` é a feature de integração —
+   ela compõe as telas de resultados dos métodos e pode importar
+   models/views/viewmodels de sulcos, faixas e inundação. Nenhuma outra
+   feature tem esse privilégio.
+3. Uma feature de método (sulcos/faixas/inundação) **não** importa outra
    feature de método.
-4. `shared/` **não** importa `features/` (ver dívida conhecida abaixo).
-5. `simulacao_guiada` só encaminha: não calcula, não salva cenário e lê apenas
-   o nome do usuário via API pública de `perfil`.
-6. Cenários são abertos por `cenarioId` (query param em `AppRoutes.cenarioId`);
-   a feature de destino hidrata o próprio controller.
-7. Dentro da feature use imports relativos; fora dela use
-   `package:irrigasim/...`.
+4. `shared/` **não** importa `features/`. O compartilhado (de)codifica os
+   projetos sem conhecê-los: cada feature registra um `CodecMetodo`
+   (`codec_faixa.dart`, `codec_sulco.dart`, `codec_inundacao.dart`) no
+   registry `registro_codecs.dart`, uma única vez em `app/codecs.dart` a
+   partir de `main.dart`. A ordem de registro define a ordem das chaves de
+   anexo no JSON persistido — não alterá-la sem atualizar também
+   `test/architecture/ordem_chaves_persistencia_test.dart`.
+5. `simulacao_guiada` só encaminha (`navigation/guia_de_metodos.dart`): não
+   calcula, não salva cenário e importa apenas o barrel `perfil.dart`.
+6. Cenários são abertos por `cenarioId` (query param `AppRoutes.cenarioId`);
+   a tela de projeto da feature de destino lê o query param e hidrata o
+   próprio controller (ex.: `project_screen.dart` de sulcos).
+7. Use sempre imports `package:irrigasim/...`, inclusive dentro da própria
+   feature (o codebase não usa imports relativos).
 
-## Dívidas conhecidas (migração)
+## Testes de arquitetura
 
-- `shared/irrigacao/models/*` (`irrigation_parameters`, `simulation_result`,
-  `simulation_result_model`) e `shared/cenarios/*` ainda importam modelos das
-  features de método. É a dívida dos DTOs "de todos" — plano de migração
-  `docs/Plano_migracao_features.md`, etapa 9 (codecs de cenário por feature).
-- `features/irrigacao_sulcos/viewmodels/parameters_controller.dart` ainda
-  importa faixas/inundação (`setMetodo`, coordenação de faixa/bacia). Será
-  removido na etapa 6c do plano; não reescrever fórmulas ao fazer.
-- O `README.md` ainda descreve a versão Kotlin Multiplatform antiga.
+`test/architecture/` contém guardrails (`shared_sem_features_test.dart`,
+`ordem_chaves_persistencia_test.dart`). Nunca enfraqueça esses testes para
+fazer uma mudança compilar; se a regra precisar mudar, discuta antes.
+
+## Dívidas conhecidas
+
+- O `README.md` ainda descreve a versão Kotlin Multiplatform antiga (agora é
+  um app Flutter único).
+- `shared/irrigacao/models/irrigation_parameters.dart` e
+  `simulation_result.dart` são os DTOs legados "de todos os métodos"; o modelo
+  canônico de resultado persistido é
+  `features/cenarios/models/simulation_result_model.dart`.
 
 ## Validação obrigatória
 

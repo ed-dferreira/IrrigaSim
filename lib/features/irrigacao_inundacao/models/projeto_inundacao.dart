@@ -10,13 +10,13 @@
 // Referência didática: Aula 8 — Irrigação por Inundação, Prof.ª Chaiane
 // Guerra da Conceição, UNIPAMPA (docs/Pacote_Inundacao).
 import 'package:irrigasim/shared/irrigacao/models/comum/adaptadores_superficie.dart';
-import 'package:irrigasim/shared/irrigacao/models/comum/clima_demanda.dart';
+import 'package:irrigasim/shared/clima/models/clima_demanda.dart';
 import 'package:irrigasim/shared/irrigacao/models/comum/contratos_metodo.dart';
 import 'package:irrigasim/shared/irrigacao/models/comum/irrigacao_comum.dart';
 import 'package:irrigasim/shared/irrigacao/models/validacao_superficie.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/agronomia_inundacao.dart';
-import 'package:irrigasim/shared/irrigacao/services/blaney_criddle.dart';
+import 'package:irrigasim/shared/clima/services/blaney_criddle.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/services/nucleo_referencia_inundacao.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/services/tabelas_referencia_inundacao.dart';
 

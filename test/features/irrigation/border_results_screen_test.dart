@@ -8,7 +8,7 @@ import 'package:irrigasim/features/cenarios/persistence/local_scenario_store.dar
 import 'package:irrigasim/features/cenarios/providers/scenario_providers.dart';
 import 'package:irrigasim/features/irrigacao_faixas/viewmodels/border_project_controller.dart';
 import 'package:irrigasim/features/irrigacao_faixas/views/border_results_screen.dart';
-import 'package:irrigasim/features/irrigacao_faixas/services/faixa_csv.dart';
+import 'package:irrigasim/features/cenarios/services/faixa_csv.dart';
 
 void main() {
   test('os oito status canônicos têm texto e ícone próprios na tela', () {
@@ -159,7 +159,7 @@ void main() {
       // Proveniência somente das fórmulas realmente executadas pela hidráulica.
       expect(csv, contains('bloco;F01–F05'));
       expect(csv, contains('formula_F07;'));
-      expect(csv, contains('status_F02;modelo_nao_implementado;'));
+      expect(csv, contains('status_F02;implementada;'));
       expect(csv, contains('formula_F02;'));
       expect(csv, contains('p. 53 · única · derivada'));
       expect(csv, contains('derivada'));

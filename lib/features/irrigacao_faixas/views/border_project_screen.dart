@@ -5,9 +5,9 @@ import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
 import 'package:irrigasim/features/irrigacao_faixas/viewmodels/border_project_controller.dart';
 import 'package:irrigasim/features/cenarios/providers/scenario_providers.dart';
 import 'package:irrigasim/app/router/app_routes.dart';
-import 'package:irrigasim/app/theme/app_icons.dart';
-import 'package:irrigasim/app/theme/app_colors.dart';
-import 'package:irrigasim/shared/irrigacao/models/comum/crop_presets.dart';
+import 'package:irrigasim/core/theme/app_icons.dart';
+import 'package:irrigasim/core/theme/app_colors.dart';
+import 'package:irrigasim/shared/cultura/models/crop_presets.dart';
 import 'package:irrigasim/features/irrigacao_faixas/views/border_project/border_project_fields.dart';
 import 'package:irrigasim/features/irrigacao_faixas/views/border_project_steps/area_step.dart';
 import 'package:irrigasim/features/irrigacao_faixas/views/border_project_steps/cultura_step.dart';
@@ -77,7 +77,7 @@ class _BorderProjectScreenState extends ConsumerState<BorderProjectScreen> {
     AppIcons.projetoRevisao,
   ];
   static const _subtitles = [
-    'Dados da gleba, levantamento topográfico e geometria da faixa.',
+    'Levantamento topográfico e geometria da faixa.',
     'Comprimento, largura e declive que conduzem o avanço da lâmina.',
     'Características do solo e curva de infiltração.',
     'Cultura, sistema radicular e demanda hídrica.',

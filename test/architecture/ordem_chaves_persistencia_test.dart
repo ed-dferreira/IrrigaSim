@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/app/codecs.dart';
 import 'package:irrigasim/shared/irrigacao/models/comum/contratos_metodo.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
-import 'package:irrigasim/shared/irrigacao/models/simulation_result_model.dart';
+import 'package:irrigasim/features/cenarios/models/simulation_result_model.dart';
 import 'package:irrigasim/shared/irrigacao/services/registro_codecs.dart';
 
 class _AnexoFalso implements AnexoSimulacao {

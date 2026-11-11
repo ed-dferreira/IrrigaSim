@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/features/cenarios/models/cenario_salvo.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
-import 'package:irrigasim/shared/irrigacao/models/medicoes_campo.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
 import 'package:irrigasim/shared/irrigacao/services/operational_planning.dart';
 import 'package:irrigasim/features/cenarios/services/project_store.dart';
 import 'package:irrigasim/app/codecs.dart';
@@ -14,7 +14,7 @@ void main() {
     'round-trips reduced-flow operation and optional furrow geometry',
     () async {
       final now = DateTime(2026, 9, 23);
-      const parameters = IrrigationParameters(
+      final parameters = IrrigationParameters(
         comprimento: 200,
         declividade: 0.005,
         larguraOuEspacamento: 0.9,
@@ -39,14 +39,14 @@ void main() {
         espacamentoFileirasM: 0.9,
         espacamentoPlantasM: 0.25,
         larguraSulcoM: 0.25,
-        metodoCurvaAvanco: MetodoAjusteAvanco.minimosQuadrados,
+        metodoCurvaAvanco: MetodoAjusteAvanco.minimosQuadrados.name,
         usarEnsaioAvanco: true,
         medicoesAvanco: [
-          MedicaoAvanco(distanciaM: 0, tempoMin: 0),
-          MedicaoAvanco(distanciaM: 100, tempoMin: 40),
-          MedicaoAvanco(distanciaM: 200, tempoMin: 90),
+          MedicaoAvanco(distanciaM: 0, tempoMin: 0).toMap(),
+          MedicaoAvanco(distanciaM: 100, tempoMin: 40).toMap(),
+          MedicaoAvanco(distanciaM: 200, tempoMin: 90).toMap(),
         ],
-        origemCurvaInfiltracao: OrigemCurvaInfiltracao.ensaioEntradaSaida,
+        origemCurvaInfiltracao: OrigemCurvaInfiltracao.ensaioEntradaSaida.name,
         distanciaEnsaioInfiltracaoM: 100,
         espacamentoEnsaioInfiltracaoM: 0.9,
         medicoesEntradaSaida: [
@@ -54,17 +54,17 @@ void main() {
             tempoMin: 10,
             vazaoEntradaLs: 1.2,
             vazaoSaidaLs: 0.4,
-          ),
+          ).toMap(),
           MedicaoEntradaSaida(
             tempoMin: 20,
             vazaoEntradaLs: 1.2,
             vazaoSaidaLs: 0.5,
-          ),
+          ).toMap(),
         ],
-        hipoteseRecessao: HipoteseRecessao.medidaPorEstaca,
+        hipoteseRecessao: HipoteseRecessao.medidaPorEstaca.name,
         medicoesRecessao: [
-          MedicaoRecessao(distanciaM: 0, instanteRecessaoMin: 200),
-          MedicaoRecessao(distanciaM: 200, instanteRecessaoMin: 260),
+          MedicaoRecessao(distanciaM: 0, instanteRecessaoMin: 200).toMap(),
+          MedicaoRecessao(distanciaM: 200, instanteRecessaoMin: 260).toMap(),
         ],
       );
       final scenario = CenarioSalvo(
@@ -122,18 +122,18 @@ void main() {
       expect(restored.parametros.profundidadeSulcoM, isNull);
       expect(
         restored.parametros.metodoCurvaAvanco,
-        MetodoAjusteAvanco.minimosQuadrados,
+        MetodoAjusteAvanco.minimosQuadrados.name,
       );
       expect(restored.parametros.medicoesAvanco, hasLength(3));
       expect(restored.parametros.usarEnsaioAvanco, isTrue);
       expect(
         restored.parametros.origemCurvaInfiltracao,
-        OrigemCurvaInfiltracao.ensaioEntradaSaida,
+        OrigemCurvaInfiltracao.ensaioEntradaSaida.name,
       );
       expect(restored.parametros.medicoesEntradaSaida, hasLength(2));
       expect(
         restored.parametros.hipoteseRecessao,
-        HipoteseRecessao.medidaPorEstaca,
+        HipoteseRecessao.medidaPorEstaca.name,
       );
       expect(restored.parametros.medicoesRecessao, hasLength(2));
       expect(restored.resultado.curvaOportunidade, hasLength(2));

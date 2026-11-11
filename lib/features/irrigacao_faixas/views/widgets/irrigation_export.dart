@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:irrigasim/app/theme/app_icons.dart';
+import 'package:irrigasim/core/theme/app_icons.dart';
 
 /// Abre a prévia de CSV comum às telas de resultado de irrigação.
 Future<void> showIrrigationExportSheet(

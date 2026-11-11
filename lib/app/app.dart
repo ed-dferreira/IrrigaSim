@@ -44,7 +44,21 @@ class App extends ConsumerWidget {
         return _AccessibilityScope(
           reducedAnimations: reducedAnimations,
           modoLeitorTela: perfilState.modoLeitorTela,
-          child: child ?? const SizedBox.shrink(),
+          // O contexto do builder fica acima do Navigator, que não possui
+          // Overlay; o SelectionArea precisa de um Overlay ancestral para
+          // inserir as alças de seleção e a barra de copiar (ver
+          // flutter/flutter#148314). Introduzimos um Overlay manualmente,
+          // acima do SelectionArea.
+          child: Overlay(
+            initialEntries: [
+              OverlayEntry(
+                builder:
+                    (context) => SelectionArea(
+                      child: child ?? const SizedBox.shrink(),
+                    ),
+              ),
+            ],
+          ),
         );
       },
     );

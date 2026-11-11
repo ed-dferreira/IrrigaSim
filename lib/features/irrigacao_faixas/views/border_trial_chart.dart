@@ -1,6 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:irrigasim/app/theme/app_icons.dart';
+import 'package:irrigasim/core/theme/app_icons.dart';
 import 'package:irrigasim/features/irrigacao_faixas/services/faixa_ensaio_campo.dart';
 import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
 

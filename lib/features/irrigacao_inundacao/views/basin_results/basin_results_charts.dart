@@ -2,7 +2,7 @@
 // de faixas: gráficos genéricos do `shared/irrigacao/widgets/charts` com a
 // aba opcional de comparação de cenários (primeira vs terceira irrigação).
 import 'package:flutter/material.dart';
-import 'package:irrigasim/app/theme/app_icons.dart';
+import 'package:irrigasim/core/theme/app_icons.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/viewmodels/basin_project_controller.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/irrigation_chart_section.dart';

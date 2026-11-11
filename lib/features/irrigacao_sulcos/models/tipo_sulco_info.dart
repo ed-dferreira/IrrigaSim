@@ -1,7 +1,7 @@
-// Re-export do enum compartilhado (ver shared/irrigacao/models/tipo_sulco.dart).
-import 'package:irrigasim/shared/irrigacao/models/tipo_sulco.dart';
+// Re-export do enum do método de sulcos (ver models/tipo_sulco.dart).
+import 'tipo_sulco.dart';
 
-export 'package:irrigasim/shared/irrigacao/models/tipo_sulco.dart';
+export 'tipo_sulco.dart';
 
 enum FaixaDeclividade { ideal, aconselhavel, usavel, fora, naoInformada }
 

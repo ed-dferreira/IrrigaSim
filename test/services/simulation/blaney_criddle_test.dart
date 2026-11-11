@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/shared/irrigacao/models/comum/clima_demanda.dart';
+import 'package:irrigasim/shared/clima/models/clima_demanda.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/proveniencia_dado.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/entradas_projeto.dart';
-import 'package:irrigasim/shared/irrigacao/services/blaney_criddle.dart';
+import 'package:irrigasim/shared/clima/services/blaney_criddle.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/controlador_parametros_sulco.dart';
 
 void main() {

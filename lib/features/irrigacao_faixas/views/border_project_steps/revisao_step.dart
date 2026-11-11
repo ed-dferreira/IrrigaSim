@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
-import 'package:irrigasim/app/theme/app_icons.dart';
+import 'package:irrigasim/core/theme/app_icons.dart';
 import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
+import 'package:irrigasim/features/irrigacao_faixas/services/faixa_hidraulica.dart';
 import 'package:irrigasim/features/irrigacao_faixas/views/border_project/border_project_fields.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/auditable_widgets.dart';
 
@@ -97,8 +98,11 @@ List<Widget> revisaoStep(BorderProjectFields fields, BorderProject p) => [
             : '${(p.fracaoCortePlanejada! * 100).toStringAsFixed(1)}% de L · bloqueado até haver modelo pós-corte',
       ),
       fields.review(
-        'F02 alternativo',
-        'Bloqueado · ρ1=${fields.format(p.rho1F02)} · ρ2=${fields.format(p.rho2F02)} · Vmax=${fields.format(p.vmaxF02)} ${p.unidadeVmaxF02 ?? ''}',
+        'qmax alternativa (F02)',
+        switch (BorderHydraulics.vazaoMaximaF02DoProjeto(p)) {
+          null => 'Não informada (requer ρ1, ρ2 e Vmax)',
+          final qmax => '${fields.format(qmax)} m³/min/m',
+        },
       ),
       fields.review('Oferta de água', '${fields.format(p.vazaoDisponivelLs)} L/s'),
       fields.review(

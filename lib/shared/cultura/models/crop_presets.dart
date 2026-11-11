@@ -38,21 +38,23 @@ const cropPresets = <CropPreset>[
   CropPreset('Azevém (forragem)', 1.05, .17, .02, 40, .60),
 ];
 
-/// Predefinição que corresponde ao projeto quando nome, Kc, espaçamentos,
-/// raízes e fração ainda coincidem com os valores do preset.
+/// Predefinição que corresponde ao projeto quando nome, Kc, raízes e fração
+/// coincidem com os valores do preset. [rows] e [plants] são opcionais:
+/// quando nulos (métodos sem espaçamento, ex.: arroz em inundação), não
+/// participam da comparação.
 CropPreset? selectedCropPreset({
   required String? cultura,
   required double? kc,
-  required double? rows,
-  required double? plants,
+  double? rows,
+  double? plants,
   required double? roots,
   required double? fraction,
 }) {
   for (final preset in cropPresets) {
     if (preset.name == cultura &&
         preset.kc == kc &&
-        preset.rows == rows &&
-        preset.plants == plants &&
+        (rows == null || preset.rows == rows) &&
+        (plants == null || preset.plants == plants) &&
         preset.roots == roots &&
         preset.fraction == fraction) {
       return preset;

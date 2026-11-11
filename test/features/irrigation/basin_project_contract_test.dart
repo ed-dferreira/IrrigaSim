@@ -2,7 +2,7 @@
 // migração fromLegacy, validação G1/G2/G9 via impedimento e ponte para
 // IrrigationParameters. Espelha furrow_project_contract_test.dart.
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/shared/irrigacao/models/comum/clima_demanda.dart';
+import 'package:irrigasim/shared/clima/models/clima_demanda.dart';
 import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/agronomia_inundacao.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/projeto_inundacao.dart';

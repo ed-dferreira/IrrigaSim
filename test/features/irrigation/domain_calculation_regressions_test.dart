@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/ensaios_sulco.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/geometria_sulco.dart';
-import 'package:irrigasim/shared/irrigacao/models/medicoes_campo.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/services/modelo_curva_avanco.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/services/desempenho_lamina.dart';
@@ -327,10 +327,12 @@ void main() {
           laminaRequerida: 42,
           tempoAvancoMetadeMin: 35,
           tempoAvancoFinalMin: 90,
-          origemCurvaInfiltracao: OrigemCurvaInfiltracao.ensaioEntradaSaida,
+          origemCurvaInfiltracao: OrigemCurvaInfiltracao.ensaioEntradaSaida.name,
           distanciaEnsaioInfiltracaoM: 100,
           espacamentoEnsaioInfiltracaoM: .9,
-          medicoesEntradaSaida: observations,
+          medicoesEntradaSaida: [
+            for (final observacao in observations) observacao.toMap(),
+          ],
         ),
       );
 
@@ -348,7 +350,7 @@ void main() {
     test(
       'measured recession changes local opportunity and rejects negative time',
       () {
-        const base = IrrigationParameters(
+        final base = IrrigationParameters(
           comprimento: 200,
           declividade: .005,
           larguraOuEspacamento: .9,
@@ -360,17 +362,17 @@ void main() {
           laminaRequerida: 42,
           tempoAvancoMetadeMin: 35,
           tempoAvancoFinalMin: 90,
-          hipoteseRecessao: HipoteseRecessao.medidaPorEstaca,
+          hipoteseRecessao: HipoteseRecessao.medidaPorEstaca.name,
           medicoesRecessao: [
-            MedicaoRecessao(distanciaM: 0, instanteRecessaoMin: 230),
-            MedicaoRecessao(distanciaM: 100, instanteRecessaoMin: 245),
-            MedicaoRecessao(distanciaM: 200, instanteRecessaoMin: 270),
+            MedicaoRecessao(distanciaM: 0, instanteRecessaoMin: 230).toMap(),
+            MedicaoRecessao(distanciaM: 100, instanteRecessaoMin: 245).toMap(),
+            MedicaoRecessao(distanciaM: 200, instanteRecessaoMin: 270).toMap(),
           ],
         );
         final measured = SimuladorSulcos()(base);
         final simplified = SimuladorSulcos()(
           base.copyWith(
-            hipoteseRecessao: HipoteseRecessao.desprezada,
+            hipoteseRecessao: HipoteseRecessao.desprezada.name,
             medicoesRecessao: const [],
           ),
         );
@@ -383,9 +385,12 @@ void main() {
         expect(
           () => SimuladorSulcos()(
             base.copyWith(
-              medicoesRecessao: const [
-                MedicaoRecessao(distanciaM: 0, instanteRecessaoMin: 30),
-                MedicaoRecessao(distanciaM: 200, instanteRecessaoMin: 80),
+              medicoesRecessao: [
+                MedicaoRecessao(distanciaM: 0, instanteRecessaoMin: 30).toMap(),
+                MedicaoRecessao(
+                  distanciaM: 200,
+                  instanteRecessaoMin: 80,
+                ).toMap(),
               ],
             ),
           ),
@@ -498,7 +503,7 @@ void main() {
           TipoSulco.sulcos_em_zigue_zague,
         ]) {
           expect(
-            () => SimuladorSulcos()(base.copyWith(tipoSulco: tipo)),
+            () => SimuladorSulcos()(base.copyWith(tipoSulco: tipo.name)),
             throwsFormatException,
             reason: tipo.displayName,
           );

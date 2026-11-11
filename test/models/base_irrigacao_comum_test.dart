@@ -7,7 +7,7 @@ import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/projeto_inundacao.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/ensaios_sulco.dart';
-import 'package:irrigasim/shared/irrigacao/models/medicoes_campo.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/geometria_sulco.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/projeto_sulco.dart';
 import 'package:irrigasim/app/codecs.dart';
@@ -85,7 +85,7 @@ void main() {
   test(
     'cenários de sulcos e inundação compartilham dados sem inventar ensaio',
     () {
-      const p = IrrigationParameters(
+      final p = IrrigationParameters(
         comprimento: 100,
         declividade: .005,
         larguraOuEspacamento: 20,
@@ -95,12 +95,16 @@ void main() {
         vazao: 20,
         tempoAplicacao: 100,
         laminaRequerida: 42,
-        medicoesAvanco: [MedicaoAvanco(distanciaM: 50, tempoMin: 30)],
+        medicoesAvanco: [MedicaoAvanco(distanciaM: 50, tempoMin: 30).toMap()],
         medicoesEntradaSaida: [
-          MedicaoEntradaSaida(tempoMin: 30, vazaoEntradaLs: 2, vazaoSaidaLs: 1),
+          MedicaoEntradaSaida(
+            tempoMin: 30,
+            vazaoEntradaLs: 2,
+            vazaoSaidaLs: 1,
+          ).toMap(),
         ],
         medicoesRecessao: [
-          MedicaoRecessao(distanciaM: 50, instanteRecessaoMin: 120),
+          MedicaoRecessao(distanciaM: 50, instanteRecessaoMin: 120).toMap(),
         ],
       );
       final sulcos = p.baseComumPara(MetodoIrrigacao.sulco);

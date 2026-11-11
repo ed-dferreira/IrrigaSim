@@ -5,21 +5,17 @@
 // seleção de vazão e volumes do arroz).
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:irrigasim/app/router/app_routes.dart';
-import 'package:irrigasim/app/theme/app_icons.dart';
+import 'package:irrigasim/core/theme/app_icons.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/projeto_inundacao.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
 import 'package:irrigasim/shared/irrigacao/models/validacao_superficie.dart';
-import 'package:irrigasim/features/irrigacao_inundacao/services/csv_inundacao.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/viewmodels/basin_project_controller.dart';
 import 'package:irrigasim/features/cenarios/controllers/salvar_cenario_controller.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/terrain/terrain_view.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/auditable_widgets.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/irrigation_project_components.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/irrigation_feedback.dart';
-import 'package:irrigasim/shared/irrigacao/widgets/irrigation_export.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/irrigation_states.dart';
 
 import 'basin_results/basin_results_charts.dart';
@@ -56,30 +52,10 @@ class BasinResultsScreen extends ConsumerWidget {
     }
     final r = result;
     final status = project.impedimento?.status ?? BorderStatus.validoNoModelo;
-    final comparison = projectOverride == null
-        ? ref.watch(basinScenarioComparisonProvider)
-        : null;
     final save = ref.watch(resultsProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Resultado de inundação'),
-        actions: [
-          IconButton(
-            tooltip: 'Referência — Aula 8',
-            onPressed: () => context.push(AppRoutes.inundacaoReferencia),
-            icon: const Icon(AppIcons.guiaDidatico),
-          ),
-          IconButton(
-            tooltip: 'Exportar CSV',
-            onPressed: () => showIrrigationExportSheet(
-              context,
-              title: 'Prévia do CSV da inundação',
-              description: '',
-              csv: csvInundacao(project, r),
-            ),
-            icon: const Icon(AppIcons.exportarDados),
-          ),
-        ],
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 48),
@@ -96,7 +72,7 @@ class BasinResultsScreen extends ConsumerWidget {
                     result: r,
                   ),
                   const SizedBox(height: IrrigationSpacing.major),
-                  BasinCharts(result: r, comparison: comparison),
+                  BasinCharts(result: r),
                   const SizedBox(height: IrrigationSpacing.major),
                   TerrainView(
                     comprimentoM:
@@ -108,13 +84,7 @@ class BasinResultsScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: IrrigationSpacing.major),
                   BasinKpis(project: project, result: r),
-                  ...secoesResultadoBasin(
-                    context: context,
-                    ref: ref,
-                    podeCompararCenarios: projectOverride == null,
-                    project: project,
-                    r: r,
-                  ),
+                  ...secoesResultadoBasin(project: project, r: r),
                   IrrigationAuditSection(
                     title: 'Salvar este projeto',
                     icon: AppIcons.salvarCenario,

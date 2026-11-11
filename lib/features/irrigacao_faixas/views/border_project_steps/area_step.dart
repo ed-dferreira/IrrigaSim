@@ -5,15 +5,12 @@ import 'package:irrigasim/features/irrigacao_faixas/views/border_project/border_
 import 'package:irrigasim/shared/irrigacao/widgets/auditable_widgets.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/irrigation_forms.dart';
 
-/// Etapa 1: dados da gleba e levantamento topográfico.
+/// Etapa 1: levantamento topográfico.
 List<Widget> areaStep(
   BorderProjectFields fields,
   BorderProject p,
   String? erroPerfil,
 ) => [
-  const Text(
-    'Dados da gleba e levantamento topográfico. O declive longitudinal conduz o avanço; o transversal precisa ser pequeno para manter a lâmina distribuída na faixa (Aula 7, pp. 12–14).',
-  ),
   fields.number(
     'comprimentoAreaM',
     'Comprimento da área',

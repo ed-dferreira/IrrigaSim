@@ -6,7 +6,7 @@ import 'package:irrigasim/shared/irrigacao/widgets/irrigation_forms.dart';
 /// Etapa 2: dimensões da faixa e condição de jusante.
 List<Widget> dimensoesStep(BorderProjectFields fields, BorderProject p) => [
   const Text(
-    'Defina o comprimento e a largura das faixas dentro da gleba. Referências usuais: L de 50–400 m e W de 4–20 m (Aula 7, pp. 18–19).',
+    'Defina o comprimento e a largura das faixas dentro da gleba. Referências usuais: L de 50–400 m e W de 4–20 m.',
   ),
   fields.number('comprimentoM', 'Comprimento da faixa (L)', p.comprimentoM, 'm'),
   fields.number('larguraM', 'Largura da faixa (W)', p.larguraM, 'm'),

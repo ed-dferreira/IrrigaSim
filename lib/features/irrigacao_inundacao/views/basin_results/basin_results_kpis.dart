@@ -2,8 +2,8 @@
 // `border_results_kpis.dart`. Os itens preservam os rótulos da tela original
 // e o acento usa a cor da paleta de inundação.
 import 'package:flutter/material.dart';
-import 'package:irrigasim/app/theme/app_icons.dart';
-import 'package:irrigasim/app/theme/app_colors.dart';
+import 'package:irrigasim/core/theme/app_icons.dart';
+import 'package:irrigasim/core/theme/app_colors.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/projeto_inundacao.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';

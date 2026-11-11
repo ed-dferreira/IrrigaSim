@@ -1,18 +1,18 @@
 import 'dart:math' as math;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:irrigasim/shared/irrigacao/models/comum/clima_demanda.dart';
+import 'package:irrigasim/shared/clima/models/clima_demanda.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/proveniencia_dado.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/tipo_sulco_info.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/coordenador_simulacao_sulcos.dart';
 import 'package:irrigasim/shared/irrigacao/services/lamina_requerida.dart';
-import 'package:irrigasim/shared/irrigacao/services/blaney_criddle.dart';
+import 'package:irrigasim/shared/clima/services/blaney_criddle.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/services/manejo_vazao.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/ensaios_sulco.dart'
     show PontoEnsaioAvanco;
-import 'package:irrigasim/shared/irrigacao/models/medicoes_campo.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/curva_infiltracao.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/services/modelo_curva_avanco.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/estado_parametros_sulco.dart';
@@ -206,7 +206,7 @@ class ControladorParametrosSulco extends StateNotifier<EstadoParametrosSulco> {
         (params.comprimento > 0
             ? params.tempoAvancoFinalMin / math.pow(params.comprimento, bAvanco)
             : 0.0659064448778603);
-    final pontosAvanco = params.medicoesAvanco
+    final pontosAvanco = params.medicoesAvancoResolvidas
         .map(
           (point) => PontoEnsaioAvanco(
             distanciaM: point.distanciaM,
@@ -296,7 +296,7 @@ class ControladorParametrosSulco extends StateNotifier<EstadoParametrosSulco> {
         manningN: params.manningN,
         sigmaZ: params.sigmaZ,
         texturaSolo: params.texturaSolo,
-        tipoSulco: params.tipoSulco,
+        tipoSulco: TipoSulco.deNome(params.tipoSulco),
         tempoAvancoMetadeMin: params.tempoAvancoMetadeMin,
         tempoAvancoFinalMin: params.tempoAvancoFinalMin,
         coeficienteAvancoKInformado: kAvanco,
@@ -323,14 +323,14 @@ class ControladorParametrosSulco extends StateNotifier<EstadoParametrosSulco> {
         espacamentoPlantasM: params.espacamentoPlantasM,
         larguraSulcoM: params.larguraSulcoM,
         profundidadeSulcoM: params.profundidadeSulcoM,
-        origemCurvaInfiltracao: params.origemCurvaInfiltracao,
+        origemCurvaInfiltracao: params.origemCurvaInfiltracaoResolvida,
         distanciaEnsaioInfiltracaoM: params.distanciaEnsaioInfiltracaoM,
         espacamentoEnsaioInfiltracaoM: params.espacamentoEnsaioInfiltracaoM,
-        medicoesEntradaSaida: params.medicoesEntradaSaida,
-        hipoteseRecessao: params.hipoteseRecessao,
-        medicoesRecessao: params.medicoesRecessao,
+        medicoesEntradaSaida: params.medicoesEntradaSaidaResolvidas,
+        hipoteseRecessao: params.hipoteseRecessaoResolvida,
+        medicoesRecessao: params.medicoesRecessaoResolvidas,
         pontosEnsaioAvanco: pontosAvanco,
-        metodoCurvaAvanco: params.metodoCurvaAvanco,
+        metodoCurvaAvanco: params.metodoCurvaAvancoResolvido,
         origemAvanco: params.usarEnsaioAvanco
             ? OrigemAvanco.ensaio
             : OrigemAvanco.estimativa,
@@ -338,7 +338,7 @@ class ControladorParametrosSulco extends StateNotifier<EstadoParametrosSulco> {
         fator11Vib: params.fator11Vib,
         vazaoEnsaioAvancoLs: params.vazaoEnsaioAvancoLs,
         condicoesEnsaioAvanco: params.condicoesEnsaioAvanco ?? '',
-        ensaioErosao: params.ensaioErosao,
+        ensaioErosao: params.ensaioErosaoResolvido,
         limparEnsaioErosao: params.ensaioErosao == null,
       ),
     );

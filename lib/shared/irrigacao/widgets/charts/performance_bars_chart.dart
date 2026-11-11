@@ -1,6 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:irrigasim/app/theme/app_colors.dart';
+import 'package:irrigasim/core/theme/app_colors.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
 
 class PerformanceBarsChart extends StatelessWidget {

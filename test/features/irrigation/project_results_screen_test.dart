@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/app/theme/app_theme.dart';
 import 'package:irrigasim/features/cenarios/models/cenario_salvo.dart';
-import 'package:irrigasim/shared/irrigacao/models/medicoes_campo.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/ensaios_sulco.dart';
 import 'package:irrigasim/features/cenarios/persistence/local_scenario_store.dart';
 import 'package:irrigasim/features/cenarios/services/scenario_service.dart';
@@ -19,9 +19,7 @@ void main() {
 
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets(
-    'mostra resultados agrupados e exporta operação e séries com CSV consistente',
-    (tester) async {
+  testWidgets('mostra resultados agrupados', (tester) async {
       tester.view.physicalSize = const Size(1100, 1800);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
@@ -80,23 +78,6 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Planejamento operacional por parcela'), findsOneWidget);
       expect(tester.takeException(), isNull);
-
-      await tester.tap(find.byTooltip('Exportar dados'));
-      await tester.pumpAndSettle();
-      final csvWidget = tester.widget<SelectableText>(
-        find.byType(SelectableText),
-      );
-      final csv = csvWidget.data!;
-      expect(csv, contains('planejamento operacional'));
-      expect(csv, contains('tempo entre parcelas'));
-      expect(csv, contains('entrada;origem avanço;ensaio;'));
-      expect(csv, contains('Coeficiente acumulado ajustado'));
-      expect(csv, contains('série avanço'));
-      expect(csv, contains('ensaio avanço'));
-      expect(
-        csv.split('\n').every((row) => row.split(';').length == 4),
-        isTrue,
-      );
     },
   );
 

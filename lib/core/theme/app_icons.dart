@@ -68,6 +68,7 @@ class AppIcons {
   static const oportunidade = Icons.timer_rounded;
 
   // ==================== HISTÓRICO DE CENÁRIOS ====================
+  static const importarCenario = Icons.upload_file_rounded;
   static const novoCenario = Icons.add_rounded;
   static const criarNovaSimulacao = Icons.add_circle_rounded;
   static const dataSalvamento = Icons.calendar_today_rounded;

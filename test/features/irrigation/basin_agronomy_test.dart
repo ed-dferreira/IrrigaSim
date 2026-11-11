@@ -3,7 +3,7 @@
 // pelo método escolhido, precedência informada > calculada (G14) e carga de
 // cenários v1 sem fabricar dado ausente (G4).
 import 'package:flutter_test/flutter_test.dart';
-import 'package:irrigasim/shared/irrigacao/models/comum/clima_demanda.dart';
+import 'package:irrigasim/shared/clima/models/clima_demanda.dart';
 import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/agronomia_inundacao.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/projeto_inundacao.dart';

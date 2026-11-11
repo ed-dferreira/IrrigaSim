@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:irrigasim/app/theme/app_icons.dart';
+import 'package:irrigasim/core/theme/app_icons.dart';
 import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
 import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
 import 'package:irrigasim/features/irrigacao_faixas/services/faixa_planejamento.dart';
-import 'package:irrigasim/features/irrigacao_faixas/services/faixa_csv.dart';
+import 'package:irrigasim/features/cenarios/services/faixa_csv.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/terrain/terrain_view.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/auditable_widgets.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/irrigation_project_components.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/irrigation_feedback.dart';
-import 'package:irrigasim/shared/irrigacao/widgets/irrigation_export.dart';
+import 'package:irrigasim/features/irrigacao_faixas/views/widgets/irrigation_export.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/irrigation_states.dart';
 
 import 'border_charts.dart';

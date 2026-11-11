@@ -3,7 +3,7 @@
 // checagem operacional G3. Usado na revisão do projeto e na tela de
 // resultado, com a página da fonte visível em cada seção e nas linhas.
 import 'package:flutter/material.dart';
-import 'package:irrigasim/app/theme/app_icons.dart';
+import 'package:irrigasim/core/theme/app_icons.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/projeto_inundacao.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/services/planejamento_inundacao.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/services/tabelas_referencia_inundacao.dart';

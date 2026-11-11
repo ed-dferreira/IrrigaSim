@@ -3,11 +3,11 @@
 // CenarioSalvo e o exportarJson. Espelha border_persistence_test.dart.
 import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/features/cenarios/models/cenario_salvo.dart';
-import 'package:irrigasim/shared/irrigacao/models/comum/clima_demanda.dart';
+import 'package:irrigasim/shared/clima/models/clima_demanda.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/anexos_inundacao.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/projeto_inundacao.dart';
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
-import 'package:irrigasim/shared/irrigacao/models/simulation_result_model.dart';
+import 'package:irrigasim/features/cenarios/models/simulation_result_model.dart';
 import 'package:irrigasim/features/cenarios/services/project_store.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/viewmodels/basin_simulation_coordinator.dart';
 import 'package:irrigasim/app/codecs.dart';

@@ -1,5 +1,5 @@
 import 'package:irrigasim/shared/irrigacao/models/irrigation_parameters.dart';
-import 'package:irrigasim/shared/irrigacao/models/medicoes_campo.dart';
+import 'package:irrigasim/features/irrigacao_sulcos/models/medicoes_campo.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/viewmodels/estado_parametros_sulco.dart';
 import 'package:irrigasim/features/irrigacao_sulcos/models/indicadores_balanco.dart';

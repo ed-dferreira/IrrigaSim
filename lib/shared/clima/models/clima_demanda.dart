@@ -1,5 +1,6 @@
 // Enums climáticos compartilhados entre os métodos de irrigação superficial
-// (sulcos, faixas e inundação). Foram extraídos de
+// (sulcos, faixas e inundação). Residem em lib/shared/clima/ por serem conceitos
+// agronômicos independentes do método de irrigação. Foram extraídos de
 // lib/models/sulcos/entradas_projeto_sulco.dart mantendo os mesmos nomes de
 // valor e a serialização por `.name`, de modo que nenhum dado persistido
 // mude de significado (os typedefs de compatibilidade ficam em

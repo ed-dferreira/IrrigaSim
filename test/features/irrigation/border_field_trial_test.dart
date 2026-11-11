@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/features/irrigacao_faixas/models/faixa_medicoes.dart';
 import 'package:irrigasim/features/irrigacao_faixas/models/faixa_projeto.dart';
 import 'package:irrigasim/features/irrigacao_faixas/models/faixa_resultado.dart';
-import 'package:irrigasim/features/irrigacao_faixas/services/faixa_csv.dart';
+import 'package:irrigasim/features/cenarios/services/faixa_csv.dart';
 import 'package:irrigasim/features/irrigacao_faixas/services/faixa_ensaio_campo.dart';
 
 void main() {

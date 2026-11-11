@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:irrigasim/app/theme/app_icons.dart';
+import 'package:irrigasim/core/theme/app_icons.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/projeto_inundacao.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/services/nucleo_referencia_inundacao.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/services/planejamento_inundacao.dart';
@@ -84,17 +84,6 @@ List<Widget> operacaoStep(
       },
     ),
     ..._vazaoUnidadesFields(fields, project),
-    const IrrigationFormulaCard(
-      description:
-          'Tempo por parcela e número de parcelas diárias; ti vem '
-          'da dimensão e tm é a mudança de parcela acima.',
-    ),
-    const IrrigationFormulaCard(
-      description:
-          'Área por parcela no período de atendimento; a simulação '
-          'anexa também o total de mudanças e a soma das vazões '
-          'por turno.',
-    ),
     ..._g12AvisoFields(fields, project),
     ..._selecaoCandidatasFields(fields, project),
   ],
@@ -115,8 +104,8 @@ List<Widget> _g12AvisoFields(
       'Intervalo × turno de rega',
       '$intervalo dias vs ${fields.format(tr, casas: 1)} dias',
       detail:
-          'O intervalo programado é menor que o turno de rega pela IRN; o '
-          'mínimo recomendado é IRN/(ETc − Pef).',
+          'O intervalo programado é menor que o turno de rega pela IRN; '
+          'o recomendado é que o intervalo cubra o turno de rega.',
       isWarning: true,
     ),
   ];
@@ -221,30 +210,11 @@ List<Widget> _vazaoUnidadesFields(
   ProjetoInundacao project,
 ) {
   final aplicada = project.vazaoAplicadaLs;
-  final maxima = project.q0MaxLsTotal;
-  final largura = project.larguraM;
-  final q0Unit = aplicada == null || largura == null || largura <= 0
-      ? null
-      : aplicada * 60 / 1000 / largura;
-  final q0MaxUnit = maxima == null || largura == null || largura <= 0
-      ? null
-      : maxima * 60 / 1000 / largura;
   final disponivel = project.vazaoDisponivelLps;
   final saldo = aplicada == null || disponivel == null
       ? null
       : disponivel - aplicada;
   return [
-    if (q0Unit != null && q0MaxUnit != null)
-      IrrigationFormulaCard(
-        formula:
-            'Q0 = ${fields.format(q0Unit, casas: 4)} m³/(min·m) · '
-            'Q0max = ${fields.format(q0MaxUnit, casas: 4)} m³/(min·m)',
-        description:
-            'Totais: ${fields.format(aplicada, casas: 1)} L/s aplicados e '
-            '${fields.format(maxima, casas: 1)} L/s não erosivos. '
-            'Hidráulica calculada por unidade de largura.',
-      ),
-    ..._y0Fields(fields, project),
     if (saldo != null)
       IrrigationAuditRow(
         'Saldo de vazão (disponível − aplicada)',
@@ -255,34 +225,6 @@ List<Widget> _vazaoUnidadesFields(
         isWarning: saldo < 0,
       ),
   ];
-}
-
-/// Profundidade normal na entrada y0 (G11, p. 54) pela mesma vazão
-/// aplicada; null quando falta geometria ou a lei de avanço rejeita.
-List<Widget> _y0Fields(BasinProjectFields fields, ProjetoInundacao project) {
-  final aplicada = project.vazaoAplicadaLs;
-  final largura = project.larguraM;
-  final n = project.rugosidadeN;
-  final l = project.comprimentoM;
-  final q0Unit = aplicada == null || largura == null || largura <= 0
-      ? null
-      : aplicada * 60 / 1000 / largura;
-  if (q0Unit == null || n == null || l == null) return const [];
-  try {
-    final y0 = profundidadeEntrada(q0Unit, n, l);
-    return [
-      IrrigationFormulaCard(
-        formula:
-            'y0 = ${fields.format(y0, casas: 4)} m (profundidade normal na '
-            'entrada)',
-        description:
-            'A profundidade avança pela lei de avanço da vazão aplicada; o '
-            'cálculo é por unidade de largura.',
-      ),
-    ];
-  } on ArgumentError {
-    return const [];
-  }
 }
 
 /// Status da checagem operacional obrigatória (G3) para o projeto atual;
