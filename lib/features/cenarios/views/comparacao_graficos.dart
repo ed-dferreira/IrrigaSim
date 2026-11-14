@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'package:irrigasim/core/theme/app_icons.dart';
 import 'package:irrigasim/features/cenarios/models/cenario_salvo.dart';

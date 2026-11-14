@@ -3,7 +3,7 @@
 // gráficos genéricos, seções auditáveis, exportação CSV e salvamento de
 // cenário, com anexos exclusivos do regime (planejamento em parcelas,
 // seleção de vazão e volumes do arroz).
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:irrigasim/core/theme/app_icons.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/projeto_inundacao.dart';

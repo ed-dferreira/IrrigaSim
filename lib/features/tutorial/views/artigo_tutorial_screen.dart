@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:irrigasim/app/router/app_routes.dart';
 import 'package:irrigasim/core/theme/app_icons.dart';

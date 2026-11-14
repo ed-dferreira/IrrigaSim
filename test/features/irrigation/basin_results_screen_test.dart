@@ -3,7 +3,7 @@
 // informado" para entrada ausente, "Não calculado" para derivado ausente e
 // "Não aplicável" para o que não vale no regime (G4/G8); IRN informada e
 // calculada coexistem sem sobrescrever (G14).
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/projeto_inundacao.dart';

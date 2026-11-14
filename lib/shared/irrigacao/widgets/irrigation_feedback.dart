@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Tom semântico dos banners do design system de irrigação.
 enum IrrigationBannerTone { success, warning, error, info }

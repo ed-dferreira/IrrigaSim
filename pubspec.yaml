@@ -11,7 +11,9 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # UI
   cupertino_icons: ^1.0.8
+  material_ui: ^1.11.0
 
   # State Management
   flutter_riverpod: ^2.6.1

@@ -9,7 +9,7 @@
 // Este arquivo é o orquestrador do wizard: estado das etapas, carregamento
 // de cenário, navegação e cálculo. O conteúdo de cada etapa fica em
 // basin_project_steps/ e os helpers de formulário em basin_project/.
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:irrigasim/app/router/app_routes.dart';

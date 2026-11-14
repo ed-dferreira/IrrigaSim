@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/core/widgets/kpi_card.dart';
 import 'package:irrigasim/shared/irrigacao/widgets/irrigation_kpi.dart';

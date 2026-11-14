@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Valor calculado pela aplicação — exibição somente leitura.
 class CalculatedField extends StatelessWidget {

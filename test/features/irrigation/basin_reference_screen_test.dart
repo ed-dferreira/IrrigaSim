@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/views/basin_reference_screen.dart';
@@ -41,6 +41,8 @@ void main() {
       ExtensionSet.gitHubFlavored,
       reason: 'tabelas da aula precisam ser renderizadas',
     );
-    expect(find.byType(SelectableText), findsWidgets);
+    // `flutter_markdown` ainda renderiza `SelectableText` do Material do SDK,
+    // então verificamos o `EditableText` (compartilhado) que ele constrói.
+    expect(find.byType(EditableText), findsWidgets);
   });
 }

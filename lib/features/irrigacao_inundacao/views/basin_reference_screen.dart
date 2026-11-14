@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:irrigasim/core/theme/app_icons.dart';
@@ -6,6 +6,66 @@ import 'package:markdown/markdown.dart' show ExtensionSet;
 
 const assetResumoInundacao =
     'docs/Pacote_Inundacao/Resumo_irrigacao_por_inundacao.md';
+
+/// Equivalente a `MarkdownStyleSheet.fromTheme`, mas construído a partir do
+/// `ThemeData` do `material_ui`. O `flutter_markdown` ainda usa os tipos do
+/// Material do SDK, então não é possível passar o tema da aplicação direto.
+MarkdownStyleSheet _estiloMarkdown(ThemeData theme) {
+  final corpo = theme.textTheme.bodyMedium ?? const TextStyle(fontSize: 14);
+  return MarkdownStyleSheet(
+    a: const TextStyle(color: Colors.blue),
+    p: corpo,
+    pPadding: EdgeInsets.zero,
+    code: corpo.copyWith(
+      backgroundColor: theme.cardTheme.color,
+      fontFamily: 'monospace',
+      fontSize: (corpo.fontSize ?? 14) * 0.85,
+    ),
+    h1: theme.textTheme.headlineSmall,
+    h1Padding: EdgeInsets.zero,
+    h2: theme.textTheme.titleLarge,
+    h2Padding: EdgeInsets.zero,
+    h3: theme.textTheme.titleMedium,
+    h3Padding: EdgeInsets.zero,
+    h4: theme.textTheme.bodyLarge,
+    h4Padding: EdgeInsets.zero,
+    h5: theme.textTheme.bodyLarge,
+    h5Padding: EdgeInsets.zero,
+    h6: theme.textTheme.bodyLarge,
+    h6Padding: EdgeInsets.zero,
+    em: const TextStyle(fontStyle: FontStyle.italic),
+    strong: const TextStyle(fontWeight: FontWeight.bold),
+    del: const TextStyle(decoration: TextDecoration.lineThrough),
+    blockquote: corpo,
+    img: corpo,
+    checkbox: corpo.copyWith(color: theme.colorScheme.primary),
+    blockSpacing: 8,
+    listIndent: 24,
+    listBullet: corpo,
+    listBulletPadding: const EdgeInsets.only(right: 4),
+    tableHead: const TextStyle(fontWeight: FontWeight.w600),
+    tableBody: corpo,
+    tableHeadAlign: TextAlign.center,
+    tablePadding: const EdgeInsets.only(bottom: 4),
+    tableBorder: TableBorder.all(color: theme.dividerColor),
+    tableColumnWidth: const FlexColumnWidth(),
+    tableCellsPadding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+    tableCellsDecoration: const BoxDecoration(),
+    blockquotePadding: const EdgeInsets.all(8),
+    blockquoteDecoration: BoxDecoration(
+      color: Colors.blue.shade100,
+      borderRadius: BorderRadius.circular(2),
+    ),
+    codeblockPadding: const EdgeInsets.all(8),
+    codeblockDecoration: BoxDecoration(
+      color: theme.cardTheme.color ?? theme.colorScheme.surface,
+      borderRadius: BorderRadius.circular(2),
+    ),
+    horizontalRuleDecoration: BoxDecoration(
+      border: Border(top: BorderSide(width: 5, color: theme.dividerColor)),
+    ),
+  );
+}
 
 class BasinReferenceScreen extends StatefulWidget {
   const BasinReferenceScreen({super.key});
@@ -124,8 +184,7 @@ class _BasinReferenceScreenState extends State<BasinReferenceScreen> {
                 selectable: true,
                 extensionSet: ExtensionSet.gitHubFlavored,
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 48),
-                styleSheet: MarkdownStyleSheet.fromTheme(theme)
-                    .copyWith(p: theme.textTheme.bodyMedium),
+                styleSheet: _estiloMarkdown(theme),
               ),
             ),
           );
