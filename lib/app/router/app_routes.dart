@@ -5,7 +5,6 @@
 /// nem testes durante a migração para arquitetura por features.
 abstract final class AppRoutes {
   static const home = '/home';
-  static const guiada = '/home/tutorial';
 
   static const irrigacao = '/home/irrigation';
   static const sulcosTipo = '/home/irrigation/tipo-sulco';
@@ -21,6 +20,7 @@ abstract final class AppRoutes {
 
   static const cenarios = '/cenarios';
   static const perfil = '/perfil';
+  static const tutorial = '/perfil/tutorial';
 
   /// Query param usado para abrir um cenário salvo diretamente na tela de
   /// projeto da feature responsável pelo método.

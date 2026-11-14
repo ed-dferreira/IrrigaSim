@@ -6,7 +6,7 @@ import 'views/tipo_sulco_screen.dart';
 
 /// Rotas da feature de irrigação por sulcos.
 ///
-/// São subrotas do fluxo guiado (`/home`), portanto os caminhos são
+/// São subrotas da Home (`/home`), portanto os caminhos são
 /// relativos; o composition root (`app/router/app_router.dart`) as injeta
 /// via `children` para preservar os deep links existentes.
 final sulcosRoutes = <RouteBase>[

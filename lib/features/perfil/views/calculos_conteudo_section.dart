@@ -5,11 +5,35 @@ import '../models/calculos_simulacao.dart';
 
 /// Seção informativa da tela de perfil: lista os cálculos expostos na
 /// interface, agrupados pelos três métodos de irrigação e pela base comum.
+///
+/// Com [expansivel] (padrão), cada método é um card que abre individualmente.
+/// Sem ele, todo o conteúdo é renderizado de uma vez, para ficar dentro de um
+/// único card expansível.
 class CalculosConteudoSection extends StatelessWidget {
-  const CalculosConteudoSection({super.key});
+  final bool expansivel;
+
+  const CalculosConteudoSection({super.key, this.expansivel = true});
 
   @override
   Widget build(BuildContext context) {
+    if (!expansivel) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final (index, modulo) in CalculosSimulacao.modulos.indexed) ...[
+            if (index > 0) const SizedBox(height: 22),
+            _ModuloHeader(metodo: modulo.metodo, icone: _icone(modulo.metodo)),
+            const SizedBox(height: 10),
+            for (final calculo in modulo.calculos)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: _CalculoRow(calculo: calculo),
+              ),
+          ],
+        ],
+      );
+    }
+
     final colors = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
     return Column(
@@ -66,6 +90,39 @@ class CalculosConteudoSection extends StatelessWidget {
     'Inundação' => AppIcons.inundacao,
     _ => Icons.calculate_outlined,
   };
+}
+
+class _ModuloHeader extends StatelessWidget {
+  final String metodo;
+  final IconData icone;
+
+  const _ModuloHeader({required this.metodo, required this.icone});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    return Row(
+      children: [
+        Container(
+          width: 38,
+          height: 38,
+          decoration: BoxDecoration(
+            color: colors.primaryContainer,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icone, color: colors.onPrimaryContainer, size: 20),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            metodo,
+            style: text.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 class _CalculoRow extends StatelessWidget {

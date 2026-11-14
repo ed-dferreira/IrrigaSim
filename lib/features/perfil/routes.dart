@@ -3,9 +3,14 @@ import 'package:irrigasim/app/router/app_routes.dart';
 
 import 'views/perfil_screen.dart';
 
-final perfilRoutes = <RouteBase>[
-  GoRoute(
+/// Rota do Perfil.
+///
+/// O composition root injeta as rotas filhas, como o tutorial, sem que esta
+/// feature precise importá-las.
+GoRoute perfilRoute({List<RouteBase> children = const []}) {
+  return GoRoute(
     path: AppRoutes.perfil,
     builder: (context, state) => const PerfilScreen(),
-  ),
-];
+    routes: children,
+  );
+}

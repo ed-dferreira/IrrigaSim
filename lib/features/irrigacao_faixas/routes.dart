@@ -5,7 +5,7 @@ import 'views/border_results_screen.dart';
 
 /// Rotas da feature de irrigação por faixas.
 ///
-/// São subrotas do fluxo guiado (`/home`), portanto os caminhos são
+/// São subrotas da Home (`/home`), portanto os caminhos são
 /// relativos; o composition root (`app/router/app_router.dart`) as injeta
 /// via `children` para preservar os deep links existentes.
 final faixasRoutes = <RouteBase>[
