@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'package:irrigasim/features/cenarios/models/cenario_salvo.dart';
 import 'package:irrigasim/features/cenarios/views/comparacao_graficos.dart';

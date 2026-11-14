@@ -1,7 +1,7 @@
 // Wizard de inundação (revisão das Fases 0–6): as etapas 1–8 distribuem os
 // campos do plano, o campo calculado I(t) reage ao tempo de contato e a
 // revisão traz o painel didático (pp. 16, 17 e 38) com G3.
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/services/nucleo_referencia_inundacao.dart';

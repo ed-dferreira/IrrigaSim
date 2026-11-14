@@ -1,6 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:irrigasim/app/router/app_routes.dart';
 import 'package:irrigasim/core/theme/app_icons.dart';
+import 'package:irrigasim/features/cenarios/providers/scenario_providers.dart';
+import 'package:irrigasim/features/cenarios/services/resumo_cenarios.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../models/tamanho_fonte.dart';
@@ -18,6 +22,8 @@ class PerfilScreen extends ConsumerWidget {
     final viewModel = ref.read(perfilProvider.notifier);
     final colors = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
+    final cenarios = ref.watch(cenariosProvider).valueOrNull;
+    final resumo = resumirCenarios(cenarios ?? const []);
 
     return Scaffold(
       body: SafeArea(
@@ -35,7 +41,7 @@ class PerfilScreen extends ConsumerWidget {
                       Semantics(
                         header: true,
                         child: Text(
-                          'Perfil e preferências',
+                          'Perfil e configurações',
                           style: text.headlineSmall?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
@@ -43,7 +49,7 @@ class PerfilScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Gerencie seus dados e adapte o IrrigaSim ao seu jeito.',
+                        'Gerencie seus dados, ajuste o app e consulte os cálculos.',
                         style: text.bodyLarge?.copyWith(
                           color: colors.onSurfaceVariant,
                         ),
@@ -59,70 +65,88 @@ class PerfilScreen extends ConsumerWidget {
                         viewModel: viewModel,
                       ),
                       const SizedBox(height: 16),
-                      _StatisticsGrid(profile: profile),
+                      _StatisticsGrid(
+                        totalSimulacoes: resumo.total,
+                        metodoFavorito: resumo.metodoMaisUsado?.nomeNoPerfil,
+                      ),
+                      const SizedBox(height: 16),
+                      const _TutorialCard(),
                       const SizedBox(height: 28),
-                      Semantics(
-                        header: true,
-                        child: Text(
-                          'Preferências',
-                          style: text.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
+                      const _SectionHeader(title: 'Configurações'),
                       const SizedBox(height: 12),
-                      LayoutBuilder(
-                        builder: (context, inner) {
-                          final preferences = _PreferencesCard(
-                            profile: profile,
-                            viewModel: viewModel,
-                          );
-                          final about = _AboutCard();
-                          if (inner.maxWidth < 820) {
-                            return Column(
-                              children: [
-                                preferences,
-                                const SizedBox(height: 16),
-                                about,
-                              ],
-                            );
-                          }
-                          return Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(flex: 3, child: preferences),
-                              const SizedBox(width: 16),
-                              Expanded(flex: 2, child: about),
-                            ],
-                          );
-                        },
-                      ),
+                      _PreferencesCard(profile: profile, viewModel: viewModel),
                       const SizedBox(height: 28),
-                      Semantics(
-                        header: true,
-                        child: Text(
-                          'Cálculos',
-                          style: text.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Quais cálculos cada módulo de irrigação aplica na '
-                        'interface.',
-                        style: text.bodyMedium?.copyWith(
-                          color: colors.onSurfaceVariant,
-                        ),
-                      ),
+                      const _SectionHeader(title: 'Sobre'),
                       const SizedBox(height: 12),
-                      const CalculosConteudoSection(),
+                      const _AboutCard(),
+                      const SizedBox(height: 28),
+                      const _CalculosCard(),
                     ],
                   ),
                 ),
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  final String title;
+
+  const _SectionHeader({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    return Semantics(
+      header: true,
+      child: Text(
+        title,
+        style: text.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+      ),
+    );
+  }
+}
+
+class _CalculosCard extends StatelessWidget {
+  const _CalculosCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          leading: Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: colors.primaryContainer,
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Icon(
+              AppIcons.projetoCalcular,
+              color: colors.onPrimaryContainer,
+            ),
+          ),
+          title: Text(
+            'Cálculos',
+            style: text.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          subtitle: Text(
+            'Quais cálculos cada módulo de irrigação aplica na interface.',
+            style: text.bodyMedium?.copyWith(color: colors.onSurfaceVariant),
+          ),
+          iconColor: colors.onSurfaceVariant,
+          collapsedIconColor: colors.onSurfaceVariant,
+          childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          children: const [CalculosConteudoSection(expansivel: false)],
         ),
       ),
     );
@@ -373,8 +397,14 @@ class _UserAvatar extends StatelessWidget {
 }
 
 class _StatisticsGrid extends StatelessWidget {
-  final PerfilState profile;
-  const _StatisticsGrid({required this.profile});
+  final int totalSimulacoes;
+  final String? metodoFavorito;
+
+  const _StatisticsGrid({
+    required this.totalSimulacoes,
+    required this.metodoFavorito,
+  });
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -385,7 +415,7 @@ class _StatisticsGrid extends StatelessWidget {
             : constraints.maxWidth;
         return Semantics(
           label:
-              '${profile.totalSimulacoes} simulações salvas. Método favorito: ${profile.metodoFavorito ?? 'ainda não definido'}',
+              '$totalSimulacoes simulações salvas. Método favorito: ${metodoFavorito ?? 'ainda não definido'}',
           child: Wrap(
             spacing: 12,
             runSpacing: 12,
@@ -393,7 +423,7 @@ class _StatisticsGrid extends StatelessWidget {
               SizedBox(
                 width: width,
                 child: _StatCard(
-                  value: profile.totalSimulacoes.toString(),
+                  value: totalSimulacoes.toString(),
                   label: 'Simulações salvas',
                   icon: AppIcons.estatisticas,
                   primary: true,
@@ -402,7 +432,7 @@ class _StatisticsGrid extends StatelessWidget {
               SizedBox(
                 width: width,
                 child: _StatCard(
-                  value: profile.metodoFavorito ?? '—',
+                  value: metodoFavorito ?? '—',
                   label: 'Método favorito',
                   icon: AppIcons.simulations,
                   primary: false,
@@ -471,6 +501,79 @@ class _StatCard extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TutorialCard extends StatelessWidget {
+  const _TutorialCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+
+    final content = Row(
+      children: [
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: colors.primaryContainer,
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Icon(AppIcons.guiaDidatico, color: colors.onPrimaryContainer),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Tutorial e ajuda',
+                style: text.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Aprenda a operar o IrrigaSIM e consulte quando precisar.',
+                style: text.bodyMedium?.copyWith(
+                  color: colors.onSurfaceVariant,
+                  height: 1.35,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+
+    final button = FilledButton.icon(
+      onPressed: () => context.push(AppRoutes.tutorial),
+      icon: const Icon(AppIcons.guiaDidatico),
+      label: const Text('Abrir tutorial'),
+    );
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            if (constraints.maxWidth < 560) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [content, const SizedBox(height: 16), button],
+              );
+            }
+            return Row(
+              children: [
+                Expanded(child: content),
+                const SizedBox(width: 20),
+                button,
+              ],
+            );
+          },
         ),
       ),
     );
@@ -652,8 +755,10 @@ class _FontSizeControl extends StatelessWidget {
             onChanged: (next) =>
                 onChanged(options[next.round().clamp(0, options.length - 1)]),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            spacing: 12,
+            runSpacing: 4,
             children: options.map((option) {
               final selected = option == value;
               return Text(
@@ -684,78 +789,107 @@ class _AboutCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
-    return Column(
+
+    final intro = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(22),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: colors.tertiaryContainer,
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Icon(
-                    Icons.info_outline_rounded,
-                    color: colors.onTertiaryContainer,
-                  ),
-                ),
-                const SizedBox(height: 18),
-                Text(
-                  'Sobre o IrrigaSim',
-                  style: text.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Apoio à aprendizagem e à simulação de irrigação por superfície.',
-                  style: text.bodyMedium?.copyWith(
-                    color: colors.onSurfaceVariant,
-                    height: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const _InfoRow(label: 'Versão', value: _appVersion),
-                const SizedBox(height: 16),
-                Text(
-                  'Desenvolvido por',
-                  style: text.labelLarge?.copyWith(
-                    color: colors.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                _DeveloperLink(
-                  name: 'Eduardo Ferreira',
-                  username: '@ed-dferreira',
-                  onTap: () => _openExternalUrl(
-                    context,
-                    'https://github.com/ed-dferreira',
-                  ),
-                ),
-                const SizedBox(height: 8),
-                _DeveloperLink(
-                  name: 'Luan Martins',
-                  username: '@lowgue',
-                  onTap: () =>
-                      _openExternalUrl(context, 'https://github.com/lowgue'),
-                ),
-                const SizedBox(height: 16),
-                _InfoRow(
-                  label: 'Instituição',
-                  value: 'UNIPAMPA - Campus Alegrete',
-                  onTap: () => _openExternalUrl(
-                    context,
-                    'https://unipampa.edu.br/alegrete/',
-                  ),
-                ),
-              ],
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: colors.tertiaryContainer,
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Icon(
+                Icons.info_outline_rounded,
+                color: colors.onTertiaryContainer,
+              ),
             ),
-          ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Sobre o IrrigaSim',
+                    style: text.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Apoio à aprendizagem e à simulação de irrigação por '
+                    'superfície.',
+                    style: text.bodyMedium?.copyWith(
+                      color: colors.onSurfaceVariant,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        const _InfoRow(label: 'Versão', value: _appVersion),
+        const SizedBox(height: 14),
+        _InfoRow(
+          label: 'Instituição',
+          value: 'UNIPAMPA - Campus Alegrete',
+          onTap: () =>
+              _openExternalUrl(context, 'https://unipampa.edu.br/alegrete/'),
         ),
       ],
+    );
+
+    final developers = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Desenvolvido por',
+          style: text.labelLarge?.copyWith(color: colors.onSurfaceVariant),
+        ),
+        const SizedBox(height: 8),
+        _DeveloperLink(
+          name: 'Eduardo Ferreira',
+          username: '@ed-dferreira',
+          onTap: () =>
+              _openExternalUrl(context, 'https://github.com/ed-dferreira'),
+        ),
+        const SizedBox(height: 8),
+        _DeveloperLink(
+          name: 'Luan Martins',
+          username: '@lowgue',
+          onTap: () => _openExternalUrl(context, 'https://github.com/lowgue'),
+        ),
+      ],
+    );
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(22),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            if (constraints.maxWidth < 700) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [intro, const SizedBox(height: 20), developers],
+              );
+            }
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(flex: 3, child: intro),
+                const SizedBox(width: 28),
+                Expanded(flex: 2, child: developers),
+              ],
+            );
+          },
+        ),
+      ),
     );
   }
 

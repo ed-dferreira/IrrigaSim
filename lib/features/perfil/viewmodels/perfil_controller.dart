@@ -14,8 +14,6 @@ class PerfilState {
   final bool textoNegrito;
   final bool animacoesReduzidas;
   final bool modoLeitorTela;
-  final int totalSimulacoes;
-  final String? metodoFavorito;
 
   const PerfilState({
     this.editando = false,
@@ -28,8 +26,6 @@ class PerfilState {
     this.textoNegrito = false,
     this.animacoesReduzidas = false,
     this.modoLeitorTela = false,
-    this.totalSimulacoes = 0,
-    this.metodoFavorito,
   });
 
   PerfilState copyWith({
@@ -43,9 +39,6 @@ class PerfilState {
     bool? textoNegrito,
     bool? animacoesReduzidas,
     bool? modoLeitorTela,
-    int? totalSimulacoes,
-    String? metodoFavorito,
-    bool clearMetodoFavorito = false,
   }) {
     return PerfilState(
       editando: editando ?? this.editando,
@@ -58,10 +51,6 @@ class PerfilState {
       textoNegrito: textoNegrito ?? this.textoNegrito,
       animacoesReduzidas: animacoesReduzidas ?? this.animacoesReduzidas,
       modoLeitorTela: modoLeitorTela ?? this.modoLeitorTela,
-      totalSimulacoes: totalSimulacoes ?? this.totalSimulacoes,
-      metodoFavorito: clearMetodoFavorito
-          ? null
-          : (metodoFavorito ?? this.metodoFavorito),
     );
   }
 }
@@ -158,15 +147,6 @@ class PerfilController extends StateNotifier<PerfilState> {
   void alternarModoLeitorTela(bool ativo) {
     state = state.copyWith(modoLeitorTela: ativo);
     PreferenciasApp.definirModoLeitorTela(ativo);
-  }
-
-  // ---- Estatísticas ----
-
-  void atualizarEstatisticas(int totalSimulacoes, String? metodoFavorito) {
-    state = state.copyWith(
-      totalSimulacoes: totalSimulacoes,
-      metodoFavorito: metodoFavorito,
-    );
   }
 }
 

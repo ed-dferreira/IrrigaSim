@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Sub-título + linhas dentro da seção "Dados do sulco".
 class DetailSubSection extends StatelessWidget {

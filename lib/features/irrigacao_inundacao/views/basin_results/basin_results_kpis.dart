@@ -1,7 +1,7 @@
 // KPIs do resultado de inundação (Fase 6). Espelha a migração de faixas:
 // `border_results_kpis.dart`. Os itens preservam os rótulos da tela original
 // e o acento usa a cor da paleta de inundação.
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:irrigasim/core/theme/app_icons.dart';
 import 'package:irrigasim/core/theme/app_colors.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/projeto_inundacao.dart';

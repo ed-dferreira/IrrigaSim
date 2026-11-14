@@ -1,7 +1,7 @@
 // Gráficos do resultado de inundação (Fase 6), em abas. Espelha a migração
 // de faixas: gráficos genéricos do `shared/irrigacao/widgets/charts` com a
 // aba opcional de comparação de cenários (primeira vs terceira irrigação).
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:irrigasim/core/theme/app_icons.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/viewmodels/basin_project_controller.dart';
 import 'package:irrigasim/shared/irrigacao/models/simulation_result.dart';

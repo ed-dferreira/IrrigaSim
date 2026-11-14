@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:irrigasim/core/theme/app_colors.dart';
 import 'package:irrigasim/shared/irrigacao/models/traco_distribuicao.dart';
 

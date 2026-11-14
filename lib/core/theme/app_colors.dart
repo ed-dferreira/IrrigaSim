@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Cores semânticas do IrrigaSim: Agro natural no claro e Premium no escuro.
 class AppColors {

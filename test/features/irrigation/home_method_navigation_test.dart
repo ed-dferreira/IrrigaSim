@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:irrigasim/features/perfil/services/preferencias_app.dart';
-import 'package:irrigasim/features/simulacao_guiada/views/home_screen.dart';
+import 'package:irrigasim/features/home/views/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -36,7 +36,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final faixas = find.text('Faixas').first;
+    final faixas = find.widgetWithText(InkWell, 'Faixas').first;
     await tester.ensureVisible(faixas);
     await tester.tap(faixas);
     await tester.pumpAndSettle();

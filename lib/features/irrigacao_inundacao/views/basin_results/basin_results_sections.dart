@@ -2,7 +2,7 @@
 // os rótulos e a didática da tela original: hipóteses, cultura,
 // clima e demanda, operação por regime, anexos exclusivos do método e
 // métricas completas, com referência à Aula 8.
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:irrigasim/core/theme/app_icons.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/anexos_inundacao.dart';
 import 'package:irrigasim/features/irrigacao_inundacao/models/projeto_inundacao.dart';
