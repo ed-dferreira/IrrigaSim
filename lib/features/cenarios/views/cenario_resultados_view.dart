@@ -30,19 +30,37 @@ class CenarioResultadosView extends ConsumerStatefulWidget {
 }
 
 class _CenarioResultadosViewState extends ConsumerState<CenarioResultadosView> {
+  /// Indica que o estado de sulco já foi carregado. Enquanto for falso,
+  /// mostramos um carregamento para não exibir o resultado da sessão anterior.
+  bool _preparado = false;
+
   @override
   void initState() {
     super.initState();
-    if (widget.cenario.metodo == MetodoIrrigacao.sulco) {
+    if (widget.cenario.metodo != MetodoIrrigacao.sulco) {
+      _preparado = true;
+      return;
+    }
+    // Riverpod proíbe alterar provedores durante o ciclo de vida do widget
+    // (inclusive no `initState`), então carregamos o cenário após o frame.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       final notifier = ref.read(provedorParametrosSulco.notifier);
       notifier.resetar();
       notifier.carregarDeParametros(widget.cenario.parametros);
       notifier.atribuirResultado(widget.cenario.resultado);
-    }
+      setState(() => _preparado = true);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!_preparado) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Resultados do projeto')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
     switch (widget.cenario.metodo) {
       case MetodoIrrigacao.sulco:
         return const ProjectResultsScreen();
